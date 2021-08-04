@@ -1,0 +1,219 @@
+\documentclass{article}
+
+\usepackage{arxiv}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{lmodern}        % https://github.com/rstudio/rticles/issues/343
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{graphicx}
+
+\title{A template for the \emph{arxiv} style}
+
+\author{
+    H.Sherry Zhang
+   \\
+    Department of Econometrics and Business Statistics \\
+    Monash University \\
+  Melbourne, Australia \\
+  \texttt{\href{mailto:huize.zhang@monash.edu}{\nolinkurl{huize.zhang@monash.edu}}} \\
+   \And
+    Dianne Cook
+   \\
+    Department of Econometrics and Business Statistics \\
+    Monash University \\
+  Melbourne, Australia \\
+  \texttt{\href{mailto:dicook@monash.edu}{\nolinkurl{dicook@monash.edu}}} \\
+   \And
+    Ursula Laa
+   \\
+    Institute of Statistics \\
+    University of Natural Resources and Life Sciences \\
+  Vienna, Austria \\
+  \texttt{\href{mailto:ursula.laa@boku.ac.at}{\nolinkurl{ursula.laa@boku.ac.at}}} \\
+   \And
+    Nicolas Langrené
+   \\
+    34 Village Street, Docklands VIC 3008 Australia \\
+    CSIRO Data61 \\
+  Melbourne, Australia \\
+  \texttt{\href{mailto:nicolas.langrene@csiro.au}{\nolinkurl{nicolas.langrene@csiro.au}}} \\
+   \And
+    Patricia Menéndez
+   \\
+    Department of Econometrics and Business Statistics \\
+    Monash University \\
+  Melbourne, Australia \\
+  \texttt{\href{mailto:patricia.menendez@monash.edu}{\nolinkurl{patricia.menendez@monash.edu}}} \\
+  }
+
+
+
+% Pandoc citation processing
+
+
+
+\begin{document}
+\maketitle
+
+\def\tightlist{}
+
+
+\begin{abstract}
+Enter the text of your abstract here.
+\end{abstract}
+
+\keywords{
+    blah
+   \and
+    blee
+   \and
+    bloo
+   \and
+    these are optional and can be removed
+  }
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+Spatio-temporal data
+
+Motivation: Many focus on spatio/ temporal solely -\textgreater{}
+spatio-temporal vector data structure for data analysis
+
+sections
+
+\hypertarget{literature-review}{%
+\section{Literature Review}\label{literature-review}}
+
+Existing R pkgs for spatio/ temporal data
+
+\begin{itemize}
+\item
+  \texttt{sp} + \texttt{spacetime} (time series data from package
+  \texttt{xts})
+\item
+  \texttt{sf}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    simple features geometry
+  \item
+    only spatio
+  \item
+    good for geographical but these geometry types i.e.~multipolygon,
+    can be hard to manipulate. Would be nice to have a vector data
+    structure
+  \end{itemize}
+\item
+  \texttt{stars}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    a newer structure allow both spatio + temporal
+  \item
+    array
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{a-new-data-structure-for-spatio-temporal-data}{%
+\section{A new data structure for spatio-temporal
+data}\label{a-new-data-structure-for-spatio-temporal-data}}
+
+Intro to cubble:
+
+\begin{itemize}
+\tightlist
+\item
+  list-column: rowwise\_df with temporal variables, including the time
+  index, nested.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Focus on spatio: those output per station
+  \end{itemize}
+\item
+  long form: grouped\_df
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Focus on temporal
+  \end{itemize}
+\end{itemize}
+
+Compatible with tidyverse manipulation and tsibble
+
+\hypertarget{examples}{%
+\section{Examples}\label{examples}}
+
+Daily climate data (prcp, tmax, and tmin) from RNOAA - lots of stations
+across Australia
+
+An exploratory data analysis questions: What's the climate profile look
+like in Australia
+
+\begin{itemize}
+\tightlist
+\item
+  General features: Any general trend/ fluctuation in prcp, tmax, and
+  tmin?
+\item
+  Local features: Any station stands out from the crowd?
+\end{itemize}
+
+\hypertarget{manipulation}{%
+\subsection{Manipulation}\label{manipulation}}
+
+\begin{itemize}
+\tightlist
+\item
+  data quality check: filter out stations have variables not properly
+  recorded
+\item
+  data summary:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    daily -\textgreater{} monthly/ weekly,
+  \item
+    summarise by mean for tmax/ tmin, sum for prcp
+  \end{itemize}
+\item
+\end{itemize}
+
+\hypertarget{graphics}{%
+\subsection{Graphics}\label{graphics}}
+
+Static + interactive -\textgreater{} tooltip to show additional
+information upon hovering
+
+\begin{itemize}
+\tightlist
+\item
+  Where are those stations on the map?
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Mention mostly aero, airport, and lighthouse
+  \end{itemize}
+\end{itemize}
+
+\hypertarget{summary}{%
+\section{Summary}\label{summary}}
+
+\bibliographystyle{unsrt}
+\bibliography{references.bib}
+
+
+\end{document}

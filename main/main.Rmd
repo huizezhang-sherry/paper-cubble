@@ -1,0 +1,100 @@
+---
+title: A template for the *arxiv* style
+authors:
+  - name: H.Sherry Zhang
+    department: Department of Econometrics and Business Statistics 
+    affiliation: Monash University 
+    location: Melbourne, Australia
+    email:  huize.zhang@monash.edu
+  - name: Dianne Cook
+    department: Department of Econometrics and Business Statistics 
+    affiliation: Monash University 
+    location: Melbourne, Australia
+    email:  dicook@monash.edu
+  - name: Ursula Laa
+    department: Institute of Statistics
+    affiliation: University of Natural Resources and Life Sciences
+    location: Vienna, Austria
+    email:  ursula.laa@boku.ac.at  
+  - name: Nicolas Langrené
+    department: 34 Village Street, Docklands VIC 3008 Australia
+    affiliation: CSIRO Data61 
+    location: Melbourne, Australia
+    email: nicolas.langrene@csiro.au
+  - name: Patricia Menéndez
+    department: Department of Econometrics and Business Statistics 
+    affiliation: Monash University 
+    location: Melbourne, Australia
+    email:  patricia.menendez@monash.edu 
+abstract: |
+  Enter the text of your abstract here.
+keywords:
+  - blah
+  - blee
+  - bloo
+  - these are optional and can be removed
+bibliography: references.bib
+biblio-style: unsrt
+output: rticles::arxiv_article
+---
+
+# Introduction 
+
+Spatio-temporal data 
+
+Motivation: Many focus on spatio/ temporal solely -> spatio-temporal vector data structure for data analysis
+
+sections
+
+# Literature Review
+
+Existing R pkgs for spatio/ temporal data
+
+- `sp` + `spacetime` (time series data from package `xts`)
+
+- `sf` 
+  - simple features geometry 
+  - only spatio
+  - good for geographical but these geometry types i.e. multipolygon, can be hard to manipulate. Would be nice to have a vector data structure
+
+- `stars`
+  - a newer structure allow both spatio + temporal 
+  - array
+
+# A new data structure for spatio-temporal data
+
+Intro to cubble: 
+
+- list-column: rowwise_df with temporal variables, including the time index, nested. 
+  - Focus on spatio: those output per station
+
+- long form: grouped_df 
+  - Focus on temporal
+
+Compatible with tidyverse manipulation and tsibble
+
+# Examples
+
+Daily climate data (prcp, tmax, and tmin) from RNOAA - lots of stations across Australia
+
+An exploratory data analysis questions: What's the climate profile look like in Australia
+
+  - General features: Any general trend/ fluctuation in prcp, tmax, and tmin?
+  - Local features: Any station stands out from the crowd?
+
+## Manipulation
+
+  - data quality check: filter out stations have variables not properly recorded 
+  - data summary: 
+    - daily -> monthly/ weekly, 
+    - summarise by mean for tmax/ tmin, sum for prcp
+  - 
+
+## Graphics
+
+Static + interactive -> tooltip to show additional information upon hovering
+
+  - Where are those stations on the map? 
+    - Mention mostly aero, airport, and lighthouse
+
+# Summary
