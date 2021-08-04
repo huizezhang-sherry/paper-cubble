@@ -55,6 +55,31 @@
 
 
 % Pandoc citation processing
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+% for Pandoc 2.8 to 2.10.1
+\newenvironment{cslreferences}%
+  {}%
+  {\par}
+% For Pandoc 2.11+
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
+  % set entry spacing
+  \ifnum #2 > 0
+  \setlength{\parskip}{#2\baselineskip}
+  \fi
+ }%
+ {}
+\usepackage{calc} % for calculating minipage widths
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 
 
@@ -88,40 +113,41 @@ spatio-temporal vector data structure for data analysis
 
 sections
 
-\hypertarget{literature-review}{%
-\section{Literature Review}\label{literature-review}}
+\hypertarget{existing-data-structure-for-spatio-and-temporal-data}{%
+\section{Existing data structure for spatio and temporal
+data}\label{existing-data-structure-for-spatio-and-temporal-data}}
 
-Existing R pkgs for spatio/ temporal data
+There has been a large class of implementations dedicated to processing
+the spatial data. This includes \texttt{sf} (E. J. Pebesma 2018) and its
+precedent \texttt{sp} (E. Pebesma and Bivand 2005) for \ldots{} and
+\texttt{raster} (Hijmans 2020) and \texttt{terra} (Hijmans 2021) for
+raster data. While these implementations specialised in geographic
+manipulations with different type of simple features, it doesn't
+incorporate a temporal dimension in the data structure. Project like
+\texttt{stars} (E. Pebesma 2021) and \texttt{spacetime} (Bivand,
+Pebesma, and Gomez-Rubio 2013) by R-Spatial allows for both space and
+time dimension for raster and vector data, but the underlying data
+structure is a multi-dimensional array, which could be difficult to
+operate for R users who are more familiar with the operation in 2D
+dataframe/ tibble.
 
-\begin{itemize}
-\item
-  \texttt{sp} + \texttt{spacetime} (time series data from package
-  \texttt{xts})
-\item
-  \texttt{sf}
-
-  \begin{itemize}
-  \tightlist
-  \item
-    simple features geometry
-  \item
-    only spatio
-  \item
-    good for geographical but these geometry types i.e.~multipolygon,
-    can be hard to manipulate. Would be nice to have a vector data
-    structure
-  \end{itemize}
-\item
-  \texttt{stars}
-
-  \begin{itemize}
-  \tightlist
-  \item
-    a newer structure allow both spatio + temporal
-  \item
-    array
-  \end{itemize}
-\end{itemize}
+In the temporal aspect, the \texttt{tsibble} (Wang, Cook, and Hyndman
+2020) structure and its tidyverts ecosystem have provided a {[}\ldots{}
+{]} workflow to work with temporal data. In a tsibble structure,
+temporal data is characterised by \texttt{index} and \texttt{key} where
+\texttt{index} is the temporal identifier and \texttt{key} is the
+identifier for multiple series, which could be used as a spatio
+identifier. However, a tsibble object, by construction, always requires
+the \texttt{index} in its structure. This makes it less appealing for
+spatio-temporal data since the output of calculated spatio-specific
+variables (i.e.~features of each series) don't have the time dimension.
+Analysts will either need to have an additional step to join this output
+to the original tsibble or operate with variables stored in two separate
+objects. In addition, the long form structure of a tsibble object means
+spatio variables (i.e.~longitude, latitude, and features of each series
+if joined back to the tsibble) of each spatio identifier will be
+repetitively recorded at each timestamp. This repetition is unnecessary
+and would inflate the object size for long series.
 
 \hypertarget{a-new-data-structure-for-spatio-temporal-data}{%
 \section{A new data structure for spatio-temporal
@@ -210,7 +236,43 @@ information upon hovering
 \end{itemize}
 
 \hypertarget{summary}{%
-\section{Summary}\label{summary}}
+\section*{Summary}\label{summary}}
+\addcontentsline{toc}{section}{Summary}
+
+\hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
+\leavevmode\hypertarget{ref-spacetimebook}{}%
+Bivand, Roger S., Edzer Pebesma, and Virgilio Gomez-Rubio. 2013.
+\emph{Applied Spatial Data Analysis with {R}, Second Edition}. Springer,
+NY. \url{https://asdar-book.org/}.
+
+\leavevmode\hypertarget{ref-raster}{}%
+Hijmans, Robert J. 2020. \emph{Raster: Geographic Data Analysis and
+Modeling}. \url{https://CRAN.R-project.org/package=raster}.
+
+\leavevmode\hypertarget{ref-terra}{}%
+---------. 2021. \emph{Terra: Spatial Data Analysis}.
+\url{https://CRAN.R-project.org/package=terra}.
+
+\leavevmode\hypertarget{ref-stars}{}%
+Pebesma, Edzer. 2021. \emph{Stars: Spatiotemporal Arrays, Raster and
+Vector Data Cubes}. \url{https://CRAN.R-project.org/package=stars}.
+
+\leavevmode\hypertarget{ref-pebesma2018simple}{}%
+Pebesma, Edzer J. 2018. {``Simple Features for r: Standardized Support
+for Spatial Vector Data.''} \emph{R J.} 10 (1): 439.
+
+\leavevmode\hypertarget{ref-pebesma2005s}{}%
+Pebesma, Edzer, and Roger S Bivand. 2005. {``S Classes and Methods for
+Spatial Data: The Sp Package.''} \emph{R News} 5 (2): 9--13.
+
+\leavevmode\hypertarget{ref-tsibbles}{}%
+Wang, Earo, Dianne Cook, and Rob J Hyndman. 2020. {``A New Tidy Data
+Structure to Support Exploration and Modeling of Temporal Data.''}
+\emph{Journal of Computational and Graphical Statistics} 29 (3):
+466--78. \url{https://doi.org/10.1080/10618600.2019.1695624}.
+
+\end{CSLReferences}
 
 \bibliographystyle{unsrt}
 \bibliography{references.bib}

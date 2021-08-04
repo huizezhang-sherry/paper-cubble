@@ -42,24 +42,29 @@ output: rticles::arxiv_article
 
 Spatio-temporal data 
 
+<!-- While satellite imagery can record information on a continuous spatial domain, other spatial information are recorded at a fixed set of locations characterised by latitude, longitude, and other spatial metadata. Examples of this type of data includes climate measures from weather observation stations and river level data recorded by electronic gauges. Analysing this data requires less considerations on the geometry type and map projection while more on how measures in these fixed locations changes across the time domain and whether these changes are related for adjacent locations. -->
+
+
 Motivation: Many focus on spatio/ temporal solely -> spatio-temporal vector data structure for data analysis
 
 sections
 
-# Literature Review
+# Existing data structure for spatio and temporal data
 
-Existing R pkgs for spatio/ temporal data
+There has been a large class of implementations dedicated to processing the spatial data. This includes `sf` [@pebesma2018simple] and its precedent `sp` [@pebesma2005s] for ... and `raster` [@raster] and `terra` [@terra] for raster data. While these implementations specialised in geographic manipulations with different type of simple features, it doesn't incorporate a temporal dimension in the data structure. Project like `stars` [@stars] and `spacetime` [@spacetimebook] by R-Spatial allows for both space and time dimension for raster and vector data, but the underlying data structure is a multi-dimensional array, which could be difficult to operate for R users who are more familiar with the operation in 2D dataframe/ tibble.
 
-- `sp` + `spacetime` (time series data from package `xts`)
+<!-- - `sp` + `spacetime` (time series data from package `xts`) -->
 
-- `sf` 
-  - simple features geometry 
-  - only spatio
-  - good for geographical but these geometry types i.e. multipolygon, can be hard to manipulate. Would be nice to have a vector data structure
+<!-- - `sf`  -->
+<!--   - simple features geometry  -->
+<!--   - only spatio -->
+<!--   - good for geographical but these geometry types i.e. multipolygon, can be hard to manipulate. Would be nice to have a vector data structure -->
 
-- `stars`
-  - a newer structure allow both spatio + temporal 
-  - array
+<!-- - `stars` -->
+<!--   - a newer structure allow both spatio + temporal  -->
+<!--   - array -->
+
+In the temporal aspect, the `tsibble` [@tsibbles] structure and its tidyverts ecosystem have provided a [... ] workflow to work with temporal data. In a tsibble structure, temporal data is characterised by `index` and `key` where `index` is the temporal identifier and `key` is the identifier for multiple series, which could be used as a spatio identifier. However, a tsibble object, by construction, always requires the `index` in its structure. This makes it less appealing for spatio-temporal data since the output of calculated spatio-specific variables (i.e. features of each series) don't have the time dimension. Analysts will either need to have an additional step to join this output to the original tsibble or operate with variables stored in two separate objects. In addition, the long form structure of a tsibble object means spatio variables (i.e. longitude, latitude, and features of each series if joined back to the tsibble) of each spatio identifier will be repetitively recorded at each timestamp. This repetition is unnecessary and would inflate the object size for long series.
 
 # A new data structure for spatio-temporal data
 
