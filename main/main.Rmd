@@ -38,20 +38,15 @@ biblio-style: unsrt
 output: rticles::arxiv_article
 ---
 
-# Introduction 
+# Introduction
 
-Saptio-temporal data
+Spatio-temporal data record changes of variables [for a reasonable length of period and spread across geographical region]. In this article, we consider spatio-temporal vector data, which are recorded in a fixed interval and are point based, characterised by longitude and latitude, in the spatial aspect. Examples of this type of data include the house price of a city or county, climate measures from weather stations in a country, and river level data from electronic gauges. 
 
-<!-- Spatio-temporal data requires the data to have both a time aspect that is long enough to be considered as time series data and a space aspect that spreads across the a certain geographical region. In the time aspect, we may expect to see trend and seasonality across different granularities and in the spatio aspect, similarity of patterns can be discovered. -->
+Analysing this type of data requires less considerations on the geographical geometry type and map projection but more on how measures in these fixed locations changes across the time domain and whether these changes are related for adjacent locations. For example, when nearby areas show patterns that are regular enough, visualising spatio-temporal data can 1) discover regional time series features, i.e. trend and seasonality, 2) find the Waldo sites from the crowd, and 3) see how correlation of nearby sites changes across time. 
 
-<!-- can see information of both dimension,  -->
-<!-- not sufficient implementation to manipulate and visualise spatio-temporal data. more focus solely on the spatio/ temporal aspect.  -->
-<!-- The purpose of this paper is to introduce a spatio-temporal vector data structure for data analysis in R -->
+The main difficulty in visualising this type of data is to show information in both space and time dimension with the proper level of details without information overflow. This would sometimes require aggregating the time dimension into the proper level or slicing the data into a reasonable number of subset for display. In this sense, a data structure that regulates the manipulation spatio-temporal data will benefit the analysis workflow. While many implementations focus on manipulating and visualising pure spatial or temporal data, there are not sufficient tools to deal with spatio-temporal data. The purpose of this paper is to introduce a spatio-temporal vector data structure for data analysis in R. 
 
-
-<!-- While satellite imagery can record information on a continuous spatial domain, other spatial information are recorded at a fixed set of locations characterised by latitude, longitude, and other spatial metadata. Examples of this type of data includes climate measures from weather observation stations and river level data recorded by electronic gauges. Analysing this data requires less considerations on the geometry type and map projection while more on how measures in these fixed locations changes across the time domain and whether these changes are related for adjacent locations. -->
-
-The rest of the paper will be divided as follows: Section 2 reviews the existing data structure for spatio, temporal, and spatio-temporal data. Section 3 presents a new data structure for spatio-temporal data: cubble. Then the paper introduces the workflow of data manipulation and visualisation with the cubble structure in Section 4. Section 5 gives some examples on how common spatial and temporal manipulations are performed with cubble and how static and interactive visualisation help ot understand climate and [...] data.
+The rest of the paper will be divided as follows: Section 2 reviews the existing data structure for spatio, temporal, and spatio-temporal data. Section 3 presents a new data structure for spatio-temporal data: cubble. Then the paper introduces the workflow of data manipulation and visualisation with the cubble structure in Section 4. Section 5 gives some examples on how common spatial and temporal manipulations are performed with cubble and how static and interactive visualisation help to understand climate and [...] data.
 
 # Existing data structure for spatio and temporal data
 
@@ -88,7 +83,7 @@ Mention different types of manipulation with cubble:
   
   - `dplyr` support for cubble: 
     - basic 5s: mutate, filter, summarise, select, arrange
-    - group and ungorup: group_by, ungroup
+    - group and ungroup: group_by, ungroup
     - slice family
   - summarise missing stats
 
