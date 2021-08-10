@@ -38,6 +38,13 @@ biblio-style: unsrt
 output: rticles::arxiv_article
 ---
 
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.path = "figures/")
+library(cubble)
+```
+
+
 # Introduction
 
 Spatio-temporal data record changes of variables [for a reasonable length of period and spread across geographical region]. In this article, we consider spatio-temporal vector data, which are recorded in a fixed interval and are point based, characterised by longitude and latitude, in the spatial aspect. Examples of this type of data include the house price of a city or county, climate measures from weather stations in a country, and river level data from electronic gauges. 
@@ -67,17 +74,35 @@ In the temporal aspect, the `tsibble` [@tsibbles] structure and its tidyverts ec
 
 # A new data structure for spatio-temporal data
 
-Intro to cubble: 
+In spatio-temporal data, a variable is usually either group-related or time-related. While time-related variables record variables that change in time, group-related variables are invariant to the time and have only one value per group. A cubble simplifies the workflow in spatio-temporal data through managing group and time-related variables separately in two forms: list-column and long form. The list column form: 
 
-- list-column: rowwise_df with temporal variables, including the time index, nested. 
-  - Focus on spatio: those output per station
+  - defines each group in a row, 
+  - displays the group-related variables in columns, and 
+  - nests all the time-related variables into a column called `ts`. 
 
-- long form: grouped_df 
-  - Focus on temporal
+In the long form, 
 
-Compatible with tidyverse manipulation and tsibble
+  - each combination of group and timestamp occupies a row
+  - time-related variables are displayed, and 
+  - group-related variables are not explicitly displayed but can be accessed through the `meta` attribute
+  
+Below are the how the list-column and long form look like for Australia climate data, which records daily precipitation, maximum and minimum temperature for 55 stations across Australia from 2015- 2020.  
+
+\newpage
+
+```{r echo = FALSE}
+climate_small
+```
+
+```{r echo = FALSE}
+climate_small %>% zoom()
+```
 
 # Manipulation and visualisation with `cubble`
+
+## Cubble verbs
+
+
 
 Mention different types of manipulation with cubble:
   

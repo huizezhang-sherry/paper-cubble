@@ -184,34 +184,86 @@ and would inflate the object size for long series.
 \section{A new data structure for spatio-temporal
 data}\label{a-new-data-structure-for-spatio-temporal-data}}
 
-Intro to cubble:
+In spatio-temporal data, a variable is usually either group-related or
+time-related. While time-related variables record variables that change
+in time, group-related variables are invariant to the time and have only
+one value per group. A cubble simplifies the workflow in spatio-temporal
+data through managing group and time-related variables separately in two
+forms: list-column and long form. The list column form:
 
 \begin{itemize}
 \tightlist
 \item
-  list-column: rowwise\_df with temporal variables, including the time
-  index, nested.
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Focus on spatio: those output per station
-  \end{itemize}
+  defines each group in a row,
 \item
-  long form: grouped\_df
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Focus on temporal
-  \end{itemize}
+  displays the group-related variables in columns, and
+\item
+  nests all the time-related variables into a column called \texttt{ts}.
 \end{itemize}
 
-Compatible with tidyverse manipulation and tsibble
+In the long form,
+
+\begin{itemize}
+\tightlist
+\item
+  each combination of group and timestamp occupies a row
+\item
+  time-related variables are displayed, and
+\item
+  group-related variables are not explicitly displayed but can be
+  accessed through the \texttt{meta} attribute
+\end{itemize}
+
+Below are the how the list-column and long form look like for Australia
+climate data, which records daily precipitation, maximum and minimum
+temperature for 55 stations across Australia from 2015- 2020.
+
+\newpage
+
+\begin{verbatim}
+## # Cubble: station-wise: list-column
+## # Group:  station [55]
+## # Meta:   station [fct], lat [dbl], long [dbl], elevation [dbl], name [fct]
+##    station       lat  long elevation name                ts                  
+##    <fct>       <dbl> <dbl>     <dbl> <fct>               <list>              
+##  1 ASN00001019 -14.3  127.      23   kalumburu           <tbl_ts [2,147 x 4]>
+##  2 ASN00002012 -18.2  128.     422   halls creek airport <tbl_ts [2,191 x 4]>
+##  3 ASN00003003 -17.9  122.       7.4 broome airport      <tbl_ts [2,192 x 4]>
+##  4 ASN00006011 -24.9  114.       4   carnarvon airport   <tbl_ts [2,192 x 4]>
+##  5 ASN00009021 -31.9  116.      15.4 perth airport       <tbl_ts [2,192 x 4]>
+##  6 ASN00009193 -32.0  116.      43.1 rottnest island     <tbl_ts [2,192 x 4]>
+##  7 ASN00009518 -34.4  115.      13   cape leeuwin        <tbl_ts [2,184 x 4]>
+##  8 ASN00009789 -33.8  122.      25   esperance           <tbl_ts [2,187 x 4]>
+##  9 ASN00010286 -31.6  117.     217.  cunderdin airfield  <tbl_ts [2,190 x 4]>
+## 10 ASN00010917 -32.7  117.     275   wandering           <tbl_ts [2,192 x 4]>
+## # ... with 45 more rows
+\end{verbatim}
+
+\begin{verbatim}
+## # Cubble: time-wise: long form [tsibble]
+## # Group:  station [55]
+## # Meta:   station [fct], lat [dbl], long [dbl], elevation [dbl], name [fct]
+##    station     date        prcp  tmax  tmin
+##    <fct>       <date>     <dbl> <dbl> <dbl>
+##  1 ASN00001019 2015-01-01   164  31.5  25  
+##  2 ASN00001019 2015-01-02   124  31.3  25  
+##  3 ASN00001019 2015-01-03    50  29.2  24.7
+##  4 ASN00001019 2015-01-04   204  32.1  24.3
+##  5 ASN00001019 2015-01-05   412  31.4  24.6
+##  6 ASN00001019 2015-01-06   200  28.7  25.1
+##  7 ASN00001019 2015-01-07   822  30.2  24.5
+##  8 ASN00001019 2015-01-08    22  31    26.6
+##  9 ASN00001019 2015-01-09    62  32.7  26.2
+## 10 ASN00001019 2015-01-10   274  32.9  22.6
+## # ... with 120,311 more rows
+\end{verbatim}
 
 \hypertarget{manipulation-and-visualisation-with-cubble}{%
 \section{\texorpdfstring{Manipulation and visualisation with
 \texttt{cubble}}{Manipulation and visualisation with cubble}}\label{manipulation-and-visualisation-with-cubble}}
+
+\hypertarget{cubble-verbs}{%
+\subsection{Cubble verbs}\label{cubble-verbs}}
 
 Mention different types of manipulation with cubble:
 
