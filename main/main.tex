@@ -148,19 +148,21 @@ to understand climate and {[}\ldots{]} data.
 \section{Existing data structure for spatio and temporal
 data}\label{existing-data-structure-for-spatio-and-temporal-data}}
 
-There has been a large class of implementations dedicated to processing
-the spatial data. This includes \texttt{sf} (E. J. Pebesma 2018) and its
-precedent \texttt{sp} (E. Pebesma and Bivand 2005) for \ldots{} and
-\texttt{raster} (Hijmans 2020) and \texttt{terra} (Hijmans 2021) for
-raster data. While these implementations specialised in geographic
-manipulations with different type of simple features, it doesn't
-incorporate a temporal dimension in the data structure. Project like
-\texttt{stars} (E. Pebesma 2021) and \texttt{spacetime} (Bivand,
-Pebesma, and Gomez-Rubio 2013) by R-Spatial allows for both space and
-time dimension for raster and vector data, but the underlying data
-structure is a multi-dimensional array, which could be difficult to
-operate for R users who are more familiar with the operation in 2D
-dataframe/ tibble.
+Below we review some structure for spatial, temporal, and
+spatio-temporal data.
+
+Many spatial and spatio-temporal data structures have been developed by
+the R-spatial team for both raster and vector spatial data. For vector
+spatial data, which is the focus of this paper, \texttt{sf} (E. J.
+Pebesma 2018) represents spatial vector information with simple
+features: points, lines, polygons and their multiples. Various
+\texttt{st\_} function are designed to manipulate these features based
+on their geometric relationships. For spatio-temporal data,
+\texttt{stars} (E. Pebesma 2021) can represent both raster and vector
+data using multi-dimensional array. However, the underlying array
+structure can be difficult to operate for data analysts who are more
+familiar with a flat 2D data frame structure used by the tidyverse
+ecosystem.
 
 In the temporal aspect, the \texttt{tsibble} (Wang, Cook, and Hyndman
 2020) structure and its tidyverts ecosystem have provided a {[}\ldots{}
@@ -348,19 +350,6 @@ information upon hovering
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{1}{0}
-\leavevmode\hypertarget{ref-spacetimebook}{}%
-Bivand, Roger S., Edzer Pebesma, and Virgilio Gomez-Rubio. 2013.
-\emph{Applied Spatial Data Analysis with {R}, Second Edition}. Springer,
-NY. \url{https://asdar-book.org/}.
-
-\leavevmode\hypertarget{ref-raster}{}%
-Hijmans, Robert J. 2020. \emph{Raster: Geographic Data Analysis and
-Modeling}. \url{https://CRAN.R-project.org/package=raster}.
-
-\leavevmode\hypertarget{ref-terra}{}%
----------. 2021. \emph{Terra: Spatial Data Analysis}.
-\url{https://CRAN.R-project.org/package=terra}.
-
 \leavevmode\hypertarget{ref-stars}{}%
 Pebesma, Edzer. 2021. \emph{Stars: Spatiotemporal Arrays, Raster and
 Vector Data Cubes}. \url{https://CRAN.R-project.org/package=stars}.
@@ -368,10 +357,6 @@ Vector Data Cubes}. \url{https://CRAN.R-project.org/package=stars}.
 \leavevmode\hypertarget{ref-pebesma2018simple}{}%
 Pebesma, Edzer J. 2018. {``Simple Features for r: Standardized Support
 for Spatial Vector Data.''} \emph{R J.} 10 (1): 439.
-
-\leavevmode\hypertarget{ref-pebesma2005s}{}%
-Pebesma, Edzer, and Roger S Bivand. 2005. {``S Classes and Methods for
-Spatial Data: The Sp Package.''} \emph{R News} 5 (2): 9--13.
 
 \leavevmode\hypertarget{ref-tsibbles}{}%
 Wang, Earo, Dianne Cook, and Rob J Hyndman. 2020. {``A New Tidy Data
