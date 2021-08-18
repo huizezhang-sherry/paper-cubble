@@ -52,6 +52,46 @@
   \texttt{\href{mailto:patricia.menendez@monash.edu}{\nolinkurl{patricia.menendez@monash.edu}}} \\
   }
 
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 
 
 % Pandoc citation processing
@@ -106,13 +146,13 @@ Enter the text of your abstract here.
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-Spatio-temporal data record changes of variables {[}for a reasonable
-length of period and spread across geographical region{]}. In this
-article, we consider spatio-temporal vector data, which are recorded in
-a fixed interval and are point based, characterised by longitude and
-latitude, in the spatial aspect. Examples of this type of data include
-the house price of a city or county, climate measures from weather
-stations in a country, and river level data from electronic gauges.
+Spatio-temporal data record changes of variables in spatially separated
+regions across time. In this article, we consider spatio-temporal vector
+data, which are recorded in a fixed interval and are point based,
+characterised by longitude and latitude, in the spatial aspect. Examples
+of this type of data include the house price of a city or county,
+climate measures from weather stations in a country, and river level
+data from electronic gauges.
 
 Analysing this type of data requires less considerations on the
 geographical geometry type and map projection but more on how measures
@@ -186,12 +226,24 @@ and would inflate the object size for long series.
 \section{A new data structure for spatio-temporal
 data}\label{a-new-data-structure-for-spatio-temporal-data}}
 
-In spatio-temporal data, a variable is usually either group-related or
-time-related. While time-related variables record variables that change
-in time, group-related variables are invariant to the time and have only
-one value per group. A cubble simplifies the workflow in spatio-temporal
-data through managing group and time-related variables separately in two
-forms: list-column and long form. The list column form:
+Spatio-temporal data can be thought of as characterised by three
+dimensions: group, time, and variable, which allows us to use a cube to
+represent the data. While group and time are can be seen as identifiers
+of the record, variables can be further divided into those that are
+group-related and time-related. Group-related variables are invariant to
+the time and have only one value per group while time-related variables
+change in time and requires both group and time to identify a record.
+Hence the cubic representation can be further simplified for those
+group-related variables as in the sketch \ref{fig:framework}, where
+group-related variables are squashed in the time dimension.
+
+\begin{figure}
+\includegraphics[width=1\linewidth,height=0.3\textheight]{/Users/hzha400/Documents/PhD/research/paper-cubble/figures/cubble-framework-hand} \caption{Cubic representation of spatio-temporal data. (1) shows the full cube, (2) simplifies teh cube by squashing the time dimension of time-invariant variables. With (2), a slice along the group dimension will affect both time-variant and invariant variables as in (3) while, a slice along the time will only affect the tim-variant variables as in (4).}\label{fig:framework}
+\end{figure}
+
+A cubble simplifies the workflow in spatio-temporal data through
+managing group and time-related variables separately in two forms:
+list-column and long form. The nested form:
 
 \begin{itemize}
 \tightlist
@@ -202,6 +254,9 @@ forms: list-column and long form. The list column form:
 \item
   nests all the time-related variables into a column called \texttt{ts}.
 \end{itemize}
+
+This form focuses on the time-invariant variable by squashing the time
+dimension
 
 In the long form,
 
@@ -216,16 +271,16 @@ In the long form,
   accessed through the \texttt{meta} attribute
 \end{itemize}
 
-Below are the how the list-column and long form look like for Australia
+Below are the how the nested and long form look like for Australia
 climate data, which records daily precipitation, maximum and minimum
-temperature for 55 stations across Australia from 2015- 2020.
-
-\newpage
+temperature for 55 stations across Australia from 2015- 2020. Notice
+that each station forms a group in both forms and specifically, the
+nested and long form have a underlying \texttt{rowwise\_df} and
+\texttt{grouped\_df} respectively.
 
 \begin{verbatim}
-## # Cubble: station-wise: list-column
+## # Cubble: station-wise: nested form
 ## # Group:  station [55]
-## # Meta:   station [fct], lat [dbl], long [dbl], elevation [dbl], name [fct]
 ##    station       lat  long elevation name                ts                  
 ##    <fct>       <dbl> <dbl>     <dbl> <fct>               <list>              
 ##  1 ASN00001019 -14.3  127.      23   kalumburu           <tbl_ts [2,147 x 4]>
@@ -244,7 +299,6 @@ temperature for 55 stations across Australia from 2015- 2020.
 \begin{verbatim}
 ## # Cubble: time-wise: long form [tsibble]
 ## # Group:  station [55]
-## # Meta:   station [fct], lat [dbl], long [dbl], elevation [dbl], name [fct]
 ##    station     date        prcp  tmax  tmin
 ##    <fct>       <date>     <dbl> <dbl> <dbl>
 ##  1 ASN00001019 2015-01-01   164  31.5  25  
@@ -260,9 +314,16 @@ temperature for 55 stations across Australia from 2015- 2020.
 ## # ... with 120,311 more rows
 \end{verbatim}
 
-\hypertarget{manipulation-and-visualisation-with-cubble}{%
-\section{\texorpdfstring{Manipulation and visualisation with
-\texttt{cubble}}{Manipulation and visualisation with cubble}}\label{manipulation-and-visualisation-with-cubble}}
+With a cubic framework on mind, different types of manipulation with
+cubble can be thought of as slicing the cube in various way. The table
+below shows how some \texttt{dplyr} verbs are mapped into the operation
+in a cubble. With the existing grouping on the station, additional
+groupping can be added with \texttt{group\_by} and removed with
+\texttt{ungrouped}. {[}talk about why it is useful{]}
+
+\begin{figure}
+\includegraphics[width=1\linewidth,height=0.5\textheight]{/Users/hzha400/Documents/PhD/research/paper-cubble/figures/cubble-verbs} \caption{sdfsdf}\label{fig:verbs}
+\end{figure}
 
 \hypertarget{cubble-verbs}{%
 \subsection{Cubble verbs}\label{cubble-verbs}}
@@ -287,6 +348,8 @@ Mention different types of manipulation with cubble:
   summarise missing stats
 \end{itemize}
 
+\newpage
+
 \hypertarget{examples}{%
 \section{Examples}\label{examples}}
 
@@ -307,6 +370,126 @@ like in Australia
 
 \hypertarget{manipulation}{%
 \subsection{Manipulation}\label{manipulation}}
+
+\hypertarget{mutate-and-filter}{%
+\subsubsection{Mutate and filter}\label{mutate-and-filter}}
+
+In the first example, we want to only keep the stations that have
+\texttt{tmax} recorded in 2020. This requires first narrow down the
+records to those in 2020, determine if \texttt{tmax} is missing for each
+station, and then retain those stations that have \texttt{tmax}
+recorded. The year filtering is an operation on the time axis, so we
+start with the long form. Whether each station has \texttt{tmax}
+recorded is a result of each station, rather than of each time point,
+hence we need to switch to the nested form with \texttt{tamp()}. To
+calculate whether \texttt{tmax} is recorded, we mutate a column
+\texttt{tmax\_missing} that takes \texttt{TRUE} if all the \texttt{tmax}
+in the nested list column \texttt{ts} are \texttt{NA} and \texttt{FALSE}
+otherwise. To get the stations that we want, we need another filter on
+\texttt{tmax\_missing}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{climate\_small }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{stretch}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(}\FunctionTok{year}\NormalTok{(date) }\SpecialCharTok{==} \DecValTok{2020}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{tamp}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{tmax\_missing =} \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{all}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(ts}\SpecialCharTok{$}\NormalTok{tmax)), }\ConstantTok{TRUE}\NormalTok{, }\ConstantTok{FALSE}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\NormalTok{tmax\_missing)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # Cubble: station-wise: nested form
+## # Group:  station [55]
+##    station      lat  long elevation name             ts             tmax_missing
+##    <fct>      <dbl> <dbl>     <dbl> <fct>            <list>         <lgl>       
+##  1 ASN000010~ -14.3  127.      23   kalumburu        <tbl_ts [366 ~ FALSE       
+##  2 ASN000020~ -18.2  128.     422   halls creek air~ <tbl_ts [366 ~ FALSE       
+##  3 ASN000030~ -17.9  122.       7.4 broome airport   <tbl_ts [366 ~ FALSE       
+##  4 ASN000060~ -24.9  114.       4   carnarvon airpo~ <tbl_ts [366 ~ FALSE       
+##  5 ASN000090~ -31.9  116.      15.4 perth airport    <tbl_ts [366 ~ FALSE       
+##  6 ASN000091~ -32.0  116.      43.1 rottnest island  <tbl_ts [366 ~ FALSE       
+##  7 ASN000095~ -34.4  115.      13   cape leeuwin     <tbl_ts [366 ~ FALSE       
+##  8 ASN000097~ -33.8  122.      25   esperance        <tbl_ts [361 ~ FALSE       
+##  9 ASN000102~ -31.6  117.     217.  cunderdin airfi~ <tbl_ts [366 ~ FALSE       
+## 10 ASN000109~ -32.7  117.     275   wandering        <tbl_ts [366 ~ FALSE       
+## # ... with 45 more rows
+\end{verbatim}
+
+\hypertarget{join}{%
+\subsubsection{Join}\label{join}}
+
+Now we want to select the stations that have been registered with world
+meteorological organisation (WMO) and the dataset \texttt{station} has a
+column \texttt{wmo\_id} that records this information. To do this task,
+we first need to join the \texttt{station} dataset with our climate
+dataset and then filter out those stations that don't have the WMO id.
+Since the join is by station rather than by time, we start with the
+nested form and write the exact same syntax of join and filter as with
+tidyverse.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# join wmo\_id for each station}
+\NormalTok{to\_join }\OtherTok{\textless{}{-}}\NormalTok{ station }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(id, wmo\_id)}
+\NormalTok{out }\OtherTok{\textless{}{-}}\NormalTok{ climate\_small }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{left\_join}\NormalTok{(to\_join, }\AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"station"} \OtherTok{=} \StringTok{"id"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(wmo\_id))}
+\NormalTok{out}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # Cubble: station-wise: nested form
+## # Group:  station [51]
+##    station       lat  long elevation name              ts                 wmo_id
+##    <fct>       <dbl> <dbl>     <dbl> <fct>             <list>              <dbl>
+##  1 ASN00001019 -14.3  127.      23   kalumburu         <tbl_ts [2,147 x ~  94100
+##  2 ASN00002012 -18.2  128.     422   halls creek airp~ <tbl_ts [2,191 x ~  94212
+##  3 ASN00003003 -17.9  122.       7.4 broome airport    <tbl_ts [2,192 x ~  94203
+##  4 ASN00006011 -24.9  114.       4   carnarvon airport <tbl_ts [2,192 x ~  94300
+##  5 ASN00009021 -31.9  116.      15.4 perth airport     <tbl_ts [2,192 x ~  94610
+##  6 ASN00009193 -32.0  116.      43.1 rottnest island   <tbl_ts [2,192 x ~  94602
+##  7 ASN00009518 -34.4  115.      13   cape leeuwin      <tbl_ts [2,184 x ~  94601
+##  8 ASN00009789 -33.8  122.      25   esperance         <tbl_ts [2,187 x ~  94638
+##  9 ASN00010286 -31.6  117.     217.  cunderdin airfie~ <tbl_ts [2,190 x ~  95625
+## 10 ASN00010917 -32.7  117.     275   wandering         <tbl_ts [2,192 x ~  95640
+## # ... with 41 more rows
+\end{verbatim}
+
+Sometimes, we would like to have station-wise and time-wise variables in
+the same form (i.e.~when plotting glyph maps). This can also be seen as
+a joining task, on the long form, with the dataset to join being the
+metadata. \texttt{migrate()} is a verb introduced as the shortcut for
+\texttt{left\_join()} with a cubble's metadata and below is the
+comparison of the two syntaxes.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{out }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{stretch}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{migrate}\NormalTok{(station, lat, long)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # Cubble: time-wise: long form
+## # Group:  station [55]
+##    station     date        prcp  tmax  tmin   lat  long
+##    <fct>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
+##  1 ASN00001019 2015-01-01   164  31.5  25   -14.3  127.
+##  2 ASN00001019 2015-01-02   124  31.3  25   -14.3  127.
+##  3 ASN00001019 2015-01-03    50  29.2  24.7 -14.3  127.
+##  4 ASN00001019 2015-01-04   204  32.1  24.3 -14.3  127.
+##  5 ASN00001019 2015-01-05   412  31.4  24.6 -14.3  127.
+##  6 ASN00001019 2015-01-06   200  28.7  25.1 -14.3  127.
+##  7 ASN00001019 2015-01-07   822  30.2  24.5 -14.3  127.
+##  8 ASN00001019 2015-01-08    22  31    26.6 -14.3  127.
+##  9 ASN00001019 2015-01-09    62  32.7  26.2 -14.3  127.
+## 10 ASN00001019 2015-01-10   274  32.9  22.6 -14.3  127.
+## # ... with 111,562 more rows
+\end{verbatim}
 
 \begin{itemize}
 \tightlist

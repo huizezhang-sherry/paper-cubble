@@ -39,15 +39,23 @@ output: rticles::arxiv_article
 ---
 
 ```{r setup, echo = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
-                      fig.path = "figures/")
-library(cubble)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, 
+                      fig.path = "figures/",
+                      out.width = "100%", 
+                      out.height = "30%")
 ```
+
+```{r echo = FALSE}
+library(cubble)
+library(dplyr)
+library(lubridate)
+```
+
 
 
 # Introduction
 
-Spatio-temporal data record changes of variables [for a reasonable length of period and spread across geographical region]. In this article, we consider spatio-temporal vector data, which are recorded in a fixed interval and are point based, characterised by longitude and latitude, in the spatial aspect. Examples of this type of data include the house price of a city or county, climate measures from weather stations in a country, and river level data from electronic gauges. 
+Spatio-temporal data record changes of variables in spatially separated regions across time. In this article, we consider spatio-temporal vector data, which are recorded in a fixed interval and are point based, characterised by longitude and latitude, in the spatial aspect. Examples of this type of data include the house price of a city or county, climate measures from weather stations in a country, and river level data from electronic gauges. 
 
 Analysing this type of data requires less considerations on the geographical geometry type and map projection but more on how measures in these fixed locations changes across the time domain and whether these changes are related for adjacent locations. For example, when nearby areas show patterns that are regular enough, visualising spatio-temporal data can 1) discover regional time series features, i.e. trend and seasonality, 2) find the Waldo sites from the crowd, and 3) see how correlation of nearby sites changes across time. 
 
@@ -65,11 +73,20 @@ In the temporal aspect, the `tsibble` [@tsibbles] structure and its tidyverts ec
 
 # A new data structure for spatio-temporal data
 
-In spatio-temporal data, a variable is usually either group-related or time-related. While time-related variables record variables that change in time, group-related variables are invariant to the time and have only one value per group. A cubble simplifies the workflow in spatio-temporal data through managing group and time-related variables separately in two forms: list-column and long form. The list column form: 
+Spatio-temporal data can be thought of as characterised by three dimensions: group, time, and variable, which allows us to use a cube to represent the data. While group and time are can be seen as identifiers of the record, variables can be further divided into those that are group-related and time-related. Group-related variables are invariant to the time and have only one value per group while time-related variables change in time and requires both group and time to identify a record. Hence the cubic representation can be further simplified for those group-related variables as in the sketch \ref{fig:framework}, where group-related variables are squashed in the time dimension. 
+
+```{r framework, echo = FALSE, fig.cap = "Cubic representation of spatio-temporal data. (1) shows the full cube, (2) simplifies teh cube by squashing the time dimension of time-invariant variables. With (2), a slice along the group dimension will affect both time-variant and invariant variables as in (3) while, a slice along the time will only affect the tim-variant variables as in (4)."}
+knitr::include_graphics(here::here("figures/cubble-framework-hand.jpeg"))
+```
+
+
+A cubble simplifies the workflow in spatio-temporal data through managing group and time-related variables separately in two forms: list-column and long form. The nested form: 
 
   - defines each group in a row, 
   - displays the group-related variables in columns, and 
   - nests all the time-related variables into a column called `ts`. 
+
+This form focuses on the time-invariant variable by squashing the time dimension
 
 In the long form, 
 
@@ -77,23 +94,26 @@ In the long form,
   - time-related variables are displayed, and 
   - group-related variables are not explicitly displayed but can be accessed through the `meta` attribute
   
-Below are the how the list-column and long form look like for Australia climate data, which records daily precipitation, maximum and minimum temperature for 55 stations across Australia from 2015- 2020.  
-
-\newpage
+Below are the how the nested and long form look like for Australia climate data, which records daily precipitation, maximum and minimum temperature for 55 stations across Australia from 2015- 2020. Notice that each station forms a group in both forms and specifically, the nested  and long form have a underlying `rowwise_df` and `grouped_df` respectively.
 
 ```{r echo = FALSE}
 climate_small
 ```
 
 ```{r echo = FALSE}
-climate_small %>% zoom()
+climate_small %>% stretch()
 ```
 
-# Manipulation and visualisation with `cubble`
+With a cubic framework on mind, different types of manipulation with cubble can be thought of as slicing the cube in various way. The table below shows how some `dplyr` verbs are mapped into the operation in a cubble. With the existing grouping on the station, additional groupping can be added with `group_by` and removed with `ungrouped`. [talk about why it is useful]
+
+
+```{r verbs, echo = FALSE, out.height = "50%", out.width = "100%", fig.cap = "sdfsdf"}
+knitr::include_graphics(here::here("figures/cubble-verbs.png"))
+```
+
+
 
 ## Cubble verbs
-
-
 
 Mention different types of manipulation with cubble:
   
@@ -102,6 +122,8 @@ Mention different types of manipulation with cubble:
     - group and ungroup: group_by, ungroup
     - slice family
   - summarise missing stats
+
+\newpage
 
 # Examples
 
@@ -113,6 +135,43 @@ An exploratory data analysis questions: What's the climate profile look like in 
   - Local features: Any station stands out from the crowd?
 
 ## Manipulation
+
+### Mutate and filter
+
+In the first example, we want to only keep the stations that have `tmax` recorded in 2020. This requires first narrow down the records to those in 2020, determine if `tmax` is missing for each station, and then retain those stations that have `tmax` recorded. The year filtering is an operation on the time axis, so we start with the long form. Whether each station has `tmax` recorded is a result of each station, rather than of each time point, hence we need to switch to the nested form with `tamp()`. To calculate whether `tmax` is recorded, we mutate a column `tmax_missing` that takes `TRUE` if all the `tmax` in the nested list column `ts` are `NA` and `FALSE` otherwise. To get the stations that we want, we need another filter on `tmax_missing`.
+
+
+```{r}
+climate_small %>% 
+  stretch() %>% 
+  filter(year(date) == 2020) %>% 
+  tamp() %>% 
+  mutate(tmax_missing = ifelse(all(is.na(ts$tmax)), TRUE, FALSE)) %>% 
+  filter(!tmax_missing)
+```
+
+
+### Join
+
+Now we want to select the stations that have been registered with world meteorological organisation (WMO) and the dataset `station` has a column `wmo_id` that records this information. To do this task, we first need to join the `station` dataset with our climate dataset and then filter out those stations that don't have the WMO id. Since the join is by station rather than by time, we start with the nested form and write the exact same syntax of join and filter as with tidyverse. 
+
+```{r}
+# join wmo_id for each station
+to_join <- station %>% select(id, wmo_id)
+out <- climate_small %>% 
+  left_join(to_join, by = c("station" = "id")) %>% 
+  filter(!is.na(wmo_id))
+out
+```
+
+Sometimes, we would like to have station-wise and time-wise variables in the same form (i.e. when plotting glyph maps). This can also be seen as a joining task, on the long form, with the dataset to join being the metadata. `migrate()` is a verb introduced as the shortcut for `left_join()` with a cubble's metadata and below is the comparison of the two syntaxes.
+
+```{r}
+out %>% 
+  stretch() %>% 
+  migrate(station, lat, long)
+```
+
 
   - data quality check: filter out stations have variables not properly recorded 
   - data summary: 
