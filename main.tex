@@ -11,6 +11,7 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{lipsum}
 \usepackage{graphicx}
 
 \title{A template for the \emph{arxiv} style}
@@ -93,7 +94,6 @@
 \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 
-
 % Pandoc citation processing
 \newlength{\csllabelwidth}
 \setlength{\csllabelwidth}{3em}
@@ -142,6 +142,8 @@ Enter the text of your abstract here.
    \and
     these are optional and can be removed
   }
+
+\newpage
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -222,28 +224,62 @@ if joined back to the tsibble) of each spatio identifier will be
 repetitively recorded at each timestamp. This repetition is unnecessary
 and would inflate the object size for long series.
 
+\newpage
+
 \hypertarget{a-new-data-structure-for-spatio-temporal-data}{%
 \section{A new data structure for spatio-temporal
 data}\label{a-new-data-structure-for-spatio-temporal-data}}
 
-Spatio-temporal data can be thought of as characterised by three
-dimensions: group, time, and variable, which allows us to use a cube to
-represent the data. While group and time are can be seen as identifiers
-of the record, variables can be further divided into those that are
-group-related and time-related. Group-related variables are invariant to
-the time and have only one value per group while time-related variables
-change in time and requires both group and time to identify a record.
-Hence the cubic representation can be further simplified for those
-group-related variables as in the sketch \ref{fig:framework}, where
-group-related variables are squashed in the time dimension.
+Spatio-temporal data don't usually come to the analysts as a whole
+piece. A way to look at these data is to divide it into spatial and
+temporal dimension with an ID that links between the two. The first row
+in Figure \ref{fig:cubble-diagram} illustrates this representation where
+in the spatial dimension, the data is characterised by \texttt{id},
+\texttt{lat}, \texttt{long}. \(V_s\) in the last column represents all
+the other site-wise variables, for example, elevation and full name etc.
+The temporal dimension, on the other hand, can be characterised by
+\texttt{id} and \texttt{t} with \(V_t\) representing all the time-wise
+variables. In climate data, this could include precipitation, maximum or
+minimum temperature, and wind speed etc.
 
 \begin{figure}
-\includegraphics[width=1\linewidth,height=0.3\textheight]{/Users/hzha400/Documents/PhD/research/paper-cubble/figures/cubble-framework-hand} \caption{Cubic representation of spatio-temporal data. (1) shows the full cube, (2) simplifies teh cube by squashing the time dimension of time-invariant variables. With (2), a slice along the group dimension will affect both time-variant and invariant variables as in (3) while, a slice along the time will only affect the tim-variant variables as in (4).}\label{fig:framework}
+
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/cubble-diagram/cubble-diagram.001} 
+
+}
+
+\caption{Cubble diagram}\label{fig:cubble-diagram}
 \end{figure}
 
-A cubble simplifies the workflow in spatio-temporal data through
-managing group and time-related variables separately in two forms:
-list-column and long form. The nested form:
+To work with spatio-temporal data, analysts can choose to either work
+separately on each dimension or join the two sets together, however,
+each approach has its own problem: While is is natural to work
+separately on each sheet (since spatial and temporal operations usually
+don't overlap), analysts will need to manually keep the other data frame
+up to date. For example, the following pseudo code illustrates the
+scenario where once the spatial dataset is filtered for those within
+Victoria, the temporal dataset needs to be manually updated to reflect
+this spatial filter.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{spatial\_new }\OtherTok{\textless{}{-}}\NormalTok{ spatial }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(SITES\_IN\_VICTORIA)}
+\NormalTok{temporal\_new }\OtherTok{\textless{}{-}}\NormalTok{ temporal }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(id }\SpecialCharTok{\%in\%}\NormalTok{ spatial\_new}\SpecialCharTok{$}\NormalTok{id)}
+\end{Highlighting}
+\end{Shaded}
+
+If analysts choose to join the spatial and temporal data together, the
+joined dataset could be too large since each spatial variable will be
+repeated at each time stamp for each site. Also, recordings of the site
+ID from different data sources can be slightly different from each
+other, causing a painful checking and cleaning of site IDs before the
+join.
+
+A cubble, in essence, wires both dimensions in the spatio-temporal data
+into one object while provide two forms for manipulation the spatial and
+temporal dimension separately.
+
+When manipulating the spatial dimension it uses a nest form that:
 
 \begin{itemize}
 \tightlist
@@ -255,10 +291,7 @@ list-column and long form. The nested form:
   nests all the time-related variables into a column called \texttt{ts}.
 \end{itemize}
 
-This form focuses on the time-invariant variable by squashing the time
-dimension
-
-In the long form,
+When manipulating the temporal dimension, it uses the long form that:
 
 \begin{itemize}
 \tightlist
@@ -268,84 +301,154 @@ In the long form,
   time-related variables are displayed, and
 \item
   group-related variables are not explicitly displayed but can be
-  accessed through the \texttt{meta} attribute
+  accessed through the \texttt{meta} attribute.
 \end{itemize}
 
-Below are the how the nested and long form look like for Australia
-climate data, which records daily precipitation, maximum and minimum
-temperature for 55 stations across Australia from 2015- 2020. Notice
-that each station forms a group in both forms and specifically, the
-nested and long form have a underlying \texttt{rowwise\_df} and
-\texttt{grouped\_df} respectively.
+\newpage
+
+\hypertarget{create-a-cubble}{%
+\section{Create a cubble}\label{create-a-cubble}}
+
+The creation of a cubble requires the site identifier (\texttt{key}), as
+well as the spatial (\texttt{coords}) and temporal (\texttt{index})
+identifier. \texttt{climate\_flat} is already a tibble and it uses
+\texttt{id} to identify each station, \texttt{date} as the time
+identifier, and \texttt{c(long,\ lat)} as the spatial identifier. To
+create a cubble for this data, use:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{climate\_flat }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as\_cubble}\NormalTok{(}\AttributeTok{key =}\NormalTok{ id, }\AttributeTok{index =}\NormalTok{ date, }\AttributeTok{coords =} \FunctionTok{c}\NormalTok{(long, lat))}
+\end{Highlighting}
+\end{Shaded}
 
 \begin{verbatim}
-## # Cubble: station-wise: nested form
-## # Group:  station [55]
-##    station       lat  long elevation name                ts                  
-##    <fct>       <dbl> <dbl>     <dbl> <fct>               <list>              
-##  1 ASN00001019 -14.3  127.      23   kalumburu           <tbl_ts [2,147 x 4]>
-##  2 ASN00002012 -18.2  128.     422   halls creek airport <tbl_ts [2,191 x 4]>
-##  3 ASN00003003 -17.9  122.       7.4 broome airport      <tbl_ts [2,192 x 4]>
-##  4 ASN00006011 -24.9  114.       4   carnarvon airport   <tbl_ts [2,192 x 4]>
-##  5 ASN00009021 -31.9  116.      15.4 perth airport       <tbl_ts [2,192 x 4]>
-##  6 ASN00009193 -32.0  116.      43.1 rottnest island     <tbl_ts [2,192 x 4]>
-##  7 ASN00009518 -34.4  115.      13   cape leeuwin        <tbl_ts [2,184 x 4]>
-##  8 ASN00009789 -33.8  122.      25   esperance           <tbl_ts [2,187 x 4]>
-##  9 ASN00010286 -31.6  117.     217.  cunderdin airfield  <tbl_ts [2,190 x 4]>
-## 10 ASN00010917 -32.7  117.     275   wandering           <tbl_ts [2,192 x 4]>
-## # ... with 45 more rows
+## # Cubble: id-wise: nested form
+## # Key:    id [5]
+## # Leaves: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+##   id            lat  long  elev name           wmo_id ts                
+##   <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
+## 1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble [366 x 4]>
+## 2 ASN00010311 -31.9  117. 179   york            94623 <tibble [366 x 4]>
+## 3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble [366 x 4]>
+## 4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble [366 x 4]>
+## 5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble [366 x 4]>
 \end{verbatim}
+
+Most of the time, spatio-temporal data doesn't come into this form and
+analysts need to query the climate variables based on station metadata.
+For this type of task, one can structure a metadata into a tibble and
+use row-wise operator to query the climate variables into a nested list.
+As an example here we demonstrate the workflow to find the 5 closest
+stations to Melbourne. We first create a station data farme with the 5
+target stations.
 
 \begin{verbatim}
-## # Cubble: time-wise: long form [tsibble]
-## # Group:  station [55]
-##    station     date        prcp  tmax  tmin
-##    <fct>       <date>     <dbl> <dbl> <dbl>
-##  1 ASN00001019 2015-01-01   164  31.5  25  
-##  2 ASN00001019 2015-01-02   124  31.3  25  
-##  3 ASN00001019 2015-01-03    50  29.2  24.7
-##  4 ASN00001019 2015-01-04   204  32.1  24.3
-##  5 ASN00001019 2015-01-05   412  31.4  24.6
-##  6 ASN00001019 2015-01-06   200  28.7  25.1
-##  7 ASN00001019 2015-01-07   822  30.2  24.5
-##  8 ASN00001019 2015-01-08    22  31    26.6
-##  9 ASN00001019 2015-01-09    62  32.7  26.2
-## 10 ASN00001019 2015-01-10   274  32.9  22.6
-## # ... with 120,311 more rows
+## # A tibble: 5 x 8
+##   id            lat  long  elev name                 wmo_id  dist city     
+##   <chr>       <dbl> <dbl> <dbl> <chr>                 <dbl> <dbl> <chr>    
+## 1 ASN00086038 -37.7  145.  78.4 essendon airport      95866  10.8 melbourne
+## 2 ASN00086282 -37.7  145. 113.  melbourne airport     94866  20.1 melbourne
+## 3 ASN00086077 -38.0  145.  12.1 moorabbin airport     94870  21.9 melbourne
+## 4 ASN00088162 -37.4  145. 528.  wallan (kilmore gap)  94860  48.1 melbourne
+## 5 ASN00087113 -38.0  144.  10.6 avalon airport        94854  48.8 melbourne
 \end{verbatim}
 
-With a cubic framework on mind, different types of manipulation with
-cubble can be thought of as slicing the cube in various way. The table
-below shows how some \texttt{dplyr} verbs are mapped into the operation
-in a cubble. With the existing grouping on the station, additional
-groupping can be added with \texttt{group\_by} and removed with
-\texttt{ungrouped}. {[}talk about why it is useful{]}
+We can query the climate information into a nested list named
+\texttt{ts} for each station with the \texttt{rowwise()} operator. To
+create a cubble, supply the same identifiers as with the first example.
 
-\begin{figure}
-\includegraphics[width=1\linewidth,height=0.5\textheight]{/Users/hzha400/Documents/PhD/research/paper-cubble/figures/cubble-verbs} \caption{sdfsdf}\label{fig:verbs}
-\end{figure}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sydmel\_climate }\OtherTok{\textless{}{-}}\NormalTok{ stations }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{rowwise}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{ts =} \FunctionTok{list}\NormalTok{(}\FunctionTok{meteo\_pull\_monitors}\NormalTok{(id, }
+                                       \AttributeTok{date\_min =} \StringTok{"2020{-}01{-}01"}\NormalTok{, }
+                                       \AttributeTok{date\_max =} \StringTok{"2020{-}12{-}31"}\NormalTok{,}
+                                       \AttributeTok{var =} \FunctionTok{c}\NormalTok{(}\StringTok{"PRCP"}\NormalTok{, }\StringTok{"TMAX"}\NormalTok{, }\StringTok{"TMIN"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
+                     \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{id))) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{as\_cubble}\NormalTok{(}\AttributeTok{key =}\NormalTok{ id, }\AttributeTok{index =}\NormalTok{ date, }\AttributeTok{coords =} \FunctionTok{c}\NormalTok{(long, lat))}
+\end{Highlighting}
+\end{Shaded}
 
-\hypertarget{cubble-verbs}{%
-\subsection{Cubble verbs}\label{cubble-verbs}}
+\begin{verbatim}
+## # Cubble: id-wise: nested form
+## # Key:    id [5]
+## # Leaves: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+##   id            lat  long  elev name                 wmo_id  dist city   ts     
+##   <chr>       <dbl> <dbl> <dbl> <chr>                 <dbl> <dbl> <chr>  <list> 
+## 1 ASN00086038 -37.7  145.  78.4 essendon airport      95866  10.8 melbo~ <tibbl~
+## 2 ASN00086282 -37.7  145. 113.  melbourne airport     94866  20.1 melbo~ <tibbl~
+## 3 ASN00086077 -38.0  145.  12.1 moorabbin airport     94870  21.9 melbo~ <tibbl~
+## 4 ASN00088162 -37.4  145. 528.  wallan (kilmore gap)  94860  48.1 melbo~ <tibbl~
+## 5 ASN00087113 -38.0  144.  10.6 avalon airport        94854  48.8 melbo~ <tibbl~
+\end{verbatim}
 
-Mention different types of manipulation with cubble:
+\newpage
+
+\hypertarget{cubble-operations}{%
+\subsection{Cubble operations}\label{cubble-operations}}
+
+\hypertarget{basics}{%
+\subsubsection{Basics}\label{basics}}
 
 \begin{itemize}
 \tightlist
 \item
-  \texttt{dplyr} support for cubble:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    basic 5s: mutate, filter, summarise, select, arrange
-  \item
-    group and ungroup: group\_by, ungroup
-  \item
-    slice family
-  \end{itemize}
+  \texttt{stretch}: nest to long form
 \item
-  summarise missing stats
+  \texttt{tamp}: long to nest form
+\item
+  \texttt{migrate}: move selected spatial variables to the long form.
+\item
+  \texttt{add\_dscrb\_prct}: summary stats for missingness
+\end{itemize}
+
+dplyr compatibility:
+
+\begin{itemize}
+\tightlist
+\item
+  mutate, filter, summarise, select, arrange
+\item
+  group and ungroup: group\_by, ungroup
+\item
+  slice family
+\end{itemize}
+
+\hypertarget{combine-two-cubbles}{%
+\subsubsection{Combine two cubbles}\label{combine-two-cubbles}}
+
+\begin{itemize}
+\tightlist
+\item
+  match river and weather gauges data
+\item
+  involve combining two cubbles
+\item
+  join operations combine the two together by appending more rows but
+  what we really want is to bind rows.
+\item
+  bind rows also doesn't work since we want to bind only when there' s a
+  matching????
+\item
+  introduce bind\_join
+\end{itemize}
+
+\hypertarget{hierarchical-structure-in-cubble}{%
+\subsubsection{Hierarchical structure in
+cubble}\label{hierarchical-structure-in-cubble}}
+
+\begin{itemize}
+\tightlist
+\item
+  hierarchical is common.
+\item
+  Given examples.
+\item
+  Essence: switch between different levels
+\item
+  introduce \texttt{switch\_key}
 \end{itemize}
 
 \newpage
@@ -390,31 +493,30 @@ otherwise. To get the stations that we want, we need another filter on
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{climate\_small }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{aus\_climate }\SpecialCharTok{\%\textgreater{}\%} 
   \FunctionTok{stretch}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
   \FunctionTok{filter}\NormalTok{(}\FunctionTok{year}\NormalTok{(date) }\SpecialCharTok{==} \DecValTok{2020}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{tamp}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{tmax\_missing =} \FunctionTok{ifelse}\NormalTok{(}\FunctionTok{all}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(ts}\SpecialCharTok{$}\NormalTok{tmax)), }\ConstantTok{TRUE}\NormalTok{, }\ConstantTok{FALSE}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\NormalTok{tmax\_missing)}
+  \FunctionTok{tamp}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## # Cubble: station-wise: nested form
-## # Group:  station [55]
-##    station      lat  long elevation name             ts             tmax_missing
-##    <fct>      <dbl> <dbl>     <dbl> <fct>            <list>         <lgl>       
-##  1 ASN000010~ -14.3  127.      23   kalumburu        <tbl_ts [366 ~ FALSE       
-##  2 ASN000020~ -18.2  128.     422   halls creek air~ <tbl_ts [366 ~ FALSE       
-##  3 ASN000030~ -17.9  122.       7.4 broome airport   <tbl_ts [366 ~ FALSE       
-##  4 ASN000060~ -24.9  114.       4   carnarvon airpo~ <tbl_ts [366 ~ FALSE       
-##  5 ASN000090~ -31.9  116.      15.4 perth airport    <tbl_ts [366 ~ FALSE       
-##  6 ASN000091~ -32.0  116.      43.1 rottnest island  <tbl_ts [366 ~ FALSE       
-##  7 ASN000095~ -34.4  115.      13   cape leeuwin     <tbl_ts [366 ~ FALSE       
-##  8 ASN000097~ -33.8  122.      25   esperance        <tbl_ts [361 ~ FALSE       
-##  9 ASN000102~ -31.6  117.     217.  cunderdin airfi~ <tbl_ts [366 ~ FALSE       
-## 10 ASN000109~ -32.7  117.     275   wandering        <tbl_ts [366 ~ FALSE       
-## # ... with 45 more rows
+## # Cubble: id-wise: nested form
+## # Key:    id [85]
+## # Leaves: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+##    id            lat  long  elev name                   wmo_id ts               
+##    <chr>       <dbl> <dbl> <dbl> <chr>                   <dbl> <list>           
+##  1 ASN00009021 -31.9  116.  15.4 perth airport           94610 <tibble [366 x 4~
+##  2 ASN00010311 -31.9  117. 179   york                    94623 <tibble [366 x 4~
+##  3 ASN00010614 -32.9  117. 338   narrogin                94627 <tibble [366 x 4~
+##  4 ASN00014015 -12.4  131.  30.4 darwin airport          94120 <tibble [366 x 4~
+##  5 ASN00015131 -17.6  134. 220   elliott                 94236 <tibble [366 x 4~
+##  6 ASN00016065 -30.4  137.  76   andamooka               95660 <tibble [366 x 4~
+##  7 ASN00023034 -35.0  139.   2   adelaide airport        94672 <tibble [366 x 4~
+##  8 ASN00023373 -34.5  139. 275   nuriootpa viticultural  94681 <tibble [366 x 4~
+##  9 ASN00024024 -34.4  141.  30.1 loxton research centre  94682 <tibble [366 x 4~
+## 10 ASN00024048 -34.2  141.  31.5 renmark aero            95687 <tibble [366 x 4~
+## # ... with 75 more rows
 \end{verbatim}
 
 \hypertarget{join}{%
@@ -432,31 +534,13 @@ tidyverse.
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# join wmo\_id for each station}
-\NormalTok{to\_join }\OtherTok{\textless{}{-}}\NormalTok{ station }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(id, wmo\_id)}
-\NormalTok{out }\OtherTok{\textless{}{-}}\NormalTok{ climate\_small }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{left\_join}\NormalTok{(to\_join, }\AttributeTok{by =} \FunctionTok{c}\NormalTok{(}\StringTok{"station"} \OtherTok{=} \StringTok{"id"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(wmo\_id))}
-\NormalTok{out}
+\CommentTok{\# to\_join \textless{}{-} station \%\textgreater{}\% select(id, wmo\_id)}
+\CommentTok{\# out \textless{}{-} climate\_small \%\textgreater{}\% }
+\CommentTok{\#   left\_join(to\_join, by = c("station" = "id")) \%\textgreater{}\% }
+\CommentTok{\#   filter(!is.na(wmo\_id))}
+\CommentTok{\# out}
 \end{Highlighting}
 \end{Shaded}
-
-\begin{verbatim}
-## # Cubble: station-wise: nested form
-## # Group:  station [51]
-##    station       lat  long elevation name              ts                 wmo_id
-##    <fct>       <dbl> <dbl>     <dbl> <fct>             <list>              <dbl>
-##  1 ASN00001019 -14.3  127.      23   kalumburu         <tbl_ts [2,147 x ~  94100
-##  2 ASN00002012 -18.2  128.     422   halls creek airp~ <tbl_ts [2,191 x ~  94212
-##  3 ASN00003003 -17.9  122.       7.4 broome airport    <tbl_ts [2,192 x ~  94203
-##  4 ASN00006011 -24.9  114.       4   carnarvon airport <tbl_ts [2,192 x ~  94300
-##  5 ASN00009021 -31.9  116.      15.4 perth airport     <tbl_ts [2,192 x ~  94610
-##  6 ASN00009193 -32.0  116.      43.1 rottnest island   <tbl_ts [2,192 x ~  94602
-##  7 ASN00009518 -34.4  115.      13   cape leeuwin      <tbl_ts [2,184 x ~  94601
-##  8 ASN00009789 -33.8  122.      25   esperance         <tbl_ts [2,187 x ~  94638
-##  9 ASN00010286 -31.6  117.     217.  cunderdin airfie~ <tbl_ts [2,190 x ~  95625
-## 10 ASN00010917 -32.7  117.     275   wandering         <tbl_ts [2,192 x ~  95640
-## # ... with 41 more rows
-\end{verbatim}
 
 Sometimes, we would like to have station-wise and time-wise variables in
 the same form (i.e.~when plotting glyph maps). This can also be seen as
@@ -467,28 +551,30 @@ comparison of the two syntaxes.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{out }\SpecialCharTok{\%\textgreater{}\%} 
+\NormalTok{aus\_climate }\SpecialCharTok{\%\textgreater{}\%} 
   \FunctionTok{stretch}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{migrate}\NormalTok{(station, lat, long)}
+  \FunctionTok{migrate}\NormalTok{(id, lat, long)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
 ## # Cubble: time-wise: long form
-## # Group:  station [55]
-##    station     date        prcp  tmax  tmin   lat  long
-##    <fct>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
-##  1 ASN00001019 2015-01-01   164  31.5  25   -14.3  127.
-##  2 ASN00001019 2015-01-02   124  31.3  25   -14.3  127.
-##  3 ASN00001019 2015-01-03    50  29.2  24.7 -14.3  127.
-##  4 ASN00001019 2015-01-04   204  32.1  24.3 -14.3  127.
-##  5 ASN00001019 2015-01-05   412  31.4  24.6 -14.3  127.
-##  6 ASN00001019 2015-01-06   200  28.7  25.1 -14.3  127.
-##  7 ASN00001019 2015-01-07   822  30.2  24.5 -14.3  127.
-##  8 ASN00001019 2015-01-08    22  31    26.6 -14.3  127.
-##  9 ASN00001019 2015-01-09    62  32.7  26.2 -14.3  127.
-## 10 ASN00001019 2015-01-10   274  32.9  22.6 -14.3  127.
-## # ... with 111,562 more rows
+## # Key:    id [85]
+## # Leaves: id [chr], lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
+## #   [dbl], prcp_missing [dbl], tmax_missing [dbl], tmin_missing [dbl]
+##    id          date        prcp  tmax  tmin   lat  long
+##    <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
+##  1 ASN00009021 2020-01-01     0   319   153 -31.9  116.
+##  2 ASN00009021 2020-01-02     0   249   164 -31.9  116.
+##  3 ASN00009021 2020-01-03     6   232   130 -31.9  116.
+##  4 ASN00009021 2020-01-04     0   284   124 -31.9  116.
+##  5 ASN00009021 2020-01-05     0   353   116 -31.9  116.
+##  6 ASN00009021 2020-01-06     0   348   131 -31.9  116.
+##  7 ASN00009021 2020-01-07     0   328   151 -31.9  116.
+##  8 ASN00009021 2020-01-08     0   304   174 -31.9  116.
+##  9 ASN00009021 2020-01-09     0   287   173 -31.9  116.
+## 10 ASN00009021 2020-01-10     0   326   158 -31.9  116.
+## # ... with 31,100 more rows
 \end{verbatim}
 
 \begin{itemize}

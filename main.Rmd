@@ -52,6 +52,7 @@ library(lubridate)
 ```
 
 
+\newpage
 
 # Introduction
 
@@ -71,57 +72,136 @@ Many spatial and spatio-temporal data structures have been developed by the R-sp
 
 In the temporal aspect, the `tsibble` [@tsibbles] structure and its tidyverts ecosystem have provided a [... ] workflow to work with temporal data. In a tsibble structure, temporal data is characterised by `index` and `key` where `index` is the temporal identifier and `key` is the identifier for multiple series, which could be used as a spatio identifier. However, a tsibble object, by construction, always requires the `index` in its structure. This makes it less appealing for spatio-temporal data since the output of calculated spatio-specific variables (i.e. features of each series) don't have the time dimension. Analysts will either need to have an additional step to join this output to the original tsibble or operate with variables stored in two separate objects. In addition, the long form structure of a tsibble object means spatio variables (i.e. longitude, latitude, and features of each series if joined back to the tsibble) of each spatio identifier will be repetitively recorded at each timestamp. This repetition is unnecessary and would inflate the object size for long series.
 
+\newpage
+
 # A new data structure for spatio-temporal data
 
-Spatio-temporal data can be thought of as characterised by three dimensions: group, time, and variable, which allows us to use a cube to represent the data. While group and time are can be seen as identifiers of the record, variables can be further divided into those that are group-related and time-related. Group-related variables are invariant to the time and have only one value per group while time-related variables change in time and requires both group and time to identify a record. Hence the cubic representation can be further simplified for those group-related variables as in the sketch \ref{fig:framework}, where group-related variables are squashed in the time dimension. 
+Spatio-temporal data don't usually come to the analysts as a whole piece. A way to look at these data is to divide it into spatial and temporal dimension with an ID that links between the two. The first row in Figure \ref{fig:cubble-diagram} illustrates this representation where in the spatial dimension, the data is characterised by `id`, `lat`, `long`. $V_s$ in the last column represents all the other site-wise variables, for example, elevation and full name etc. The temporal dimension, on the other hand, can be characterised by `id` and `t` with $V_t$ representing all the time-wise variables. In climate data, this could include precipitation, maximum or minimum temperature, and wind speed etc. 
 
-```{r framework, echo = FALSE, fig.cap = "Cubic representation of spatio-temporal data. (1) shows the full cube, (2) simplifies teh cube by squashing the time dimension of time-invariant variables. With (2), a slice along the group dimension will affect both time-variant and invariant variables as in (3) while, a slice along the time will only affect the tim-variant variables as in (4)."}
-knitr::include_graphics(here::here("figures/cubble-framework-hand.jpeg"))
+```{r cubble-diagram, echo = FALSE, fig.cap="Cubble diagram", out.height="40%", fig.align='center'}
+knitr::include_graphics(here::here("figures/cubble-diagram/cubble-diagram.001.png"))
 ```
 
+To work with spatio-temporal data, analysts can choose to either work separately on each dimension or join the two sets together, however, each approach has its own problem: While is is natural to work separately on each sheet (since spatial and temporal operations usually don't overlap), analysts will need to manually keep the other data frame up to date. For example, the following pseudo code illustrates the scenario where once the spatial dataset is filtered for those within Victoria, the temporal dataset needs to be manually updated to reflect this spatial filter.
 
-A cubble simplifies the workflow in spatio-temporal data through managing group and time-related variables separately in two forms: list-column and long form. The nested form: 
+```{r eval = FALSE}
+spatial_new <- spatial %>% filter(SITES_IN_VICTORIA)
+temporal_new <- temporal %>% filter(id %in% spatial_new$id)
+```
+
+If analysts choose to join the spatial and temporal data together, the joined dataset could be too large since each spatial variable will be repeated at each time stamp for each site. Also, recordings of the site ID from different data sources can be slightly different from each other, causing a painful checking and cleaning of site IDs before the join.
+
+A cubble, in essence, wires both dimensions in the spatio-temporal data into one object while provide two forms for manipulation the spatial and temporal dimension separately. 
+
+
+When manipulating the spatial dimension it uses a nest form that:
 
   - defines each group in a row, 
   - displays the group-related variables in columns, and 
   - nests all the time-related variables into a column called `ts`. 
-
-This form focuses on the time-invariant variable by squashing the time dimension
-
-In the long form, 
+  
+When manipulating the temporal dimension, it uses the long form that: 
 
   - each combination of group and timestamp occupies a row
   - time-related variables are displayed, and 
-  - group-related variables are not explicitly displayed but can be accessed through the `meta` attribute
+  - group-related variables are not explicitly displayed but can be accessed through the `meta` attribute.
+
+
+\newpage
+
+# Create a cubble
   
-Below are the how the nested and long form look like for Australia climate data, which records daily precipitation, maximum and minimum temperature for 55 stations across Australia from 2015- 2020. Notice that each station forms a group in both forms and specifically, the nested  and long form have a underlying `rowwise_df` and `grouped_df` respectively.
+The creation of a cubble requires the site identifier (`key`), as well as the spatial (`coords`) and temporal (`index`) identifier. `climate_flat` is already a tibble and it uses `id` to identify each station, `date` as the time identifier, and `c(long, lat)` as the spatial identifier. To create a cubble for this data, use: 
+
+```{r}
+climate_flat %>% as_cubble(key = id, index = date, coords = c(long, lat))
+```
+
+Most of the time, spatio-temporal data doesn't come into this form and analysts need to query the climate variables based on station metadata. For this type of task, one can structure a metadata into a tibble and use row-wise operator to query the climate variables into a nested list. As an example here we demonstrate the workflow to find the 5 closest stations to Melbourne. We first create a station data farme with the 5 target stations.
 
 ```{r echo = FALSE}
-climate_small
+latlon_ref <- tibble::tibble(id = "melbourne", lat = -37.8136, long = 144.9631)
+
+cand <- aus_climate %>% 
+  select(id, lat, long, elev, name, wmo_id) %>% 
+   as_tibble()
+
+calc_dist <- function(df_ref, df, n = 5){
+  long_ref <- df_ref$long
+  lat_ref <- df_ref$lat
+  
+  df %>% 
+    mutate(long_ref = long_ref,
+           lat_ref=  lat_ref,
+           dist = rnoaa::meteo_spherical_distance(lat, long,lat_ref, long_ref)) %>% 
+    slice_min(dist, n = n) %>% 
+    mutate(city = df_ref$id) %>% 
+    select(-long_ref, -lat_ref)
+}
+
+(stations <- do.call("rbind", purrr::map(1:nrow(latlon_ref), 
+                             ~calc_dist(latlon_ref[.x, ], cand))))
+```
+
+We can query the climate information into a nested list named `ts` for each station with the `rowwise()` operator. To create a cubble, supply the same identifiers as with the first example.
+
+
+```{r eval = FALSE}
+sydmel_climate <- stations %>% 
+  rowwise() %>% 
+  mutate(ts = list(meteo_pull_monitors(id, 
+                                       date_min = "2020-01-01", 
+                                       date_max = "2020-12-31",
+                                       var = c("PRCP", "TMAX", "TMIN")) %>% 
+                     select(-id))) %>% 
+  as_cubble(key = id, index = date, coords = c(long, lat))
 ```
 
 ```{r echo = FALSE}
-climate_small %>% stretch()
-```
-
-With a cubic framework on mind, different types of manipulation with cubble can be thought of as slicing the cube in various way. The table below shows how some `dplyr` verbs are mapped into the operation in a cubble. With the existing grouping on the station, additional groupping can be added with `group_by` and removed with `ungrouped`. [talk about why it is useful]
-
-
-```{r verbs, echo = FALSE, out.height = "50%", out.width = "100%", fig.cap = "sdfsdf"}
-knitr::include_graphics(here::here("figures/cubble-verbs.png"))
+(sydmel_climate <- stations %>% 
+   left_join(aus_climate) %>% 
+   as_cubble(key = id, index = date, coords = c(long, lat)))
 ```
 
 
+<!-- Below are the how the nested and long form look like for Australia climate data, which records daily precipitation, maximum and minimum temperature for 55 stations across Australia from 2015- 2020. Notice that each station forms a group in both forms and specifically, the nested  and long form have a underlying `rowwise_df` and `grouped_df` respectively. -->
 
-## Cubble verbs
 
-Mention different types of manipulation with cubble:
-  
-  - `dplyr` support for cubble: 
-    - basic 5s: mutate, filter, summarise, select, arrange
-    - group and ungroup: group_by, ungroup
-    - slice family
-  - summarise missing stats
+<!-- With a cubic framework on mind, different types of manipulation with cubble can be thought of as slicing the cube in various way. The table below shows how some `dplyr` verbs are mapped into the operation in a cubble. With the existing grouping on the station, additional groupping can be added with `group_by` and removed with `ungrouped`. [talk about why it is useful] -->
+
+\newpage
+
+## Cubble operations
+
+### Basics
+
+- `stretch`: nest to long form
+- `tamp`: long to nest form
+- `migrate`: move selected spatial variables to the long form.
+- `add_dscrb_prct`: summary stats for missingness
+
+dplyr compatibility: 
+
+  - mutate, filter, summarise, select, arrange
+  - group and ungroup: group_by, ungroup
+  - slice family
+
+### Combine two cubbles
+
+  - match river and weather gauges data
+  - involve combining two cubbles
+  - join operations combine the two together by appending more rows but what we really want is to bind rows.
+  - bind rows also doesn't work since we want to bind only when there' s a matching????
+  - introduce bind_join
+
+### Hierarchical structure in cubble
+
+  - hierarchical is common. 
+  - Given examples. 
+  - Essence: switch between different levels
+  - introduce `switch_key`
+
+
 
 \newpage
 
@@ -142,12 +222,10 @@ In the first example, we want to only keep the stations that have `tmax` recorde
 
 
 ```{r}
-climate_small %>% 
+aus_climate %>% 
   stretch() %>% 
   filter(year(date) == 2020) %>% 
-  tamp() %>% 
-  mutate(tmax_missing = ifelse(all(is.na(ts$tmax)), TRUE, FALSE)) %>% 
-  filter(!tmax_missing)
+  tamp()
 ```
 
 
@@ -157,19 +235,19 @@ Now we want to select the stations that have been registered with world meteorol
 
 ```{r}
 # join wmo_id for each station
-to_join <- station %>% select(id, wmo_id)
-out <- climate_small %>% 
-  left_join(to_join, by = c("station" = "id")) %>% 
-  filter(!is.na(wmo_id))
-out
+# to_join <- station %>% select(id, wmo_id)
+# out <- climate_small %>% 
+#   left_join(to_join, by = c("station" = "id")) %>% 
+#   filter(!is.na(wmo_id))
+# out
 ```
 
 Sometimes, we would like to have station-wise and time-wise variables in the same form (i.e. when plotting glyph maps). This can also be seen as a joining task, on the long form, with the dataset to join being the metadata. `migrate()` is a verb introduced as the shortcut for `left_join()` with a cubble's metadata and below is the comparison of the two syntaxes.
 
 ```{r}
-out %>% 
+aus_climate %>% 
   stretch() %>% 
-  migrate(station, lat, long)
+  migrate(id, lat, long)
 ```
 
 
