@@ -72,14 +72,16 @@ Many spatial and spatio-temporal data structures have been developed by the R-sp
 
 In the temporal aspect, the `tsibble` [@tsibbles] structure and its tidyverts ecosystem have provided a [... ] workflow to work with temporal data. In a tsibble structure, temporal data is characterised by `index` and `key` where `index` is the temporal identifier and `key` is the identifier for multiple series, which could be used as a spatio identifier. However, a tsibble object, by construction, always requires the `index` in its structure. This makes it less appealing for spatio-temporal data since the output of calculated spatio-specific variables (i.e. features of each series) don't have the time dimension. Analysts will either need to have an additional step to join this output to the original tsibble or operate with variables stored in two separate objects. In addition, the long form structure of a tsibble object means spatio variables (i.e. longitude, latitude, and features of each series if joined back to the tsibble) of each spatio identifier will be repetitively recorded at each timestamp. This repetition is unnecessary and would inflate the object size for long series.
 
+\textcolor{red}{Under the third tidy data principle [@tidydata], these are two type of observational unit and should form different tables. An example (Table 8) is also given to demonstrate the billboard dataset where there are song variables and rank variables that changes each week. The other has mentioned the lack of tool to work directly with relational data and analysis will usually need to merge the dataset into one table, which could causes errors. These days more implementations have looked at relational data structure and in R, several good examples include, `tidygraph`[@tidygraph] for graph manipulation, `dm` [@dm] for relational data model. In the domain of spatio-temporal data, @spacetime has considered four types of spatio-temporal layout. `Spatstat` [@Spatstat] an implementation of point pattern.  }
+
 \newpage
 
 # A new data structure for spatio-temporal data
 
-Spatio-temporal data don't usually come to the analysts as a whole piece. A way to look at these data is to divide it into spatial and temporal dimension with an ID that links between the two. The first row in Figure \ref{fig:cubble-diagram} illustrates this representation where in the spatial dimension, the data is characterised by `id`, `lat`, `long`. $V_s$ in the last column represents all the other site-wise variables, for example, elevation and full name etc. The temporal dimension, on the other hand, can be characterised by `id` and `t` with $V_t$ representing all the time-wise variables. In climate data, this could include precipitation, maximum or minimum temperature, and wind speed etc. 
+Spatio-temporal data don't usually come to the analysts as a whole piece. A way to look at these data is to divide it into spatial and temporal dimension with an ID that links between the two. The first row in Figure \ref{fig:cubble-diagram} illustrates this representation where in the spatial dimension, the data is characterised by `id`, `lat`, `long`. $V_s$ in the last column represents all the other site-wise variables, for example, elevation and full name etc. The temporal dimension, on the other hand, can be characterised by `id` and `t` with $V_t$ representing all the time-wise variables. In climate data, this could include precipitation, maximum or minimum temperature, and wind speed etc.
 
 ```{r cubble-diagram, echo = FALSE, fig.cap="Cubble diagram", out.height="40%", fig.align='center'}
-knitr::include_graphics(here::here("figures/cubble-diagram/cubble-diagram.001.png"))
+knitr::include_graphics(here::here("figures/input-formats/input-formats.001.png"))
 ```
 
 To work with spatio-temporal data, analysts can choose to either work separately on each dimension or join the two sets together, however, each approach has its own problem: While is is natural to work separately on each sheet (since spatial and temporal operations usually don't overlap), analysts will need to manually keep the other data frame up to date. For example, the following pseudo code illustrates the scenario where once the spatial dataset is filtered for those within Victoria, the temporal dataset needs to be manually updated to reflect this spatial filter.
@@ -117,7 +119,7 @@ The creation of a cubble requires the site identifier (`key`), as well as the sp
 climate_flat %>% as_cubble(key = id, index = date, coords = c(long, lat))
 ```
 
-Most of the time, spatio-temporal data doesn't come into this form and analysts need to query the climate variables based on station metadata. For this type of task, one can structure a metadata into a tibble and use row-wise operator to query the climate variables into a nested list. As an example here we demonstrate the workflow to find the 5 closest stations to Melbourne. We first create a station data farme with the 5 target stations.
+Most of the time, spatio-temporal data doesn't come into this form and analysts need to query the climate variables based on station metadata. \textcolor{red}{This is also a problem illustrated in Section 3.5 in @tidydata. Here we provide a structured way to query this data based on the row-wise operator and nested list.} For this type of task, one can structure a metadata into a tibble and use row-wise operator to query the climate variables into a nested list. As an example here we demonstrate the workflow to find the 5 closest stations to Melbourne. We first create a station data frame with the 5 target stations.
 
 ```{r echo = FALSE}
 latlon_ref <- tibble::tibble(id = "melbourne", lat = -37.8136, long = 144.9631)
@@ -172,6 +174,10 @@ sydmel_climate <- stations %>%
 \newpage
 
 ## Cubble operations
+
+```{r cubble-operations, echo = FALSE, fig.cap="Cubble operations", out.height="50%", fig.align='center'}
+knitr::include_graphics(here::here("figures/cubble-operations/cubble-operations.001.png"))
+```
 
 ### Basics
 

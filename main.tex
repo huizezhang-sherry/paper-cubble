@@ -224,6 +224,8 @@ if joined back to the tsibble) of each spatio identifier will be
 repetitively recorded at each timestamp. This repetition is unnecessary
 and would inflate the object size for long series.
 
+\textcolor{red}{Under the third tidy data principle [@tidydata], these are two type of observational unit and should form different tables. An example (Table 8) is also given to demonstrate the billboard dataset where there are song variables and rank variables that changes each week. The other has mentioned the lack of tool to work directly with relational data and analysis will usually need to merge the dataset into one table, which could causes errors. These days more implementations have looked at relational data structure and in R, several good examples include, `tidygraph`[@tidygraph] for graph manipulation, `dm` [@dm] for relational data model. In the domain of spatio-temporal data, @spacetime has considered four types of spatio-temporal layout. `Spatstat` [@Spatstat] an implementation of point pattern.  }
+
 \newpage
 
 \hypertarget{a-new-data-structure-for-spatio-temporal-data}{%
@@ -244,7 +246,7 @@ minimum temperature, and wind speed etc.
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/cubble-diagram/cubble-diagram.001} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/input-formats/input-formats.001} 
 
 }
 
@@ -337,10 +339,11 @@ create a cubble for this data, use:
 
 Most of the time, spatio-temporal data doesn't come into this form and
 analysts need to query the climate variables based on station metadata.
+\textcolor{red}{This is also a problem illustrated in Section 3.5 in @tidydata. Here we provide a structured way to query this data based on the row-wise operator and nested list.}
 For this type of task, one can structure a metadata into a tibble and
 use row-wise operator to query the climate variables into a nested list.
 As an example here we demonstrate the workflow to find the 5 closest
-stations to Melbourne. We first create a station data farme with the 5
+stations to Melbourne. We first create a station data frame with the 5
 target stations.
 
 \begin{verbatim}
@@ -388,6 +391,15 @@ create a cubble, supply the same identifiers as with the first example.
 
 \hypertarget{cubble-operations}{%
 \subsection{Cubble operations}\label{cubble-operations}}
+
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth,height=0.5\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/cubble-operations/cubble-operations.001} 
+
+}
+
+\caption{Cubble operations}\label{fig:cubble-operations}
+\end{figure}
 
 \hypertarget{basics}{%
 \subsubsection{Basics}\label{basics}}
