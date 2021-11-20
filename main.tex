@@ -1,147 +1,48 @@
-\documentclass{article}
+\documentclass[
+]{jss}
 
-\usepackage{arxiv}
+\usepackage[utf8]{inputenc}
 
-\usepackage[utf8]{inputenc} % allow utf-8 input
-\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
-\usepackage{lmodern}        % https://github.com/rstudio/rticles/issues/343
-\usepackage{hyperref}       % hyperlinks
-\usepackage{url}            % simple URL typesetting
-\usepackage{booktabs}       % professional-quality tables
-\usepackage{amsfonts}       % blackboard math symbols
-\usepackage{nicefrac}       % compact symbols for 1/2, etc.
-\usepackage{microtype}      % microtypography
-\usepackage{lipsum}
-\usepackage{graphicx}
-
-\title{A template for the \emph{arxiv} style}
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \author{
-    H.Sherry Zhang
-   \\
-    Department of Econometrics and Business Statistics \\
-    Monash University \\
-  Melbourne, Australia \\
-  \texttt{\href{mailto:huize.zhang@monash.edu}{\nolinkurl{huize.zhang@monash.edu}}} \\
-   \And
-    Dianne Cook
-   \\
-    Department of Econometrics and Business Statistics \\
-    Monash University \\
-  Melbourne, Australia \\
-  \texttt{\href{mailto:dicook@monash.edu}{\nolinkurl{dicook@monash.edu}}} \\
-   \And
-    Ursula Laa
-   \\
-    Institute of Statistics \\
-    University of Natural Resources and Life Sciences \\
-  Vienna, Austria \\
-  \texttt{\href{mailto:ursula.laa@boku.ac.at}{\nolinkurl{ursula.laa@boku.ac.at}}} \\
-   \And
-    Nicolas Langrené
-   \\
-    34 Village Street, Docklands VIC 3008 Australia \\
-    CSIRO Data61 \\
-  Melbourne, Australia \\
-  \texttt{\href{mailto:nicolas.langrene@csiro.au}{\nolinkurl{nicolas.langrene@csiro.au}}} \\
-   \And
-    Patricia Menéndez
-   \\
-    Department of Econometrics and Business Statistics \\
-    Monash University \\
-  Melbourne, Australia \\
-  \texttt{\href{mailto:patricia.menendez@monash.edu}{\nolinkurl{patricia.menendez@monash.edu}}} \\
-  }
+H. Sherry Zhang\\Monash University \And Dianne Cook\\Monash University
+\AND Ursula Laa\\University of Natural Resources and Life Sciences
+\AND Nicolas Langrené\\CSIRO Data61 \AND Patricia
+Menéndez\\Monash University \AND
+}
+\title{\pkg{cubble}: An R Package for Structuring Spatio-temporal Data}
 
-\usepackage{color}
-\usepackage{fancyvrb}
-\newcommand{\VerbBar}{|}
-\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
-% Add ',fontsize=\small' for more characters per line
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{248,248,248}
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\BuiltInTok}[1]{#1}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
-\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
-\newcommand{\ExtensionTok}[1]{#1}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ImportTok}[1]{#1}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\NormalTok}[1]{#1}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\RegionMarkerTok}[1]{#1}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\Plainauthor{H. Sherry Zhang, Dianne Cook, Ursula Laa, Nicolas
+Langrené, Patricia Menéndez}
+\Plaintitle{cubble: An R Package for Structuring Spatio-temporal Data}
+
+\Abstract{
+The abstract of the article.
+}
+
+\Keywords{spatio-temporal data, \proglang{R}}
+\Plainkeywords{spatio-temporal data, R}
+
+%% publication information
+%% \Volume{50}
+%% \Issue{9}
+%% \Month{June}
+%% \Year{2012}
+%% \Submitdate{}
+%% \Acceptdate{2012-06-04}
+
+\Address{
+          }
 
 % Pandoc citation processing
-\newlength{\csllabelwidth}
-\setlength{\csllabelwidth}{3em}
-\newlength{\cslhangindent}
-\setlength{\cslhangindent}{1.5em}
-% for Pandoc 2.8 to 2.10.1
-\newenvironment{cslreferences}%
-  {}%
-  {\par}
-% For Pandoc 2.11+
-\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
- {% don't indent paragraphs
-  \setlength{\parindent}{0pt}
-  % turn on hanging indent if param 1 is 1
-  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
-  % set entry spacing
-  \ifnum #2 > 0
-  \setlength{\parskip}{#2\baselineskip}
-  \fi
- }%
- {}
-\usepackage{calc} % for calculating minipage widths
-\newcommand{\CSLBlock}[1]{#1\hfill\break}
-\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
-\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
-\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
+% Pandoc header
 
+\usepackage{amsmath}
 
 \begin{document}
-\maketitle
-
-\def\tightlist{}
-
-
-\begin{abstract}
-Enter the text of your abstract here.
-\end{abstract}
-
-\keywords{
-    blah
-   \and
-    blee
-   \and
-    bloo
-   \and
-    these are optional and can be removed
-  }
 
 \newpage
 
@@ -195,34 +96,33 @@ spatio-temporal data.
 
 Many spatial and spatio-temporal data structures have been developed by
 the R-spatial team for both raster and vector spatial data. For vector
-spatial data, which is the focus of this paper, \texttt{sf} (E. J.
-Pebesma 2018) represents spatial vector information with simple
-features: points, lines, polygons and their multiples. Various
+spatial data, which is the focus of this paper, \texttt{sf}
+\citep{pebesma2018simple} represents spatial vector information with
+simple features: points, lines, polygons and their multiples. Various
 \texttt{st\_} function are designed to manipulate these features based
 on their geometric relationships. For spatio-temporal data,
-\texttt{stars} (E. Pebesma 2021) can represent both raster and vector
-data using multi-dimensional array. However, the underlying array
-structure can be difficult to operate for data analysts who are more
-familiar with a flat 2D data frame structure used by the tidyverse
-ecosystem.
+\texttt{stars} \citep{stars} can represent both raster and vector data
+using multi-dimensional array. However, the underlying array structure
+can be difficult to operate for data analysts who are more familiar with
+a flat 2D data frame structure used by the tidyverse ecosystem.
 
-In the temporal aspect, the \texttt{tsibble} (Wang, Cook, and Hyndman
-2020) structure and its tidyverts ecosystem have provided a {[}\ldots{}
-{]} workflow to work with temporal data. In a tsibble structure,
-temporal data is characterised by \texttt{index} and \texttt{key} where
-\texttt{index} is the temporal identifier and \texttt{key} is the
-identifier for multiple series, which could be used as a spatio
-identifier. However, a tsibble object, by construction, always requires
-the \texttt{index} in its structure. This makes it less appealing for
-spatio-temporal data since the output of calculated spatio-specific
-variables (i.e.~features of each series) don't have the time dimension.
-Analysts will either need to have an additional step to join this output
-to the original tsibble or operate with variables stored in two separate
-objects. In addition, the long form structure of a tsibble object means
-spatio variables (i.e.~longitude, latitude, and features of each series
-if joined back to the tsibble) of each spatio identifier will be
-repetitively recorded at each timestamp. This repetition is unnecessary
-and would inflate the object size for long series.
+In the temporal aspect, the \texttt{tsibble} \citep{tsibbles} structure
+and its tidyverts ecosystem have provided a {[}\ldots{} {]} workflow to
+work with temporal data. In a tsibble structure, temporal data is
+characterised by \texttt{index} and \texttt{key} where \texttt{index} is
+the temporal identifier and \texttt{key} is the identifier for multiple
+series, which could be used as a spatio identifier. However, a tsibble
+object, by construction, always requires the \texttt{index} in its
+structure. This makes it less appealing for spatio-temporal data since
+the output of calculated spatio-specific variables (i.e.~features of
+each series) don't have the time dimension. Analysts will either need to
+have an additional step to join this output to the original tsibble or
+operate with variables stored in two separate objects. In addition, the
+long form structure of a tsibble object means spatio variables
+(i.e.~longitude, latitude, and features of each series if joined back to
+the tsibble) of each spatio identifier will be repetitively recorded at
+each timestamp. This repetition is unnecessary and would inflate the
+object size for long series.
 
 \textcolor{red}{Under the third tidy data principle [@tidydata], these are two type of observational unit and should form different tables. An example (Table 8) is also given to demonstrate the billboard dataset where there are song variables and rank variables that changes each week. The other has mentioned the lack of tool to work directly with relational data and analysis will usually need to merge the dataset into one table, which could causes errors. These days more implementations have looked at relational data structure and in R, several good examples include, `tidygraph`[@tidygraph] for graph manipulation, `dm` [@dm] for relational data model. In the domain of spatio-temporal data, @spacetime has considered four types of spatio-temporal layout. `Spatstat` [@Spatstat] an implementation of point pattern.  }
 
@@ -244,14 +144,16 @@ The temporal dimension, on the other hand, can be characterised by
 variables. In climate data, this could include precipitation, maximum or
 minimum temperature, and wind speed etc.
 
+\begin{CodeChunk}
 \begin{figure}
 
 {\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/input-formats/input-formats.001} 
 
 }
 
-\caption{Cubble diagram}\label{fig:cubble-diagram}
+\caption[Cubble diagram]{Cubble diagram}\label{fig:cubble-diagram}
 \end{figure}
+\end{CodeChunk}
 
 To work with spatio-temporal data, analysts can choose to either work
 separately on each dimension or join the two sets together, however,
@@ -263,12 +165,12 @@ scenario where once the spatial dataset is filtered for those within
 Victoria, the temporal dataset needs to be manually updated to reflect
 this spatial filter.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{spatial\_new }\OtherTok{\textless{}{-}}\NormalTok{ spatial }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(SITES\_IN\_VICTORIA)}
-\NormalTok{temporal\_new }\OtherTok{\textless{}{-}}\NormalTok{ temporal }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(id }\SpecialCharTok{\%in\%}\NormalTok{ spatial\_new}\SpecialCharTok{$}\NormalTok{id)}
-\end{Highlighting}
-\end{Shaded}
+\begin{CodeChunk}
+\begin{CodeInput}
+R> spatial_new <- spatial %>% filter(SITES_IN_VICTORIA)
+R> temporal_new <- temporal %>% filter(id %in% spatial_new$id)
+\end{CodeInput}
+\end{CodeChunk}
 
 If analysts choose to join the spatial and temporal data together, the
 joined dataset could be too large since each spatial variable will be
@@ -318,24 +220,23 @@ identifier. \texttt{climate\_flat} is already a tibble and it uses
 identifier, and \texttt{c(long,\ lat)} as the spatial identifier. To
 create a cubble for this data, use:
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{climate\_flat }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{as\_cubble}\NormalTok{(}\AttributeTok{key =}\NormalTok{ id, }\AttributeTok{index =}\NormalTok{ date, }\AttributeTok{coords =} \FunctionTok{c}\NormalTok{(long, lat))}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## # Cubble: id-wise: nested form
-## # Key:    id [5]
-## # Leaves: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-##   id            lat  long  elev name           wmo_id ts                
-##   <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
-## 1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble [366 x 4]>
-## 2 ASN00010311 -31.9  117. 179   york            94623 <tibble [366 x 4]>
-## 3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble [366 x 4]>
-## 4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble [366 x 4]>
-## 5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble [366 x 4]>
-\end{verbatim}
+\begin{CodeChunk}
+\begin{CodeInput}
+R> climate_flat %>% as_cubble(key = id, index = date, coords = c(long, lat))
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:   id [5]: nested form
+# bbox:     [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
+# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+  id            lat  long  elev name           wmo_id ts                
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble [366 x 4]>
+2 ASN00010311 -31.9  117. 179   york            94623 <tibble [366 x 4]>
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble [366 x 4]>
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble [366 x 4]>
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble [366 x 4]>
+\end{CodeOutput}
+\end{CodeChunk}
 
 Most of the time, spatio-temporal data doesn't come into this form and
 analysts need to query the climate variables based on station metadata.
@@ -346,60 +247,66 @@ As an example here we demonstrate the workflow to find the 5 closest
 stations to Melbourne. We first create a station data frame with the 5
 target stations.
 
-\begin{verbatim}
-## # A tibble: 5 x 8
-##   id            lat  long  elev name                 wmo_id  dist city     
-##   <chr>       <dbl> <dbl> <dbl> <chr>                 <dbl> <dbl> <chr>    
-## 1 ASN00086038 -37.7  145.  78.4 essendon airport      95866  10.8 melbourne
-## 2 ASN00086282 -37.7  145. 113.  melbourne airport     94866  20.1 melbourne
-## 3 ASN00086077 -38.0  145.  12.1 moorabbin airport     94870  21.9 melbourne
-## 4 ASN00088162 -37.4  145. 528.  wallan (kilmore gap)  94860  48.1 melbourne
-## 5 ASN00087113 -38.0  144.  10.6 avalon airport        94854  48.8 melbourne
-\end{verbatim}
+\begin{CodeChunk}
+\begin{CodeOutput}
+# A tibble: 5 x 8
+  id            lat  long  elev name                 wmo_id  dist city     
+  <chr>       <dbl> <dbl> <dbl> <chr>                 <dbl> <dbl> <chr>    
+1 ASN00086038 -37.7  145.  78.4 essendon airport      95866  10.8 melbourne
+2 ASN00086282 -37.7  145. 113.  melbourne airport     94866  20.1 melbourne
+3 ASN00086077 -38.0  145.  12.1 moorabbin airport     94870  21.9 melbourne
+4 ASN00088162 -37.4  145. 528.  wallan (kilmore gap)  94860  48.1 melbourne
+5 ASN00087113 -38.0  144.  10.6 avalon airport        94854  48.8 melbourne
+\end{CodeOutput}
+\end{CodeChunk}
 
 We can query the climate information into a nested list named
 \texttt{ts} for each station with the \texttt{rowwise()} operator. To
 create a cubble, supply the same identifiers as with the first example.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{sydmel\_climate }\OtherTok{\textless{}{-}}\NormalTok{ stations }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{rowwise}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{ts =} \FunctionTok{list}\NormalTok{(}\FunctionTok{meteo\_pull\_monitors}\NormalTok{(id, }
-                                       \AttributeTok{date\_min =} \StringTok{"2020{-}01{-}01"}\NormalTok{, }
-                                       \AttributeTok{date\_max =} \StringTok{"2020{-}12{-}31"}\NormalTok{,}
-                                       \AttributeTok{var =} \FunctionTok{c}\NormalTok{(}\StringTok{"PRCP"}\NormalTok{, }\StringTok{"TMAX"}\NormalTok{, }\StringTok{"TMIN"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
-                     \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{id))) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{as\_cubble}\NormalTok{(}\AttributeTok{key =}\NormalTok{ id, }\AttributeTok{index =}\NormalTok{ date, }\AttributeTok{coords =} \FunctionTok{c}\NormalTok{(long, lat))}
-\end{Highlighting}
-\end{Shaded}
+\begin{CodeChunk}
+\begin{CodeInput}
+R> sydmel_climate <- stations %>% 
++   rowwise() %>% 
++   mutate(ts = list(meteo_pull_monitors(id, 
++                                        date_min = "2020-01-01", 
++                                        date_max = "2020-12-31",
++                                        var = c("PRCP", "TMAX", "TMIN")) %>% 
++                      select(-id))) %>% 
++   as_cubble(key = id, index = date, coords = c(long, lat))
+\end{CodeInput}
+\end{CodeChunk}
 
-\begin{verbatim}
-## # Cubble: id-wise: nested form
-## # Key:    id [5]
-## # Leaves: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-##   id            lat  long  elev name                 wmo_id  dist city   ts     
-##   <chr>       <dbl> <dbl> <dbl> <chr>                 <dbl> <dbl> <chr>  <list> 
-## 1 ASN00086038 -37.7  145.  78.4 essendon airport      95866  10.8 melbo~ <tibbl~
-## 2 ASN00086282 -37.7  145. 113.  melbourne airport     94866  20.1 melbo~ <tibbl~
-## 3 ASN00086077 -38.0  145.  12.1 moorabbin airport     94870  21.9 melbo~ <tibbl~
-## 4 ASN00088162 -37.4  145. 528.  wallan (kilmore gap)  94860  48.1 melbo~ <tibbl~
-## 5 ASN00087113 -38.0  144.  10.6 avalon airport        94854  48.8 melbo~ <tibbl~
-\end{verbatim}
+\begin{CodeChunk}
+\begin{CodeOutput}
+# cubble:   id [5]: nested form
+# bbox:     [144.47, -38.03, 145.1, -37.38]
+# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+  id            lat  long  elev name                 wmo_id  dist city   ts     
+  <chr>       <dbl> <dbl> <dbl> <chr>                 <dbl> <dbl> <chr>  <list> 
+1 ASN00086038 -37.7  145.  78.4 essendon airport      95866  10.8 melbo~ <tibbl~
+2 ASN00086282 -37.7  145. 113.  melbourne airport     94866  20.1 melbo~ <tibbl~
+3 ASN00086077 -38.0  145.  12.1 moorabbin airport     94870  21.9 melbo~ <tibbl~
+4 ASN00088162 -37.4  145. 528.  wallan (kilmore gap)  94860  48.1 melbo~ <tibbl~
+5 ASN00087113 -38.0  144.  10.6 avalon airport        94854  48.8 melbo~ <tibbl~
+\end{CodeOutput}
+\end{CodeChunk}
 
 \newpage
 
 \hypertarget{cubble-operations}{%
 \subsection{Cubble operations}\label{cubble-operations}}
 
+\begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.5\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/cubble-operations/cubble-operations.001} 
+{\centering \includegraphics[width=0.9\linewidth,height=0.5\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/cubble-operations/cubble-operations.001} 
 
 }
 
-\caption{Cubble operations}\label{fig:cubble-operations}
+\caption[Cubble operations]{Cubble operations}\label{fig:cubble-operations}
 \end{figure}
+\end{CodeChunk}
 
 \hypertarget{basics}{%
 \subsubsection{Basics}\label{basics}}
@@ -503,33 +410,32 @@ in the nested list column \texttt{ts} are \texttt{NA} and \texttt{FALSE}
 otherwise. To get the stations that we want, we need another filter on
 \texttt{tmax\_missing}.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{aus\_climate }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{stretch}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{filter}\NormalTok{(}\FunctionTok{year}\NormalTok{(date) }\SpecialCharTok{==} \DecValTok{2020}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{tamp}\NormalTok{()}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## # Cubble: id-wise: nested form
-## # Key:    id [85]
-## # Leaves: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-##    id            lat  long  elev name                   wmo_id ts               
-##    <chr>       <dbl> <dbl> <dbl> <chr>                   <dbl> <list>           
-##  1 ASN00009021 -31.9  116.  15.4 perth airport           94610 <tibble [366 x 4~
-##  2 ASN00010311 -31.9  117. 179   york                    94623 <tibble [366 x 4~
-##  3 ASN00010614 -32.9  117. 338   narrogin                94627 <tibble [366 x 4~
-##  4 ASN00014015 -12.4  131.  30.4 darwin airport          94120 <tibble [366 x 4~
-##  5 ASN00015131 -17.6  134. 220   elliott                 94236 <tibble [366 x 4~
-##  6 ASN00016065 -30.4  137.  76   andamooka               95660 <tibble [366 x 4~
-##  7 ASN00023034 -35.0  139.   2   adelaide airport        94672 <tibble [366 x 4~
-##  8 ASN00023373 -34.5  139. 275   nuriootpa viticultural  94681 <tibble [366 x 4~
-##  9 ASN00024024 -34.4  141.  30.1 loxton research centre  94682 <tibble [366 x 4~
-## 10 ASN00024048 -34.2  141.  31.5 renmark aero            95687 <tibble [366 x 4~
-## # ... with 75 more rows
-\end{verbatim}
+\begin{CodeChunk}
+\begin{CodeInput}
+R> aus_climate %>% 
++   stretch() %>% 
++   filter(year(date) == 2020) %>% 
++   tamp()
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:   id [85]: nested form
+# bbox:     [115.97, -43.32, 153.13, -12.42]- check gap on long
+# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+   id            lat  long  elev name                   wmo_id ts               
+   <chr>       <dbl> <dbl> <dbl> <chr>                   <dbl> <list>           
+ 1 ASN00009021 -31.9  116.  15.4 perth airport           94610 <tibble [366 x 4~
+ 2 ASN00010311 -31.9  117. 179   york                    94623 <tibble [366 x 4~
+ 3 ASN00010614 -32.9  117. 338   narrogin                94627 <tibble [366 x 4~
+ 4 ASN00014015 -12.4  131.  30.4 darwin airport          94120 <tibble [366 x 4~
+ 5 ASN00015131 -17.6  134. 220   elliott                 94236 <tibble [366 x 4~
+ 6 ASN00016065 -30.4  137.  76   andamooka               95660 <tibble [366 x 4~
+ 7 ASN00023034 -35.0  139.   2   adelaide airport        94672 <tibble [366 x 4~
+ 8 ASN00023373 -34.5  139. 275   nuriootpa viticultural  94681 <tibble [366 x 4~
+ 9 ASN00024024 -34.4  141.  30.1 loxton research centre  94682 <tibble [366 x 4~
+10 ASN00024048 -34.2  141.  31.5 renmark aero            95687 <tibble [366 x 4~
+# ... with 75 more rows
+\end{CodeOutput}
+\end{CodeChunk}
 
 \hypertarget{join}{%
 \subsubsection{Join}\label{join}}
@@ -543,16 +449,16 @@ Since the join is by station rather than by time, we start with the
 nested form and write the exact same syntax of join and filter as with
 tidyverse.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# join wmo\_id for each station}
-\CommentTok{\# to\_join \textless{}{-} station \%\textgreater{}\% select(id, wmo\_id)}
-\CommentTok{\# out \textless{}{-} climate\_small \%\textgreater{}\% }
-\CommentTok{\#   left\_join(to\_join, by = c("station" = "id")) \%\textgreater{}\% }
-\CommentTok{\#   filter(!is.na(wmo\_id))}
-\CommentTok{\# out}
-\end{Highlighting}
-\end{Shaded}
+\begin{CodeChunk}
+\begin{CodeInput}
+R> # join wmo_id for each station
+R> # to_join <- station %>% select(id, wmo_id)
+R> # out <- climate_small %>% 
+R> #   left_join(to_join, by = c("station" = "id")) %>% 
+R> #   filter(!is.na(wmo_id))
+R> # out
+\end{CodeInput}
+\end{CodeChunk}
 
 Sometimes, we would like to have station-wise and time-wise variables in
 the same form (i.e.~when plotting glyph maps). This can also be seen as
@@ -561,33 +467,31 @@ metadata. \texttt{migrate()} is a verb introduced as the shortcut for
 \texttt{left\_join()} with a cubble's metadata and below is the
 comparison of the two syntaxes.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{aus\_climate }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{stretch}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%} 
-  \FunctionTok{migrate}\NormalTok{(id, lat, long)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## # Cubble: time-wise: long form
-## # Key:    id [85]
-## # Leaves: id [chr], lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
-## #   [dbl], prcp_missing [dbl], tmax_missing [dbl], tmin_missing [dbl]
-##    id          date        prcp  tmax  tmin   lat  long
-##    <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
-##  1 ASN00009021 2020-01-01     0   319   153 -31.9  116.
-##  2 ASN00009021 2020-01-02     0   249   164 -31.9  116.
-##  3 ASN00009021 2020-01-03     6   232   130 -31.9  116.
-##  4 ASN00009021 2020-01-04     0   284   124 -31.9  116.
-##  5 ASN00009021 2020-01-05     0   353   116 -31.9  116.
-##  6 ASN00009021 2020-01-06     0   348   131 -31.9  116.
-##  7 ASN00009021 2020-01-07     0   328   151 -31.9  116.
-##  8 ASN00009021 2020-01-08     0   304   174 -31.9  116.
-##  9 ASN00009021 2020-01-09     0   287   173 -31.9  116.
-## 10 ASN00009021 2020-01-10     0   326   158 -31.9  116.
-## # ... with 31,100 more rows
-\end{verbatim}
+\begin{CodeChunk}
+\begin{CodeInput}
+R> aus_climate %>% 
++   stretch() %>% 
++   migrate(id, lat, long)
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:  date, id [85]: long form
+# bbox:    [115.97, -43.32, 153.13, -12.42]- check gap on long
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
+   id          date        prcp  tmax  tmin   lat  long
+   <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
+ 1 ASN00009021 2020-01-01     0  31.9  15.3 -31.9  116.
+ 2 ASN00009021 2020-01-02     0  24.9  16.4 -31.9  116.
+ 3 ASN00009021 2020-01-03     6  23.2  13   -31.9  116.
+ 4 ASN00009021 2020-01-04     0  28.4  12.4 -31.9  116.
+ 5 ASN00009021 2020-01-05     0  35.3  11.6 -31.9  116.
+ 6 ASN00009021 2020-01-06     0  34.8  13.1 -31.9  116.
+ 7 ASN00009021 2020-01-07     0  32.8  15.1 -31.9  116.
+ 8 ASN00009021 2020-01-08     0  30.4  17.4 -31.9  116.
+ 9 ASN00009021 2020-01-09     0  28.7  17.3 -31.9  116.
+10 ASN00009021 2020-01-10     0  32.6  15.8 -31.9  116.
+# ... with 31,100 more rows
+\end{CodeOutput}
+\end{CodeChunk}
 
 \begin{itemize}
 \tightlist
@@ -625,29 +529,7 @@ information upon hovering
   \end{itemize}
 \end{itemize}
 
-\hypertarget{summary}{%
-\section*{Summary}\label{summary}}
-\addcontentsline{toc}{section}{Summary}
-
-\hypertarget{refs}{}
-\begin{CSLReferences}{1}{0}
-\leavevmode\hypertarget{ref-stars}{}%
-Pebesma, Edzer. 2021. \emph{Stars: Spatiotemporal Arrays, Raster and
-Vector Data Cubes}. \url{https://CRAN.R-project.org/package=stars}.
-
-\leavevmode\hypertarget{ref-pebesma2018simple}{}%
-Pebesma, Edzer J. 2018. {``Simple Features for r: Standardized Support
-for Spatial Vector Data.''} \emph{R J.} 10 (1): 439.
-
-\leavevmode\hypertarget{ref-tsibbles}{}%
-Wang, Earo, Dianne Cook, and Rob J Hyndman. 2020. {``A New Tidy Data
-Structure to Support Exploration and Modeling of Temporal Data.''}
-\emph{Journal of Computational and Graphical Statistics} 29 (3):
-466--78. \url{https://doi.org/10.1080/10618600.2019.1695624}.
-
-\end{CSLReferences}
-
-\bibliographystyle{unsrt}
+\renewcommand\refname{Summary}
 \bibliography{references.bib}
 
 

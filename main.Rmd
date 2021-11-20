@@ -1,41 +1,47 @@
 ---
-title: A template for the *arxiv* style
-authors:
-  - name: H.Sherry Zhang
-    department: Department of Econometrics and Business Statistics 
-    affiliation: Monash University 
-    location: Melbourne, Australia
-    email:  huize.zhang@monash.edu
+documentclass: jss
+author:
+  - name: H. Sherry Zhang
+    # department: Department of Econometrics and Business Statistics
+    affiliation: Monash University
+    #location: Melbourne, Australia
+    email: \email{huize.zhang@monash.edu}
   - name: Dianne Cook
-    department: Department of Econometrics and Business Statistics 
-    affiliation: Monash University 
-    location: Melbourne, Australia
-    email:  dicook@monash.edu
+    # department: Department of Econometrics and Business Statistics
+    affiliation: 'Monash University \AND'
+    # location: Melbourne, Australia
+    # email:  dicook@monash.edu
   - name: Ursula Laa
-    department: Institute of Statistics
-    affiliation: University of Natural Resources and Life Sciences
-    location: Vienna, Austria
-    email:  ursula.laa@boku.ac.at  
+    # department: Institute of Statistics
+    affiliation: 'University of Natural Resources and Life Sciences \AND'
+    # location: Vienna, Austria
+    # email:  ursula.laa@boku.ac.at
   - name: Nicolas Langrené
-    department: 34 Village Street, Docklands VIC 3008 Australia
-    affiliation: CSIRO Data61 
-    location: Melbourne, Australia
-    email: nicolas.langrene@csiro.au
+    # department: 34 Village Street, Docklands VIC 3008 Australia
+    affiliation: 'CSIRO Data61 \AND'
+    # location: Melbourne, Australia
+    # email: nicolas.langrene@csiro.au
   - name: Patricia Menéndez
-    department: Department of Econometrics and Business Statistics 
-    affiliation: Monash University 
-    location: Melbourne, Australia
-    email:  patricia.menendez@monash.edu 
-abstract: |
-  Enter the text of your abstract here.
+    # department: Department of Econometrics and Business Statistics
+    affiliation: 'Monash University \AND'
+    # location: Melbourne, Australia
+    # email:  patricia.menendez@monash.edu
+title:
+  formatted: "\\pkg{cubble}: An R Package for Structuring Spatio-temporal Data"
+  # If you use tex in the formatted title, alsoge supply version without
+  plain:     "cubble: An R Package for Structuring Spatio-temporal Data"
+  # For running headers, if needed
+  # short:     "\\pkg{foo}: A Capitalized Title"
+abstract: >
+  The abstract of the article.
 keywords:
-  - blah
-  - blee
-  - bloo
-  - these are optional and can be removed
+  # at least one keyword must be supplied
+  formatted: [spatio-temporal data,  "\\proglang{R}"]
+  plain:     [spatio-temporal data, R]
+preamble: >
+  \usepackage{amsmath}
+output: rticles::jss_article
 bibliography: references.bib
-biblio-style: unsrt
-output: rticles::arxiv_article
 ---
 
 ```{r setup, echo = FALSE}
@@ -43,6 +49,7 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
                       fig.path = "figures/",
                       out.width = "100%", 
                       out.height = "30%")
+options(prompt = 'R> ', continue = '+ ')
 ```
 
 ```{r echo = FALSE}
@@ -125,8 +132,9 @@ Most of the time, spatio-temporal data doesn't come into this form and analysts 
 latlon_ref <- tibble::tibble(id = "melbourne", lat = -37.8136, long = 144.9631)
 
 cand <- aus_climate %>% 
-  select(id, lat, long, elev, name, wmo_id) %>% 
-   as_tibble()
+  as_tibble() %>% 
+  select(id, lat, long, elev, name, wmo_id)
+   
 
 calc_dist <- function(df_ref, df, n = 5){
   long_ref <- df_ref$long
@@ -175,7 +183,7 @@ sydmel_climate <- stations %>%
 
 ## Cubble operations
 
-```{r cubble-operations, echo = FALSE, fig.cap="Cubble operations", out.height="50%", fig.align='center'}
+```{r cubble-operations, echo = FALSE, fig.cap="Cubble operations", out.height="50%", out.width="90%", fig.align='center'}
 knitr::include_graphics(here::here("figures/cubble-operations/cubble-operations.001.png"))
 ```
 
