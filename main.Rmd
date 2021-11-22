@@ -63,25 +63,109 @@ library(lubridate)
 
 # Introduction
 
-Spatio-temporal data record changes of variables in spatially separated regions across time. In this article, we consider spatio-temporal vector data, which are recorded in a fixed interval and are point based, characterised by longitude and latitude, in the spatial aspect. Examples of this type of data include the house price of a city or county, climate measures from weather stations in a country, and river level data from electronic gauges. 
+**Spatio-temporal data + examples**  
+Spatio-temporal data record changes of variables in spatially separated regions across time. In this article, we consider spatio-temporal vector data, which are recorded in a fixed interval. Examples of this type of data include the house price of a city or county, climate measures from weather stations in a country, and river level data from electronic gauges \textcolor{red}{more examples here}. \newline
 
-Analysing this type of data requires less considerations on the geographical geometry type and map projection but more on how measures in these fixed locations changes across the time domain and whether these changes are related for adjacent locations. For example, when nearby areas show patterns that are regular enough, visualising spatio-temporal data can 1) discover regional time series features, i.e. trend and seasonality, 2) find the Waldo sites from the crowd, and 3) see how correlation of nearby sites changes across time. 
+<!-- and are point based, characterised by longitude and latitude, in the spatial aspect -->
 
-The main difficulty in visualising this type of data is to show information in both space and time dimension with the proper level of details without information overflow. This would sometimes require aggregating the time dimension into the proper level or slicing the data into a reasonable number of subset for display. In this sense, a data structure that regulates the manipulation spatio-temporal data will benefit the analysis workflow. While many implementations focus on manipulating and visualising pure spatial or temporal data, there are not sufficient tools to deal with spatio-temporal data. The purpose of this paper is to introduce a spatio-temporal vector data structure for data analysis in R. 
+**point to common feature: spatial level variables + time level variables relates to Table 13 in Tidy data paper**  
+Usually, this type of spatio-temporal data don't come in as a single table. Tidy data principle (...) prescribes each type of observational unit to form a table. This would suggest two tables to store the data, one for spatial-level and  one for temporal-level. The Table 13 in the tidy data paper present a structure like this and the author argues the lack of tools to work with relational data. \newline
 
-The rest of the paper will be divided as follows: Section 2 reviews the existing data structure for spatio, temporal, and spatio-temporal data. Section 3 presents a new data structure for spatio-temporal data: cubble. Then the paper introduces the workflow of data manipulation and visualisation with the cubble structure in Section 4. Section 5 gives some examples on how common spatial and temporal manipulations are performed with cubble and how static and interactive visualisation help to understand climate and [...] data.
+
+**My proposal**  
+Recent software development in R has proposed several relational data structure: `tidygraph`[@tidygraph] for graph manipulation, `dm` [@dm] for relational data model, while spatio-temporal data could benefit from having its own relational data structure. In this paper, we propose a tidy data structure for vector spaio-temporal data.  \newline
+
+**Section division**  
+The rest of the paper will be divided as follows: Section 2 reviews the existing data structure for spatio, temporal, and spatio-temporal data. Section 3 presents a new data structure for spatio-temporal data: cubble. Then the paper introduces the workflow of data manipulation and visualisation with the cubble structure in Section 4. Section 5 gives some examples on how common spatial and temporal manipulations are performed with cubble and how static and interactive visualisation help to understand climate and [...] data. \newline
+
+\newpage
 
 # Existing data structure for spatio and temporal data
 
-Below we review some structure for spatial, temporal, and spatio-temporal data. 
+**Existing packages**  
+Many data structures have been proposed for spatial and temporal data, but not many for spatio-temporal data. One of the reason could be the inherent different levels of information make it inefficient to store in the same table. `spacetime`[@spacetime] proposed four space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI), and trajectory (STT) based on underlying spatial structure `sp` [@sp] and temporal structure `xts`[@xts]. `spatstat` [@spatstat] implements a `ppp` class for point pattern data. More recent package `stars` [@stars] uses a spatiotemporal array to store the data and the array structure has its influence from `cubelyr` [@cubelyr], a dplyr data cube backend. \newline
+
+**Criteria of a data structure we want**  
+
+With recent development in the R community, `sf` [@sf] and `tsibble`[@tsibble] have replaced `sp` and `xts` to be the convention structure for spatial and temporal data. One reason for their popularity is its integration with tidyverse ecosystem, making them intuitive and easy to adopt. For spatio-temporal data, we hope to build a data structure has the following features:
+
+  1) A data structure that handles spatial and temporal dimension in a relational structure. This derives from the 3rd tidy data principal.
+  2) An intuitive and easy to use interface that fits into the tidyverse ecosystem, and
+  3) Compatibility with the latest spatial and temporal data structure. This would give users the flexibility to use work from existing packages.
+
+\newpage
+# Workflow/ Data pipeline
+
+Now we introduce cubble in a data pipeline structure (review the concept of data pipeline? at least articulate its importance - automation, predictable of output)
+
+## Spatio-temporal data in the wild
+
+**Format of st in the wild**  
+Analysing this type of data requires less considerations on the geographical geometry type and map projection but more on how measures in these fixed locations changes across the time domain and whether these changes are related for adjacent locations. For example, when nearby areas show patterns that are regular enough, visualising spatio-temporal data can 1) discover regional time series features, i.e. trend and seasonality, 2) find the Waldo sites from the crowd, and 3) see how correlation of nearby sites changes across time. \newline
+
+**The main difficulty and challenge**  
+The main difficulty in visualising this type of data is to show information in both space and time dimension with the proper level of details without information overflow. This would sometimes require aggregating the time dimension into the proper level or slicing the data into a reasonable number of subset for display. In this sense, a data structure that regulates the manipulation spatio-temporal data will benefit the analysis workflow. While many implementations focus on manipulating and visualising pure spatial or temporal data, there are not sufficient tools to deal with spatio-temporal data. The purpose of this paper is to introduce a spatio-temporal vector data structure for data analysis in R. 
+
+## Cubble 
+
+**We form a cubble by defining abc... - Nested and long form**  
+When manipulating the spatial dimension it uses a nest form that:
+
+  - defines each group in a row,
+  - displays the group-related variables in columns, and
+  - nests all the time-related variables into a column called `ts`.
+
+When manipulating the temporal dimension, it uses the long form that:
+
+  - each combination of group and timestamp occupies a row
+  - time-related variables are displayed, and
+  - group-related variables are not explicitly displayed but can be accessed through the `meta` attribute.
+
+
+### stretch
+
+*By default build a nested cubble, stretch to long, create spatial attributes*
+
+### tamp
+
+*Tamp to nested, use the spatial attributes*
+
+### Support on hierarchical structure
+
+## Tidyverse compatibility 
+
+*list supported tidyverse functions*
+
+## Others
+
+
+
+\newpage
+
+# Examples
+
+## Australia precipitation pattern in 2020
+
+Forming a cubble + basic tidyverse verbs - Vig 2
+Aggregation  - Vig 4
+
+
+## Matching precipitation and river level in Victria water gauges
+
+Matching  - Vig 3
+
+
+# Conclusion
+
+
+\newpage
+
+# Old stuff
+
 
 Many spatial and spatio-temporal data structures have been developed by the R-spatial team for both raster and vector spatial data. For vector spatial data, which is the focus of this paper, `sf` [@pebesma2018simple] represents spatial vector information with simple features: points, lines, polygons and their multiples. Various `st_` function are designed to manipulate these features based on their geometric relationships. For spatio-temporal data,  `stars` [@stars] can represent both raster and vector data using multi-dimensional array. However, the underlying array structure can be difficult to operate for data analysts who are more familiar with a flat 2D data frame structure used by the tidyverse ecosystem.
 
 In the temporal aspect, the `tsibble` [@tsibbles] structure and its tidyverts ecosystem have provided a [... ] workflow to work with temporal data. In a tsibble structure, temporal data is characterised by `index` and `key` where `index` is the temporal identifier and `key` is the identifier for multiple series, which could be used as a spatio identifier. However, a tsibble object, by construction, always requires the `index` in its structure. This makes it less appealing for spatio-temporal data since the output of calculated spatio-specific variables (i.e. features of each series) don't have the time dimension. Analysts will either need to have an additional step to join this output to the original tsibble or operate with variables stored in two separate objects. In addition, the long form structure of a tsibble object means spatio variables (i.e. longitude, latitude, and features of each series if joined back to the tsibble) of each spatio identifier will be repetitively recorded at each timestamp. This repetition is unnecessary and would inflate the object size for long series.
-
-\textcolor{red}{Under the third tidy data principle [@tidydata], these are two type of observational unit and should form different tables. An example (Table 8) is also given to demonstrate the billboard dataset where there are song variables and rank variables that changes each week. The other has mentioned the lack of tool to work directly with relational data and analysis will usually need to merge the dataset into one table, which could causes errors. These days more implementations have looked at relational data structure and in R, several good examples include, `tidygraph`[@tidygraph] for graph manipulation, `dm` [@dm] for relational data model. In the domain of spatio-temporal data, @spacetime has considered four types of spatio-temporal layout. `Spatstat` [@Spatstat] an implementation of point pattern.  }
-
-\newpage
 
 # A new data structure for spatio-temporal data
 
@@ -100,27 +184,26 @@ temporal_new <- temporal %>% filter(id %in% spatial_new$id)
 
 If analysts choose to join the spatial and temporal data together, the joined dataset could be too large since each spatial variable will be repeated at each time stamp for each site. Also, recordings of the site ID from different data sources can be slightly different from each other, causing a painful checking and cleaning of site IDs before the join.
 
-A cubble, in essence, wires both dimensions in the spatio-temporal data into one object while provide two forms for manipulation the spatial and temporal dimension separately. 
+A cubble, in essence, wires both dimensions in the spatio-temporal data into one object while provide two forms for manipulation the spatial and temporal dimension separately.
 
 
 When manipulating the spatial dimension it uses a nest form that:
 
-  - defines each group in a row, 
-  - displays the group-related variables in columns, and 
-  - nests all the time-related variables into a column called `ts`. 
-  
-When manipulating the temporal dimension, it uses the long form that: 
+  - defines each group in a row,
+  - displays the group-related variables in columns, and
+  - nests all the time-related variables into a column called `ts`.
+
+When manipulating the temporal dimension, it uses the long form that:
 
   - each combination of group and timestamp occupies a row
-  - time-related variables are displayed, and 
+  - time-related variables are displayed, and
   - group-related variables are not explicitly displayed but can be accessed through the `meta` attribute.
-
 
 \newpage
 
 # Create a cubble
-  
-The creation of a cubble requires the site identifier (`key`), as well as the spatial (`coords`) and temporal (`index`) identifier. `climate_flat` is already a tibble and it uses `id` to identify each station, `date` as the time identifier, and `c(long, lat)` as the spatial identifier. To create a cubble for this data, use: 
+
+The creation of a cubble requires the site identifier (`key`), as well as the spatial (`coords`) and temporal (`index`) identifier. `climate_flat` is already a tibble and it uses `id` to identify each station, `date` as the time identifier, and `c(long, lat)` as the spatial identifier. To create a cubble for this data, use:
 
 ```{r}
 climate_flat %>% as_cubble(key = id, index = date, coords = c(long, lat))
@@ -131,25 +214,25 @@ Most of the time, spatio-temporal data doesn't come into this form and analysts 
 ```{r echo = FALSE}
 latlon_ref <- tibble::tibble(id = "melbourne", lat = -37.8136, long = 144.9631)
 
-cand <- aus_climate %>% 
-  as_tibble() %>% 
+cand <- aus_climate %>%
+  as_tibble() %>%
   select(id, lat, long, elev, name, wmo_id)
-   
+
 
 calc_dist <- function(df_ref, df, n = 5){
   long_ref <- df_ref$long
   lat_ref <- df_ref$lat
-  
-  df %>% 
+
+  df %>%
     mutate(long_ref = long_ref,
            lat_ref=  lat_ref,
-           dist = rnoaa::meteo_spherical_distance(lat, long,lat_ref, long_ref)) %>% 
-    slice_min(dist, n = n) %>% 
-    mutate(city = df_ref$id) %>% 
+           dist = rnoaa::meteo_spherical_distance(lat, long,lat_ref, long_ref)) %>%
+    slice_min(dist, n = n) %>%
+    mutate(city = df_ref$id) %>%
     select(-long_ref, -lat_ref)
 }
 
-(stations <- do.call("rbind", purrr::map(1:nrow(latlon_ref), 
+(stations <- do.call("rbind", purrr::map(1:nrow(latlon_ref),
                              ~calc_dist(latlon_ref[.x, ], cand))))
 ```
 
@@ -157,27 +240,27 @@ We can query the climate information into a nested list named `ts` for each stat
 
 
 ```{r eval = FALSE}
-sydmel_climate <- stations %>% 
-  rowwise() %>% 
-  mutate(ts = list(meteo_pull_monitors(id, 
-                                       date_min = "2020-01-01", 
+sydmel_climate <- stations %>%
+  rowwise() %>%
+  mutate(ts = list(meteo_pull_monitors(id,
+                                       date_min = "2020-01-01",
                                        date_max = "2020-12-31",
-                                       var = c("PRCP", "TMAX", "TMIN")) %>% 
-                     select(-id))) %>% 
+                                       var = c("PRCP", "TMAX", "TMIN")) %>%
+                     select(-id))) %>%
   as_cubble(key = id, index = date, coords = c(long, lat))
 ```
 
 ```{r echo = FALSE}
-(sydmel_climate <- stations %>% 
-   left_join(aus_climate) %>% 
+(sydmel_climate <- stations %>%
+   left_join(aus_climate) %>%
    as_cubble(key = id, index = date, coords = c(long, lat)))
 ```
 
 
-<!-- Below are the how the nested and long form look like for Australia climate data, which records daily precipitation, maximum and minimum temperature for 55 stations across Australia from 2015- 2020. Notice that each station forms a group in both forms and specifically, the nested  and long form have a underlying `rowwise_df` and `grouped_df` respectively. -->
+Below are the how the nested and long form look like for Australia climate data, which records daily precipitation, maximum and minimum temperature for 55 stations across Australia from 2015- 2020. Notice that each station forms a group in both forms and specifically, the nested  and long form have a underlying `rowwise_df` and `grouped_df` respectively.
 
 
-<!-- With a cubic framework on mind, different types of manipulation with cubble can be thought of as slicing the cube in various way. The table below shows how some `dplyr` verbs are mapped into the operation in a cubble. With the existing grouping on the station, additional groupping can be added with `group_by` and removed with `ungrouped`. [talk about why it is useful] -->
+With a cubic framework on mind, different types of manipulation with cubble can be thought of as slicing the cube in various way. The table below shows how some `dplyr` verbs are mapped into the operation in a cubble. With the existing grouping on the station, additional groupping can be added with `group_by` and removed with `ungrouped`. [talk about why it is useful]
 
 \newpage
 
@@ -194,7 +277,7 @@ knitr::include_graphics(here::here("figures/cubble-operations/cubble-operations.
 - `migrate`: move selected spatial variables to the long form.
 - `add_dscrb_prct`: summary stats for missingness
 
-dplyr compatibility: 
+dplyr compatibility:
 
   - mutate, filter, summarise, select, arrange
   - group and ungroup: group_by, ungroup
@@ -210,14 +293,11 @@ dplyr compatibility:
 
 ### Hierarchical structure in cubble
 
-  - hierarchical is common. 
-  - Given examples. 
+  - hierarchical is common.
+  - Given examples.
   - Essence: switch between different levels
   - introduce `switch_key`
 
-
-
-\newpage
 
 # Examples
 
@@ -227,55 +307,3 @@ An exploratory data analysis questions: What's the climate profile look like in 
 
   - General features: Any general trend/ fluctuation in prcp, tmax, and tmin?
   - Local features: Any station stands out from the crowd?
-
-## Manipulation
-
-### Mutate and filter
-
-In the first example, we want to only keep the stations that have `tmax` recorded in 2020. This requires first narrow down the records to those in 2020, determine if `tmax` is missing for each station, and then retain those stations that have `tmax` recorded. The year filtering is an operation on the time axis, so we start with the long form. Whether each station has `tmax` recorded is a result of each station, rather than of each time point, hence we need to switch to the nested form with `tamp()`. To calculate whether `tmax` is recorded, we mutate a column `tmax_missing` that takes `TRUE` if all the `tmax` in the nested list column `ts` are `NA` and `FALSE` otherwise. To get the stations that we want, we need another filter on `tmax_missing`.
-
-
-```{r}
-aus_climate %>% 
-  stretch() %>% 
-  filter(year(date) == 2020) %>% 
-  tamp()
-```
-
-
-### Join
-
-Now we want to select the stations that have been registered with world meteorological organisation (WMO) and the dataset `station` has a column `wmo_id` that records this information. To do this task, we first need to join the `station` dataset with our climate dataset and then filter out those stations that don't have the WMO id. Since the join is by station rather than by time, we start with the nested form and write the exact same syntax of join and filter as with tidyverse. 
-
-```{r}
-# join wmo_id for each station
-# to_join <- station %>% select(id, wmo_id)
-# out <- climate_small %>% 
-#   left_join(to_join, by = c("station" = "id")) %>% 
-#   filter(!is.na(wmo_id))
-# out
-```
-
-Sometimes, we would like to have station-wise and time-wise variables in the same form (i.e. when plotting glyph maps). This can also be seen as a joining task, on the long form, with the dataset to join being the metadata. `migrate()` is a verb introduced as the shortcut for `left_join()` with a cubble's metadata and below is the comparison of the two syntaxes.
-
-```{r}
-aus_climate %>% 
-  stretch() %>% 
-  migrate(id, lat, long)
-```
-
-
-  - data quality check: filter out stations have variables not properly recorded 
-  - data summary: 
-    - daily -> monthly/ weekly, 
-    - summarise by mean for tmax/ tmin, sum for prcp
-  - 
-
-## Graphics
-
-Static + interactive -> tooltip to show additional information upon hovering
-
-  - Where are those stations on the map? 
-    - Mention mostly aero, airport, and lighthouse
-
-# Summary

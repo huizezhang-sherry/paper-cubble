@@ -49,14 +49,99 @@ The abstract of the article.
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
+\textbf{Spatio-temporal data + examples}\\
 Spatio-temporal data record changes of variables in spatially separated
 regions across time. In this article, we consider spatio-temporal vector
-data, which are recorded in a fixed interval and are point based,
-characterised by longitude and latitude, in the spatial aspect. Examples
-of this type of data include the house price of a city or county,
-climate measures from weather stations in a country, and river level
-data from electronic gauges.
+data, which are recorded in a fixed interval. Examples of this type of
+data include the house price of a city or county, climate measures from
+weather stations in a country, and river level data from electronic
+gauges \textcolor{red}{more examples here}. \newline
 
+\textbf{point to common feature: spatial level variables + time level
+variables relates to Table 13 in Tidy data paper}\\
+Usually, this type of spatio-temporal data don't come in as a single
+table. Tidy data principle (\ldots) prescribes each type of
+observational unit to form a table. This would suggest two tables to
+store the data, one for spatial-level and one for temporal-level. The
+Table 13 in the tidy data paper present a structure like this and the
+author argues the lack of tools to work with relational data. \newline
+
+\textbf{My proposal}\\
+Recent software development in R has proposed several relational data
+structure: \texttt{tidygraph}\citep{tidygraph} for graph manipulation,
+\texttt{dm} \citep{dm} for relational data model, while spatio-temporal
+data could benefit from having its own relational data structure. In
+this paper, we propose a tidy data structure for vector spaio-temporal
+data. \newline
+
+\textbf{Section division}\\
+The rest of the paper will be divided as follows: Section 2 reviews the
+existing data structure for spatio, temporal, and spatio-temporal data.
+Section 3 presents a new data structure for spatio-temporal data:
+cubble. Then the paper introduces the workflow of data manipulation and
+visualisation with the cubble structure in Section 4. Section 5 gives
+some examples on how common spatial and temporal manipulations are
+performed with cubble and how static and interactive visualisation help
+to understand climate and {[}\ldots{]} data. \newline
+
+\newpage
+
+\hypertarget{existing-data-structure-for-spatio-and-temporal-data}{%
+\section{Existing data structure for spatio and temporal
+data}\label{existing-data-structure-for-spatio-and-temporal-data}}
+
+\textbf{Existing packages}\\
+Many data structures have been proposed for spatial and temporal data,
+but not many for spatio-temporal data. One of the reason could be the
+inherent different levels of information make it inefficient to store in
+the same table. \texttt{spacetime}\citep{spacetime} proposed four
+space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI),
+and trajectory (STT) based on underlying spatial structure \texttt{sp}
+\citep{sp} and temporal structure \texttt{xts}\citep{xts}.
+\texttt{spatstat} \citep{spatstat} implements a \texttt{ppp} class for
+point pattern data. More recent package \texttt{stars} \citep{stars}
+uses a spatiotemporal array to store the data and the array structure
+has its influence from \texttt{cubelyr} \citep{cubelyr}, a dplyr data
+cube backend. \newline
+
+\textbf{Criteria of a data structure we want}
+
+With recent development in the R community, \texttt{sf} \citep{sf} and
+\texttt{tsibble}\citep{tsibble} have replaced \texttt{sp} and
+\texttt{xts} to be the convention structure for spatial and temporal
+data. One reason for their popularity is its integration with tidyverse
+ecosystem, making them intuitive and easy to adopt. For spatio-temporal
+data, we hope to build a data structure has the following features:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi})}
+\tightlist
+\item
+  A data structure that handles spatial and temporal dimension in a
+  relational structure. This derives from the 3rd tidy data principal.
+\item
+  An intuitive and easy to use interface that fits into the tidyverse
+  ecosystem, and
+\item
+  Compatibility with the latest spatial and temporal data structure.
+  This would give users the flexibility to use work from existing
+  packages.
+\end{enumerate}
+
+\newpage
+
+\hypertarget{workflow-data-pipeline}{%
+\section{Workflow/ Data pipeline}\label{workflow-data-pipeline}}
+
+Now we introduce cubble in a data pipeline structure (review the concept
+of data pipeline? at least articulate its importance - automation,
+predictable of output)
+
+\hypertarget{spatio-temporal-data-in-the-wild}{%
+\subsection{Spatio-temporal data in the
+wild}\label{spatio-temporal-data-in-the-wild}}
+
+\textbf{Format of st in the wild}\\
 Analysing this type of data requires less considerations on the
 geographical geometry type and map projection but more on how measures
 in these fixed locations changes across the time domain and whether
@@ -64,8 +149,9 @@ these changes are related for adjacent locations. For example, when
 nearby areas show patterns that are regular enough, visualising
 spatio-temporal data can 1) discover regional time series features,
 i.e.~trend and seasonality, 2) find the Waldo sites from the crowd, and
-3) see how correlation of nearby sites changes across time.
+3) see how correlation of nearby sites changes across time. \newline
 
+\textbf{The main difficulty and challenge}\\
 The main difficulty in visualising this type of data is to show
 information in both space and time dimension with the proper level of
 details without information overflow. This would sometimes require
@@ -78,21 +164,83 @@ not sufficient tools to deal with spatio-temporal data. The purpose of
 this paper is to introduce a spatio-temporal vector data structure for
 data analysis in R.
 
-The rest of the paper will be divided as follows: Section 2 reviews the
-existing data structure for spatio, temporal, and spatio-temporal data.
-Section 3 presents a new data structure for spatio-temporal data:
-cubble. Then the paper introduces the workflow of data manipulation and
-visualisation with the cubble structure in Section 4. Section 5 gives
-some examples on how common spatial and temporal manipulations are
-performed with cubble and how static and interactive visualisation help
-to understand climate and {[}\ldots{]} data.
+\hypertarget{cubble}{%
+\subsection{Cubble}\label{cubble}}
 
-\hypertarget{existing-data-structure-for-spatio-and-temporal-data}{%
-\section{Existing data structure for spatio and temporal
-data}\label{existing-data-structure-for-spatio-and-temporal-data}}
+\textbf{We form a cubble by defining abc\ldots{} - Nested and long
+form}\\
+When manipulating the spatial dimension it uses a nest form that:
 
-Below we review some structure for spatial, temporal, and
-spatio-temporal data.
+\begin{itemize}
+\tightlist
+\item
+  defines each group in a row,
+\item
+  displays the group-related variables in columns, and
+\item
+  nests all the time-related variables into a column called \texttt{ts}.
+\end{itemize}
+
+When manipulating the temporal dimension, it uses the long form that:
+
+\begin{itemize}
+\tightlist
+\item
+  each combination of group and timestamp occupies a row
+\item
+  time-related variables are displayed, and
+\item
+  group-related variables are not explicitly displayed but can be
+  accessed through the \texttt{meta} attribute.
+\end{itemize}
+
+\hypertarget{stretch}{%
+\subsubsection{stretch}\label{stretch}}
+
+\emph{By default build a nested cubble, stretch to long, create spatial
+attributes}
+
+\hypertarget{tamp}{%
+\subsubsection{tamp}\label{tamp}}
+
+\emph{Tamp to nested, use the spatial attributes}
+
+\hypertarget{support-on-hierarchical-structure}{%
+\subsubsection{Support on hierarchical
+structure}\label{support-on-hierarchical-structure}}
+
+\hypertarget{tidyverse-compatibility}{%
+\subsection{Tidyverse compatibility}\label{tidyverse-compatibility}}
+
+\emph{list supported tidyverse functions}
+
+\hypertarget{others}{%
+\subsection{Others}\label{others}}
+
+\newpage
+
+\hypertarget{examples}{%
+\section{Examples}\label{examples}}
+
+\hypertarget{australia-precipitation-pattern-in-2020}{%
+\subsection{Australia precipitation pattern in
+2020}\label{australia-precipitation-pattern-in-2020}}
+
+Forming a cubble + basic tidyverse verbs - Vig 2 Aggregation - Vig 4
+
+\hypertarget{matching-precipitation-and-river-level-in-victria-water-gauges}{%
+\subsection{Matching precipitation and river level in Victria water
+gauges}\label{matching-precipitation-and-river-level-in-victria-water-gauges}}
+
+Matching - Vig 3
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+\newpage
+
+\hypertarget{old-stuff}{%
+\section{Old stuff}\label{old-stuff}}
 
 Many spatial and spatio-temporal data structures have been developed by
 the R-spatial team for both raster and vector spatial data. For vector
@@ -123,10 +271,6 @@ long form structure of a tsibble object means spatio variables
 the tsibble) of each spatio identifier will be repetitively recorded at
 each timestamp. This repetition is unnecessary and would inflate the
 object size for long series.
-
-\textcolor{red}{Under the third tidy data principle [@tidydata], these are two type of observational unit and should form different tables. An example (Table 8) is also given to demonstrate the billboard dataset where there are song variables and rank variables that changes each week. The other has mentioned the lack of tool to work directly with relational data and analysis will usually need to merge the dataset into one table, which could causes errors. These days more implementations have looked at relational data structure and in R, several good examples include, `tidygraph`[@tidygraph] for graph manipulation, `dm` [@dm] for relational data model. In the domain of spatio-temporal data, @spacetime has considered four types of spatio-temporal layout. `Spatstat` [@Spatstat] an implementation of point pattern.  }
-
-\newpage
 
 \hypertarget{a-new-data-structure-for-spatio-temporal-data}{%
 \section{A new data structure for spatio-temporal
@@ -266,13 +410,13 @@ create a cubble, supply the same identifiers as with the first example.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> sydmel_climate <- stations %>% 
-+   rowwise() %>% 
-+   mutate(ts = list(meteo_pull_monitors(id, 
-+                                        date_min = "2020-01-01", 
+R> sydmel_climate <- stations %>%
++   rowwise() %>%
++   mutate(ts = list(meteo_pull_monitors(id,
++                                        date_min = "2020-01-01",
 +                                        date_max = "2020-12-31",
-+                                        var = c("PRCP", "TMAX", "TMIN")) %>% 
-+                      select(-id))) %>% 
++                                        var = c("PRCP", "TMAX", "TMIN")) %>%
++                      select(-id))) %>%
 +   as_cubble(key = id, index = date, coords = c(long, lat))
 \end{CodeInput}
 \end{CodeChunk}
@@ -291,6 +435,20 @@ R> sydmel_climate <- stations %>%
 5 ASN00087113 -38.0  144.  10.6 avalon airport        94854  48.8 melbo~ <tibbl~
 \end{CodeOutput}
 \end{CodeChunk}
+
+Below are the how the nested and long form look like for Australia
+climate data, which records daily precipitation, maximum and minimum
+temperature for 55 stations across Australia from 2015- 2020. Notice
+that each station forms a group in both forms and specifically, the
+nested and long form have a underlying \texttt{rowwise\_df} and
+\texttt{grouped\_df} respectively.
+
+With a cubic framework on mind, different types of manipulation with
+cubble can be thought of as slicing the cube in various way. The table
+below shows how some \texttt{dplyr} verbs are mapped into the operation
+in a cubble. With the existing grouping on the station, additional
+groupping can be added with \texttt{group\_by} and removed with
+\texttt{ungrouped}. {[}talk about why it is useful{]}
 
 \newpage
 
@@ -370,10 +528,8 @@ cubble}\label{hierarchical-structure-in-cubble}}
   introduce \texttt{switch\_key}
 \end{itemize}
 
-\newpage
-
-\hypertarget{examples}{%
-\section{Examples}\label{examples}}
+\hypertarget{examples-1}{%
+\section{Examples}\label{examples-1}}
 
 Daily climate data (prcp, tmax, and tmin) from RNOAA - lots of stations
 across Australia
@@ -390,146 +546,6 @@ like in Australia
   Local features: Any station stands out from the crowd?
 \end{itemize}
 
-\hypertarget{manipulation}{%
-\subsection{Manipulation}\label{manipulation}}
-
-\hypertarget{mutate-and-filter}{%
-\subsubsection{Mutate and filter}\label{mutate-and-filter}}
-
-In the first example, we want to only keep the stations that have
-\texttt{tmax} recorded in 2020. This requires first narrow down the
-records to those in 2020, determine if \texttt{tmax} is missing for each
-station, and then retain those stations that have \texttt{tmax}
-recorded. The year filtering is an operation on the time axis, so we
-start with the long form. Whether each station has \texttt{tmax}
-recorded is a result of each station, rather than of each time point,
-hence we need to switch to the nested form with \texttt{tamp()}. To
-calculate whether \texttt{tmax} is recorded, we mutate a column
-\texttt{tmax\_missing} that takes \texttt{TRUE} if all the \texttt{tmax}
-in the nested list column \texttt{ts} are \texttt{NA} and \texttt{FALSE}
-otherwise. To get the stations that we want, we need another filter on
-\texttt{tmax\_missing}.
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> aus_climate %>% 
-+   stretch() %>% 
-+   filter(year(date) == 2020) %>% 
-+   tamp()
-\end{CodeInput}
-\begin{CodeOutput}
-# cubble:   id [85]: nested form
-# bbox:     [115.97, -43.32, 153.13, -12.42]- check gap on long
-# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-   id            lat  long  elev name                   wmo_id ts               
-   <chr>       <dbl> <dbl> <dbl> <chr>                   <dbl> <list>           
- 1 ASN00009021 -31.9  116.  15.4 perth airport           94610 <tibble [366 x 4~
- 2 ASN00010311 -31.9  117. 179   york                    94623 <tibble [366 x 4~
- 3 ASN00010614 -32.9  117. 338   narrogin                94627 <tibble [366 x 4~
- 4 ASN00014015 -12.4  131.  30.4 darwin airport          94120 <tibble [366 x 4~
- 5 ASN00015131 -17.6  134. 220   elliott                 94236 <tibble [366 x 4~
- 6 ASN00016065 -30.4  137.  76   andamooka               95660 <tibble [366 x 4~
- 7 ASN00023034 -35.0  139.   2   adelaide airport        94672 <tibble [366 x 4~
- 8 ASN00023373 -34.5  139. 275   nuriootpa viticultural  94681 <tibble [366 x 4~
- 9 ASN00024024 -34.4  141.  30.1 loxton research centre  94682 <tibble [366 x 4~
-10 ASN00024048 -34.2  141.  31.5 renmark aero            95687 <tibble [366 x 4~
-# ... with 75 more rows
-\end{CodeOutput}
-\end{CodeChunk}
-
-\hypertarget{join}{%
-\subsubsection{Join}\label{join}}
-
-Now we want to select the stations that have been registered with world
-meteorological organisation (WMO) and the dataset \texttt{station} has a
-column \texttt{wmo\_id} that records this information. To do this task,
-we first need to join the \texttt{station} dataset with our climate
-dataset and then filter out those stations that don't have the WMO id.
-Since the join is by station rather than by time, we start with the
-nested form and write the exact same syntax of join and filter as with
-tidyverse.
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> # join wmo_id for each station
-R> # to_join <- station %>% select(id, wmo_id)
-R> # out <- climate_small %>% 
-R> #   left_join(to_join, by = c("station" = "id")) %>% 
-R> #   filter(!is.na(wmo_id))
-R> # out
-\end{CodeInput}
-\end{CodeChunk}
-
-Sometimes, we would like to have station-wise and time-wise variables in
-the same form (i.e.~when plotting glyph maps). This can also be seen as
-a joining task, on the long form, with the dataset to join being the
-metadata. \texttt{migrate()} is a verb introduced as the shortcut for
-\texttt{left\_join()} with a cubble's metadata and below is the
-comparison of the two syntaxes.
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> aus_climate %>% 
-+   stretch() %>% 
-+   migrate(id, lat, long)
-\end{CodeInput}
-\begin{CodeOutput}
-# cubble:  date, id [85]: long form
-# bbox:    [115.97, -43.32, 153.13, -12.42]- check gap on long
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
-   id          date        prcp  tmax  tmin   lat  long
-   <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
- 1 ASN00009021 2020-01-01     0  31.9  15.3 -31.9  116.
- 2 ASN00009021 2020-01-02     0  24.9  16.4 -31.9  116.
- 3 ASN00009021 2020-01-03     6  23.2  13   -31.9  116.
- 4 ASN00009021 2020-01-04     0  28.4  12.4 -31.9  116.
- 5 ASN00009021 2020-01-05     0  35.3  11.6 -31.9  116.
- 6 ASN00009021 2020-01-06     0  34.8  13.1 -31.9  116.
- 7 ASN00009021 2020-01-07     0  32.8  15.1 -31.9  116.
- 8 ASN00009021 2020-01-08     0  30.4  17.4 -31.9  116.
- 9 ASN00009021 2020-01-09     0  28.7  17.3 -31.9  116.
-10 ASN00009021 2020-01-10     0  32.6  15.8 -31.9  116.
-# ... with 31,100 more rows
-\end{CodeOutput}
-\end{CodeChunk}
-
-\begin{itemize}
-\tightlist
-\item
-  data quality check: filter out stations have variables not properly
-  recorded
-\item
-  data summary:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    daily -\textgreater{} monthly/ weekly,
-  \item
-    summarise by mean for tmax/ tmin, sum for prcp
-  \end{itemize}
-\item
-\end{itemize}
-
-\hypertarget{graphics}{%
-\subsection{Graphics}\label{graphics}}
-
-Static + interactive -\textgreater{} tooltip to show additional
-information upon hovering
-
-\begin{itemize}
-\tightlist
-\item
-  Where are those stations on the map?
-
-  \begin{itemize}
-  \tightlist
-  \item
-    Mention mostly aero, airport, and lighthouse
-  \end{itemize}
-\end{itemize}
-
-\renewcommand\refname{Summary}
 \bibliography{references.bib}
 
 
