@@ -49,50 +49,16 @@ The abstract of the article.
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-\textbf{Spatio-temporal data + examples}\\
-Spatio-temporal data record changes of variables in spatially separated
-regions across time. In this article, we consider spatio-temporal vector
-data, which are recorded in a fixed interval. Examples of this type of
-data include the house price of a city or county, climate measures from
-weather stations in a country, and river level data from electronic
-gauges \textcolor{red}{more examples here}. \newline
+\textbf{Motivation}
 
-\textbf{point to common feature: spatial level variables + time level
-variables relates to Table 13 in Tidy data paper}\\
-Usually, this type of spatio-temporal data does not necessarily come in
-as a single table. Tidy data principle \citep{tidydata} prescribes each
-type of observational unit to form a table. This would suggest two
-tables to store the data, one for spatial-level and one for
-temporal-level. The Table 13 in \citet{tidydata} presents a structure
-like this and the author argues the lack of tools to work with
-relational data like such. \newline
+In spatio-temporal data analysis, there's a need for a new
+spato-temporal data structure. The requirement for such a tool is
+necessary given the ubiquity of spatio-temporal data in the wild.
+Example of this includes house price of a city or county, climate
+station data from the government,
 
-\textbf{My proposal}\\
-Recent software development in R has proposed several relational data
-structure: \texttt{tidygraph}\citep{tidygraph} for graph manipulation,
-\texttt{dm} \citep{dm} for relational data model, while spatio-temporal
-data could benefit from having its own relational data structure that
-identifies the essential spati0-temporal element: site identifier, time
-identifier, geographic coordinates. In this paper, we propose a tidy
-data structure for vector spaio-temporal data. \newline
+\textbf{Existing packages}
 
-\textbf{Section division}\\
-The rest of the paper will be divided as follows: Section 2 reviews the
-existing data structure for spatio, temporal, and spatio-temporal data.
-Section 3 presents a new data structure for spatio-temporal data:
-cubble. Then the paper introduces the workflow of data manipulation and
-visualisation with the cubble structure in Section 4. Section 5 gives
-some examples on how common spatial and temporal manipulations are
-performed with cubble and how static and interactive visualisation help
-to understand climate and {[}\ldots{]} data. \newline
-
-\newpage
-
-\hypertarget{lit-review}{%
-\section{Existing data structure for spatio and temporal
-data}\label{lit-review}}
-
-\textbf{Existing packages}\\
 Many data structures have been proposed for spatial and temporal data,
 but not many for spatio-temporal data. One of the reason could be the
 inherent different levels of information make it inefficient to store in
@@ -105,6 +71,27 @@ point pattern data. More recent package \texttt{stars} \citep{stars}
 uses a spatiotemporal array to store the data and the array structure
 has its influence from \texttt{cubelyr} \citep{cubelyr}, a dplyr data
 cube backend. \newline
+
+\textbf{Our new data structure for spatio-temporal data}
+
+In this paper, a new spatio-temporal data structure, \texttt{cubble}, is
+introduced. \texttt{cubble} implements a relational data structure that
+splits the data into its spatial and temporal component. With this
+structure, users can separately manipulate the spaital or temporal
+component of the data while keep the two dimension linked. The software
+is available from the Comprehensive R Archive Network (CRAN) at {[}CRAN
+link{]}. \newline
+
+\textbf{Section division}
+
+The rest of the paper will be divided as follows: Section 2 reviews the
+existing data structure for spatio, temporal, and spatio-temporal data.
+Section 3 presents a new data structure for spatio-temporal data:
+cubble. Then the paper introduces the workflow of data manipulation and
+visualisation with the cubble structure in Section 4. Section 5 gives
+some examples on how common spatial and temporal manipulations are
+performed with cubble and how static and interactive visualisation help
+to understand climate and {[}\ldots{]} data. \newline
 
 \textbf{Criteria of a data structure we want}
 
@@ -130,10 +117,42 @@ data, we hope to build a data structure has the following features:
   packages.
 \end{enumerate}
 
+\textbf{Spatio-temporal data + examples}\\
+Spatio-temporal data record changes of variables in spatially separated
+regions across time. In this article, we consider spatio-temporal vector
+data, which are recorded in a fixed interval. Examples of this type of
+data include the house price of a city or county, climate measures from
+weather stations in a country, and river level data from electronic
+gauges \textcolor{red}{more examples here}. \newline
+
+\textbf{point to common feature: spatial level variables + time level
+variables relates to Table 13 in Tidy data paper}\\
+Usually, this type of spatio-temporal data does not necessarily come in
+as a single table. Tidy data principle \citep{tidydata} prescribes each
+type of observational unit to form a table. This would suggest two
+tables to store the data, one for spatial-level and one for
+temporal-level. The Table 13 in \citet{tidydata} presents a structure
+like this and the author argues the lack of tools to work with
+relational data like such. \newline
+
+\textbf{My proposal}\\
+Recent software development in R has proposed several relational data
+structure: \texttt{tidygraph}\citep{tidygraph} for graph manipulation,
+\texttt{dm} \citep{dm} for relational data model, while spatio-temporal
+data could benefit from having its own relational data structure that
+identifies the essential spati0-temporal element: site identifier, time
+identifier, geographic coordinates. \newline
+
 \newpage
 
-\hypertarget{workflow-data-pipeline}{%
-\section{Workflow/ Data pipeline}\label{workflow-data-pipeline}}
+\hypertarget{lit-review}{%
+\section{Existing data structure for spatio and temporal
+data}\label{lit-review}}
+
+\newpage
+
+\hypertarget{cubble-data-structure}{%
+\section{Cubble data structure}\label{cubble-data-structure}}
 
 \hypertarget{spatio-temporal-data-in-the-wild}{%
 \subsection{Spatio-temporal data in the
@@ -355,9 +374,9 @@ structure}\label{support-on-hierarchical-structure}}
 
 \texttt{switch\_key()}
 
-\hypertarget{compatibility-with-existing-software}{%
-\subsection{Compatibility with existing
-software}\label{compatibility-with-existing-software}}
+\hypertarget{integrating-into-a-tidy-workflow}{%
+\subsection{Integrating into a tidy
+workflow}\label{integrating-into-a-tidy-workflow}}
 
 Building from an underlying \texttt{tbl\_df} structure, it is natural to
 implement methods available in \texttt{dplyr} to \texttt{cubble}.
