@@ -65,12 +65,11 @@ library(lubridate)
 
 **Motivation**  
 
-In spatio-temporal data analysis, there's a need for a new spato-temporal data structure. The requirement for such a tool is necessary given the ubiquity of spatio-temporal data in the wild. Example of this includes house price of a city or county, climate station data from the government. The ireland wind data from 
+Many data structures have been proposed for spatial (`sf` by @sf) and temporal (`tsibble` by @tsibble) data in the R community, while less has been done for spatio-temporal data. The lack of such tools could potentially  because analysts usually treat the spatial and temporal dimension separately, without realising the need to create a new data structure for spatio-temporal data. While this approach fulfills the third tidy data principal to store each type of observational unit in its own table [@tidydata], analysts will always need to manually join the station summary of temporal results into the spatial table or combine the two tables into one for downstream analysis. This additional step doesn't add new operations but can be error prone.  \newline
 
+**Existing packages**  
 
-**Existing packages** 
-
-Many data structures have been proposed for spatial and temporal data, but not many for spatio-temporal data. One of the reason could be the inherent different levels of information make it inefficient to store in the same table. `spacetime`[@spacetime] proposed four space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI), and trajectory (STT) based on underlying spatial structure `sp` [@sp] and temporal structure `xts`[@xts]. `spatstat` [@spatstat] implements a `ppp` class for point pattern data. More recent package `stars` [@stars] uses a spatiotemporal array to store the data and the array structure has its influence from `cubelyr` [@cubelyr], a dplyr data cube backend. \newline
+Currently, available spatio-temporal data structure in R includes: `spacetime`[@spacetime], which has proposed four space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI), and trajectory (STT). The data structure it uses are based on `sp` [@sp] for spatial and `xts`[@xts] for temporal, both of which has been replaced by more recent implementations. `spatstat` [@spatstat] implements a `ppp` class for point pattern data. More recent package `stars` [@stars] uses a spatio-temporal array to store the data and the array structure has its influence from `cubelyr` [@cubelyr], a dplyr data cube backend. None of these packages provide [....] and this motivates a new spatio-temporal data structure that can smoothly switch between the spatial and temporal table for manipulation of each dimension, while also take care of combining the two dimension together. The requirement for such a tool is important given the ubiquity of spatio-temporal vector data in the wild. Example of this includes [house price of a city or county], climate station data from Beureau of Meteorology (BoM), the Ireland wind data from `gstat`, air pollution data. \newline
 
 **Our new data structure for spatio-temporal data**  
 
@@ -79,6 +78,10 @@ In this paper, a new spatio-temporal data structure, `cubble`, is introduced. `c
 **Section division**  
 
 The rest of the paper will be divided as follows: Section 2 reviews the existing data structure for spatio, temporal, and spatio-temporal data. Section 3 presents a new data structure for spatio-temporal data: cubble. Then the paper introduces the workflow of data manipulation and visualisation with the cubble structure in Section 4. Section 5 gives some examples on how common spatial and temporal manipulations are performed with cubble and how static and interactive visualisation help to understand climate and [...] data. \newline
+
+##################################################################
+
+
 
 
 **Criteria of a data structure we want**  
@@ -89,8 +92,7 @@ With recent development in the R community, `sf` [@sf] and `tsibble`[@tsibble] h
   2) An intuitive and easy to use interface that fits into the tidyverse ecosystem, and
   3) Compatibility with the latest spatial and temporal data structure. This would give users the flexibility to use the work in existing packages.
 
-**Spatio-temporal data + examples**  
-Spatio-temporal data record changes of variables in spatially separated regions across time. In this article, we consider spatio-temporal vector data, which are recorded in a fixed interval. Examples of this type of data include the house price of a city or county, climate measures from weather stations in a country, and river level data from electronic gauges \textcolor{red}{more examples here}. \newline
+ * In this article, we consider spatio-temporal vector data, which are recorded in a fixed interval.
 
 <!-- and are point based, characterised by longitude and latitude, in the spatial aspect -->
 
