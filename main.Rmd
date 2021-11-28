@@ -40,6 +40,7 @@ keywords:
   plain:     [spatio-temporal data, R]
 preamble: >
   \usepackage{amsmath}
+  \usepackage{array}
 output: rticles::jss_article
 bibliography: references.bib
 ---
@@ -69,7 +70,7 @@ Many data structures have been proposed for spatial (`sf` by @sf) and temporal (
 
 **Existing packages**  
 
-Currently, available spatio-temporal data structure in R includes: `spacetime`[@spacetime], which proposes four space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI), and trajectory (STT). The data structure it uses is based on `sp` [@sp] and `xts`[@xts], both of which has been replaced by more recent implementations. `spatstat` [@spatstat] implements a `ppp` class for point pattern data; and more recent, `stars` [@stars] implements a spatio-temporal array with the dplyr's data cube structure `cubelyr` [@cubelyr] as its backend. While these implementations either store spatial and temporal variables all in a single table, hence duplicate the spatial variables for each temporal unit; or split them into two separate tables that has the problem of manually joining, mentioned in the previously. None of these packages enjoy both the benefits of being able to separate manipulation in the two dimensions while also keep the data object as a whole. This create a gap in the software development. The requirement for such a tool is important given the ubiquity of spatio-temporal vector data in the wild: the Ireland wind data from `gstat` is an classic example data that splits variables into spatial (`wind.loc`) and temporal (`wind`) dimension;Bureau of Meteorology (BoM) provides climate observations that are widely applied in agriculture and ecology study; air pollution data. \newline
+Currently, available spatio-temporal data structure in R includes: `spacetime`[@spacetime], which proposes four space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI), and trajectory (STT). The data structure it uses is based on `sp` [@sp] and `xts`[@xts], both of which has been replaced by more recent implementations. `spatstat` [@spatstat] implements a `ppp` class for point pattern data; and more recent, `stars` [@stars] implements a spatio-temporal array with the dplyr's data cube structure `cubelyr` [@cubelyr] as its backend. While these implementations either store spatial and temporal variables all in a single table, hence duplicate the spatial variables for each temporal unit; or split them into two separate tables that has the problem of manually joining, mentioned in the previously. None of these packages enjoy both the benefits of being able to separate manipulation in the two dimensions while also keep the data object as a whole. This create a gap in the software development. The requirement for such a tool is important given the ubiquity of spatio-temporal vector data in the wild: the Ireland wind data from `gstat` is an classic example data that splits variables into spatial (`wind.loc`) and temporal (`wind`) dimension; Bureau of Meteorology (BoM) provides climate observations that are widely applied in agriculture and ecology study; air pollution data. \newline
 
 **Our new data structure for spatio-temporal data**  
 This paper describes the implementation of a new spatio-temporal data structure: `cubble`. `cubble` implements a relational data structure that uses two forms to manage the switch between spatial and temporal dimension. With this structure, users can manipulate the spatial or temporal dimension separately, while leaves the linking of two dimensions to `cubble`. The software is available from the Comprehensive R Archive Network (CRAN) at [CRAN link]. \newline
@@ -81,31 +82,20 @@ The rest of the paper will be divided as follows: [complete when the paper struc
 <!-- Section 2 reviews the existing data structure for spatio, temporal, and spatio-temporal data. Section 3 presents a new data structure for spatio-temporal data: cubble. Then the paper introduces the workflow of data manipulation and visualisation with the cubble structure in Section 4. Section 5 gives some examples on how common spatial and temporal manipulations are performed with cubble and how static and interactive visualisation help to understand climate and [...] data. \newline -->
 
 \newpage
-# Cubble data structure
+# The cubble package
 
-## Spatio-temporal data in the wild
-
-Spatio-temporal data don't usually come to the analysts in various forms. Figure \ref{fig:cubble-diagram} groups them into four categories. Despite whichever form the data is in, all the forms have a group identifier, `key`, a time column, `t`, and variables that either various across group, i.e. `lon`, `lat`, $C_s$, or across time, i.e. $V_t$. These identifiers will be the building blocks for the data structure introduced below. 
+Spatio-temporal data usually come in various forms and Figure \ref{fig:cubble-diagram} shows four examples of this. No matter whichever form the data is in, there are always some common components shared by these data. A spatial identifier (`id` in the diagram) identifies each site. The temporal identifier (`t` in the diagram) [...]. Coordinates, comprising of latitude and longitude, are commonly used variables for point pattern data.These identifiers will be the building blocks for the data structure introduced below. For other variables, those invariant at each time stamp are spatial variables and those differ are temporal variables.
 
 ```{r cubble-diagram, echo = FALSE, fig.cap="Illustration of incoming data formats for spatio-temporal data. (1) Data comes in as a single table; (2) Separate tables for spatial and temporal variables; (3) A single table with all the parameters used to query the database and a separate table for queried data; and (4) Cubical data in array or NetCDF format.", fig.align='center', out.height = "15%"}
 knitr::include_graphics(here::here("figures/input-formats/input-formats.001.png"))
 ```
 
-## A new data structure: cubble 
+In a cubble, there are two forms: 1) nested form, for manipulating the spatial dimension, and 2) long form, for manipulating the temporal dimension. Figure \ref{fig:def-cubble} sketches the two forms along with the associated attributes. A variable identifies by the spatial identifies can come from manipulating spatial variables itself, or summary of temporal variables. The nested cubble is best suited to work with this type of operation, since it defines each spatial unit as a row. The spatial variables are directly displayed in columns. Temporal variables are nested in a column called `ts` and the underlying rowwise dataframe uses a `group` attributes to ensure each row  is in its own group. 
 
-A cubble, in essence, wires the spatial and temporal dimension into a single object while provides two forms for manipulation each dimension separately.
+<!-- In this structure, the nested form is suitable for manipulating the spatial dimension of the data and this would include manipulating variables that 1) are inherently spatial and 2) summarise the temporal variables by `key`. Under the hood, the nested cubble is built on top of the rowwise dataframe (`rowwise_df`). This is design to simplify the code when working with the temporal variables - they are nested into the list-column `ts`. -->
 
-In the nest form, Figure \ref{fig:def-cubble}a), a cubble:
 
-  - defines each group in a row,
-  - displays the group-related variables in columns, and
-  - nests all the time-related variables into a column called `ts`.
-
-In the long form, Figure \ref{fig:def-cubble}b), a cubble:
-
-  - defines the combination of group and timestamp as a row
-  - displays time-related variables, along with the group identifier in columns, and
-  - stores group-related variables as a attributes called `spatial`.
+Temporal operations are suited to be performed in the long cubble as each row is defines as the combination of spatial and temporal identifier. This is also the structure that `tsibble` adopts. Temporal variables are directly displayed. To avoid repeating the same spatial at each temporal unit, all the spatial variables, along with the spatial identifier, are stored as a `spatial` attributes. This information is used when switching back to the nested form.
 
 ```{r def-cubble, echo = FALSE, fig.align="center", out.height="30%", fig.cap = "Illustration of nested and long cubble."}
 knitr::include_graphics(here::here("figures/def-cubble/def-cubble.001.png"))
@@ -114,20 +104,18 @@ knitr::include_graphics(here::here("figures/def-cubble/def-cubble.001.png"))
 \newpage
 ## Create a cubble in the nested form
 
-To create a cubble, you can use `as_cubble` with proper supply of `key`, `index`, and `coords`. [`key` defines whether a variable is spatial or temperal by looking at whether it varies across `key`. For example, `lat` is a spatial variable since for one `id` there's only one `lat` value. `index` and `coords` prescribes the temporal index and spaital coordinates used in the data. These are common variables that should present in the point pattern spatio-temporal data.] The cubble created by default is in the nested form.  \newline
+To use functionalities from cubble, data analysts first need to create a cubble. `as_cubble` create a `cubble` by supplying the three key components: `key` as the spatial identifier; `index` as the temporal identifier; and a vector of `coords` in the order of longitude first and then latitude. The use of `key` and `index` follows the naming convention in `tsibble`. The cubble created by default is in the nested form. Below is an example of creating a cubble:  \newline
 
 ```{r}
-(cubble_nested <- climate_flat %>% 
+(cubble_nested <- cubble::climate_flat %>% 
   as_cubble(key = id, index = date, coords = c("long", "lat")))
 ```
 
-In the `cubble` header, you can read the key variable + number, bbox, and also the name of variable nested in the `ts` column. Here in this example, the temporal variables are precipitation, `prcp`, maximum temporature, `tmax`, and minimum temperature, `tmin`.
-
-In this structure, the nested form is suitable for manipulating the spatial dimension of the data and this would include manipulating variables that 1) are inherently spatial and 2) summarise the temporal variables by `key`. Under the hood, the nested cubble is built on top of the rowwise dataframe (`rowwise_df`). This is design to simplify the code when working with the temporal variables - they are nested into the list-column `ts`.
+In the `cubble` header, you can read the name of the `key` variable, bbox, and also the name of variable nested in the `ts` column. In this example, the spatial identifier is `id` and the number in the bracket means there are 5 unique `id` in this dataset. The bbox in the second row gives the range of the coordinates. The temporal variables are all nested in the `ts` column, but it could be useful to know the name these variables. The third row in the cubble header shows these names and in this example this includes: precipitation, `prcp`, maximum temporature, `tmax`, and minimum temperature, `tmin`.
 
 ## Stretch a nested cubble into the long form
 
-The verb `stretch()` switch the cubble from the nested form into a long form. Under the hood, it first extracts the spatial variables into a separate tibble to store in the attribute `spatial` and then unnests the `ts` column to show the temporal content: 
+From a created cubble in the nested form, analysts may want to directly manipulate the temporal variables. This would require switching to the long form using `stretch()`. The verb `stretch()` switch the cubble from the nested form into a long form. Under the hood, it first extracts the spatial variables into a separate tibble to store in the attribute `spatial` and then unnests the `ts` column to show the temporal content: 
 
 ```{r}
 (cubble_long <- cubble_nested %>% stretch(ts))
@@ -155,9 +143,26 @@ As an output to be supplied to further visualisation or modelling, analysts woul
 
 `switch_key()`
 
+## Support on interactive graphics
+
 ## Integrating into a tidy workflow
 
-Building from an underlying `tbl_df` structure, it is natural to implement methods available in `dplyr` to `cubble`. Supported methods in the `cubble` with `dplyr` generics includes: `mutate`, `filter`, `summarise`, `select`, `arrange`, `rename`, `left_join`, `group_by`, `ungroup`, and the slice family (`slice_head`, `slice_tail`, `slice_sample`, `slice_min` and `slice_max`) \textcolor{red}{into a table}.
+Building from an underlying `tbl_df` structure, it is natural to implement methods available in `dplyr` to `cubble`. Supported methods in the `cubble` with `dplyr` generics includes: 
+
+\begin{center}
+\begin{tabular}{ | m{5em} | m{15cm}| } 
+\textbf{mutate} \\
+\textbf{filter}\\
+\textbf{summarise} \\
+\textbf{select} \\
+\textbf{arrange} \\
+\textbf{rename} \\
+\textbf{left\_join} \\
+\textbf{group\_by} \\
+\textbf{ungroup}\\
+slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample}, \textbf{slice\_min} and \textbf{slice\_max} \\
+\end{tabular}
+\end{center}
 
 `cubble` is also compatible with `tsibble` in the sense that the original list-column can be a `tbl_ts` object. Duplicates and gaps shoudl be first checked before structuring the data into a cubble. If the input data is a `tsibble` object, the long form cubble is also a `tsibble` where users can directly apply time series operations.
 

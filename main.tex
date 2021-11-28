@@ -40,7 +40,7 @@ The abstract of the article.
 
 % Pandoc header
 
-\usepackage{amsmath}
+\usepackage{amsmath} \usepackage{array}
 
 \begin{document}
 
@@ -84,7 +84,7 @@ whole. This create a gap in the software development. The requirement
 for such a tool is important given the ubiquity of spatio-temporal
 vector data in the wild: the Ireland wind data from \texttt{gstat} is an
 classic example data that splits variables into spatial
-(\texttt{wind.loc}) and temporal (\texttt{wind}) dimension;Bureau of
+(\texttt{wind.loc}) and temporal (\texttt{wind}) dimension; Bureau of
 Meteorology (BoM) provides climate observations that are widely applied
 in agriculture and ecology study; air pollution data. \newline
 
@@ -104,20 +104,19 @@ paper structure is more solid{]}
 
 \newpage
 
-\hypertarget{cubble-data-structure}{%
-\section{Cubble data structure}\label{cubble-data-structure}}
+\hypertarget{the-cubble-package}{%
+\section{The cubble package}\label{the-cubble-package}}
 
-\hypertarget{spatio-temporal-data-in-the-wild}{%
-\subsection{Spatio-temporal data in the
-wild}\label{spatio-temporal-data-in-the-wild}}
-
-Spatio-temporal data don't usually come to the analysts in various
-forms. Figure \ref{fig:cubble-diagram} groups them into four categories.
-Despite whichever form the data is in, all the forms have a group
-identifier, \texttt{key}, a time column, \texttt{t}, and variables that
-either various across group, i.e.~\texttt{lon}, \texttt{lat}, \(C_s\),
-or across time, i.e.~\(V_t\). These identifiers will be the building
-blocks for the data structure introduced below.
+Spatio-temporal data usually come in various forms and Figure
+\ref{fig:cubble-diagram} shows four examples of this. No matter
+whichever form the data is in, there are always some common components
+shared by these data. A spatial identifier (\texttt{id} in the diagram)
+identifies each site. The temporal identifier (\texttt{t} in the
+diagram) {[}\ldots{]}. Coordinates, comprising of latitude and
+longitude, are commonly used variables for point pattern data.These
+identifiers will be the building blocks for the data structure
+introduced below. For other variables, those invariant at each time
+stamp are spatial variables and those differ are temporal variables.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -130,39 +129,25 @@ blocks for the data structure introduced below.
 \end{figure}
 \end{CodeChunk}
 
-\hypertarget{a-new-data-structure-cubble}{%
-\subsection{A new data structure:
-cubble}\label{a-new-data-structure-cubble}}
+In a cubble, there are two forms: 1) nested form, for manipulating the
+spatial dimension, and 2) long form, for manipulating the temporal
+dimension. Figure \ref{fig:def-cubble} sketches the two forms along with
+the associated attributes. A variable identifies by the spatial
+identifies can come from manipulating spatial variables itself, or
+summary of temporal variables. The nested cubble is best suited to work
+with this type of operation, since it defines each spatial unit as a
+row. The spatial variables are directly displayed in columns. Temporal
+variables are nested in a column called \texttt{ts} and the underlying
+rowwise dataframe uses a \texttt{group} attributes to ensure each row is
+in its own group.
 
-A cubble, in essence, wires the spatial and temporal dimension into a
-single object while provides two forms for manipulation each dimension
-separately.
-
-In the nest form, Figure \ref{fig:def-cubble}a), a cubble:
-
-\begin{itemize}
-\tightlist
-\item
-  defines each group in a row,
-\item
-  displays the group-related variables in columns, and
-\item
-  nests all the time-related variables into a column called \texttt{ts}.
-\end{itemize}
-
-In the long form, Figure \ref{fig:def-cubble}b), a cubble:
-
-\begin{itemize}
-\tightlist
-\item
-  defines the combination of group and timestamp as a row
-\item
-  displays time-related variables, along with the group identifier in
-  columns, and
-\item
-  stores group-related variables as a attributes called
-  \texttt{spatial}.
-\end{itemize}
+Temporal operations are suited to be performed in the long cubble as
+each row is defines as the combination of spatial and temporal
+identifier. This is also the structure that \texttt{tsibble} adopts.
+Temporal variables are directly displayed. To avoid repeating the same
+spatial at each temporal unit, all the spatial variables, along with the
+spatial identifier, are stored as a \texttt{spatial} attributes. This
+information is used when switching back to the nested form.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -181,19 +166,18 @@ In the long form, Figure \ref{fig:def-cubble}b), a cubble:
 \subsection{Create a cubble in the nested
 form}\label{create-a-cubble-in-the-nested-form}}
 
-To create a cubble, you can use \texttt{as\_cubble} with proper supply
-of \texttt{key}, \texttt{index}, and \texttt{coords}. {[}\texttt{key}
-defines whether a variable is spatial or temperal by looking at whether
-it varies across \texttt{key}. For example, \texttt{lat} is a spatial
-variable since for one \texttt{id} there's only one \texttt{lat} value.
-\texttt{index} and \texttt{coords} prescribes the temporal index and
-spaital coordinates used in the data. These are common variables that
-should present in the point pattern spatio-temporal data.{]} The cubble
-created by default is in the nested form. \newline
+To use functionalities from cubble, data analysts first need to create a
+cubble. \texttt{as\_cubble} create a \texttt{cubble} by supplying the
+three key components: \texttt{key} as the spatial identifier;
+\texttt{index} as the temporal identifier; and a vector of
+\texttt{coords} in the order of longitude first and then latitude. The
+use of \texttt{key} and \texttt{index} follows the naming convention in
+\texttt{tsibble}. The cubble created by default is in the nested form.
+Below is an example of creating a cubble: \newline
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> (cubble_nested <- climate_flat %>% 
+R> (cubble_nested <- cubble::climate_flat %>% 
 +   as_cubble(key = id, index = date, coords = c("long", "lat")))
 \end{CodeInput}
 \begin{CodeOutput}
@@ -210,28 +194,28 @@ R> (cubble_nested <- climate_flat %>%
 \end{CodeOutput}
 \end{CodeChunk}
 
-In the \texttt{cubble} header, you can read the key variable + number,
-bbox, and also the name of variable nested in the \texttt{ts} column.
-Here in this example, the temporal variables are precipitation,
-\texttt{prcp}, maximum temporature, \texttt{tmax}, and minimum
-temperature, \texttt{tmin}.
-
-In this structure, the nested form is suitable for manipulating the
-spatial dimension of the data and this would include manipulating
-variables that 1) are inherently spatial and 2) summarise the temporal
-variables by \texttt{key}. Under the hood, the nested cubble is built on
-top of the rowwise dataframe (\texttt{rowwise\_df}). This is design to
-simplify the code when working with the temporal variables - they are
-nested into the list-column \texttt{ts}.
+In the \texttt{cubble} header, you can read the name of the \texttt{key}
+variable, bbox, and also the name of variable nested in the \texttt{ts}
+column. In this example, the spatial identifier is \texttt{id} and the
+number in the bracket means there are 5 unique \texttt{id} in this
+dataset. The bbox in the second row gives the range of the coordinates.
+The temporal variables are all nested in the \texttt{ts} column, but it
+could be useful to know the name these variables. The third row in the
+cubble header shows these names and in this example this includes:
+precipitation, \texttt{prcp}, maximum temporature, \texttt{tmax}, and
+minimum temperature, \texttt{tmin}.
 
 \hypertarget{stretch-a-nested-cubble-into-the-long-form}{%
 \subsection{Stretch a nested cubble into the long
 form}\label{stretch-a-nested-cubble-into-the-long-form}}
 
-The verb \texttt{stretch()} switch the cubble from the nested form into
-a long form. Under the hood, it first extracts the spatial variables
-into a separate tibble to store in the attribute \texttt{spatial} and
-then unnests the \texttt{ts} column to show the temporal content:
+From a created cubble in the nested form, analysts may want to directly
+manipulate the temporal variables. This would require switching to the
+long form using \texttt{stretch()}. The verb \texttt{stretch()} switch
+the cubble from the nested form into a long form. Under the hood, it
+first extracts the spatial variables into a separate tibble to store in
+the attribute \texttt{spatial} and then unnests the \texttt{ts} column
+to show the temporal content:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -334,12 +318,22 @@ workflow}\label{integrating-into-a-tidy-workflow}}
 Building from an underlying \texttt{tbl\_df} structure, it is natural to
 implement methods available in \texttt{dplyr} to \texttt{cubble}.
 Supported methods in the \texttt{cubble} with \texttt{dplyr} generics
-includes: \texttt{mutate}, \texttt{filter}, \texttt{summarise},
-\texttt{select}, \texttt{arrange}, \texttt{rename}, \texttt{left\_join},
-\texttt{group\_by}, \texttt{ungroup}, and the slice family
-(\texttt{slice\_head}, \texttt{slice\_tail}, \texttt{slice\_sample},
-\texttt{slice\_min} and \texttt{slice\_max})
-\textcolor{red}{into a table}.
+includes:
+
+\begin{center}
+\begin{tabular}{ | m{5em} | m{15cm}| } 
+\textbf{mutate} \\
+\textbf{filter}\\
+\textbf{summarise} \\
+\textbf{select} \\
+\textbf{arrange} \\
+\textbf{rename} \\
+\textbf{left\_join} \\
+\textbf{group\_by} \\
+\textbf{ungroup}\\
+slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample}, \textbf{slice\_min} and \textbf{slice\_max} \\
+\end{tabular}
+\end{center}
 
 \texttt{cubble} is also compatible with \texttt{tsibble} in the sense
 that the original list-column can be a \texttt{tbl\_ts} object.
