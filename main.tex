@@ -55,112 +55,52 @@ Many data structures have been proposed for spatial (\texttt{sf} by
 \citet{sf}) and temporal (\texttt{tsibble} by \citet{tsibble}) data in
 the R community, while less has been done for spatio-temporal data. The
 lack of such tools could potentially because analysts usually treat the
-spatial and temporal dimension separately, without realising the need to
-create a new data structure for spatio-temporal data. While this
-approach fulfills the third tidy data principal to store each type of
-observational unit in its own table \citep{tidydata}, analysts will
-always need to manually join the station summary of temporal results
-into the spatial table or combine the two tables into one for downstream
-analysis. This additional step doesn't add new operations but can be
-error prone. \newline
+spatial and temporal dimension pf the data separately, without realising
+the need to create a new data structure. While this approach follows the
+third tidy data principal \citep{tidydata} (\emph{Each type of
+observational unit forms a table}), analysts always need to manually
+join results from different observational units or combining multiple
+tables into one for downstream analysis. This additional step doesn't
+add new operations into the data but can be error prone. \newline
 
 \textbf{Existing packages}
 
 Currently, available spatio-temporal data structure in R includes:
-\texttt{spacetime}\citep{spacetime}, which has proposed four space-time
+\texttt{spacetime}\citep{spacetime}, which proposes four space-time
 layouts: Full grid (STF), sparse grid(STS), irregular (STI), and
-trajectory (STT). The data structure it uses are based on \texttt{sp}
-\citep{sp} for spatial and \texttt{xts}\citep{xts} for temporal, both of
-which has been replaced by more recent implementations.
-\texttt{spatstat} \citep{spatstat} implements a \texttt{ppp} class for
-point pattern data. More recent package \texttt{stars} \citep{stars}
-uses a spatio-temporal array to store the data and the array structure
-has its influence from \texttt{cubelyr} \citep{cubelyr}, a dplyr data
-cube backend. None of these packages provide {[}\ldots.{]} and this
-motivates a new spatio-temporal data structure that can smoothly switch
-between the spatial and temporal table for manipulation of each
-dimension, while also take care of combining the two dimension together.
-The requirement for such a tool is important given the ubiquity of
-spatio-temporal vector data in the wild. Example of this includes
-{[}house price of a city or county{]}, climate station data from Beureau
-of Meteorology (BoM), the Ireland wind data from \texttt{gstat}, air
-pollution data. \newline
+trajectory (STT). The data structure it uses is based on \texttt{sp}
+\citep{sp} and \texttt{xts}\citep{xts}, both of which has been replaced
+by more recent implementations. \texttt{spatstat} \citep{spatstat}
+implements a \texttt{ppp} class for point pattern data; and more recent,
+\texttt{stars} \citep{stars} implements a spatio-temporal array with the
+dplyr's data cube structure \texttt{cubelyr} \citep{cubelyr} as its
+backend. While these implementations either store spatial and temporal
+variables all in a single table, hence duplicate the spatial variables
+for each temporal unit; or split them into two separate tables that has
+the problem of manually joining, mentioned in the previously. None of
+these packages enjoy both the benefits of being able to separate
+manipulation in the two dimensions while also keep the data object as a
+whole. This create a gap in the software development. The requirement
+for such a tool is important given the ubiquity of spatio-temporal
+vector data in the wild: the Ireland wind data from \texttt{gstat} is an
+classic example data that splits variables into spatial
+(\texttt{wind.loc}) and temporal (\texttt{wind}) dimension;Bureau of
+Meteorology (BoM) provides climate observations that are widely applied
+in agriculture and ecology study; air pollution data. \newline
 
-\textbf{Our new data structure for spatio-temporal data}
-
-In this paper, a new spatio-temporal data structure, \texttt{cubble}, is
-introduced. \texttt{cubble} implements a relational data structure that
-splits the data into its spatial and temporal component. With this
-structure, users can separately manipulate the spaital or temporal
-component of the data while keep the two dimension linked. The software
-is available from the Comprehensive R Archive Network (CRAN) at {[}CRAN
-link{]}. \newline
+\textbf{Our new data structure for spatio-temporal data}\\
+This paper describes the implementation of a new spatio-temporal data
+structure: \texttt{cubble}. \texttt{cubble} implements a relational data
+structure that uses two forms to manage the switch between spatial and
+temporal dimension. With this structure, users can manipulate the
+spatial or temporal dimension separately, while leaves the linking of
+two dimensions to \texttt{cubble}. The software is available from the
+Comprehensive R Archive Network (CRAN) at {[}CRAN link{]}. \newline
 
 \textbf{Section division}
 
-The rest of the paper will be divided as follows: Section 2 reviews the
-existing data structure for spatio, temporal, and spatio-temporal data.
-Section 3 presents a new data structure for spatio-temporal data:
-cubble. Then the paper introduces the workflow of data manipulation and
-visualisation with the cubble structure in Section 4. Section 5 gives
-some examples on how common spatial and temporal manipulations are
-performed with cubble and how static and interactive visualisation help
-to understand climate and {[}\ldots{]} data. \newline
-
-\textbf{Criteria of a data structure we want}
-
-With recent development in the R community, \texttt{sf} \citep{sf} and
-\texttt{tsibble}\citep{tsibble} have replaced \texttt{sp} and
-\texttt{xts} to be the convention structure for spatial and temporal
-data. One reason for their popularity is its integration with tidyverse
-ecosystem, making them intuitive and easy to adopt. For spatio-temporal
-data, we hope to build a data structure has the following features:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi})}
-\tightlist
-\item
-  A data structure that handles spatial and temporal dimension in a
-  relational structure. This derives from the 3rd tidy data principal.
-\item
-  An intuitive and easy to use interface that fits into the tidyverse
-  ecosystem, and
-\item
-  Compatibility with the latest spatial and temporal data structure.
-  This would give users the flexibility to use the work in existing
-  packages.
-\end{enumerate}
-
-\begin{itemize}
-\tightlist
-\item
-  In this article, we consider spatio-temporal vector data, which are
-  recorded in a fixed interval.
-\end{itemize}
-
-\textbf{point to common feature: spatial level variables + time level
-variables relates to Table 13 in Tidy data paper}\\
-Usually, this type of spatio-temporal data does not necessarily come in
-as a single table. Tidy data principle \citep{tidydata} prescribes each
-type of observational unit to form a table. This would suggest two
-tables to store the data, one for spatial-level and one for
-temporal-level. The Table 13 in \citet{tidydata} presents a structure
-like this and the author argues the lack of tools to work with
-relational data like such. \newline
-
-\textbf{My proposal}\\
-Recent software development in R has proposed several relational data
-structure: \texttt{tidygraph}\citep{tidygraph} for graph manipulation,
-\texttt{dm} \citep{dm} for relational data model, while spatio-temporal
-data could benefit from having its own relational data structure that
-identifies the essential spati0-temporal element: site identifier, time
-identifier, geographic coordinates. \newline
-
-\newpage
-
-\hypertarget{lit-review}{%
-\section{Existing data structure for spatio and temporal
-data}\label{lit-review}}
+The rest of the paper will be divided as follows: {[}complete when the
+paper structure is more solid{]}
 
 \newpage
 
