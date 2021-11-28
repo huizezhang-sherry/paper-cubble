@@ -2,6 +2,8 @@ library(gstat)
 library(tidyverse)
 library(cubble)
 
+data(wind)
+
 wind_temporal <- wind %>% 
   pivot_longer(RPT:MAL, names_to = "code", values_to = "wind_speed") %>% 
   mutate(date = lubridate::make_date(year + 1900, month, day)) %>% 
