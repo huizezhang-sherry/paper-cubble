@@ -167,8 +167,6 @@ each time stamp while not dropping information from spatial variables.
 \end{figure}
 \end{CodeChunk}
 
-\newpage
-
 \hypertarget{create-a-cubble-in-the-nested-form}{%
 \subsection{Create a cubble in the nested
 form}\label{create-a-cubble-in-the-nested-form}}
@@ -201,28 +199,26 @@ R> (cubble_nested <- cubble::climate_flat %>%
 \end{CodeOutput}
 \end{CodeChunk}
 
-In the \texttt{cubble} header, you can read the name of the \texttt{key}
-variable, bbox, and also the name of variable nested in the \texttt{ts}
-column. In this example, the spatial identifier is \texttt{id} and the
-number in the bracket means there are 5 unique \texttt{id} in this
-dataset. The bbox in the second row gives the range of the coordinates.
-The temporal variables are all nested in the \texttt{ts} column, but it
-could be useful to know the name these variables. The third row in the
-cubble header shows these names and in this example this includes:
-precipitation, \texttt{prcp}, maximum temperature, \texttt{tmax}, and
-minimum temperature, \texttt{tmin}.
+There are a few information in the \texttt{cubble} header: the name of
+the \texttt{key} variable, bbox, and also the name of variable nested in
+the \texttt{ts} column. In this example, each site is identifier is
+\texttt{id} and the number in the bracket means there are 5 unique
+\texttt{id} in this dataset. The bbox in the second row gives the range
+of the coordinates. The temporal variables are all nested in the
+\texttt{ts} column, but it could be useful to know the name these
+variables. The third row in the cubble header shows these names and in
+this example this includes: precipitation, \texttt{prcp}, maximum
+temperature, \texttt{tmax}, and minimum temperature, \texttt{tmin}.
 
 \hypertarget{stretch-a-nested-cubble-into-the-long-form}{%
 \subsection{Stretch a nested cubble into the long
 form}\label{stretch-a-nested-cubble-into-the-long-form}}
 
-From a created cubble in the nested form, analysts may want to directly
-manipulate the temporal variables. This would require switching to the
-long form using \texttt{stretch()}. The verb \texttt{stretch()} switch
-the cubble from the nested form into a long form. Under the hood, it
-first extracts the spatial variables into a separate tibble to store in
-the attribute \texttt{spatial} and then unnests the \texttt{ts} column
-to show the temporal content:
+The long cubble is suitable to manipulate the time dimension of the
+data. The function \texttt{stretch()} switches the nested cubble into
+the long cubble by first extracts all the spatial variables into a
+separate tibble and store in the \texttt{spatial} attribute and then
+unnests the \texttt{ts} column:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -248,18 +244,19 @@ R> (cubble_long <- cubble_nested %>% stretch(ts))
 \end{CodeOutput}
 \end{CodeChunk}
 
-Notice here that the third line in the header is changed to reflect the
-spatial variables stored. This is a format suitable for computing
-time-wise variables.
+Notice here that the third line in the header now shows the name of
+spatial variables rather than the temporal variables.
 
 \hypertarget{tamp-a-long-cubble-back-to-the-nested-form}{%
 \subsection{Tamp a long cubble back to the nested
 form}\label{tamp-a-long-cubble-back-to-the-nested-form}}
 
 Manipulation on the spatial and temporal dimension can be an iterative
-process. Many times, we may decide to go back to the nested form after
-some temporal manipulation. The verb to switch a long cubble back to the
-nested form is \texttt{tamp()}:
+process. Many times, analysts will need to go back and forth between the
+nested and long cubble. The \texttt{stretch()} function introduced in
+the previous section switches a nested cubble into a long cubble and
+function \texttt{tamp()} is its inverse function to switch a long cubble
+back to the nested cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -283,10 +280,10 @@ R> (cubble_back <- cubble_long %>% tamp())
 \subsection{Migrate spatial variables to a long
 cubble}\label{migrate-spatial-variables-to-a-long-cubble}}
 
-As an output to be supplied to further visualisation or modelling,
-analysts would usually like the spatial and temporal variables to be in
-the same table. \texttt{migrate()} moves the spatial variables in the
-attribute \texttt{spatial} into the long form cubble.
+As a final data output for modelling or visualisation, spatio-temporal
+data is usually expected to be in a single table. Function
+\texttt{migrate()} moves the spatial variables from the \texttt{spatial}
+attribute into the long cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -312,19 +309,11 @@ R> (cubble_long %>% migrate(long, lat))
 \end{CodeOutput}
 \end{CodeChunk}
 
-\hypertarget{support-on-hierarchical-structure}{%
-\subsection{Support on hierarchical
-structure}\label{support-on-hierarchical-structure}}
-
-\texttt{switch\_key()}
-
-\hypertarget{support-on-interactive-graphics}{%
-\subsection{Support on interactive
-graphics}\label{support-on-interactive-graphics}}
-
-\hypertarget{integrating-into-a-tidy-workflow}{%
-\subsection{Integrating into a tidy
-workflow}\label{integrating-into-a-tidy-workflow}}
+In this workflow described above, data objects come into cubble in the
+nested form, then various operations on the spatial and temporal
+dimension can go back and forth between the nested and long form, and
+finally, the data will come out of cubble in the long form for further
+modelling or visualisation.
 
 Building from an underlying \texttt{tbl\_df} structure, it is natural to
 implement methods available in \texttt{dplyr} to \texttt{cubble}.
@@ -333,15 +322,8 @@ includes:
 
 \begin{center}
 \begin{tabular}{ | m{5em} | m{15cm}| } 
-\textbf{mutate} \\
-\textbf{filter}\\
-\textbf{summarise} \\
-\textbf{select} \\
-\textbf{arrange} \\
-\textbf{rename} \\
-\textbf{left\_join} \\
-\textbf{group\_by} \\
-\textbf{ungroup}\\
+basics & \textbf{mutate}, \textbf{filter}, \textbf{summarise}, \textbf{select}, \textbf{arrange}, \textbf{rename}, \textbf{left\_join} \\
+grouping &  \textbf{group\_by}, \textbf{ungroup}\\
 slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample}, \textbf{slice\_min} and \textbf{slice\_max} \\
 \end{tabular}
 \end{center}
@@ -352,6 +334,21 @@ Duplicates and gaps should be first checked before structuring the data
 into a cubble. If the input data is a \texttt{tsibble} object, the long
 form cubble is also a \texttt{tsibble} where users can directly apply
 time series operations.
+
+\hypertarget{advanced-features-considerations}{%
+\section{Advanced features/
+considerations}\label{advanced-features-considerations}}
+
+\hypertarget{hierarchical-structure}{%
+\subsection{Hierarchical structure}\label{hierarchical-structure}}
+
+\texttt{switch\_key()}
+
+\hypertarget{interactive-graphics}{%
+\subsection{Interactive graphics}\label{interactive-graphics}}
+
+\hypertarget{data-fusion-and-matching}{%
+\subsection{Data fusion and matching}\label{data-fusion-and-matching}}
 
 \newpage
 
@@ -478,30 +475,6 @@ R> tmax_long2 <- tmax_nested2 %>%
 Now its time for the glyph map!
 
 \begin{CodeChunk}
-\begin{CodeInput}
-R> gly <- glyphs(
-+   tmax_long2,
-+   x_major = "longitude",
-+   y_major = "latitude",
-+   x_minor = "month",
-+   y_minor = "tmax",
-+   height = 0.6,
-+   width = 1
-+ )
-R> 
-R> nsw_vic <- ozmaps::abs_ste %>%
-+   filter(NAME %in% c("Victoria", "New South Wales"))
-R> 
-R> plot_map(nsw_vic, fill = "transparent") +
-+   geom_path(data = gly, aes(gx, gy,
-+     group = interaction(id, group),
-+     color = group
-+   )) +
-+   scale_color_brewer(palette = "Dark2") + 
-+   theme_bw() + 
-+   coord_sf(xlim = c(140, 155)) + 
-+   theme(legend.position = "bottom")
-\end{CodeInput}
 
 
 \begin{center}\includegraphics{figures/unnamed-chunk-10-1} \end{center}
@@ -628,30 +601,6 @@ diagram above and construct the glyph map with
 \texttt{GGally::glyphs()}:
 
 \begin{CodeChunk}
-\begin{CodeInput}
-R> cluster_long <- cluster_nested %>%
-+   stretch(ts) %>%
-+   group_by(wk) %>%
-+   summarise(prcp = sum(prcp, na.rm = TRUE)) %>%
-+   migrate(cent_long, cent_lat)
-R> 
-R> gly <- GGally::glyphs(cluster_long,
-+   x_major = "cent_long", x_minor = "wk",
-+   y_major = "cent_lat", y_minor = "prcp",
-+   height = 2, width = 4
-+ )
-R> 
-R> state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
-R> plot_map(state_map) +
-+   geom_text(
-+     data = cluster_nested,
-+     aes(x = cent_long, y = cent_lat, label = cluster)
-+   ) +
-+   geom_path(
-+     data = gly,
-+     aes(x = gx, y = gy, group = gid)
-+   )
-\end{CodeInput}
 
 
 \begin{center}\includegraphics{figures/unnamed-chunk-15-1} \end{center}
@@ -662,16 +611,6 @@ We can also look at the precipitation of each individual station within
 the same cluster:
 
 \begin{CodeChunk}
-\begin{CodeInput}
-R> station_long <- station_nested %>%
-+   stretch(ts) %>%
-+   migrate(cluster)
-R> station_long %>%
-+   ggplot(aes(x = wk, y = prcp, group = id)) +
-+   geom_line(alpha = .3) +
-+   facet_wrap(vars(cluster), scales = "free_y", ncol = 4) +
-+   theme_bw()
-\end{CodeInput}
 \begin{figure}
 
 {\centering \includegraphics{figures/unnamed-chunk-16-1} 
@@ -686,20 +625,6 @@ Lastly, there is one series on Tasmania island standing out from others,
 lets look at where it is:
 
 \begin{CodeChunk}
-\begin{CodeInput}
-R> # this part still needs some fixing
-R> tas_latlong <- station_nested %>%
-+   filter(lat < -40) %>%
-+   mutate(p = max(ts$prcp)) %>%
-+   strip_rowwise() %>%
-+   filter(p == max(p))
-R> 
-R> state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
-R> plot_map(state_map) +
-+   geom_point(data = station_nested, aes(x = long, y = lat), size = 0.5) +
-+   geom_sf(data = cluster_nested, aes(geometry = ll_cluster), fill = "transparent") +
-+   geom_point(data = tas_latlong, aes(x = long, y = lat), col = "red")
-\end{CodeInput}
 
 
 \begin{center}\includegraphics{figures/unnamed-chunk-17-1} \end{center}
@@ -720,29 +645,6 @@ the water course level and add a column annotate this data of type
 these stations are on the map first:
 
 \begin{CodeChunk}
-\begin{CodeInput}
-R> river <- weatherdata::water %>%
-+   stretch() %>%
-+   select(date, Water_course_level) %>%
-+   tamp() %>%
-+   mutate(type = "river")
-R> 
-R> climate <- weatherdata::climate_full %>%
-+   filter(between(stringr::str_sub(id, 7, 8), 76, 90)) %>%
-+   stretch() %>%
-+   filter(lubridate::year(date) == 2020) %>%
-+   tamp() %>%
-+   mutate(type = "climate")
-R> 
-R> vic_map <- rmapshaper::ms_simplify(ozmaps::abs_ste %>% filter(NAME == "Victoria"))
-R> plot_map(vic_map) +
-+   geom_point(
-+     data = dplyr::bind_rows(river, climate),
-+     aes(x = long, y = lat, color = type)
-+   ) +
-+   scale_color_brewer(palette = "Dark2") +
-+   theme_bw()
-\end{CodeInput}
 
 
 \begin{center}\includegraphics{figures/unnamed-chunk-18-1} \end{center}
@@ -850,46 +752,6 @@ can use this output to plot the location of match or to look at the
 series:
 
 \begin{CodeChunk}
-\begin{CodeInput}
-R> p1 <- plot_map(vic_map) +
-+   geom_point(
-+     data = res,
-+     aes(x = long, y = lat, color = type)
-+   ) +
-+   ggrepel::geom_label_repel(
-+     data = res %>% filter(type == "river"),
-+     aes(x = long, y = lat, label = .group)
-+   ) +
-+   scale_color_brewer(palette = "Dark2") +
-+   ggtitle("Victoria") +
-+   theme_minimal() +
-+   theme(
-+     panel.grid.major = element_blank(),
-+     panel.grid.minor = element_blank(),
-+     legend.position = "bottom"
-+   )
-R> 
-R> res_long <- res %>%
-+   stretch(ts) %>%
-+   migrate(.group, type) %>%
-+   mutate(prcp = scale(prcp)[, 1]) %>%
-+   switch_key(.group) %>%
-+   migrate(type)
-R> 
-R> p2 <- res_long %>%
-+   ggplot(aes(
-+     x = date, y = prcp,
-+     group = id, color = type
-+   )) +
-+   geom_line() +
-+   facet_wrap(vars(.group)) +
-+   scale_color_brewer(palette = "Dark2", guide = "none") +
-+   theme_bw() +
-+   labs(x = "week") +
-+   scale_x_date(date_labels = "%b")
-R> 
-R> p1 | p2
-\end{CodeInput}
 \begin{figure}
 
 {\centering \includegraphics[width=1\linewidth]{figures/unnamed-chunk-22-1} 
@@ -907,8 +769,11 @@ cubble}\label{interative-graphic-with-cubble}}
 \begin{CodeChunk}
 \begin{CodeInput}
 R> set.seed(123)
-R> tmax_data <- weatherdata::climate_full %>%
-+   slice_sample(n = 50) %>%
+R> dt <- weatherdata::climate_full %>%
++   slice_sample(n = 50) %>% 
++   mutate(name = str_replace(name, "\\s*\\([^\\)]+\\)", ""))
+R>  
+R> tmax_data <- dt %>%
 +   stretch() %>%
 +   mutate(ym = tsibble::yearmonth(date)) %>%
 +   group_by(ym) %>%
@@ -928,29 +793,6 @@ R> tmax_data <- weatherdata::climate_full %>%
 +   stretch() %>%
 +   migrate(median_tmax, long, lat, name) %>%
 +   highlight_key(~id)
-R> 
-R> p1 <- tmax_data %>%
-+   ggplot(aes(
-+     x = month, y = tmax, group = interaction(year, id),
-+     color = median_tmax, label = name
-+   )) +
-+   geom_line() +
-+   facet_wrap(vars(fct_reorder(name, -median_tmax))) +
-+   theme(legend.position = "none")
-R> 
-R> state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
-R> p2 <- tmax_data %>%
-+   ggplot() +
-+   geom_sf(data = state_map, aes(geometry = geometry)) +
-+   geom_point(aes(x = long, y = lat, color = median_tmax, label = name)) +
-+   theme_void()
-R> 
-R> bscols(
-+   ggplotly(p1, width = 800, height = 800, tooltip = "label") %>%
-+     highlight(on = "plotly_selected", off = "plotly_deselect", color = "red"),
-+   ggplotly(p2, width = 800, height = 800, tooltip = "label") %>%
-+     highlight(on = "plotly_selected", off = "plotly_deselect", color = "red")
-+ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -961,18 +803,6 @@ R> bscols(
 
 \hypertarget{old-stuff}{%
 \section{Old stuff}\label{old-stuff}}
-
-Many spatial and spatio-temporal data structures have been developed by
-the R-spatial team for both raster and vector spatial data. For vector
-spatial data, which is the focus of this paper, \texttt{sf}
-\citep{pebesma2018simple} represents spatial vector information with
-simple features: points, lines, polygons and their multiples. Various
-\texttt{st\_} function are designed to manipulate these features based
-on their geometric relationships. For spatio-temporal data,
-\texttt{stars} \citep{stars} can represent both raster and vector data
-using multi-dimensional array. However, the underlying array structure
-can be difficult to operate for data analysts who are more familiar with
-a flat 2D data frame structure used by the tidyverse ecosystem.
 
 In the temporal aspect, the \texttt{tsibble} \citep{tsibbles} structure
 and its tidyverts ecosystem have provided a {[}\ldots{} {]} workflow to
@@ -991,49 +821,6 @@ long form structure of a tsibble object means spatio variables
 the tsibble) of each spatio identifier will be repetitively recorded at
 each timestamp. This repetition is unnecessary and would inflate the
 object size for long series.
-
-\hypertarget{a-new-data-structure-for-spatio-temporal-data}{%
-\section{A new data structure for spatio-temporal
-data}\label{a-new-data-structure-for-spatio-temporal-data}}
-
-\textbf{The main difficulty and challenge}\\
-The main difficulty in visualising this type of data is to show
-information in both space and time dimension with the proper level of
-details without information overflow. This would sometimes require
-aggregating the time dimension into the proper level or slicing the data
-into a reasonable number of subset for display. In this sense, a data
-structure that regulates the manipulation spatio-temporal data will
-benefit the analysis workflow. While many implementations focus on
-manipulating and visualising pure spatial or temporal data, there are
-not sufficient tools to deal with spatio-temporal data. The purpose of
-this paper is to introduce a spatio-temporal vector data structure for
-data analysis in R.
-
-To work with spatio-temporal data, analysts can choose to either work
-separately on each dimension or join the two sets together, however,
-each approach has its own problem: While is is natural to work
-separately on each sheet (since spatial and temporal operations usually
-don't overlap), analysts will need to manually keep the other data frame
-up to date. For example, the following pseudo code illustrates the
-scenario where once the spatial dataset is filtered for those within
-Victoria, the temporal dataset needs to be manually updated to reflect
-this spatial filter.
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> spatial_new <- spatial %>% filter(SITES_IN_VICTORIA)
-R> temporal_new <- temporal %>% filter(id %in% spatial_new$id)
-\end{CodeInput}
-\end{CodeChunk}
-
-If analysts choose to join the spatial and temporal data together, the
-joined dataset could be too large since each spatial variable will be
-repeated at each time stamp for each site. Also, recordings of the site
-ID from different data sources can be slightly different from each
-other, causing a painful checking and cleaning of site IDs before the
-join.
-
-\newpage
 
 \hypertarget{create-a-cubble}{%
 \section{Create a cubble}\label{create-a-cubble}}
@@ -1147,86 +934,6 @@ grouping can be added with \texttt{group\_by} and removed with
 \caption[Cubble operations]{Cubble operations}\label{fig:cubble-operations}
 \end{figure}
 \end{CodeChunk}
-
-\hypertarget{basics}{%
-\subsubsection{Basics}\label{basics}}
-
-\begin{itemize}
-\tightlist
-\item
-  \texttt{stretch}: nest to long form
-\item
-  \texttt{tamp}: long to nest form
-\item
-  \texttt{migrate}: move selected spatial variables to the long form.
-\item
-  \texttt{add\_dscrb\_prct}: summary stats for missingness
-\end{itemize}
-
-dplyr compatibility:
-
-\begin{itemize}
-\tightlist
-\item
-  mutate, filter, summarise, select, arrange
-\item
-  group and ungroup: group\_by, ungroup
-\item
-  slice family
-\end{itemize}
-
-\hypertarget{combine-two-cubbles}{%
-\subsubsection{Combine two cubbles}\label{combine-two-cubbles}}
-
-\begin{itemize}
-\tightlist
-\item
-  match river and weather gauges data
-\item
-  involve combining two cubbles
-\item
-  join operations combine the two together by appending more rows but
-  what we really want is to bind rows.
-\item
-  bind rows also doesn't work since we want to bind only when there' s a
-  matching????
-\item
-  introduce bind\_join
-\end{itemize}
-
-\hypertarget{hierarchical-structure-in-cubble}{%
-\subsubsection{Hierarchical structure in
-cubble}\label{hierarchical-structure-in-cubble}}
-
-\begin{itemize}
-\tightlist
-\item
-  hierarchical is common.
-\item
-  Given examples.
-\item
-  Essence: switch between different levels
-\item
-  introduce \texttt{switch\_key}
-\end{itemize}
-
-\hypertarget{examples-1}{%
-\section{Examples}\label{examples-1}}
-
-Daily climate data (prcp, tmax, and tmin) from RNOAA - lots of stations
-across Australia
-
-An exploratory data analysis questions: What's the climate profile look
-like in Australia
-
-\begin{itemize}
-\tightlist
-\item
-  General features: Any general trend/ fluctuation in prcp, tmax, and
-  tmin?
-\item
-  Local features: Any station stands out from the crowd?
-\end{itemize}
 
 \bibliography{references.bib}
 

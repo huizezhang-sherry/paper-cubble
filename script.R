@@ -29,3 +29,40 @@ plot_map(ireland) +
   geom_point(data = wind_cubble, aes(x = long, y = lat), shape = "+", color = "red", size = 5) + 
   geom_text(data = wind_cubble, aes(x = long, y = lat-0.05, label = station), size= 2)
 
+######################################
+
+nc <- ncdf4::nc_open(file.choose())
+temp <- as_cubble(nc, vars = "tp")
+
+aus <- temp %>% 
+  stretch() %>% 
+  filter(between(lubridate::date(time), as.Date("2021-11-17"), as.Date("2021-11-23"))) %>% 
+  tamp() %>% 
+  mutate(long = floor(long), lat = floor(lat), id2 = paste0(long, lat)) %>% 
+  switch_key(id2) %>% 
+  filter(s2::s2_within(s2::s2_lnglat(long, lat), sf::st_union(state_map))) 
+
+out <- aus %>% 
+  stretch(ts) %>% 
+  mutate(tp = tp * 39 * 31) %>% 
+  group_by(id) %>% 
+  summarise(tp = sum(tp, na.rm = TRUE)) %>% 
+  ungroup(id) %>% 
+  summarise(tp = mean(tp, na.rm = TRUE))
+
+res <- out %>%
+  migrate(long, lat) %>% 
+  distinct()
+
+state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3) 
+
+state_string <- state_map %>% sf::st_cast("MULTILINESTRING") 
+res %>% 
+  ggplot() +
+  geom_tile(aes(x = long, y = lat, fill = tp)) +
+  geom_sf(data = state_string , alpha = 0.5, fill = "transparent") +
+  theme_bw() + 
+  colorspace::scale_fill_continuous_sequential(
+    "Purple", breaks = seq(0, 150, 25)
+    )
+
