@@ -762,38 +762,48 @@ series:
 \end{figure}
 \end{CodeChunk}
 
+\hypertarget{spatio-temporal-data-with-netcdf}{%
+\subsection{Spatio-temporal data with
+NetCDF}\label{spatio-temporal-data-with-netcdf}}
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> nc <- ncdf4::nc_open(here::here("data/adaptor.mars.internal-1638344933.932894-4194-11-a5d35ac3-b36d-4982-afa5-a5dd193a6718.nc"))
+R> temp <- as_cubble(nc, vars = "d2m")
+R> vic_map <- ozmaps::abs_ste %>% filter(NAME == "Victoria")
+R> 
+R> res <- temp %>% 
++   stretch(ts) %>% 
++   mutate(d2m = d2m - 273.15) %>% 
++   filter(lubridate::hour(time) == 12) %>% 
++   group_by(id) %>% 
++   summarise(d2m = mean(d2m, na.rm= TRUE)) %>%
++   migrate(long, lat)
+R> 
+R> vic_string <- vic_map %>% sf::st_cast("MULTILINESTRING") 
+R> 
+R> res %>% 
++   ggplot() +
++   geom_tile(aes(x = long, y = lat, fill = d2m)) +
++   geom_sf(data = vic_string , alpha = 0.5, fill = "transparent") +
++   theme_bw() + 
++   colorspace::scale_fill_continuous_sequential("Mint")
+\end{CodeInput}
+
+
+\begin{center}\includegraphics{figures/unnamed-chunk-23-1} \end{center}
+
+\end{CodeChunk}
+
 \hypertarget{interative-graphic-with-cubble}{%
 \subsection{Interative graphic with
 cubble}\label{interative-graphic-with-cubble}}
 
 \begin{CodeChunk}
-\begin{CodeInput}
-R> set.seed(123)
-R> dt <- weatherdata::climate_full %>%
-+   slice_sample(n = 50) %>% 
-+   mutate(name = str_replace(name, "\\s*\\([^\\)]+\\)", ""))
-R>  
-R> tmax_data <- dt %>%
-+   stretch() %>%
-+   mutate(ym = tsibble::yearmonth(date)) %>%
-+   group_by(ym) %>%
-+   summarise(
-+     tmax = mean(tmax, na.rm = TRUE),
-+     tmin = mean(tmin, na.rm = TRUE),
-+     prcp = sum(prcp, na.rm = TRUE)
-+   ) %>%
-+   ungroup(ym) %>%
-+   mutate(
-+     year = as.factor(year(ym)),
-+     month = as.factor(month(ym)),
-+     prcp = sqrt(prcp + 0.001)
-+   ) %>%
-+   tamp() %>%
-+   mutate(median_tmax = median(ts$tmax, na.rm = TRUE)) %>%
-+   stretch() %>%
-+   migrate(median_tmax, long, lat, name) %>%
-+   highlight_key(~id)
-\end{CodeInput}
+
+
+\begin{center}\includegraphics[width=1\linewidth,height=0.3\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/linking} \end{center}
+
 \end{CodeChunk}
 
 \hypertarget{conclusion}{%
