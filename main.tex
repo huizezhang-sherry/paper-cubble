@@ -344,11 +344,46 @@ considerations}\label{advanced-features-considerations}}
 
 \texttt{switch\_key()}
 
+\hypertarget{data-fusion-and-matching}{%
+\subsection{Data fusion and matching}\label{data-fusion-and-matching}}
+
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}
 
-\hypertarget{data-fusion-and-matching}{%
-\subsection{Data fusion and matching}\label{data-fusion-and-matching}}
+Interactive graphics give users the chance to manipulate the graphes for
+additional information. This is especially useful for spatio-temporal
+data since users can zoom or pan the map to see different areas; use
+tooltips or popups to query more detailed information about a particular
+point; or explore points in multiple facets through highlight and
+cross-linking.
+
+Current general purpose R implementation on iterative graphics includes:
+plotly \citep{plotly}, leaflet \citep{leaflet}, and mapdeck
+\citep{mapdeck} uses the underlying javascript library plotly.js,
+leaflet.js, and mapbox.js; ggiraph \citep{ggiraph} for {[}\ldots{]};
+crosstalk \citep{crosstalk} has developed a cross linking between html
+widgets. There's also more R implement that produces leaflet extension,
+i.e.~tmap \citep{map}, mapview \citep{mapview}, leafpop \citep{leafpop},
+and leafgl \citep{leafgl}.
+
+Underlying each interactive graphic system is a pipeline workflow that
+communicates the user action down the workflow to {[}\ldots{]}. Various
+such workflow has been proposed in the 90s literature, including
+{[}\ldots{]}. These designs do the linking as follows: when an user
+action is captured, the system searches for the unique identifiers of
+that observation, and fetches the queried information with the same
+unique identifiers.
+
+With spatial temporal data, a common type of user action is to link
+between the time series plotted with the site on the map. Figure
+\ref{fig:interactive-workflow} shows how does interactivities work with
+graphics created by two forms in a cubble. With cubble, the time series
+plot and site map can be created with the long and nested form
+separately. The unique identifier shared by both the nested and long
+form in a cubble is the \texttt{key} variable. Once a user action is
+captured, the system will look for the corresponding key variable, which
+will highlight the observations in both forms. Then graphics will be
+updated with the highlighted observations.
 
 \newpage
 
@@ -803,6 +838,13 @@ cubble}\label{interative-graphic-with-cubble}}
 
 
 \begin{center}\includegraphics[width=1\linewidth,height=0.3\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/linking} \end{center}
+
+\end{CodeChunk}
+
+\begin{CodeChunk}
+
+
+\begin{center}\includegraphics[width=0.5\linewidth,height=0.3\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/popup} \end{center}
 
 \end{CodeChunk}
 

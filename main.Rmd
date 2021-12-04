@@ -171,9 +171,15 @@ slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample
 
 ## Interactive graphics
 
-Interactive graphics give users the chance to manipulate the graphes for additional information. This is especially useful for spatio-temporal data since it would be interesting to explore the correlation between nearby sites on the map or compare between clusters. Underlying each interactive graphic system is a pipeline workflow that communicates the user action down the workflow to [...]. Various such workflow has been proposed in the 90s literature, including [...]. Current general purpose R implementation on iterative graphics includes: plotly [@plotly] for [...]; ggiraph [@ggiraph] for [...]; crosstalk[@crosstalk] for [...]. Specifically for spatio-temporal data, there is tmap [@map], leftlet [@leaflet], mapview [@mapview]. 
+Interactive graphics give users the chance to manipulate the graphes for additional information. This is especially useful for spatio-temporal data since users can zoom or pan the map to see different areas; use tooltips or popups to query more detailed information about a particular point; or explore points in multiple facets through highlight and cross-linking.
 
-some common interactive actions include zoom and panning, tooltip/ highlight, and more advanced cross-linking. 
+Current general purpose R implementation on iterative graphics includes: plotly [@plotly], leaflet [@leaflet], and mapdeck [@mapdeck] uses the underlying javascript library plotly.js, leaflet.js, and mapbox.js; ggiraph [@ggiraph] for [...]; crosstalk [@crosstalk] has developed a cross linking between html widgets. There's also more R implement that produces leaflet extension, i.e. tmap [@map], mapview [@mapview], leafpop [@leafpop], and leafgl [@leafgl]. 
+
+
+Underlying each interactive graphic system is a pipeline workflow that communicates the user action down the workflow to [...]. Various such workflow has been proposed in the 90s literature, including [...]. These designs do the linking as follows: when an user action is captured, the system searches for the unique identifiers of that observation, and fetches the queried information with the same unique identifiers.
+
+With spatial temporal data, a common type of user action is to link between the time series plotted with the site on the map. Figure \ref{fig:interactive-workflow} shows how does interactivities work with graphics created by two forms in a cubble.  With cubble, the time series plot and site map can be created with the long and nested form separately. The unique identifier shared by both the nested and long form in a cubble is the `key` variable. Once a user action is captured, the system will look for the corresponding key variable, which will highlight the observations in both forms. Then graphics will be updated with the highlighted observations.
+
 
 
 
@@ -572,6 +578,11 @@ res %>%
 
 ```{r echo = FALSE, out.width="100%", out.height="30%"}
 knitr::include_graphics(here::here("figures/linking.png"))
+```
+
+
+```{r echo = FALSE, out.width="50%", out.height="30%"}
+knitr::include_graphics(here::here("figures/popup.png"))
 ```
 
 
