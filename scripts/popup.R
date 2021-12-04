@@ -50,3 +50,6 @@ leaflet() %>%
   addCircleMarkers(data = nested, group = "a", radius = 1) %>% 
   addPopupGraphs(graph = p, group = "a", width = 300, height =200)
 
+# manually saved from the Viewer tab
+
+
