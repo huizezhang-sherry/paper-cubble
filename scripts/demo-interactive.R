@@ -1,0 +1,36 @@
+library(cubble)
+library(dplyr)
+library(ggplot2)
+library(tsibble)
+
+set.seed(123)
+dt <- weatherdata::climate_full %>% slice_sample(n = 50)
+
+
+
+state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
+plot_map(state_map) +
+  geom_point(data = dt, aes(x = long, y = lat)) + 
+  geom_point(data = dt %>% filter(id == "ASN00003057"), aes(x = long, y = lat), color = "red") 
+
+ggsave(filename = "figures/map.png")
+
+long <- dt %>% 
+  stretch() %>% 
+  mutate(month = lubridate::month(date)) %>% 
+  group_by(month) %>% 
+  summarise(tmax = mean(tmax, na.rm = TRUE)) %>% 
+  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01")))
+
+highlight_line <- long %>% filter(id == "ASN00003057")
+highlight_point <- highlight_line %>% filter(month == 9)
+long %>% 
+  ggplot(aes(x = dummy_date, y = tmax, group = id)) +
+  geom_point(size = 0.3) + 
+  geom_line() + 
+  geom_line(data = highlight_line, color = "red") + 
+  geom_point(data = highlight_point, color = "red") + 
+  scale_x_date(date_labels = "%b") + 
+  xlab("Month")
+  
+ggsave(filename = "figures/mean-temp.png", width = 5, height = 3)
