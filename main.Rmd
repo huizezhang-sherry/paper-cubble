@@ -76,14 +76,14 @@ library(patchwork)
 
 **Motivation**
 
-Many data structures have been proposed for spatial (`sf` by @sf) and temporal (`tsibble` by @tsibble) data in the R community, while less has been done for spatio-temporal data. The lack of such tools could potentially because analysts usually treat the spatial and temporal dimension of the data separately, without realising the need to create a new data structure. While this approach follows the third tidy data principal [@tidydata] (*Each type of observational unit forms a table*), analysts always need to manually join results from different observational units or combining multiple tables into one for downstream analysis. This additional step doesn't add new operations into the data but can be error prone. \newline
+Many data structures have been proposed for spatial (\pkg{sf} by @sf) and temporal (\pkg{tsibble} by @tsibble) data in the R community, while less has been done for spatio-temporal data. The lack of such tools could potentially because analysts usually treat the spatial and temporal dimension of the data separately, without realising the need to create a new data structure. While this approach follows the third tidy data principal [@tidydata] (*Each type of observational unit forms a table*), analysts always need to manually join results from different observational units or combining multiple tables into one for downstream analysis. This additional step doesn't add new operations into the data but can be error prone. \newline
 
 **Existing packages**
 
-Currently, available spatio-temporal data structure in R includes: `spacetime`[@spacetime], which proposes four space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI), and trajectory (STT). The data structure it uses is based on `sp` [@sp] and `xts`[@xts], both of which has been replaced by more recent implementations. `spatstat` [@spatstat] implements a `ppp` class for point pattern data; and more recent, `stars` [@stars] implements a spatio-temporal array with the dplyr's data cube structure `cubelyr` [@cubelyr] as its backend. While these implementations either store spatial and temporal variables all in a single table, hence duplicate the spatial variables for each temporal unit; or split them into two separate tables that has the problem of manually joining, mentioned in the previously. None of these packages enjoy both the benefits of being able to separate manipulation in the two dimensions while also keep the data object as a whole. This create a gap in the software development. The requirement for such a tool is important given the ubiquity of spatio-temporal vector data in the wild: the Ireland wind data from `gstat` is an classic example data that splits variables into spatial (`wind.loc`) and temporal (`wind`) dimension; Bureau of Meteorology (BoM) provides climate observations that are widely applied in agriculture and ecology study; air pollution data. \newline
+Currently, available spatio-temporal data structure in R includes: \pkg{spacetime} [@spacetime], which proposes four space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI), and trajectory (STT). The data structure it uses is based on \pkg{sp} [@sp] and \pkg{xts} [@xts], both of which has been replaced by more recent implementations. \pkg{spatstat} [@spatstat] implements a `ppp` class for point pattern data; and more recent, \pkg{stars} [@stars] implements a spatio-temporal array with the dplyr's data cube structure \pkg{cubelyr} [@cubelyr] as its backend. While these implementations either store spatial and temporal variables all in a single table, hence duplicate the spatial variables for each temporal unit; or split them into two separate tables that has the problem of manually joining, mentioned in the previously. None of these packages enjoy both the benefits of being able to separate manipulation in the two dimensions while also keep the data object as a whole. This create a gap in the software development. The requirement for such a tool is important given the ubiquity of spatio-temporal vector data in the wild: the Ireland wind data from \pkg{gstat} is an classic example data that splits variables into spatial (`wind.loc`) and temporal (`wind`) dimension; Bureau of Meteorology (BoM) provides climate observations that are widely applied in agriculture and ecology study; air pollution data. \newline
 
 **Our new data structure for spatio-temporal data**\
-This paper describes the implementation of a new spatio-temporal data structure: `cubble`. `cubble` implements a relational data structure that uses two forms to manage the switch between spatial and temporal dimension. With this structure, users can manipulate the spatial or temporal dimension separately, while leaves the linking of two dimensions to `cubble`. The software is available from the Comprehensive R Archive Network (CRAN) at [CRAN link]. \newline
+This paper describes the implementation of a new spatio-temporal data structure: \pkg{cubble}. \pkg{cubble} implements a relational data structure that uses two forms to manage the switch between spatial and temporal dimension. With this structure, users can manipulate the spatial or temporal dimension separately, while leaves the linking of two dimensions to \pkg{cubble\pkg{. The software is available from the Comprehensive R Archive Network (CRAN) at [CRAN link]. \newline
 
 **Section division**
 
@@ -97,28 +97,28 @@ The rest of the paper will be divided as follows: [complete when the paper struc
 
 Spatio-temporal data usually come in various forms and Figure \ref{fig:cubble-diagram} shows four examples of this. No matter which form the data is in, these formats share some common components that characterise spatio-temporal data. A spatial identifier (`id` in the diagram) is the unique identifier of each site. The temporal identifier (`t` in the diagram) prescribes the time stamp each site is recorded. Coordinates, comprising of latitude and longitude (`lon` and `lat` in the diagram), locates each site on the map. These identifiers will be the building blocks for the data structure introduced below. Other variables in the data can be categorised into two groups: spatial variables that are invariant at each time stamp for every site, i.e. the name or code of the weather station and temporal variables that varies with time.
 
-```{r cubble-diagram, echo = FALSE, out.width = "100%", out.height = "30%", fig.cap="Illustration of incoming data formats for spatio-temporal data. (1) Data comes in as a single table; (2) Separate tables for spatial and temporal variables; (3) A single table with all the parameters used to query the database and a separate table for queried data; and (4) Cubical data in array or NetCDF format.", fig.align='center', out.height = "15%"}
-knitr::include_graphics(here::here("figures/input-formats/input-formats.001.png"))
+```{r cubble-diagram, echo = FALSE, out.width = "100%", fig.cap="Illustration of incoming data formats for spatio-temporal data. (1) Data comes in as a single table; (2) Separate tables for spatial and temporal variables; (3) A single table with all the parameters used to query the database and a separate table for queried data; and (4) Cubical data in array or NetCDF format.", fig.align='center', out.height = "15%"}
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
 ```
 
 In a cubble, there are two forms: nested form and long form, and Figure \ref{fig:def-cubble} sketches the two forms along with the associated attributes. The decision on which form to use is output-oriented, meaning analysts need to first think about whether the output of a particular operation is identified only by the spatial identifier, or a combination of spatial and temporal identifier. The nested cubble is suitable for working with operations that are only identified by site and this type of operation can be a pure manipulation of spatial variables, or a summary of temporal variables by site (i.e. the output of counting the number of raining day is only identified by sites and hence should be performed with the nested form). Underneath the nested form, a cubble is built from a row-wise dataframe (`rowwise_df`) where each site forms a separate group. This structure simplifies the calculation that involves temporal variables by avoiding the use of `map` syntax when working with list-column.
 
-For those operations whose output involves both a spatial and temporal dimension, long form should be used. The long form is identified by both the spatial and temporal identifier and adopts a grouped dataframe (`grouped_df`) to forms each site as a group. Spatial variables are stored separately in a `tibble` as an special attribute of the long cubble. This design avoids repeating the spatial variables at each time stamp while not dropping information from spatial variables.
+For those operations whose output involves both a spatial and temporal dimension, long form should be used. The long form is identified by both the spatial and temporal identifier and adopts a grouped dataframe (`grouped_df`) to forms each site as a group. Spatial variables are stored separately in a \pkg{tibble} as an special attribute of the long cubble. This design avoids repeating the spatial variables at each time stamp while not dropping information from spatial variables.
 
-```{r def-cubble, echo = FALSE, fig.align="center", out.height="30%", out.width = "100%", fig.cap = "Illustration of nested and long cubble."}
-knitr::include_graphics(here::here("figures/def-cubble/def-cubble.001.png"))
+```{r def-cubble, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "Illustration of nested and long cubble."}
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
 ```
 
 ## Create a cubble in the nested form
 
-To use functionalities from cubble, data analysts first need to create a cubble. `as_cubble` create a `cubble` by supplying the three key components: `key` as the spatial identifier; `index` as the temporal identifier; and a vector of `coords` in the order of longitude first and then latitude. The naming of `key` and `index` follows the convention in the `tsibble` package. The cubble created by default is in the nested form. Below is an example of creating a cubble: \newline
+To use functionalities from cubble, data analysts first need to create a cubble. `as_cubble` create a \pkg{cubble} by supplying the three key components: `key` as the spatial identifier; `index` as the temporal identifier; and a vector of `coords` in the order of longitude first and then latitude. The naming of `key` and `index` follows the convention in the \pkg{tsibble} package. The cubble created by default is in the nested form. Below is an example of creating a cubble: \newline
 
 ```{r}
 (cubble_nested <- cubble::climate_flat %>%
   as_cubble(key = id, index = date, coords = c("long", "lat")))
 ```
 
-There are a few information in the `cubble` header: the name of the `key` variable, bbox, and also the name of variable nested in the `ts` column. In this example, each site is identifier is `id` and the number in the bracket means there are 5 unique `id` in this dataset. The bbox in the second row gives the range of the coordinates. The temporal variables are all nested in the `ts` column, but it could be useful to know the name these variables. The third row in the cubble header shows these names and in this example this includes: precipitation, `prcp`, maximum temperature, `tmax`, and minimum temperature, `tmin`.
+There are a few information in the \pkg{cubble} header: the name of the `key` variable, bbox, and also the name of variable nested in the `ts` column. In this example, each site is identifier is `id` and the number in the bracket means there are 5 unique `id` in this dataset. The bbox in the second row gives the range of the coordinates. The temporal variables are all nested in the `ts` column, but it could be useful to know the name these variables. The third row in the cubble header shows these names and in this example this includes: precipitation, `prcp`, maximum temperature, `tmax`, and minimum temperature, `tmin`.
 
 ## Stretch a nested cubble into the long form
 
@@ -159,7 +159,7 @@ slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample
 \end{tabular}
 \end{center}
 ```
-`cubble` is also compatible with `tsibble` in the sense that the original list-column can be a `tbl_ts` object. Duplicates and gaps should be first checked before structuring the data into a cubble. If the input data is a `tsibble` object, the long form cubble is also a `tsibble` where users can directly apply time series operations.
+\pkg{cubble} is also compatible with \pkg{tsibble} in the sense that the original list-column can be a `tbl_ts` object. Duplicates and gaps should be first checked before structuring the data into a cubble. If the input data is a \pkg{tsibble} object, the long form cubble is also a \pkg{tsibble} where users can directly apply time series operations.
 
 # Advanced features/ considerations
 
@@ -171,17 +171,22 @@ slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample
 
 ## Interactive graphics
 
-Interactive graphics give users the chance to manipulate the graphes for additional information. This is especially useful for spatio-temporal data since users can zoom or pan the map to see different areas; use tooltips or popups to query more detailed information about a particular point; or explore points in multiple facets through highlight and cross-linking.
+Interactive graphics give users the chance to manipulate the graphes for additional information. This is especially useful for spatio-temporal data since users can zoom or pan the map to see more details; use tooltips or popups to query more information about a graphic element; or explore points in multiple facets through highlight and cross-linking.
 
-Current general purpose R implementation on iterative graphics includes: plotly [@plotly], leaflet [@leaflet], and mapdeck [@mapdeck] uses the underlying javascript library plotly.js, leaflet.js, and mapbox.js; ggiraph [@ggiraph] for [...]; crosstalk [@crosstalk] has developed a cross linking between html widgets. There's also more R implement that produces leaflet extension, i.e. tmap [@map], mapview [@mapview], leafpop [@leafpop], and leafgl [@leafgl]. 
+Current general purpose R implementations on interactive graphics include: \pkg{plotly} [@plotly], \pkg{leaflet} [@leaflet] that uses the underlying javascript library to realise various interactive actions; \pkg{ggiraph} [@ggiraph] implements tooltip, self-linking, and customised actions specified through \\proglang{javascripts}; \pkg{crosstalk} [@crosstalk] implements brushed linking between htmlwidgets. There's also more R implements that produces leaflet extension, i.e. \pkg{tmap} [@tmap], \pkg{mapview} [@mapview], and \pkg{leafpop} [@leafpop]. 
+
+While many graphic implementations present worked examples to illustrate the usage of the package, few documents the design framework that transforms the raw data step-by-step to the final view on the screen. This step is called data pipeline and some early work in building a data pipeline includes @buja1988elements, @buja1996interactive, and  @sutherland2000orca. @wickham2009plumbing argues that *this pipeline must be presented, in some form, in all graphic software*. For interactive graphics, the pipeline also needs to include how this workflow is updated to reflect a captured user action. Some good examples of this includes [@xie2014reactive]. maybe one sentence on @cheng2016enabling.  In @wickham2009plumbing, they hope to implement a workflow where subseting of the data can be moved to a later stage. This would enable the plot to display different subsets of the data. @xie2014reactive describes the machanism of category linking with multiple sources through a key variable. 
+
+Here we will describe brushed linking between the two forms in cubble. With spatial temporal data, a common type of user action is to link between the time series plotted with the site on the map. Figure \ref{fig:interactive-workflow} shows how does interactivities work with graphics created by two forms in a cubble.  With cubble, the time series plot and site map can be created with the long and nested form separately. The unique identifier shared by both the nested and long form in a cubble is the `key` variable. Once a user action is captured, the system will look for the corresponding key variable, which will highlight the observations in both forms. Then graphics will be updated with the highlighted observations.
+
+```{r interactive-workflow, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon interactivity"}
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
+```
 
 
-Underlying each interactive graphic system is a pipeline workflow that communicates the user action down the workflow to [...]. Various such workflow has been proposed in the 90s literature, including [...]. These designs do the linking as follows: when an user action is captured, the system searches for the unique identifiers of that observation, and fetches the queried information with the same unique identifiers.
+<!-- communicates the user action down the workflow to [...]. Various such workflow has been proposed in the 90s literature, including [...]. These designs do the linking as follows: when an user action is)) captured, the system searches for the unique identifiers of that observation, and fetches the queried information with the same unique identifiers. -->
 
-With spatial temporal data, a common type of user action is to link between the time series plotted with the site on the map. Figure \ref{fig:interactive-workflow} shows how does interactivities work with graphics created by two forms in a cubble.  With cubble, the time series plot and site map can be created with the long and nested form separately. The unique identifier shared by both the nested and long form in a cubble is the `key` variable. Once a user action is captured, the system will look for the corresponding key variable, which will highlight the observations in both forms. Then graphics will be updated with the highlighted observations.
-
-
-
+linking machenism in crosstalk and leaflet
 
 \newpage
 
@@ -662,5 +667,5 @@ With a cubic framework on mind, different types of manipulation with cubble can 
 ## Cubble operations
 
 ```{r cubble-operations, echo = FALSE, fig.cap="Cubble operations", out.height="50%", out.width="90%", fig.align='center'}
-knitr::include_graphics(here::here("figures/cubble-operations/cubble-operations.001.png"))
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```

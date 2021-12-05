@@ -51,10 +51,10 @@ The abstract of the article.
 
 \textbf{Motivation}
 
-Many data structures have been proposed for spatial (\texttt{sf} by
-\citet{sf}) and temporal (\texttt{tsibble} by \citet{tsibble}) data in
-the R community, while less has been done for spatio-temporal data. The
-lack of such tools could potentially because analysts usually treat the
+Many data structures have been proposed for spatial (\pkg{sf} by
+\citet{sf}) and temporal (\pkg{tsibble} by \citet{tsibble}) data in the
+R community, while less has been done for spatio-temporal data. The lack
+of such tools could potentially because analysts usually treat the
 spatial and temporal dimension of the data separately, without realising
 the need to create a new data structure. While this approach follows the
 third tidy data principal \citep{tidydata} (\emph{Each type of
@@ -66,14 +66,14 @@ add new operations into the data but can be error prone. \newline
 \textbf{Existing packages}
 
 Currently, available spatio-temporal data structure in R includes:
-\texttt{spacetime}\citep{spacetime}, which proposes four space-time
+\pkg{spacetime} \citep{spacetime}, which proposes four space-time
 layouts: Full grid (STF), sparse grid(STS), irregular (STI), and
-trajectory (STT). The data structure it uses is based on \texttt{sp}
-\citep{sp} and \texttt{xts}\citep{xts}, both of which has been replaced
-by more recent implementations. \texttt{spatstat} \citep{spatstat}
-implements a \texttt{ppp} class for point pattern data; and more recent,
-\texttt{stars} \citep{stars} implements a spatio-temporal array with the
-dplyr's data cube structure \texttt{cubelyr} \citep{cubelyr} as its
+trajectory (STT). The data structure it uses is based on \pkg{sp}
+\citep{sp} and \pkg{xts} \citep{xts}, both of which has been replaced by
+more recent implementations. \pkg{spatstat} \citep{spatstat} implements
+a \texttt{ppp} class for point pattern data; and more recent,
+\pkg{stars} \citep{stars} implements a spatio-temporal array with the
+dplyr's data cube structure \pkg{cubelyr} \citep{cubelyr} as its
 backend. While these implementations either store spatial and temporal
 variables all in a single table, hence duplicate the spatial variables
 for each temporal unit; or split them into two separate tables that has
@@ -82,7 +82,7 @@ these packages enjoy both the benefits of being able to separate
 manipulation in the two dimensions while also keep the data object as a
 whole. This create a gap in the software development. The requirement
 for such a tool is important given the ubiquity of spatio-temporal
-vector data in the wild: the Ireland wind data from \texttt{gstat} is an
+vector data in the wild: the Ireland wind data from \pkg{gstat} is an
 classic example data that splits variables into spatial
 (\texttt{wind.loc}) and temporal (\texttt{wind}) dimension; Bureau of
 Meteorology (BoM) provides climate observations that are widely applied
@@ -90,12 +90,13 @@ in agriculture and ecology study; air pollution data. \newline
 
 \textbf{Our new data structure for spatio-temporal data}\\
 This paper describes the implementation of a new spatio-temporal data
-structure: \texttt{cubble}. \texttt{cubble} implements a relational data
+structure: \pkg{cubble}. \pkg{cubble} implements a relational data
 structure that uses two forms to manage the switch between spatial and
 temporal dimension. With this structure, users can manipulate the
 spatial or temporal dimension separately, while leaves the linking of
-two dimensions to \texttt{cubble}. The software is available from the
-Comprehensive R Archive Network (CRAN) at {[}CRAN link{]}. \newline
+two dimensions to \textbackslash pkg\{cubble\textbackslash pkg\{. The
+software is available from the Comprehensive R Archive Network (CRAN) at
+{[}CRAN link{]}. \newline
 
 \textbf{Section division}
 
@@ -124,7 +125,7 @@ station and temporal variables that varies with time.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.15\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/input-formats/input-formats.001} 
+{\centering \includegraphics[width=1\linewidth,height=0.15\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
 
 }
 
@@ -152,14 +153,14 @@ For those operations whose output involves both a spatial and temporal
 dimension, long form should be used. The long form is identified by both
 the spatial and temporal identifier and adopts a grouped dataframe
 (\texttt{grouped\_df}) to forms each site as a group. Spatial variables
-are stored separately in a \texttt{tibble} as an special attribute of
-the long cubble. This design avoids repeating the spatial variables at
-each time stamp while not dropping information from spatial variables.
+are stored separately in a \pkg{tibble} as an special attribute of the
+long cubble. This design avoids repeating the spatial variables at each
+time stamp while not dropping information from spatial variables.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.3\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/def-cubble/def-cubble.001} 
+{\centering \includegraphics[width=1\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.002} 
 
 }
 
@@ -172,13 +173,13 @@ each time stamp while not dropping information from spatial variables.
 form}\label{create-a-cubble-in-the-nested-form}}
 
 To use functionalities from cubble, data analysts first need to create a
-cubble. \texttt{as\_cubble} create a \texttt{cubble} by supplying the
-three key components: \texttt{key} as the spatial identifier;
-\texttt{index} as the temporal identifier; and a vector of
-\texttt{coords} in the order of longitude first and then latitude. The
-naming of \texttt{key} and \texttt{index} follows the convention in the
-\texttt{tsibble} package. The cubble created by default is in the nested
-form. Below is an example of creating a cubble: \newline
+cubble. \texttt{as\_cubble} create a \pkg{cubble} by supplying the three
+key components: \texttt{key} as the spatial identifier; \texttt{index}
+as the temporal identifier; and a vector of \texttt{coords} in the order
+of longitude first and then latitude. The naming of \texttt{key} and
+\texttt{index} follows the convention in the \pkg{tsibble} package. The
+cubble created by default is in the nested form. Below is an example of
+creating a cubble: \newline
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -199,9 +200,9 @@ R> (cubble_nested <- cubble::climate_flat %>%
 \end{CodeOutput}
 \end{CodeChunk}
 
-There are a few information in the \texttt{cubble} header: the name of
-the \texttt{key} variable, bbox, and also the name of variable nested in
-the \texttt{ts} column. In this example, each site is identifier is
+There are a few information in the \pkg{cubble} header: the name of the
+\texttt{key} variable, bbox, and also the name of variable nested in the
+\texttt{ts} column. In this example, each site is identifier is
 \texttt{id} and the number in the bracket means there are 5 unique
 \texttt{id} in this dataset. The bbox in the second row gives the range
 of the coordinates. The temporal variables are all nested in the
@@ -328,12 +329,12 @@ slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample
 \end{tabular}
 \end{center}
 
-\texttt{cubble} is also compatible with \texttt{tsibble} in the sense
-that the original list-column can be a \texttt{tbl\_ts} object.
-Duplicates and gaps should be first checked before structuring the data
-into a cubble. If the input data is a \texttt{tsibble} object, the long
-form cubble is also a \texttt{tsibble} where users can directly apply
-time series operations.
+\pkg{cubble} is also compatible with \pkg{tsibble} in the sense that the
+original list-column can be a \texttt{tbl\_ts} object. Duplicates and
+gaps should be first checked before structuring the data into a cubble.
+If the input data is a \pkg{tsibble} object, the long form cubble is
+also a \pkg{tsibble} where users can directly apply time series
+operations.
 
 \hypertarget{advanced-features-considerations}{%
 \section{Advanced features/
@@ -358,22 +359,31 @@ point; or explore points in multiple facets through highlight and
 cross-linking.
 
 Current general purpose R implementation on iterative graphics includes:
-plotly \citep{plotly}, leaflet \citep{leaflet}, and mapdeck
-\citep{mapdeck} uses the underlying javascript library plotly.js,
-leaflet.js, and mapbox.js; ggiraph \citep{ggiraph} for {[}\ldots{]};
-crosstalk \citep{crosstalk} has developed a cross linking between html
-widgets. There's also more R implement that produces leaflet extension,
-i.e.~tmap \citep{map}, mapview \citep{mapview}, leafpop \citep{leafpop},
-and leafgl \citep{leafgl}.
+\pkg{plotly} \citep{plotly}, \pkg{leaflet} \citep{leaflet}, and
+\pkg{mapdeck} \citep{mapdeck} uses the underlying javascript library
+\pkg{plotly.js}, \pkg{leaflet.js}, and \pkg{mapbox.js}; \pkg{ggiraph}
+\citep{ggiraph} for {[}\ldots{]}; \pkg{crosstalk} \citep{crosstalk} has
+developed a cross linking between html widgets. There's also more R
+implement that produces leaflet extension, i.e.~\pkg{tmap} \citep{tmap},
+\pkg{mapview} \citep{mapview}, and \pkg{leafpop} \citep{leafpop}.
 
-Underlying each interactive graphic system is a pipeline workflow that
-communicates the user action down the workflow to {[}\ldots{]}. Various
-such workflow has been proposed in the 90s literature, including
-{[}\ldots{]}. These designs do the linking as follows: when an user
-action is captured, the system searches for the unique identifiers of
-that observation, and fetches the queried information with the same
-unique identifiers.
+While many graphic implementations present the design framework and
+presents worked examples, few demonstrates how the design framework
+transforms the raw data step-by-step to the final view on the screen.
+This step is called data pipeline and some early work in building a data
+pipeline includes \citet{buja1988elements}, \citet{buja1996interactive},
+and \citet{sutherland2000orca}. \citet{wickham2009plumbing} argues that
+\emph{this pipeline must be presented, in some form, in all graphic
+software}. For interactive graphics, the pipeline also needs to include
+how this workflow is updated to reflect a captured user action. Some
+good examples of this includes \citep{xie2014reactive}. maybe one
+sentence on \citet{cheng2016enabling}. In \citet{wickham2009plumbing},
+they hope to implement a workflow where subseting of the data can be
+moved to a later stage. This would enable the plot to display different
+subsets of the data. \citet{xie2014reactive} describes the machanism of
+category linking with multiple sources through a key variable.
 
+Here we will describe brushed linking between the two forms in cubble.
 With spatial temporal data, a common type of user action is to link
 between the time series plotted with the site on the map. Figure
 \ref{fig:interactive-workflow} shows how does interactivities work with
@@ -384,6 +394,19 @@ form in a cubble is the \texttt{key} variable. Once a user action is
 captured, the system will look for the corresponding key variable, which
 will highlight the observations in both forms. Then graphics will be
 updated with the highlighted observations.
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
+
+}
+
+\caption[demon interactivity]{demon interactivity}\label{fig:interactive-workflow}
+\end{figure}
+\end{CodeChunk}
+
+linking machenism in crosstalk and leaflet
 
 \newpage
 
@@ -979,7 +1002,7 @@ grouping can be added with \texttt{group\_by} and removed with
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth,height=0.5\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/cubble-operations/cubble-operations.001} 
+{\centering \includegraphics[width=0.9\linewidth,height=0.5\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.004} 
 
 }
 
