@@ -17,7 +17,8 @@ long <- weatherdata::climate_full %>%
   ) %>%
   ungroup(ym) %>%
   mutate(month = lubridate::month(ym),
-         year = as.factor(lubridate::year(ym))) %>% 
+         year = as.factor(lubridate::year(ym)),
+         dummy_date = as.Date(glue::glue("2021-{month}-01"))) %>% 
   migrate(name)
 
 nested <- long %>% tamp()
@@ -32,11 +33,12 @@ for (i in 1:length(df_id)) {
   
   p[[i]] <- dt %>% 
     ggplot(aes(
-      x = month, y = tmax, group = year,
+      x = dummy_date, y = tmax, group = year,
       color = year, label = name
     )) +
     geom_point(size = 0.5) + 
     geom_line() +
+    scale_x_date(date_labels = "%b") + 
     scale_color_brewer(palette = "Reds",direction = 1) + 
     theme_bw() + 
     labs(x = "Month", title = name[i]) 

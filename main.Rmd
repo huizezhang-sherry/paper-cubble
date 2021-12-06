@@ -190,11 +190,9 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Australia precipitation pattern in 2020
 
-Forming a cubble + basic tidyverse verbs - Vig 2 Aggregation - Vig 4
+### Glyph map 
 
 This vignette introduces how to perform spatial and temporal manipulate in a cubble with dplyr verbs. We will illustrate with `weatherdata::historical_tmax` data, which have the historical maximum temperature recorded for Australian stations with the earliest dating back to 1859.
-
-### Spatial manipulation
 
 `historical_tmax` is already in a nested cubble format, which is suitable for station-wise manipulation. `rnoaa` construct the station id by prefix `ASN00` to the Bureau of Meteorology (BOM) station number. In [BOM's numbering system](http://www.bom.gov.au/climate/cdo/about/site-num.shtml), the 2nd and 3rd digit denotes the state a station is located in and this is equivalent to the 7th to 8th digit in our string. We can mutate/ filter station in a particular state based on this information and here we add a column called `state_id` and filter out the ones in New South Wales and Victoria (ranging from 46 to 90).
 
@@ -203,8 +201,6 @@ tmax_nested <- weatherdata::historical_tmax %>%
   mutate(state_id = stringr::str_sub(id, 7, 8)) %>%
   filter(between(state_id, 46, 90))
 ```
-
-### Temporal manipulation
 
 There are some operations in the time dimension we would like to make:
 
@@ -229,8 +225,6 @@ tmax_long <- tmax_nested %>%
   summarise(tmax = mean(tmax, na.rm = TRUE))
 ```
 
-### Back to spatial
-
 A data quality issue with the `rnoaa` data is that while it records the first and last year recorded of each series, it doesn't report the period of missingness. For example, station `ASN00047048` starts it first record in 1957, pauses for a period from 1963 to 1990, and then resumes it recording till today. Out of the `r nrow(tmax_nested)` stations in New South Wales and Victoria, 7 stations have this issue and we would like to remove those stations from the comparison.
 
 Again, this is a station-wise operation and to convert back from the long cubble to a nested one, use `tamp()`. Here we keep the stations with 24 observations (12 months for both periods) after the monthly aggregation.
@@ -248,8 +242,6 @@ tmax_long2 <- tmax_nested2 %>%
   stretch() %>%
   migrate(latitude, longitude)
 ```
-
-### Glyph map
 
 Now its time for the glyph map!
 
@@ -278,7 +270,7 @@ plot_map(nsw_vic, fill = "transparent") +
   theme(legend.position = "bottom")
 ```
 
-## Spatial and temporal aggregation
+### Aggregation 
 
 On top of `aus_climate` data in this package, `climate_full` from package [`weatherdata`](https://github.com/huizezhang-sherry/weatherdata) has daily climate data of `r nrow(weatherdata::climate_full)` Australia stations from 2016 to 2020. This is where these stations locate in an Australia map:
 
@@ -295,8 +287,6 @@ station_nested <- weatherdata::climate_full %>%
   summarise(prcp = sum(prcp, na.rm = TRUE)) %>%
   tamp()
 ```
-
-### Hierarchical data structure
 
 Imposing a clustering structure can be thought of as building a hierarchical structure where stations are nested within clusters. As an example to illustrate here, we use a kmean clustering algorithm based on the distance matrix and specify the number of centres to be 20. More complex algorithms can also be used for more complex problem, as long as a mapping from each station id to the cluster id can be constructed. We then join this data to our station data:
 
@@ -398,7 +388,7 @@ plot_map(state_map) +
   geom_point(data = tas_latlong, aes(x = long, y = lat), col = "red")
 ```
 
-## Matching precipitation and river level in Victria water gauges
+## River level data in Victria water gauges
 
 The water level data comes from [Bureau of Meteorology](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) and has a copy in `weatherdata`. Here we extract the water course level and add a column annotate this data of type `river`. For the rainfall data, we will still use the `weatherdata::climate_full`, filtering for Victorian stations in 2020 should be pretty familiar by now. Again, we first look at where these stations are on the map first:
 
@@ -426,7 +416,6 @@ plot_map(vic_map) +
   theme_bw()
 ```
 
-### Theory
 
 Temporal matching checks how spatially matched pairs align temporally. We use the following chart to illustrate how the temporal matching works:
 
@@ -481,8 +470,6 @@ ggplot() +
 For each spatially matched pair, say `A` and `a`, we first find the largest `n` points in each series, colored in brown points here. Here we use the largest three but you can tune this number by `temporal_n_highest`. Then we construct the interval of the largest points from one series and see how many points, from the other series, fall into the intervals. The series used to construct the interval is controlled by `temporal_independent` and the window size by `temporal_window` with a default of 5.
 
 In this illustration, we construct the interval based on series `A` and two of the three peaks from `a` falls into this interval at Time 7 and 27.
-
-### Rainfall translates into river level
 
 There's another mandatory argument that hasn't been introduced above: `temporal_var_to_match`. This argument controls the variable to match and it needs to appear in both the `major` and `minor` set. In the water level matching example, we match the variable `Water_course_level` from `river` to `prcp` from `climate`, hence need to manually rename one of them to match the other, here we rename `Water_course_level` to `prcp` in `river`:
 
@@ -549,11 +536,13 @@ p2 <- res_long %>%
 p1 | p2
 ```
 
-## Spatio-temporal data with NetCDF
+## ERA5: climate reanalysis data
 
-```{r}
+```{r eval = FALSE}
 nc <- ncdf4::nc_open(here::here("data/adaptor.mars.internal-1638344933.932894-4194-11-a5d35ac3-b36d-4982-afa5-a5dd193a6718.nc"))
-temp <- as_cubble(nc, vars = "d2m")
+
+nc <- ncdf4::nc_open(here::here("data/tas_Amon_ACCESS-CM2_ssp585_r1i1p1f1_gn_20150116-20201216_v20191108.nc"))
+temp <- as_cubble(nc, vars = "tas")
 vic_map <- ozmaps::abs_ste %>% filter(NAME == "Victoria")
 
 res <- temp %>% 

@@ -413,16 +413,14 @@ the same category.
 \subsection{Australia precipitation pattern in
 2020}\label{australia-precipitation-pattern-in-2020}}
 
-Forming a cubble + basic tidyverse verbs - Vig 2 Aggregation - Vig 4
+\hypertarget{glyph-map}{%
+\subsubsection{Glyph map}\label{glyph-map}}
 
 This vignette introduces how to perform spatial and temporal manipulate
 in a cubble with dplyr verbs. We will illustrate with
 \texttt{weatherdata::historical\_tmax} data, which have the historical
 maximum temperature recorded for Australian stations with the earliest
 dating back to 1859.
-
-\hypertarget{spatial-manipulation}{%
-\subsubsection{Spatial manipulation}\label{spatial-manipulation}}
 
 \texttt{historical\_tmax} is already in a nested cubble format, which is
 suitable for station-wise manipulation. \texttt{rnoaa} construct the
@@ -443,9 +441,6 @@ R> tmax_nested <- weatherdata::historical_tmax %>%
 +   filter(between(state_id, 46, 90))
 \end{CodeInput}
 \end{CodeChunk}
-
-\hypertarget{temporal-manipulation}{%
-\subsubsection{Temporal manipulation}\label{temporal-manipulation}}
 
 There are some operations in the time dimension we would like to make:
 
@@ -481,9 +476,6 @@ R> tmax_long <- tmax_nested %>%
 +   summarise(tmax = mean(tmax, na.rm = TRUE))
 \end{CodeInput}
 \end{CodeChunk}
-
-\hypertarget{back-to-spatial}{%
-\subsubsection{Back to spatial}\label{back-to-spatial}}
 
 A data quality issue with the \texttt{rnoaa} data is that while it
 records the first and last year recorded of each series, it doesn't
@@ -523,9 +515,6 @@ R> tmax_long2 <- tmax_nested2 %>%
 \end{CodeInput}
 \end{CodeChunk}
 
-\hypertarget{glyph-map}{%
-\subsubsection{Glyph map}\label{glyph-map}}
-
 Now its time for the glyph map!
 
 \begin{CodeChunk}
@@ -535,9 +524,8 @@ Now its time for the glyph map!
 
 \end{CodeChunk}
 
-\hypertarget{spatial-and-temporal-aggregation}{%
-\subsection{Spatial and temporal
-aggregation}\label{spatial-and-temporal-aggregation}}
+\hypertarget{aggregation}{%
+\subsubsection{Aggregation}\label{aggregation}}
 
 On top of \texttt{aus\_climate} data in this package,
 \texttt{climate\_full} from package
@@ -567,10 +555,6 @@ R> station_nested <- weatherdata::climate_full %>%
 +   tamp()
 \end{CodeInput}
 \end{CodeChunk}
-
-\hypertarget{hierarchical-data-structure}{%
-\subsubsection{Hierarchical data
-structure}\label{hierarchical-data-structure}}
 
 Imposing a clustering structure can be thought of as building a
 hierarchical structure where stations are nested within clusters. As an
@@ -685,9 +669,9 @@ lets look at where it is:
 
 \end{CodeChunk}
 
-\hypertarget{matching-precipitation-and-river-level-in-victria-water-gauges}{%
-\subsection{Matching precipitation and river level in Victria water
-gauges}\label{matching-precipitation-and-river-level-in-victria-water-gauges}}
+\hypertarget{river-level-data-in-victria-water-gauges}{%
+\subsection{River level data in Victria water
+gauges}\label{river-level-data-in-victria-water-gauges}}
 
 The water level data comes from
 \href{http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full}{Bureau
@@ -704,9 +688,6 @@ these stations are on the map first:
 \begin{center}\includegraphics{figures/unnamed-chunk-18-1} \end{center}
 
 \end{CodeChunk}
-
-\hypertarget{theory}{%
-\subsubsection{Theory}\label{theory}}
 
 Temporal matching checks how spatially matched pairs align temporally.
 We use the following chart to illustrate how the temporal matching
@@ -735,10 +716,6 @@ size by \texttt{temporal\_window} with a default of 5.
 In this illustration, we construct the interval based on series
 \texttt{A} and two of the three peaks from \texttt{a} falls into this
 interval at Time 7 and 27.
-
-\hypertarget{rainfall-translates-into-river-level}{%
-\subsubsection{Rainfall translates into river
-level}\label{rainfall-translates-into-river-level}}
 
 There's another mandatory argument that hasn't been introduced above:
 \texttt{temporal\_var\_to\_match}. This argument controls the variable
@@ -816,14 +793,16 @@ series:
 \end{figure}
 \end{CodeChunk}
 
-\hypertarget{spatio-temporal-data-with-netcdf}{%
-\subsection{Spatio-temporal data with
-NetCDF}\label{spatio-temporal-data-with-netcdf}}
+\hypertarget{era5-climate-reanalysis-data}{%
+\subsection{ERA5: climate reanalysis
+data}\label{era5-climate-reanalysis-data}}
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> nc <- ncdf4::nc_open(here::here("data/adaptor.mars.internal-1638344933.932894-4194-11-a5d35ac3-b36d-4982-afa5-a5dd193a6718.nc"))
-R> temp <- as_cubble(nc, vars = "d2m")
+R> 
+R> nc <- ncdf4::nc_open(here::here("data/tas_Amon_ACCESS-CM2_ssp585_r1i1p1f1_gn_20150116-20201216_v20191108.nc"))
+R> temp <- as_cubble(nc, vars = "tas")
 R> vic_map <- ozmaps::abs_ste %>% filter(NAME == "Victoria")
 R> 
 R> res <- temp %>% 
@@ -843,10 +822,6 @@ R> res %>%
 +   theme_bw() + 
 +   colorspace::scale_fill_continuous_sequential("Mint")
 \end{CodeInput}
-
-
-\begin{center}\includegraphics{figures/unnamed-chunk-23-1} \end{center}
-
 \end{CodeChunk}
 
 \hypertarget{interative-graphic-with-cubble}{%
