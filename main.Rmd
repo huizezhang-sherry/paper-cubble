@@ -171,7 +171,7 @@ slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample
 
 ## Interactive graphics
 
-Interactive graphics can listen to users' actions on the plot to provide additional information that facilitates data exploration. This is a useful technique for spatio-temporal data since users can zoom or pan the map to view the local and global structure of the map; use tooltips or popups to query more information about a graphic element; or highlight points to explore its linked views in other plots. In the R community, many implementations have been developed to connect \proglang{R} to \proglang{javascript} to create interactive graphics. In relation to spatio, temporal, and spatio-temporal data, the general purpose packages \pkg{plotly} [@plotly] and \pkg{leaflet} [@leaflet] realise various interactive actions through their corresponding javascript libraries. \pkg{crosstalk} [@crosstalk] and \pkg{tsibbletalk} [@tsibbletalk] implement brushed linking between htmlwidgets. \pkg{ggiraph} [@ggiraph] enables tooltip, self-linking, and customised actions specified through its own \proglang{javascript}. 
+Interactive graphics can listen to users' actions on the plot to provide additional information that facilitates data exploration. This is a useful technique for spatio-temporal data since users can zoom or pan the map to view the local and global structure of the map; use tooltips or popups to query more information about a graphic element; or highlight points to explore its linked views in other plots. In the R community, many implementations have been developed to connect \proglang{R} to \proglang{javascript} to create interactive graphics. In relation to spatio, temporal, and spatio-temporal data, the general purpose packages \pkg{plotly} [@plotly] and \pkg{leaflet} [@leaflet] realise various interactive actions through their corresponding javascript libraries. \pkg{crosstalk} [@crosstalk] and \pkg{tsibbletalk} [@tsibbletalk] implement brushed linking between htmlwidgets. \pkg{ggiraph} [@ggiraph] enables tooltip, self-linking, and customised actions specified through its own \proglang{javascript}.
 
 While many graphic implementations present worked examples to illustrate the usage of the package, few documents the underlying pipeline that transforms the raw data step-by-step to the final view on the screen. There have been some early work in building the data pipeline for (interactive) graphics [@buja1988elements; @buja1996interactive;  @sutherland2000orca] and more recent discussions include @wickham2009plumbing, @xie2014reactive, and @cheng2016enabling.
 
@@ -190,26 +190,35 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Australia precipitation pattern in 2020
 
-### Glyph map 
+### Basic manipulation
 
-This vignette introduces how to perform spatial and temporal manipulate in a cubble with dplyr verbs. We will illustrate with `weatherdata::historical_tmax` data, which have the historical maximum temperature recorded for Australian stations with the earliest dating back to 1859.
+Bureau of Meteorology (BoM) collects climate variables. This variables can be openly queried via `rnoaa`. `weatherdata` provides a readily available copy of several data. `weatherdata::historical_tmax` provides historical maximum temperature recorded for Australian stations with the earliest dating back to 1859 and this can be used to understand the change of maximum temperature from a past period to nowadays. 
 
-`historical_tmax` is already in a nested cubble format, which is suitable for station-wise manipulation. `rnoaa` construct the station id by prefix `ASN00` to the Bureau of Meteorology (BOM) station number. In [BOM's numbering system](http://www.bom.gov.au/climate/cdo/about/site-num.shtml), the 2nd and 3rd digit denotes the state a station is located in and this is equivalent to the 7th to 8th digit in our string. We can mutate/ filter station in a particular state based on this information and here we add a column called `state_id` and filter out the ones in New South Wales and Victoria (ranging from 46 to 90).
-
-```{r}
-tmax_nested <- weatherdata::historical_tmax %>%
-  mutate(state_id = stringr::str_sub(id, 7, 8)) %>%
-  filter(between(state_id, 46, 90))
+```{r code1-workflow, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon code"}
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
 
-There are some operations in the time dimension we would like to make:
+<!-- `historical_tmax` is already in a nested cubble format, which is suitable for station-wise manipulation. `rnoaa` construct the station id by prefix `ASN00` to the Bureau of Meteorology (BOM) station number. In [BOM's numbering system](http://www.bom.gov.au/climate/cdo/about/site-num.shtml), the 2nd and 3rd digit denotes the state a station is located in and this is equivalent to the 7th to 8th digit in our string. We can mutate/ filter station in a particular state based on this information and here we add a column called `state_id` and filter out the ones in New South Wales and Victoria (ranging from 46 to 90). -->
 
--   Extract observations in a particular period, say, those in 1971 to 1975 and 2016 to 2020. This can be used to compare the historical and recent climate.
--   Summarise daily records into monthly to remove sparsity
 
-These time dimension operations can be computed in the long form and `stretch()` converts a nested cubble to a long cubble. From a long cubble, we can write the exact same dplyr codes to complete the two tasks:
+<!-- There are some operations in the time dimension we would like to make: -->
 
-```{r}
+<!-- -   Extract observations in a particular period, say, those in 1971 to 1975 and 2016 to 2020. This can be used to compare the historical and recent climate. -->
+<!-- -   Summarise daily records into monthly to remove sparsity -->
+
+<!-- These time dimension operations can be computed in the long form and `stretch()` converts a nested cubble to a long cubble. From a long cubble, we can write the exact same dplyr codes to complete the two tasks: -->
+
+<!-- A data quality issue with the `rnoaa` data is that while it records the first and last year recorded of each series, it doesn't report the period of missingness. For example, station `ASN00047048` starts it first record in 1957, pauses for a period from 1963 to 1990, and then resumes it recording till today. Out of the `nrow(tmax_nested)` stations in New South Wales and Victoria, 7 stations have this issue and we would like to remove those stations from the comparison. -->
+
+<!-- Again, this is a station-wise operation and to convert back from the long cubble to a nested one, use `tamp()`. Here we keep the stations with 24 observations (12 months for both periods) after the monthly aggregation. -->
+
+<!-- In some visualisation, we may need information from both spatial and temporal dimension. One example of this is a glyph map, where spatial variables, i.e. `longitude` and `latitude`, are used to construct the major axes and temporal variables, i.e. `month` and `tmax`, are used to construct the minor axes. This requires these variables to be in the same table, rather than in different forms. In cubble, you can append spatial variables that are invariant to the `key` with `migrate()` -->
+
+
+```{r echo = FALSE}
+tmax_nested <- weatherdata::historical_tmax %>%
+  filter(between(stringr::str_sub(id, 7, 8), 46, 90)) 
+
 tmax_long <- tmax_nested %>%
   stretch() %>%
   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) %>%
@@ -223,52 +232,31 @@ tmax_long <- tmax_nested %>%
   ) %>%
   group_by(month, group) %>%
   summarise(tmax = mean(tmax, na.rm = TRUE))
-```
 
-A data quality issue with the `rnoaa` data is that while it records the first and last year recorded of each series, it doesn't report the period of missingness. For example, station `ASN00047048` starts it first record in 1957, pauses for a period from 1963 to 1990, and then resumes it recording till today. Out of the `r nrow(tmax_nested)` stations in New South Wales and Victoria, 7 stations have this issue and we would like to remove those stations from the comparison.
-
-Again, this is a station-wise operation and to convert back from the long cubble to a nested one, use `tamp()`. Here we keep the stations with 24 observations (12 months for both periods) after the monthly aggregation.
-
-```{r}
 tmax_nested2 <- tmax_long %>%
   tamp() %>%
   filter(nrow(ts) == 24)
-```
 
-In some visualisation, we may need information from both spatial and temporal dimension. One example of this is a glyph map, where spatial variables, i.e. `longitude` and `latitude`, are used to construct the major axes and temporal variables, i.e. `month` and `tmax`, are used to construct the minor axes. This requires these variables to be in the same table, rather than in different forms. In cubble, you can append spatial variables that are invariant to the `key` with `migrate()`
-
-```{r}
 tmax_long2 <- tmax_nested2 %>%
   stretch() %>%
   migrate(latitude, longitude)
-```
 
-Now its time for the glyph map!
-
-```{r echo = FALSE}
-gly <- glyphs(
-  tmax_long2,
-  x_major = "longitude",
-  y_major = "latitude",
-  x_minor = "month",
-  y_minor = "tmax",
-  height = 0.6,
-  width = 1
-)
+gly <- glyphs(tmax_long2, "longitude", "month", "latitude", "tmax",
+              height = 0.6, width = 1)
 
 nsw_vic <- ozmaps::abs_ste %>%
   filter(NAME %in% c("Victoria", "New South Wales"))
 
 plot_map(nsw_vic, fill = "transparent") +
-  geom_path(data = gly, aes(gx, gy,
-    group = interaction(id, group),
-    color = group
-  )) +
+  geom_path(data = gly, 
+            aes(gx, gy, group = interaction(id, group), 
+                color = group)) +
   scale_color_brewer(palette = "Dark2") + 
   theme_bw() + 
   coord_sf(xlim = c(140, 155)) + 
   theme(legend.position = "bottom")
 ```
+
 
 ### Aggregation 
 
