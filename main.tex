@@ -375,47 +375,28 @@ this fit into the remaining data pipeline.
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}
 
-Interactive graphics can listen to users' actions on the plot to provide
-additional information that facilitates data exploration. This is a
-useful technique for spatio-temporal data since users can zoom or pan
-the map to view the local and global structure of the map; use tooltips
-or popups to query more information about a graphic element; or
-highlight points to explore its linked views in other plots. In the R
-community, many implementations have been developed to connect
-\proglang{R} to \proglang{javascript} to create interactive graphics. In
-relation to spatio, temporal, and spatio-temporal data, the general
-purpose packages \pkg{plotly} \citep{plotly} and \pkg{leaflet}
-\citep{leaflet} realise various interactive actions through their
-corresponding javascript libraries. \pkg{crosstalk} \citep{crosstalk}
-and \pkg{tsibbletalk} \citep{tsibbletalk} implement brushed linking
-between htmlwidgets. \pkg{ggiraph} \citep{ggiraph} enables tooltip,
-self-linking, and customised actions specified through its own
-\proglang{javascript}.
+The cubble structure fits in naturally with the interactive graphic
+pipeline discussed in the literature
+\citep{buja1988elements, buja1996interactive, sutherland2000orca, xie2014reactive, cheng2016enabling}.
+Diagram \ref{fig:interactive-workflow} illustrates how linking works
+with the two forms in a cubble, where a time series plot is created with
+the long cubble and a map is created with the nested cubble. When a user
+action is captured from the map, the site will be activated in the
+nested cubble. Then, the nested cubble will communicate to the long
+cubble to activate all the observations with the same \texttt{id}. The
+long cubble will then highlight the activated series in the time series
+plot.
 
-While many graphic implementations present worked examples to illustrate
-the usage of the package, few documents the underlying pipeline that
-transforms the raw data step-by-step to the final view on the screen.
-There have been some early work in building the data pipeline for
-(interactive) graphics
-\citep{buja1988elements, buja1996interactive, sutherland2000orca} and
-more recent discussions include \citet{wickham2009plumbing},
-\citet{xie2014reactive}, and \citet{cheng2016enabling}.
-
-Figure \ref{fig:interactive-workflow} shows how cross-linking works with
-the two forms in a cubble. The data pipeline flows from the
-\emph{Augmented Data} to \emph{Transformation}, and then \emph{Subset},
-to finally, \emph{Plot}. This data pipeline, proposed by
-\citet{wickham2009plumbing}, places the \emph{Subset} stage as the last
-step before \emph{Plot} so that each plot can be made separately from
-different subsets. This design fits naturally with cubble where the
-spatial map is solely made from the nested form and the time series plot
-can be created from the long form. When a user action is captured either
-from the map or the time series, the relevant row will be highlighted in
-the data and all the observations that shares the same \texttt{key}
-variable (\texttt{id}), in both forms, will then be highlighted. This
-type of linking is called categorical linking \citep{xie2014reactive},
-which is a one-to-many linking through highlighting observations within
-the same category.
+The linking is also available from the time series plot to the map. The
+selection on the time series is through selecting the point on the time
+series and once a point is selected, it will be activated in the long
+cubble. All the observations that share the same \texttt{id}, either in
+the long and nested cubble, are then activated. This includes other
+points in the same time series in the long cubble and the corresponding
+observation of site in the nested cubble. These activated observations
+will then being reflected in the updated plots and Diagram
+\ref{fig:interactive-workflow-2} in the Appendix illustrates this
+process.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -616,6 +597,11 @@ data}\label{era5-climate-reanalysis-data}}
 \subsection{Interative graphic with
 cubble}\label{interative-graphic-with-cubble}}
 
+With a larger dataset, interactive graphics can be helpful to explore
+these data from multiple perspective. Two examples are presented here to
+show how interactivity can be used to explore the climate data across
+Australia.
+
 \begin{CodeChunk}
 
 
@@ -632,6 +618,20 @@ cubble}\label{interative-graphic-with-cubble}}
 
 \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
+
+\hypertarget{appendix}{%
+\section{Appendix}\label{appendix}}
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.007} 
+
+}
+
+\caption[demon interactivity]{demon interactivity}\label{fig:interactive-workflow-2}
+\end{figure}
+\end{CodeChunk}
 
 \newpage
 

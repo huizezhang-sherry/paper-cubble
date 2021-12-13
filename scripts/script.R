@@ -56,6 +56,9 @@ res %>%
 
 
 ######################################
+set.seed(123)
+dt <- weatherdata::climate_full %>% slice_sample(n = 200)
+
 df <- dt %>%
   stretch() %>%
   mutate(month = month(date)) %>%
@@ -86,7 +89,7 @@ p1 <- long %>%
   geom_point(size = 0.5) + 
   geom_line() +
   scale_x_date(date_labels = "%b") + 
-  scale_color_distiller(palette = "YlOrRd",direction = 1) + 
+  scale_color_distiller(palette = "Reds",direction = 1) + 
   theme_bw() + 
   theme(legend.position = "none") + 
   xlab("Month")
@@ -96,17 +99,17 @@ p2 <- nested %>%
   ggplot() +
   geom_sf(data = state_map, aes(geometry = geometry)) +
   geom_point(aes(x = long, y = lat, color = median_tmax, label = name)) +
-  scale_color_distiller(palette = "YlOrRd", direction = 1) + 
-  theme_void()
+  scale_color_distiller(palette = "Reds", direction = 1) + 
+  theme_bw() + 
+  theme(panel.grid.major = element_blank())
 
 out <- bscols(
   ggplotly(p1, width = 800, height = 800, tooltip = "label") %>%
     highlight(on = "plotly_selected", off = "plotly_deselect", color = "red"),
-  ggplotly(p2, width = 800, height = 800, tooltip = "label") 
-  %>%
+  ggplotly(p2, width = 900, height = 800, tooltip = "label")%>%
     highlight(on = "plotly_selected", off = "plotly_deselect", color = "red")
 )
 
 htmltools::save_html(out, file = "figures/linking.html")
 webshot2::webshot("figures/linking.html", "figures/linking.png", vwidth = 1800, vheight = 2000)
-```
+

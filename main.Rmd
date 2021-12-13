@@ -180,18 +180,17 @@ this fit into the remaining data pipeline.
 
 ## Interactive graphics
 
-Interactive graphics can listen to users' actions on the plot to provide additional information that facilitates data exploration. This is a useful technique for spatio-temporal data since users can zoom or pan the map to view the local and global structure of the map; use tooltips or popups to query more information about a graphic element; or highlight points to explore its linked views in other plots. In the R community, many implementations have been developed to connect \proglang{R} to \proglang{javascript} to create interactive graphics. In relation to spatio, temporal, and spatio-temporal data, the general purpose packages \pkg{plotly} [@plotly] and \pkg{leaflet} [@leaflet] realise various interactive actions through their corresponding javascript libraries. \pkg{crosstalk} [@crosstalk] and \pkg{tsibbletalk} [@tsibbletalk] implement brushed linking between htmlwidgets. \pkg{ggiraph} [@ggiraph] enables tooltip, self-linking, and customised actions specified through its own \proglang{javascript}.
+<!-- Interactive graphics can listen to users' actions on the plot to provide additional information that facilitates data exploration. This is a useful technique for spatio-temporal data since users can zoom or pan the map to view the local and global structure of the map; use tooltips or popups to query more information about a graphic element; or highlight points to explore its linked views in other plots. In the R community, many implementations have been developed to connect \proglang{R} to \proglang{javascript} to create interactive graphics. In relation to spatio, temporal, and spatio-temporal data, the general purpose packages \pkg{plotly} [@plotly] and \pkg{leaflet} [@leaflet] realise various interactive actions through their corresponding javascript libraries. \pkg{crosstalk} [@crosstalk] and \pkg{tsibbletalk} [@tsibbletalk] implement brushed linking between htmlwidgets. \pkg{ggiraph} [@ggiraph] enables tooltip, self-linking, and customised actions specified through its own \proglang{javascript}. -->
 
-While many graphic implementations present worked examples to illustrate the usage of the package, few documents the underlying pipeline that transforms the raw data step-by-step to the final view on the screen. There have been some early work in building the data pipeline for (interactive) graphics [@buja1988elements; @buja1996interactive;  @sutherland2000orca] and more recent discussions include @wickham2009plumbing, @xie2014reactive, and @cheng2016enabling.
+<!-- While many graphic implementations present worked examples to illustrate the usage of the package, few documents the underlying pipeline that transforms the raw data step-by-step to the final view on the screen. There have been some early work in building the data pipeline for (interactive) graphics [@buja1988elements; @buja1996interactive;  @sutherland2000orca] and more recent discussions include @wickham2009plumbing, @xie2014reactive, and @cheng2016enabling. -->
 
-Figure \ref{fig:interactive-workflow} shows how cross-linking works with the two forms in a cubble. The data pipeline flows from the *Augmented Data* to *Transformation*, and then *Subset*, to finally, *Plot*. This data pipeline, proposed by @wickham2009plumbing, places the *Subset* stage as the last step before *Plot* so that each plot can be made separately from different subsets. This design fits naturally with cubble where the spatial map is solely made from the nested form and the time series plot can be created from the long form. When a user action is captured either from the map or the time series, the relevant row will be highlighted in the data and all the observations that shares the same `key` variable (`id`), in both forms, will then be highlighted. This type of linking is called categorical linking [@xie2014reactive], which is a one-to-many linking through highlighting observations within the same category. 
+The cubble structure fits in naturally with the interactive graphic pipeline discussed in the literature [@buja1988elements; @buja1996interactive;  @sutherland2000orca; @xie2014reactive; @cheng2016enabling]. Diagram \ref{fig:interactive-workflow} illustrates how linking works with the two forms in a cubble, where a time series plot is created with the long cubble and a map is created with the nested cubble. When a user action is captured from the map, the site will be activated in the nested cubble. Then, the nested cubble will communicate to the long cubble to activate all the observations with the same `id`. The long cubble will then highlight the  activated series in the time series plot. 
+
+The linking is also available from the time series plot to the map. The selection on the time series is through selecting the point on the time series and once a point is selected, it will be activated in the long cubble. All the observations that share the same `id`,  either in the long and nested cubble, are then activated. This includes other points in the same time series in the long cubble and the corresponding observation of site in the nested cubble. These activated observations will then being reflected in the updated plots and Diagram \ref{fig:interactive-workflow-2} in the Appendix illustrates this process. 
 
 ```{r interactive-workflow, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon interactivity"}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
 ```
-
-
-<!-- communicates the user action down the workflow to [...]. Various such workflow has been proposed in the 90s literature, including [...]. These designs do the linking as follows: when an user action is)) captured, the system searches for the unique identifiers of that observation, and fetches the queried information with the same unique identifiers. -->
 
 \newpage
 
@@ -477,6 +476,13 @@ res %>%
 
 ## Interative graphic with cubble
 
+With a larger dataset, interactive graphics can be helpful to explore these data from multiple perspective. Two examples are presented here to show how interactivity can be used to explore the climate data across Australia.
+
+
+
+
+
+
 ```{r echo = FALSE, out.width="100%", out.height="30%"}
 knitr::include_graphics(here::here("figures/linking.png"))
 ```
@@ -488,6 +494,12 @@ knitr::include_graphics(here::here("figures/popup.png"))
 
 
 # Conclusion
+
+# Appendix
+
+```{r interactive-workflow-2, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon interactivity"}
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.007.png"))
+```
 
 \newpage
 

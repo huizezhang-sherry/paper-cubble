@@ -1,0 +1,129 @@
+library(cubble)
+library(dplyr)
+library(ggplot2)
+library(leaflet)
+library(leafpop)
+
+clean <-  weatherdata::climate_full %>%
+  stretch() %>%
+  mutate(month = month(date),
+         diff = tmax - tmin) %>% 
+  group_by(month) %>% 
+  summarise(tmax = mean(tmax, na.rm = TRUE),
+            diff = mean(diff, na.rm = TRUE)) %>% 
+  ungroup(month) %>% 
+  tamp() %>%
+  mutate(diff_winter = ts %>% filter(month %in% c(6,7,8)) %>% pull(diff) %>% mean(na.rm = TRUE),
+         diff_summer = ts %>% filter(month %in% c(12, 1,2)) %>% pull(diff) %>% mean(na.rm = TRUE),
+         diff_year = diff_winter - diff_summer) %>% 
+  stretch() %>% 
+  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) %>%
+  migrate(name) 
+
+long <- clean %>% 
+  SharedData$new(~id, group = "cubble")
+
+nested <- clean %>% tamp() %>% 
+  SharedData$new(~id, group = "cubble")
+
+
+p1 <- nested %>% 
+  ggplot(aes(x = diff_summer, y = diff_winter, color = diff_year, label = name)) + 
+  geom_point() + 
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") + 
+  colorspace::scale_color_continuous_diverging("Purple-Green", mid = 0, l2 = 80) + 
+  xlim(0, 25) + 
+  ylim(0, 25) +
+  theme_bw() + 
+  theme(legend.position = "none") + 
+  xlab("temperature difference in summer") + 
+  ylab("temperature difference in winter") 
+
+state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
+p2 <- nested %>%
+  ggplot() +
+  geom_sf(data = state_map, aes(geometry = geometry), fill = "transparent") +
+  geom_point(aes(x = long, y = lat, label = name, color = diff_year)) +
+  colorspace::scale_color_continuous_diverging(
+    "Purple-Green", 
+    mid = 0, l2 = 80,
+    name = "winter-summer difference") + 
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(),
+        legend.position = "bottom")
+
+out <- bscols(
+  ggplotly(p1, width = 800, height = 800, tooltip = "label") %>%
+    highlight(on = "plotly_selected", off = "plotly_deselect", color = "red"),
+  ggplotly(p2, width = 900, height = 800, tooltip = "label") %>%
+    highlight(on = "plotly_selected", off = "plotly_deselect", color = "red")
+    
+)
+
+htmltools::save_html(out, file = "figures/linking.html")
+webshot2::webshot("figures/linking.html", "figures/linking.png", vwidth = 1800, vheight = 2000)
+
+########################################
+tas <- weatherdata::climate_full %>%
+  filter(stringr::str_sub(id, 7, 8) > 90) %>% 
+  stretch() %>%
+  mutate(month = month(date),
+         diff = tmax - tmin) %>% 
+  filter(month %in% c(12, 1,2, 6,7,8)) %>% 
+  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01")),
+         season = case_when(month %in% c(12, 1, 2) ~ "winter",
+                            month %in% c(6,7,8) ~ "summer"))
+
+i <- 1
+df_id <- tas$id %>% unique()
+p <- vector("list", length(df_id))
+name <- unique(tas$name)
+for (i in 1:length(df_id)) {
+  dt <- tas %>% 
+    filter(id == df_id[i]) 
+  
+  p[[i]] <- dt %>% 
+    ggplot() + 
+    geom_histogram(aes(x = diff, group = season), binwidth = 1) + 
+    geom_vline(aes(xintercept = mean(diff, na.rm = TRUE)), 
+               color = "red", data = ~ filter(.x, season == "summer")) + 
+    geom_vline(aes(xintercept = mean(diff, na.rm = TRUE)), 
+               color = "red", data = ~ filter(.x, season == "winter")) + 
+    facet_wrap(vars(season), ncol = 1) + 
+    theme_bw() + 
+    xlab("temperature difference")
+  
+  i <- i + 1
+  
+}
+
+tas_nested <- tamp(tas) %>%
+  mutate(diff_winter = ts %>% filter(month %in% c(6,7,8)) %>% pull(diff) %>% mean(na.rm = TRUE),
+         diff_summer = ts %>% filter(month %in% c(12, 1,2)) %>% pull(diff) %>% mean(na.rm = TRUE),
+         diff_year = diff_winter - diff_summer)
+
+domain <- range(tas_nested$diff_year)
+pal <- colorNumeric(colorspace::diverging_hcl(palette = "Purple-Green", n = 100),
+                    domain = domain)
+
+leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(tas_nested, group = "a") %>% 
+  addPopupGraphs(graph = p, group = "a", width = 300, height =200)
+
+
+
+
+
+long %>%
+  ggplot() +
+  geom_ribbon(aes(x = dummy_date, ymin = tmax - diff, ymax = tmax, group = name),
+              fill = "grey90") +
+  scale_x_date(date_labels = "%b") + 
+  scale_color_distiller(palette = "Reds",direction = 1) + 
+  theme_bw() + 
+  theme(legend.position = "none") + 
+  xlab("Month") + 
+  facet_wrap(vars(fct_reorder(name, -diff)))
+
+
