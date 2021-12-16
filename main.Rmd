@@ -54,7 +54,8 @@ knitr::opts_chunk$set(
   fig.path = "figures/",
   fig.height = 10
 )
-options(prompt = "R> ", continue = "+ ")
+options(prompt = "R> ", continue = "+ ", 
+        tibble.print_max = 5, tibble.print_min = 5)
 ```
 
 ```{r echo = FALSE}
@@ -74,18 +75,11 @@ library(patchwork)
 
 # Introduction
 
-**Motivation**
-
 Many data structures have been proposed for spatial (\pkg{sf} by @sf) and temporal (\pkg{tsibble} by @tsibble) data in the R community, while less has been done for spatio-temporal data. The lack of such tools could potentially because analysts usually treat the spatial and temporal dimension of the data separately, without realising the need to create a new data structure. While this approach follows the third tidy data principal [@tidydata] (*Each type of observational unit forms a table*), analysts always need to manually join results from different observational units or combining multiple tables into one for downstream analysis. This additional step doesn't add new operations into the data but can be error prone. \newline
-
-**Existing packages**
 
 Currently, available spatio-temporal data structure in R includes: \pkg{spacetime} [@spacetime], which proposes four space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI), and trajectory (STT). The data structure it uses is based on \pkg{sp} [@sp] and \pkg{xts} [@xts], both of which has been replaced by more recent implementations. \pkg{spatstat} [@spatstat] implements a `ppp` class for point pattern data; and more recent, \pkg{stars} [@stars] implements a spatio-temporal array with the dplyr's data cube structure \pkg{cubelyr} [@cubelyr] as its backend. While these implementations either store spatial and temporal variables all in a single table, hence duplicate the spatial variables for each temporal unit; or split them into two separate tables that has the problem of manually joining, mentioned in the previously. None of these packages enjoy both the benefits of being able to separate manipulation in the two dimensions while also keep the data object as a whole. This create a gap in the software development. The requirement for such a tool is important given the ubiquity of spatio-temporal vector data in the wild: the Ireland wind data from \pkg{gstat} is an classic example data that splits variables into spatial (`wind.loc`) and temporal (`wind`) dimension; Bureau of Meteorology (BoM) provides climate observations that are widely applied in agriculture and ecology study; air pollution data. \newline
 
-**Our new data structure for spatio-temporal data**
-This paper describes the implementation of a new spatio-temporal data structure: \pkg{cubble}. \pkg{cubble} implements a relational data structure that uses two forms to manage the switch between spatial and temporal dimension. With this structure, users can manipulate the spatial or temporal dimension separately, while leaves the linking of two dimensions to \pkg{cubble\pkg{. The software is available from the Comprehensive R Archive Network (CRAN) at [CRAN link]. \newline
-
-**Section division**
+This paper describes the implementation of a new spatio-temporal data structure: \pkg{cubble}. \pkg{cubble} implements a relational data structure that uses two forms to manage the switch between spatial and temporal dimension. With this structure, users can manipulate the spatial or temporal dimension separately, while leaves the linking of two dimensions to \pkg{cubble}. The software is available from the Comprehensive R Archive Network (CRAN) at [CRAN link]. \newline
 
 The rest of the paper will be divided as follows: [complete when the paper structure is more solid]
 
@@ -95,17 +89,17 @@ The rest of the paper will be divided as follows: [complete when the paper struc
 
 # The cubble package
 
-Spatio-temporal data usually come in various forms and Figure \ref{fig:cubble-diagram} shows four examples of this. No matter which form the data is in, these formats share some common components that characterise spatio-temporal data. A spatial identifier (`id` in the diagram) is the unique identifier of each site. The temporal identifier (`t` in the diagram) prescribes the time stamp each site is recorded. Coordinates, comprising of latitude and longitude (`lon` and `lat` in the diagram), locates each site on the map. These identifiers will be the building blocks for the data structure introduced below. Other variables in the data can be categorised into two groups: spatial variables that are invariant at each time stamp for every site, i.e. the name or code of the weather station and temporal variables that varies with time.
+Spatio-temporal data usually come in various forms and Figure \ref{fig:illu-input} shows four examples of this. No matter which form the data is in, these formats share some common components that characterise spatio-temporal data. A spatial identifier (`id` in the diagram) is the unique identifier of each site. The temporal identifier (`t` in the diagram) prescribes the time stamp each site is recorded. Coordinates, comprising of latitude and longitude (`lon` and `lat` in the diagram), locates each site on the map. These identifiers will be the building blocks for the data structure introduced below. Other variables in the data can be categorised into two groups: spatial variables that are invariant at each time stamp for every site, i.e. the name or code of the weather station and temporal variables that varies with time.
 
-```{r cubble-diagram, echo = FALSE, out.width = "100%", fig.cap="Illustration of incoming data formats for spatio-temporal data. (1) Data comes in as a single table; (2) Separate tables for spatial and temporal variables; (3) A single table with all the parameters used to query the database and a separate table for queried data; and (4) Cubical data in array or NetCDF format.", fig.align='center', out.height = "15%"}
+```{r illu-input, echo = FALSE, out.width = "100%", fig.cap="Illustration of incoming data formats for spatio-temporal data. (1) Data comes in as a single table; (2) Separate tables for spatial and temporal variables; (3) A single table with all the parameters used to query the database and a separate table for queried data; and (4) Cubical data in array or NetCDF format.", fig.align='center', out.height = "15%"}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
 ```
 
-In a cubble, there are two forms: nested form and long form, and Figure \ref{fig:def-cubble} sketches the two forms along with the associated attributes. The decision on which form to use is output-oriented, meaning analysts need to first think about whether the output of a particular operation is identified only by the spatial identifier, or a combination of spatial and temporal identifier. The nested cubble is suitable for working with operations that are only identified by site and this type of operation can be a pure manipulation of spatial variables, or a summary of temporal variables by site (i.e. the output of counting the number of raining day is only identified by sites and hence should be performed with the nested form). Underneath the nested form, a cubble is built from a row-wise dataframe (`rowwise_df`) where each site forms a separate group. This structure simplifies the calculation that involves temporal variables by avoiding the use of `map` syntax when working with list-column.
+In a cubble, there are two forms: nested form and long form, and Figure \ref{fig:illu-cubble} sketches the two forms along with the associated attributes. The decision on which form to use is output-oriented, meaning analysts need to first think about whether the output of a particular operation is identified only by the spatial identifier, or a combination of spatial and temporal identifier. The nested cubble is suitable for working with operations that are only identified by site and this type of operation can be a pure manipulation of spatial variables, or a summary of temporal variables by site (i.e. the output of counting the number of raining day is only identified by sites and hence should be performed with the nested form). Underneath the nested form, a cubble is built from a row-wise dataframe (`rowwise_df`) where each site forms a separate group. This structure simplifies the calculation that involves temporal variables by avoiding the use of `map` syntax when working with list-column.
 
 For those operations whose output involves both a spatial and temporal dimension, long form should be used. The long form is identified by both the spatial and temporal identifier and adopts a grouped dataframe (`grouped_df`) to forms each site as a group. Spatial variables are stored separately in a \pkg{tibble} as an special attribute of the long cubble. This design avoids repeating the spatial variables at each time stamp while not dropping information from spatial variables.
 
-```{r def-cubble, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "Illustration of nested and long cubble."}
+```{r illu-cubble, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "Illustration of nested and long cubble."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
 ```
 
@@ -172,11 +166,31 @@ One thing we hope to do with the cluster is to find the coordinates of the centr
 
 This structure makes it easy to compute cluster level variable, for example, the convex hull and the centroid coordinate of each cluster. These can be amended into the nested form with function `get_centroid`.
 
-After we have got `cluster_nested`, spatial and temporal data at both levels can be easily obtained. Figure \ref{fig:hierachical} illustrate the relationship between the long and nested form cubble at both site and cluster level. More description on this. Start with the original `station_nested`, `stretch()` expands the `ts` column with each station (`id`) forming a group and attach variables invariant to `id` as an attribute. `switch_key()` changes the `key` from `id` to `cluster` and nests all the spatial variables that variant to `cluster`. `stretch()` `cluster_nested` will store variables that are invariant to `cluster` as a tibble in the attribute.
+After we have got `cluster_nested`, spatial and temporal data at both levels can be easily obtained. Figure \ref{fig:illu-hier} illustrate the relationship between the long and nested form cubble at both site and cluster level. More description on this. Start with the original `station_nested`, `stretch()` expands the `ts` column with each station (`id`) forming a group and attach variables invariant to `id` as an attribute. `switch_key()` changes the `key` from `id` to `cluster` and nests all the spatial variables that variant to `cluster`. `stretch()` `cluster_nested` will store variables that are invariant to `cluster` as a tibble in the attribute.
 
 this fit into the remaining data pipeline. 
 
+```{r illu-hier, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "Hierarchical structure"}
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
+```
+
 ## Data fusion and matching
+
+Temporal matching checks how spatially matched pairs align temporally. We use the following chart to illustrate how the temporal matching works:
+
+For each spatially matched pair, say `A` and `a`, we first find the largest `n` points in each series, colored in brown points here. Here we use the largest three but you can tune this number by `temporal_n_highest`. Then we construct the interval of the largest points from one series and see how many points, from the other series, fall into the intervals. The series used to construct the interval is controlled by `temporal_independent` and the window size by `temporal_window` with a default of 5.
+
+In this illustration, we construct the interval based on series `A` and two of the three peaks from `a` falls into this interval at Time 7 and 27.
+
+There's another mandatory argument that hasn't been introduced above: `temporal_var_to_match`. This argument controls the variable to match and it needs to appear in both the `major` and `minor` set. In the water level matching example, we match the variable `Water_course_level` from `river` to `prcp` from `climate`, hence need to manually rename one of them to match the other, here we rename `Water_course_level` to `prcp` in `river`:
+
+
+
+Figure \ref{fig:illu-matching}
+
+```{r illu-matching, out.width="100%", out.height="30%", fig.cap="sdfasdf"}
+knitr::include_graphics("figures/illu-matching.png")
+```
 
 ## Interactive graphics
 
@@ -184,12 +198,12 @@ this fit into the remaining data pipeline.
 
 <!-- While many graphic implementations present worked examples to illustrate the usage of the package, few documents the underlying pipeline that transforms the raw data step-by-step to the final view on the screen. There have been some early work in building the data pipeline for (interactive) graphics [@buja1988elements; @buja1996interactive;  @sutherland2000orca] and more recent discussions include @wickham2009plumbing, @xie2014reactive, and @cheng2016enabling. -->
 
-The cubble structure fits in naturally with the interactive graphic pipeline discussed in the literature [@buja1988elements; @buja1996interactive;  @sutherland2000orca; @xie2014reactive; @cheng2016enabling]. Diagram \ref{fig:interactive-workflow} illustrates how linking works with the two forms in a cubble, where a time series plot is created with the long cubble and a map is created with the nested cubble. When a user action is captured from the map, the site will be activated in the nested cubble. Then, the nested cubble will communicate to the long cubble to activate all the observations with the same `id`. The long cubble will then highlight the  activated series in the time series plot. 
+The cubble structure fits in naturally with the interactive graphic pipeline discussed in the literature [@buja1988elements; @buja1996interactive;  @sutherland2000orca; @xie2014reactive; @cheng2016enabling]. Diagram \ref{fig:illu-interactive} illustrates how linking works with the two forms in a cubble, where a time series plot is created with the long cubble and a map is created with the nested cubble. When a user action is captured from the map, the site will be activated in the nested cubble. Then, the nested cubble will communicate to the long cubble to activate all the observations with the same `id`. The long cubble will then highlight the  activated series in the time series plot. 
 
-The linking is also available from the time series plot to the map. The selection on the time series is through selecting the point on the time series and once a point is selected, it will be activated in the long cubble. All the observations that share the same `id`,  either in the long and nested cubble, are then activated. This includes other points in the same time series in the long cubble and the corresponding observation of site in the nested cubble. These activated observations will then being reflected in the updated plots and Diagram \ref{fig:interactive-workflow-2} in the Appendix illustrates this process. 
+The linking is also available from the time series plot to the map. The selection on the time series is through selecting the point on the time series and once a point is selected, it will be activated in the long cubble. All the observations that share the same `id`,  either in the long and nested cubble, are then activated. This includes other points in the same time series in the long cubble and the corresponding observation of site in the nested cubble. These activated observations will then being reflected in the updated plots and Diagram \ref{fig:illu-interactive-2} in the Appendix illustrates this process. 
 
-```{r interactive-workflow, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon interactivity"}
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
+```{r illu-interactive, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon interactivity"}
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
 
 \newpage
@@ -200,11 +214,52 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ### Basic manipulation
 
-Bureau of Meteorology (BoM) collects climate variables. This variables can be openly queried via `rnoaa`. `weatherdata` provides a readily available copy of several data.`weatherdata::historical_tmax` provides historical maximum temperature recorded for Australian stations with the earliest dating back to 1859 and this can be used to understand the change of maximum temperature from a past period to nowadays. Figure \ref{fig:glyphmap-workflow} shows the steps involved from the initial data to the final glyph map in Figure \ref{fig:glyphmap}.
+Bureau of Meteorology (BoM) collects climate variables. This variables can be openly queried via `rnoaa`. `weatherdata` provides a readily available copy of several data. `weatherdata::historical_tmax` provides historical maximum temperature recorded for Australian stations with the earliest dating back to 1859 and this can be used to understand the change of maximum temperature from a past period to nowadays. 
 
-```{r glyphmap-workflow, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon code"}
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
+Figure \ref{fig:basic-manip}.
+
+```{r eval=  FALSE, echo = TRUE}
+tmax <- weatherdata::historical_tmax %>%
+  # filter out VIC and NSW stations
+  filter(between(stringr::str_sub(id, 7, 8), 46, 90)) %>% 
+  
+  # filter out observations in between 1971-1975 and 2016 - 2020
+  stretch() %>%
+  filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) %>%
+  mutate(month = lubridate::month(date), 
+         group = as.factor(ifelse(lubridate::year(date) > 2015, 
+                                  "2016 ~ 2020", "1971 ~ 1975"))) %>%
+  group_by(month, group) %>%
+  # summarise tmax into monthly mean for both periods
+  summarise(tmax = mean(tmax, na.rm = TRUE)) %>% 
+  
+  # filter out stations that have complete records in both periods 
+  tamp() %>%
+  filter(nrow(ts) == 24) %>% 
+  
+  # migrate longitude and latitude to the long form for making the glyph map
+  stretch() %>%
+  migrate(latitude, longitude)
+
+gly <- glyphs(tmax, "longitude", "month", "latitude", "tmax",
+              height = 0.6, width = 1)
+
+nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria", "New South Wales"))
+
+ggplot() + 
+  geom_sf(data = nsw_vic, fill = "transparent") + 
+  geom_path(data = gly, 
+            aes(gx, gy, group = interaction(id, group), color = group)) +
+  scale_color_brewer(palette = "Dark2") + 
+  theme_bw() + 
+  coord_sf(xlim = c(140, 155)) + 
+  theme(legend.position = "bottom")
 ```
+
+```{r basic-manip, out.width="100%", out.height="70%", fig.cap="asdfasd"}
+knitr::include_graphics("figures/basic-manip.png")
+```
+
 
 <!-- `historical_tmax` is already in a nested cubble format, which is suitable for station-wise manipulation. `rnoaa` construct the station id by prefix `ASN00` to the Bureau of Meteorology (BOM) station number. In [BOM's numbering system](http://www.bom.gov.au/climate/cdo/about/site-num.shtml), the 2nd and 3rd digit denotes the state a station is located in and this is equivalent to the 7th to 8th digit in our string. We can mutate/ filter station in a particular state based on this information and here we add a column called `state_id` and filter out the ones in New South Wales and Victoria (ranging from 46 to 90). -->
 
@@ -223,61 +278,12 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 <!-- In some visualisation, we may need information from both spatial and temporal dimension. One example of this is a glyph map, where spatial variables, i.e. `longitude` and `latitude`, are used to construct the major axes and temporal variables, i.e. `month` and `tmax`, are used to construct the minor axes. This requires these variables to be in the same table, rather than in different forms. In cubble, you can append spatial variables that are invariant to the `key` with `migrate()` -->
 
 
-```{r echo = FALSE, eval = FALSE}
-tmax_nested <- weatherdata::historical_tmax %>%
-  filter(between(stringr::str_sub(id, 7, 8), 46, 90))
-
-tmax_long <- tmax_nested %>%
-  stretch() %>%
-  filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) %>%
-  mutate(
-    month = lubridate::month(date),
-    group = as.factor(ifelse(
-      lubridate::year(date) > 2015,
-      "2016 ~ 2020",
-      "1971 ~ 1975"
-    ))
-  ) %>%
-  group_by(month, group) %>%
-  summarise(tmax = mean(tmax, na.rm = TRUE))
-
-tmax_nested2 <- tmax_long %>%
-  tamp() %>%
-  filter(nrow(ts) == 24)
-
-tmax_long2 <- tmax_nested2 %>%
-  stretch() %>%
-  migrate(latitude, longitude)
-
-gly <- glyphs(tmax_long2, "longitude", "month", "latitude", "tmax",
-              height = 0.6, width = 1)
-
-nsw_vic <- ozmaps::abs_ste %>%
-  filter(NAME %in% c("Victoria", "New South Wales")) # 
-
-plot_map(nsw_vic, fill = "transparent") +
-  geom_path(data = gly, 
-            aes(gx, gy, group = interaction(id, group), 
-                color = group)) +
-  scale_color_brewer(palette = "Dark2") + 
-  theme_bw() + 
-  coord_sf(xlim = c(141, 154)) + 
-  theme(legend.position = "bottom") 
-
-ggsave(filename = "figures/basic-manipulation.png", width = 10, height = 10)
-```
-
-```{r glyphmap, out.width="100%", out.height="70%", fig.cap="asdfasd"}
-knitr::include_graphics("figures/basic-manipulation.png")
-```
-
-
 
 ### Aggregation 
 
-In figure \ref{fig:glyphmap}, there are a few stations around Sydney (151E, 34S) and New castle (152E, 33S). Aggregating them into averages or other statistics would give a better picture. This can be done with cubble through a hierarchical structure, where the cluster indicator is one level above the individual station. 
+In figure \ref{fig:basic-manip}, there are a few stations around Sydney (151E, 34S) and New castle (152E, 33S). Aggregating them into averages or other statistics would give a better picture. This can be done with cubble through a hierarchical structure, where the cluster indicator is one level above the individual station. 
 
-In Figure \ref{fig:aggregation}
+In Figure \ref{fig:basic-agg}
 
 The `weatherdata::climate_full` data has daily climate data of `r nrow(weatherdata::climate_full)` Australia stations from 2016 to 2020. 
 
@@ -293,8 +299,8 @@ As an example to illustrate here, a kmean clustering algorithm based on the dist
 <!-- Lastly, there is one series on Tasmania island standing out from others, lets look at where it is: -->
 
 
-```{r aggregation, out.width="100%", out.height="90%", fig.cap="sdfasdf"}
-knitr::include_graphics("figures/aggregation.png")
+```{r basic-agg, out.width="100%", out.height="90%", fig.cap="sdfasdf"}
+knitr::include_graphics("figures/basic-agg.png")
 ```
 
 
@@ -302,193 +308,33 @@ knitr::include_graphics("figures/aggregation.png")
 
 The water level data comes from [Bureau of Meteorology](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) and has a copy in `weatherdata`. Here we extract the water course level and add a column annotate this data of type `river`. For the rainfall data, we will still use the `weatherdata::climate_full`, filtering for Victorian stations in 2020 should be pretty familiar by now. Again, we first look at where these stations are on the map first:
 
-```{r echo = FALSE}
-river <- weatherdata::water %>%
-  stretch() %>%
-  select(date, Water_course_level) %>%
-  tamp() %>%
-  mutate(type = "river")
-
-climate <- weatherdata::climate_full %>%
-  filter(between(stringr::str_sub(id, 7, 8), 76, 90)) %>%
-  stretch() %>%
-  filter(lubridate::year(date) == 2020) %>%
-  tamp() %>%
-  mutate(type = "climate")
-
-vic_map <- rmapshaper::ms_simplify(ozmaps::abs_ste %>% filter(NAME == "Victoria"))
-plot_map(vic_map) +
-  geom_point(
-    data = dplyr::bind_rows(river, climate),
-    aes(x = long, y = lat, color = type)
-  ) +
-  scale_color_brewer(palette = "Dark2") +
-  theme_bw()
-```
-
-
-Temporal matching checks how spatially matched pairs align temporally. We use the following chart to illustrate how the temporal matching works:
-
-```{r echo = FALSE, fig.height=3, fig.cap = "shtishisaasdf"}
-set.seed(123)
-dt <- tibble(
-  id = factor(c(rep("A", 31), rep("a", 31)), levels = c("A", "a")),
-  date = rep(1:31, 2),
-  val = c(
-    c(rnorm(5), 10, rnorm(7), 5, rnorm(8), 7, rnorm(8)),
-    c(
-      rnorm(6, sd = 0.5), 7, rnorm(7, sd = 0.5), rnorm(6, sd = 0.5),
-      4, rnorm(5, sd = 0.5), 6, rnorm(4, sd = 0.5)
-    )
-  )
-) %>% mutate(val = ifelse(val < 0, 0, val))
-
-circle <- tibble(
-  x = c(6, 14, 23, 7, 21, 27),
-  y = c(10, 5, 7, 7, 4, 6),
-  id = factor(c(rep("A", 3), rep("a", 3)), levels = c("A", "a")),
-  xend = x + 5
-)
-
-errorbar <- bind_rows(
-  circle %>% filter(id == "A"),
-  circle %>% filter(id == "A") %>% mutate(id = "a")
-) %>%
-  mutate(id = factor(id, c("A", "a")))
-
-fallin <- tibble(
-  id = factor(rep("a", 2), c("A", "a")),
-  x = c(7, 27),
-  y = -0.5,
-  label = "\U2714"
-)
-
-ggplot() +
-  geom_line(data = dt, aes(x = date, y = val, group = id), color = "grey60") +
-  geom_vline(data = circle, aes(xintercept = x), linetype = "longdash", color = "grey60") +
-  geom_errorbar(data = errorbar, aes(xmin = x, xmax = xend, y = -0.5), width = 0.5) +
-  geom_point(data = circle, aes(x = x, y = y), color = "brown") +
-  geom_text(data = fallin, aes(x = x, y = y, label = label), color = "brown", size = 5) +
-  facet_wrap(vars(id), nrow = 2) +
-  scale_y_continuous(breaks = seq(0, 10, 2)) +
-  scale_x_continuous(breaks = seq(1, 31, 1)) +
-  theme_bw() +
-  theme(panel.grid = element_blank()) +
-  labs(x = "Time", y = "Value")
-```
-
-For each spatially matched pair, say `A` and `a`, we first find the largest `n` points in each series, colored in brown points here. Here we use the largest three but you can tune this number by `temporal_n_highest`. Then we construct the interval of the largest points from one series and see how many points, from the other series, fall into the intervals. The series used to construct the interval is controlled by `temporal_independent` and the window size by `temporal_window` with a default of 5.
-
-In this illustration, we construct the interval based on series `A` and two of the three peaks from `a` falls into this interval at Time 7 and 27.
-
-There's another mandatory argument that hasn't been introduced above: `temporal_var_to_match`. This argument controls the variable to match and it needs to appear in both the `major` and `minor` set. In the water level matching example, we match the variable `Water_course_level` from `river` to `prcp` from `climate`, hence need to manually rename one of them to match the other, here we rename `Water_course_level` to `prcp` in `river`:
-
-```{r}
-river <- river %>%
-  stretch() %>%
-  rename(prcp = Water_course_level) %>%
-  tamp()
-```
-
-Now we use `match_sites()` to first pair the weather stations with the river gauges spatially and then apply the temporal matching on `prcp`. We will construct the interval based on peaks in `climate` since we would expect a lag effect for precipitation to flow into the river and cause a raise in river level, hence `temporal_independent = climate`. We select the 30 highest peak from the series to construct the match by setting `temporal_n_highest = 30`. This is a tuning parameter and you can start with 10% of the points of one series (here we have daily data for a year, 10% is roughly 30 points). `temporal_min_match` filters out pairs don't have enough match and to return all the pairs, set `temporal_min_match` to `0`.
-
-```{r}
-res <- match_sites(river, climate,
-  temporal_var_to_match = prcp,
-  temporal_independent = climate,  
-  temporal_n_highest = 30,
-  temporal_min_match = 15
-)
-
-res
-```
+Now we use `match_sites()` to first pair the weather stations with the river gauges spatially and then apply the temporal matching on `prcp`. We will construct the interval based on peaks in `climate` since we would expect a lag effect for precipitation to flow into the river and cause a raise in river level, hence `temporal_independent = climate`. We select the 30 highest peak from the series to construct the match by setting `temporal_n_highest = 30`. This is a tuning parameter and you can start with 10% of the points of one series (here we have daily data for a year, 10% is roughly 30 points). `temporal_min_match` filters out pairs don't have enough match and to return all the pairs, set `temporal_min_match` to `0`.``
 
 The output from temporal matching is also a cubble, with additional column `.dist` and `.group` inherent from spatial matching and `n_match` for the number of matched temporal peaks. Then you can use this output to plot the location of match or to look at the series:
 
-```{r echo = FALSE, out.width="100%", fig.cap="..."}
-p1 <- plot_map(vic_map) +
-  geom_point(
-    data = res,
-    aes(x = long, y = lat, color = type)
-  ) +
-  ggrepel::geom_label_repel(
-    data = res %>% filter(type == "river"),
-    aes(x = long, y = lat, label = .group)
-  ) +
-  scale_color_brewer(palette = "Dark2") +
-  ggtitle("Victoria") +
-  theme_minimal() +
-  theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    legend.position = "bottom"
-  )
 
-res_long <- res %>%
-  stretch(ts) %>%
-  migrate(.group, type) %>%
-  mutate(prcp = scale(prcp)[, 1]) %>%
-  switch_key(.group) %>%
-  migrate(type)
-
-p2 <- res_long %>%
-  ggplot(aes(
-    x = date, y = prcp,
-    group = id, color = type
-  )) +
-  geom_line() +
-  facet_wrap(vars(.group)) +
-  scale_color_brewer(palette = "Dark2", guide = "none") +
-  theme_bw() +
-  labs(x = "week") +
-  scale_x_date(date_labels = "%b")
-
-p1 | p2
+```{r matching, out.width="100%", out.height="30%", fig.cap="asdfasd"}
+knitr::include_graphics("figures/matching.png")
 ```
+
+
 
 ## ERA5: climate reanalysis data
 
-```{r eval = FALSE}
-nc <- ncdf4::nc_open(here::here("data/adaptor.mars.internal-1638344933.932894-4194-11-a5d35ac3-b36d-4982-afa5-a5dd193a6718.nc"))
-
-nc <- ncdf4::nc_open(here::here("data/tas_Amon_ACCESS-CM2_ssp585_r1i1p1f1_gn_20150116-20201216_v20191108.nc"))
-temp <- as_cubble(nc, vars = "tas")
-vic_map <- ozmaps::abs_ste %>% filter(NAME == "Victoria")
-
-res <- temp %>% 
-  stretch(ts) %>% 
-  mutate(d2m = d2m - 273.15) %>% 
-  filter(lubridate::hour(time) == 12) %>% 
-  group_by(id) %>% 
-  summarise(d2m = mean(d2m, na.rm= TRUE)) %>%
-  migrate(long, lat)
-
-vic_string <- vic_map %>% sf::st_cast("MULTILINESTRING") 
-
-res %>% 
-  ggplot() +
-  geom_tile(aes(x = long, y = lat, fill = d2m)) +
-  geom_sf(data = vic_string , alpha = 0.5, fill = "transparent") +
-  theme_bw() + 
-  colorspace::scale_fill_continuous_sequential("Mint")
-
-```
 
 ## Interative graphic with cubble
 
 With a larger dataset, interactive graphics can be helpful to explore these data from multiple perspective. Two examples are presented here to show how interactivity can be used to explore the climate data across Australia.
 
+Figure \ref{fig:interactive-linking} 
+Figure \ref{fig:interactive-popup} 
 
-
-
-
-
-```{r echo = FALSE, out.width="100%", out.height="30%"}
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="30%", fig.cap = "sdfasd"}
 knitr::include_graphics(here::here("figures/linking.png"))
 ```
 
 
-```{r echo = FALSE, out.width="50%", out.height="30%"}
+```{r interactive-popup, echo = FALSE, out.width="50%", out.height="30%", fig.cap = "sdfasd"}
 knitr::include_graphics(here::here("figures/popup.png"))
 ```
 
@@ -497,83 +343,83 @@ knitr::include_graphics(here::here("figures/popup.png"))
 
 # Appendix
 
-```{r interactive-workflow-2, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon interactivity"}
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.007.png"))
+```{r illu-interactive-2, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon interactivity"}
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.005.png"))
 ```
 
 \newpage
 
-# Old stuff
+<!-- # Old stuff -->
 
-In the temporal aspect, the `tsibble` [@tsibbles] structure and its tidyverts ecosystem have provided a [... ] workflow to work with temporal data. In a tsibble structure, temporal data is characterised by `index` and `key` where `index` is the temporal identifier and `key` is the identifier for multiple series, which could be used as a spatio identifier. However, a tsibble object, by construction, always requires the `index` in its structure. This makes it less appealing for spatio-temporal data since the output of calculated spatio-specific variables (i.e. features of each series) don't have the time dimension. Analysts will either need to have an additional step to join this output to the original tsibble or operate with variables stored in two separate objects. In addition, the long form structure of a tsibble object means spatio variables (i.e. longitude, latitude, and features of each series if joined back to the tsibble) of each spatio identifier will be repetitively recorded at each timestamp. This repetition is unnecessary and would inflate the object size for long series.
+<!-- In the temporal aspect, the `tsibble` [@tsibbles] structure and its tidyverts ecosystem have provided a [... ] workflow to work with temporal data. In a tsibble structure, temporal data is characterised by `index` and `key` where `index` is the temporal identifier and `key` is the identifier for multiple series, which could be used as a spatio identifier. However, a tsibble object, by construction, always requires the `index` in its structure. This makes it less appealing for spatio-temporal data since the output of calculated spatio-specific variables (i.e. features of each series) don't have the time dimension. Analysts will either need to have an additional step to join this output to the original tsibble or operate with variables stored in two separate objects. In addition, the long form structure of a tsibble object means spatio variables (i.e. longitude, latitude, and features of each series if joined back to the tsibble) of each spatio identifier will be repetitively recorded at each timestamp. This repetition is unnecessary and would inflate the object size for long series. -->
 
-# Create a cubble
+<!-- # Create a cubble -->
 
-The creation of a cubble requires the site identifier (`key`), as well as the spatial (`coords`) and temporal (`index`) identifier. `climate_flat` is already a tibble and it uses `id` to identify each station, `date` as the time identifier, and `c(long, lat)` as the spatial identifier. To create a cubble for this data, use:
+<!-- The creation of a cubble requires the site identifier (`key`), as well as the spatial (`coords`) and temporal (`index`) identifier. `climate_flat` is already a tibble and it uses `id` to identify each station, `date` as the time identifier, and `c(long, lat)` as the spatial identifier. To create a cubble for this data, use: -->
 
-```{r}
-climate_flat %>% as_cubble(key = id, index = date, coords = c(long, lat))
-```
+<!-- ```{r} -->
+<!-- climate_flat %>% as_cubble(key = id, index = date, coords = c(long, lat)) -->
+<!-- ``` -->
 
-Most of the time, spatio-temporal data doesn't come into this form and analysts need to query the climate variables based on station metadata. \textcolor{red}{This is also a problem illustrated in Section 3.5 in @tidydata. Here we provide a structured way to query this data based on the row-wise operator and nested list.} For this type of task, one can structure a metadata into a tibble and use row-wise operator to query the climate variables into a nested list. As an example here we demonstrate the workflow to find the 5 closest stations to Melbourne. We first create a station data frame with the 5 target stations.
+<!-- Most of the time, spatio-temporal data doesn't come into this form and analysts need to query the climate variables based on station metadata. \textcolor{red}{This is also a problem illustrated in Section 3.5 in @tidydata. Here we provide a structured way to query this data based on the row-wise operator and nested list.} For this type of task, one can structure a metadata into a tibble and use row-wise operator to query the climate variables into a nested list. As an example here we demonstrate the workflow to find the 5 closest stations to Melbourne. We first create a station data frame with the 5 target stations. -->
 
-```{r echo = FALSE}
-latlon_ref <- tibble::tibble(id = "melbourne", lat = -37.8136, long = 144.9631)
+<!-- ```{r echo = FALSE} -->
+<!-- latlon_ref <- tibble::tibble(id = "melbourne", lat = -37.8136, long = 144.9631) -->
 
-cand <- aus_climate %>%
-  as_tibble() %>%
-  select(id, lat, long, elev, name, wmo_id)
+<!-- cand <- aus_climate %>% -->
+<!--   as_tibble() %>% -->
+<!--   select(id, lat, long, elev, name, wmo_id) -->
 
 
-calc_dist <- function(df_ref, df, n = 5) {
-  long_ref <- df_ref$long
-  lat_ref <- df_ref$lat
+<!-- calc_dist <- function(df_ref, df, n = 5) { -->
+<!--   long_ref <- df_ref$long -->
+<!--   lat_ref <- df_ref$lat -->
 
-  df %>%
-    mutate(
-      long_ref = long_ref,
-      lat_ref = lat_ref,
-      dist = rnoaa::meteo_spherical_distance(lat, long, lat_ref, long_ref)
-    ) %>%
-    slice_min(dist, n = n) %>%
-    mutate(city = df_ref$id) %>%
-    select(-long_ref, -lat_ref)
-}
+<!--   df %>% -->
+<!--     mutate( -->
+<!--       long_ref = long_ref, -->
+<!--       lat_ref = lat_ref, -->
+<!--       dist = rnoaa::meteo_spherical_distance(lat, long, lat_ref, long_ref) -->
+<!--     ) %>% -->
+<!--     slice_min(dist, n = n) %>% -->
+<!--     mutate(city = df_ref$id) %>% -->
+<!--     select(-long_ref, -lat_ref) -->
+<!-- } -->
 
-(stations <- do.call("rbind", purrr::map(
-  1:nrow(latlon_ref),
-  ~ calc_dist(latlon_ref[.x, ], cand)
-)))
-```
+<!-- (stations <- do.call("rbind", purrr::map( -->
+<!--   1:nrow(latlon_ref), -->
+<!--   ~ calc_dist(latlon_ref[.x, ], cand) -->
+<!-- ))) -->
+<!-- ``` -->
 
-We can query the climate information into a nested list named `ts` for each station with the `rowwise()` operator. To create a cubble, supply the same identifiers as with the first example.
+<!-- We can query the climate information into a nested list named `ts` for each station with the `rowwise()` operator. To create a cubble, supply the same identifiers as with the first example. -->
 
-```{r eval = FALSE}
-sydmel_climate <- stations %>%
-  rowwise() %>%
-  mutate(ts = list(meteo_pull_monitors(id,
-    date_min = "2020-01-01",
-    date_max = "2020-12-31",
-    var = c("PRCP", "TMAX", "TMIN")
-  ) %>%
-    select(-id))) %>%
-  as_cubble(key = id, index = date, coords = c(long, lat))
-```
+<!-- ```{r eval = FALSE} -->
+<!-- sydmel_climate <- stations %>% -->
+<!--   rowwise() %>% -->
+<!--   mutate(ts = list(meteo_pull_monitors(id, -->
+<!--     date_min = "2020-01-01", -->
+<!--     date_max = "2020-12-31", -->
+<!--     var = c("PRCP", "TMAX", "TMIN") -->
+<!--   ) %>% -->
+<!--     select(-id))) %>% -->
+<!--   as_cubble(key = id, index = date, coords = c(long, lat)) -->
+<!-- ``` -->
 
-```{r echo = FALSE}
-(sydmel_climate <- stations %>%
-  left_join(aus_climate) %>%
-  as_cubble(key = id, index = date, coords = c(long, lat)))
-```
+<!-- ```{r echo = FALSE} -->
+<!-- (sydmel_climate <- stations %>% -->
+<!--   left_join(aus_climate) %>% -->
+<!--   as_cubble(key = id, index = date, coords = c(long, lat))) -->
+<!-- ``` -->
 
-Below are the how the nested and long form look like for Australia climate data, which records daily precipitation, maximum and minimum temperature for 55 stations across Australia from 2015- 2020. Notice that each station forms a group in both forms and specifically, the nested and long form have a underlying `rowwise_df` and `grouped_df` respectively.
+<!-- Below are the how the nested and long form look like for Australia climate data, which records daily precipitation, maximum and minimum temperature for 55 stations across Australia from 2015- 2020. Notice that each station forms a group in both forms and specifically, the nested and long form have a underlying `rowwise_df` and `grouped_df` respectively. -->
 
-With a cubic framework on mind, different types of manipulation with cubble can be thought of as slicing the cube in various way. The table below shows how some `dplyr` verbs are mapped into the operation in a cubble. With the existing grouping on the station, additional grouping can be added with `group_by` and removed with `ungrouped`. [talk about why it is useful]
+<!-- With a cubic framework on mind, different types of manipulation with cubble can be thought of as slicing the cube in various way. The table below shows how some `dplyr` verbs are mapped into the operation in a cubble. With the existing grouping on the station, additional grouping can be added with `group_by` and removed with `ungrouped`. [talk about why it is useful] -->
 
-\newpage
+<!-- \newpage -->
 
-## Cubble operations
+<!-- ## Cubble operations -->
 
-```{r cubble-operations, echo = FALSE, fig.cap="Cubble operations", out.height="50%", out.width="90%", fig.align='center'}
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
-```
+<!-- ```{r cubble-operations, echo = FALSE, fig.cap="Cubble operations", out.height="50%", out.width="90%", fig.align='center'} -->
+<!-- knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png")) -->
+<!-- ``` -->
