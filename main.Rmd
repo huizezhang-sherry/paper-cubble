@@ -329,13 +329,15 @@ With a larger dataset, interactive graphics can be helpful to explore these data
 Figure \ref{fig:interactive-linking} 
 Figure \ref{fig:interactive-popup} 
 
-```{r interactive-linking, echo = FALSE, out.width="100%", out.height="30%", fig.cap = "sdfasd"}
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="25%", fig.cap = "sdfasd"}
 knitr::include_graphics(here::here("figures/linking.png"))
 ```
 
 
-```{r interactive-popup, echo = FALSE, out.width="50%", out.height="30%", fig.cap = "sdfasd"}
-knitr::include_graphics(here::here("figures/popup.png"))
+```{r interactive-popup, echo = FALSE, out.width="50%", out.height="30%", fig.cap = "sdfasd", fig.show='hold'}
+knitr::include_graphics(here::here("figures/popup-tas.png"))
+knitr::include_graphics(here::here("figures/popup-mid.png"))
+knitr::include_graphics(here::here("figures/popup-north.png"))
 ```
 
 
