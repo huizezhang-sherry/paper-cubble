@@ -1,3 +1,5 @@
+library(tidyverse)
+library(cubble)
 coords <- cbind(weatherdata::climate_full$long, weatherdata::climate_full$lat)
 dist_raw <- geosphere::distm(coords, coords)
 
@@ -16,7 +18,7 @@ station_long <- cluster_nested %>%
   summarise(prcp = sum(prcp, na.rm = TRUE))
 
 cluster_long <- station_long %>% 
-  ungroup(id)
+  ungroup(id) %>% 
   summarise(prcp = mean(prcp, na.rm = TRUE)) %>% 
   migrate(cent_long, cent_lat)
 
@@ -53,4 +55,4 @@ p3 <- plot_map(state_map) +
   geom_point(data = tas_latlong, aes(x = long, y = lat), col = "red")
 
 (p1 | p3)/ p2 + plot_annotation(tag_levels = 'A')
-ggsave(filename = "figures/aggregation.png", width = 7, height = 9)
+ggsave(filename = "figures/basic-agg.png", width = 7, height = 9)

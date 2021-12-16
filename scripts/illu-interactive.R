@@ -14,12 +14,12 @@ plot_map(state_map) +
   geom_point(data = dt %>% filter(id == "ASN00003057"), aes(x = long, y = lat), 
              color = "red", size =5) 
 
-ggsave(filename = "figures/illu-highlighted-map.png")
+ggsave(filename = "figures/keynotes-figures/illu-highlighted-map.png")
 
 plot_map(state_map) +
   geom_point(data = dt, aes(x = long, y = lat)) 
   
-ggsave(filename = "figures/illu-default-map.png")
+ggsave(filename = "figures/keynotes-figures/illu-default-map.png")
 
 long <- dt %>% 
   stretch() %>% 
@@ -39,7 +39,7 @@ long %>%
   scale_x_date(date_labels = "%b") + 
   xlab("Month")
   
-ggsave(filename = "figures/illu-highlighted-long.png", width = 5, height = 3)
+ggsave(filename = "figures/keynotes-figures/illu-highlighted-long.png", width = 5, height = 3)
 
 long %>% 
   ggplot(aes(x = dummy_date, y = tmax, group = id)) +
@@ -47,7 +47,7 @@ long %>%
   scale_x_date(date_labels = "%b") + 
   xlab("Month")
 
-ggsave(filename = "figures/illu-default-long.png", width = 5, height = 3)
+ggsave(filename = "figures/keynotes-figures/illu-default-long.png", width = 5, height = 3)
 
 ###########################
 # from ts to map
@@ -62,6 +62,6 @@ long %>%
   scale_x_date(date_labels = "%b") + 
   xlab("Month")
 
-ggsave(filename = "figures/illu-highlighted-long-point.png", width = 5, height = 3)
+ggsave(filename = "figures/keynotes-figures/illu-highlighted-long-point.png", width = 5, height = 3)
 
 
