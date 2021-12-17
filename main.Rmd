@@ -321,23 +321,57 @@ knitr::include_graphics("figures/matching.png")
 
 ## ERA5: climate reanalysis data
 
+\newpage
 
 ## Interative graphic with cubble
 
-With a larger dataset, interactive graphics can be helpful to explore these data from multiple perspective. Two examples are presented here to show how interactivity can be used to explore the climate data across Australia.
+With a larger dataset, interactive graphics can be helpful to explore these data from multiple perspective. Two examples are presented here to show how interactivity can be used to explore the climate data across Australia. Again, `weatherdata::climate_full` will be used and we hope to include more than one time variable here. The difference between the maximum and minimum temperature of the day, the diurnal range, can be directly calculated from the data and it can have large impact on the wine industry (lol this is going far). This would be useful to compare the temperature difference across stations and to compare how this temperature difference differs throughout the year.
 
-Figure \ref{fig:interactive-linking} 
-Figure \ref{fig:interactive-popup} 
+Temperature difference is a time-wise variable and should be computed in the long form cubble. The variables are averaged over the 2016 to 2020 period by month to stabilise the result. 
 
-```{r interactive-linking, echo = FALSE, out.width="100%", out.height="25%", fig.cap = "sdfasd"}
-knitr::include_graphics(here::here("figures/linking.png"))
+```{r eval = FALSE, echo = TRUE}
+res <- weatherdata::climate_full %>%
+  # filter(!id %in% c("ASN00067033", "ASN00072091", 
+  #                   "ASN00059040", "ASN00097053")) %>%
+  stretch() %>%
+  mutate(month = lubridate::month(date),
+         diff = tmax - tmin) %>%
+  group_by(month) %>%
+  summarise(tmax = mean(tmax, na.rm = TRUE),
+            diff = mean(diff, na.rm = TRUE)) %>%
+  ungroup(month)
+  
 ```
 
+Several variables can be useful when comparing the seasonal effect of the temperature differences, for example, the difference of average temperature difference between summer and winter can tell [...]. This is a station-wise measure and hence computed in the nested form. 
 
-```{r interactive-popup, echo = FALSE, out.width="50%", out.height="30%", fig.cap = "sdfasd", fig.show='hold'}
-knitr::include_graphics(here::here("figures/popup-tas.png"))
-knitr::include_graphics(here::here("figures/popup-mid.png"))
+```{r eval = FALSE, echo = TRUE}
+res <- res %>% 
+  tamp() %>%
+  mutate(
+    diff_winter = ts %>% filter(month %in% c(6, 7, 8)) %>%
+      pull(diff) %>% mean(na.rm = TRUE),
+    diff_summer = ts %>% filter(month %in% c(12, 1, 2)) %>%
+      pull(diff) %>% mean(na.rm = TRUE),
+    diff_year = diff_winter - diff_summer
+  )
+```
+
+The result from the above manipulation can be directly supplied to make interactive plots and Figure \ref{fig:interactive-linking} is an example made with \pkg{plotly} and \pkg{crosstalk}. For example, the second row results from selecting the highest mean maximum temperature in July and this corresponds to Kalumburu where there is a larger winter (June to August) temperature difference than summer (December to February). The third row selects one of the stations (Birdsville Airport) with a large average temperature difference in the interior desert region on the map and the linked view from the time series shows that this maximum and minimum temperature difference is constant throughout the year. The last row selects the lowest maximum temperature in July on the temperature band and surprisingly, the corresponding station doesn't fall into the Tasmania island but Mountain Hotham in Victoria.
+
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="25%", fig.cap = "Screenshots of the mean daily temperature difference averaged by month from 2016 to 2020 at various locations in Australia. Crossed linking between the map and the temperature band is implemented in both directions for exploring the temperature pattern interactively. The first row is the general appearance of the graph and the next three rows are examples from various selection to show different temperature patterns in Australia. The html version can be found at ...", fig.show='hold'}
+knitr::include_graphics(here::here("figures/linking.png"))
+knitr::include_graphics(here::here("figures/linking-north.png"))
+knitr::include_graphics(here::here("figures/linking-mid.png"))
+knitr::include_graphics(here::here("figures/linking-south.png"))
+```
+
+Cubble is also compatible with \pkg{leaflet} and with leaflet extension package \pkg{leafpop}, the temperature band can be displayed upon clicking on the station on the map. Figure \ref{fig:interactive-popup} shows more examples of temperature pattern that can be found in Australia. With the same latitude as Kalumburu but in the Pacific coastline, Cooktown airport shows a similarly high but constant temperature throughout the year. With a slightly higher latitude than the mountain Hotham, flat land in Melbourne airport shows a less extreme temperature band. Lastly, the Cape Grim Baps, in the north-west tip of the Tasmania island shows a uniformly low and thin temperature band. 
+
+```{r interactive-popup, echo = FALSE, out.width="50%", out.height="30%", fig.cap = "Screenshots of the diurnal temperature range averaged by month from 2016 to 2020 at various locations in Australia. The leaflet popup allows users to click on a single station for its temperature band as a small plot in the popup window. The html version can be found at ...", fig.show='hold'}
 knitr::include_graphics(here::here("figures/popup-north.png"))
+knitr::include_graphics(here::here("figures/popup-vic.png"))
+knitr::include_graphics(here::here("figures/popup-tas.png"))
 ```
 
 

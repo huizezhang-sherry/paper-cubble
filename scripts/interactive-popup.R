@@ -35,7 +35,8 @@ for (i in 1:length(df_id)) {
     theme_bw() + 
     scale_x_date(date_labels = "%b", date_breaks = "1 month") + 
     labs(x = "Month", y = "Temperature") + 
-    ylim(-10, 50)
+    ylim(-10, 50) + 
+    ggtitle(paste0(stringr::str_to_title(unique(dt$name))))
   
   i <- i + 1
   

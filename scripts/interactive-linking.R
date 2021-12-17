@@ -4,30 +4,29 @@ library(crosstalk)
 library(plotly)
 
 clean <-  weatherdata::climate_full %>%
-  filter(!id %in% c("ASN00067033", "ASN00072091")) %>% 
+  filter(!id %in% c("ASN00067033", "ASN00072091", "ASN00059040", "ASN00097053")) %>%
   stretch() %>%
   mutate(month = lubridate::month(date),
-         diff = tmax - tmin) %>% 
-  group_by(month) %>% 
+         diff = tmax - tmin,
+         avg = (tmax + tmin)/2) %>%
+  group_by(month) %>%
   summarise(tmax = mean(tmax, na.rm = TRUE),
-            diff = mean(diff, na.rm = TRUE)) %>% 
-  ungroup(month) %>% 
+            tmin = mean(tmin, na.rm = TRUE),
+            diff = mean(diff, na.rm = TRUE),
+            avg = mean(avg, na.rm =TRUE)) %>%
+  ungroup(month) %>%
+  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) %>% 
   tamp() %>%
-  mutate(a = nrow(ts)) %>% 
-  filter(a == 12) %>% 
-  mutate(diff_winter = ts %>% filter(month %in% c(6,7,8)) %>% pull(diff) %>% mean(na.rm = TRUE),
-         diff_summer = ts %>% filter(month %in% c(12, 1,2)) %>% pull(diff) %>% mean(na.rm = TRUE),
-         diff_year = diff_winter - diff_summer) %>% 
-  stretch() %>% 
-  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) %>%
-  migrate(name) 
+  mutate(
+    diff_winter = ts %>% filter(month %in% c(6, 7, 8)) %>% pull(diff) %>% mean(na.rm = TRUE),
+    diff_summer = ts %>% filter(month %in% c(12, 1, 2)) %>% pull(diff) %>% mean(na.rm = TRUE),
+    diff_year = diff_winter - diff_summer,
+    annual = ts %>% filter(month %in% c(7, 1)) %>% pull(avg) %>% diff() %>% abs(),
+    diurnal = ts %>% pull(diff) %>% mean(na.rm = TRUE)
+  )
 
-long <- clean %>% 
+nested <- clean %>% 
   SharedData$new(~id, group = "cubble")
-
-nested <- clean %>% tamp() %>% as_tibble() %>% 
-  SharedData$new(~id, group = "cubble")
-
 
 p1 <- nested %>%  
   ggplot(aes(x = diff_summer, y = diff_winter, color = diff_year, label = name)) + 
@@ -53,8 +52,6 @@ p2 <- nested %>%
   theme_bw() + 
   theme(panel.grid.major = element_blank(),
         legend.position = "bottom")
-
-
 
 out <- bscols(
   ggplotly(p1, width = 700, height = 700, tooltip = "label") %>% 
