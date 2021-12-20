@@ -210,80 +210,60 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 # Examples
 
-## Australia precipitation pattern in 2020
+## Australia historical maximum temperature
 
-### Basic manipulation
+Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world and the dataset `weatherdata::historical_tmax` extracts the historical maximum temperature recorded for `r nrow(weatherdata::historical_tmax)` Australian stations. The data `historical_tmax` is already presented as a cubble, with `id` as the key, `date` as the index, and `c("longitude", "latitude")` as the coordinates. Other variables include `elevation`, `name`, `wmo_id`, `first_year`, and  `last_year` in the nested form and `tmax` in the long form. This example compares the maximum temperature in two periods: 1971 - 1975 and 2016 - 2020 for stations in Victoria and New South Wales.
 
-Bureau of Meteorology (BoM) collects climate variables. This variables can be openly queried via `rnoaa`. `weatherdata` provides a readily available copy of several data. `weatherdata::historical_tmax` provides historical maximum temperature recorded for Australian stations with the earliest dating back to 1859 and this can be used to understand the change of maximum temperature from a past period to nowadays. 
+Stations in the two states can be subsetted on the station number: Australia GHCN station number starts with `ASN00` and followed by the [Bureau of Meteorology (BOM) station number](http://www.bom.gov.au/climate/cdo/about/site-num.shtml), where the 2nd and 3rd digit (7th and 8th in the GHCN number) denote the state a station belongs to. New South Wales stations start from 46 to 75 and Victoria stations then follow from 76 to 90. Extracting Victoria and New South Wales stations is a filter operation in the spatial dimension and hence is operated in the nested form: 
 
-Figure \ref{fig:basic-manip}.
+```{r eval = FALSE, echo = TRUE}
+tmax <- weatherdata::historical_tmax %>%
+  filter(between(stringr::str_sub(id, 7, 8), 46, 90))
+```
+
+The five year window is chosen to remove the effect of a particular year and the historical period of 1971 - 1975 is used since all the stations have records from 1970. This following chunk filters on records in the two study periods and summarises the maximum temperature into monthly measure. `stretch()` is used to convert the nested form cubble into the long form for these operations:
 
 ```{r eval=  FALSE, echo = TRUE}
-tmax <- weatherdata::historical_tmax %>%
-  # filter out VIC and NSW stations
-  filter(between(stringr::str_sub(id, 7, 8), 46, 90)) %>% 
-  
-  # filter out observations in between 1971-1975 and 2016 - 2020
+tmax <- tmax %>% 
   stretch() %>%
   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) %>%
   mutate(month = lubridate::month(date), 
          group = as.factor(ifelse(lubridate::year(date) > 2015, 
                                   "2016 ~ 2020", "1971 ~ 1975"))) %>%
   group_by(month, group) %>%
-  # summarise tmax into monthly mean for both periods
-  summarise(tmax = mean(tmax, na.rm = TRUE)) %>% 
-  
-  # filter out stations that have complete records in both periods 
+  summarise(tmax = mean(tmax, na.rm = TRUE))
+```  
+
+A data quality issue with GHCN data is that while the first and last year of each series is provided, years missing in this period is not reported. There are a few stations which don't have records during 1971 - 1975 and these stations are filtered out by examining whether the summarised `tmax` has a total of 24 months. This is again a station-wise operation and is operated in the nested form, which is switched to from the long form by  `tamp()`:
+
+```{r eval = FALSE, echo = TRUE}
+tmax <- tmax %>% 
   tamp() %>%
-  filter(nrow(ts) == 24) %>% 
-  
-  # migrate longitude and latitude to the long form for making the glyph map
-  stretch() %>%
-  migrate(latitude, longitude)
-
-gly <- glyphs(tmax, "longitude", "month", "latitude", "tmax",
-              height = 0.6, width = 1)
-
-nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria", "New South Wales"))
-
-ggplot() + 
-  geom_sf(data = nsw_vic, fill = "transparent") + 
-  geom_path(data = gly, 
-            aes(gx, gy, group = interaction(id, group), color = group)) +
-  scale_color_brewer(palette = "Dark2") + 
-  theme_bw() + 
-  coord_sf(xlim = c(140, 155)) + 
-  theme(legend.position = "bottom")
+  filter(nrow(ts) == 24) 
 ```
 
-```{r basic-manip, out.width="100%", out.height="70%", fig.cap="asdfasd"}
+Lastly, to create a glyph map, both the major (`longitude`, `latitude`) and minor (`month`, `tmax`) coordinates need to be in the same table. Spatial variables can be moved to the long form with `migrate()`:
+
+```{r eval = FALSE, echo = TRUE}  
+tmax <- tmax %>%   
+  stretch() %>%
+  migrate(latitude, longitude)
+```
+
+Figure \ref{fig:basic-manip} shows the glyph map made with the data after the wangling above. One issue with this map is that the similar pattern shown from a few nearby stations around Sydney (151E, 34S) and New castle (152E, 33S) can be distracting. Aggregation is a useful technique to observe the general pattern of a collection of series and will be the topic of the next example.
+
+```{r basic-manip, out.width="100%", out.height="70%", fig.cap="Glyph map of the mean maximum temperature by month for Victoria and New South Wales weather stations. On the top left corner is a detailed legend for station Cobar highlighted in the black box. Compared to 1971 - 1975,  the period 2016 - 2020 sees an increase of mean maximum temperature in spring and summer in Australia (end and beginning of the year). A larger increase during the first three months of the year is observed at stations with a lower latitude."}
 knitr::include_graphics("figures/basic-manip.png")
 ```
 
 
-<!-- `historical_tmax` is already in a nested cubble format, which is suitable for station-wise manipulation. `rnoaa` construct the station id by prefix `ASN00` to the Bureau of Meteorology (BOM) station number. In [BOM's numbering system](http://www.bom.gov.au/climate/cdo/about/site-num.shtml), the 2nd and 3rd digit denotes the state a station is located in and this is equivalent to the 7th to 8th digit in our string. We can mutate/ filter station in a particular state based on this information and here we add a column called `state_id` and filter out the ones in New South Wales and Victoria (ranging from 46 to 90). -->
+
+## Australia precipitation pattern in 2020
 
 
-<!-- There are some operations in the time dimension we would like to make: -->
-
-<!-- -   Extract observations in a particular period, say, those in 1971 to 1975 and 2016 to 2020. This can be used to compare the historical and recent climate. -->
-<!-- -   Summarise daily records into monthly to remove sparsity -->
-
-<!-- These time dimension operations can be computed in the long form and `stretch()` converts a nested cubble to a long cubble. From a long cubble, we can write the exact same dplyr codes to complete the two tasks: -->
-
-<!-- A data quality issue with the `rnoaa` data is that while it records the first and last year recorded of each series, it doesn't report the period of missingness. For example, station `ASN00047048` starts it first record in 1957, pauses for a period from 1963 to 1990, and then resumes it recording till today. Out of the `nrow(tmax_nested)` stations in New South Wales and Victoria, 7 stations have this issue and we would like to remove those stations from the comparison. -->
-
-<!-- Again, this is a station-wise operation and to convert back from the long cubble to a nested one, use `tamp()`. Here we keep the stations with 24 observations (12 months for both periods) after the monthly aggregation. -->
-
-<!-- In some visualisation, we may need information from both spatial and temporal dimension. One example of this is a glyph map, where spatial variables, i.e. `longitude` and `latitude`, are used to construct the major axes and temporal variables, i.e. `month` and `tmax`, are used to construct the minor axes. This requires these variables to be in the same table, rather than in different forms. In cubble, you can append spatial variables that are invariant to the `key` with `migrate()` -->
+In Figure \ref{fig:basic-agg}. Aggregating them into averages or other statistics would give a better picture. This can be done with cubble through a hierarchical structure, where the cluster indicator is one level above the individual station. 
 
 
-
-### Aggregation 
-
-In figure \ref{fig:basic-manip}, there are a few stations around Sydney (151E, 34S) and New castle (152E, 33S). Aggregating them into averages or other statistics would give a better picture. This can be done with cubble through a hierarchical structure, where the cluster indicator is one level above the individual station. 
-
-In Figure \ref{fig:basic-agg}
 
 The `weatherdata::climate_full` data has daily climate data of `r nrow(weatherdata::climate_full)` Australia stations from 2016 to 2020. 
 

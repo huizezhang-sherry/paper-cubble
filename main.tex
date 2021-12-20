@@ -445,62 +445,95 @@ will then being reflected in the updated plots and Diagram
 \hypertarget{examples}{%
 \section{Examples}\label{examples}}
 
-\hypertarget{australia-precipitation-pattern-in-2020}{%
-\subsection{Australia precipitation pattern in
-2020}\label{australia-precipitation-pattern-in-2020}}
+\hypertarget{australia-historical-maximum-temperature}{%
+\subsection{Australia historical maximum
+temperature}\label{australia-historical-maximum-temperature}}
 
-\hypertarget{basic-manipulation}{%
-\subsubsection{Basic manipulation}\label{basic-manipulation}}
+Global Historical Climatology Network (GHCN) provides daily climate
+measures from stations across the world and the dataset
+\texttt{weatherdata::historical\_tmax} extracts the historical maximum
+temperature recorded for 236 Australian stations. The data
+\texttt{historical\_tmax} is already presented as a cubble, with
+\texttt{id} as the key, \texttt{date} as the index, and
+\texttt{c("longitude",\ "latitude")} as the coordinates. Other variables
+include \texttt{elevation}, \texttt{name}, \texttt{wmo\_id},
+\texttt{first\_year}, and \texttt{last\_year} in the nested form and
+\texttt{tmax} in the long form. This example compares the maximum
+temperature in two periods: 1971 - 1975 and 2016 - 2020 for stations in
+Victoria and New South Wales.
 
-Bureau of Meteorology (BoM) collects climate variables. This variables
-can be openly queried via \texttt{rnoaa}. \texttt{weatherdata} provides
-a readily available copy of several data.
-\texttt{weatherdata::historical\_tmax} provides historical maximum
-temperature recorded for Australian stations with the earliest dating
-back to 1859 and this can be used to understand the change of maximum
-temperature from a past period to nowadays.
-
-Figure \ref{fig:basic-manip}.
+Stations in the two states can be subsetted on the station number:
+Australia GHCN station number starts with \texttt{ASN00} and followed by
+the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Bureau
+of Meteorology (BOM) station number}, where the 2nd and 3rd digit (7th
+and 8th in the GHCN number) denote the state a station belongs to. New
+South Wales stations start from 46 to 75 and Victoria stations then
+follow from 76 to 90. Extracting Victoria and New South Wales stations
+is a filter operation in the spatial dimension and hence is operated in
+the nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> tmax <- weatherdata::historical_tmax %>%
-+   # filter out VIC and NSW stations
-+   filter(between(stringr::str_sub(id, 7, 8), 46, 90)) %>% 
-+   
-+   # filter out observations in between 1971-1975 and 2016 - 2020
++   filter(between(stringr::str_sub(id, 7, 8), 46, 90))
+\end{CodeInput}
+\end{CodeChunk}
+
+The five year window is chosen to remove the effect of a particular year
+and the historical period of 1971 - 1975 is used since all the stations
+have records from 1970. This following chunk filters on records in the
+two study periods and summarises the maximum temperature into monthly
+measure. \texttt{stretch()} is used to convert the nested form cubble
+into the long form for these operations:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> tmax <- tmax %>% 
 +   stretch() %>%
 +   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) %>%
 +   mutate(month = lubridate::month(date), 
 +          group = as.factor(ifelse(lubridate::year(date) > 2015, 
 +                                   "2016 ~ 2020", "1971 ~ 1975"))) %>%
 +   group_by(month, group) %>%
-+   # summarise tmax into monthly mean for both periods
-+   summarise(tmax = mean(tmax, na.rm = TRUE)) %>% 
-+   
-+   # filter out stations that have complete records in both periods 
-+   tamp() %>%
-+   filter(nrow(ts) == 24) %>% 
-+   
-+   # migrate longitude and latitude to the long form for making the glyph map
-+   stretch() %>%
-+   migrate(latitude, longitude)
-R> 
-R> gly <- glyphs(tmax, "longitude", "month", "latitude", "tmax",
-+               height = 0.6, width = 1)
-R> 
-R> nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria", "New South Wales"))
-R> 
-R> ggplot() + 
-+   geom_sf(data = nsw_vic, fill = "transparent") + 
-+   geom_path(data = gly, 
-+             aes(gx, gy, group = interaction(id, group), color = group)) +
-+   scale_color_brewer(palette = "Dark2") + 
-+   theme_bw() + 
-+   coord_sf(xlim = c(140, 155)) + 
-+   theme(legend.position = "bottom")
++   summarise(tmax = mean(tmax, na.rm = TRUE))
 \end{CodeInput}
 \end{CodeChunk}
+
+A data quality issue with GHCN data is that while the first and last
+year of each series is provided, years missing in this period is not
+reported. There are a few stations which don't have records during 1971
+- 1975 and these stations are filtered out by examining whether the
+summarised \texttt{tmax} has a total of 24 months. This is again a
+station-wise operation and is operated in the nested form, which is
+switched to from the long form by \texttt{tamp()}:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> tmax <- tmax %>% 
++   tamp() %>%
++   filter(nrow(ts) == 24) 
+\end{CodeInput}
+\end{CodeChunk}
+
+Lastly, to create a glyph map, both the major (\texttt{longitude},
+\texttt{latitude}) and minor (\texttt{month}, \texttt{tmax}) coordinates
+need to be in the same table. Spatial variables can be moved to the long
+form with \texttt{migrate()}:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> tmax <- tmax %>%   
++   stretch() %>%
++   migrate(latitude, longitude)
+\end{CodeInput}
+\end{CodeChunk}
+
+Figure \ref{fig:basic-manip} shows the glyph map made with the data
+after the wangling above. One issue with this map is that the similar
+pattern shown from a few nearby stations around Sydney (151E, 34S) and
+New castle (152E, 33S) can be distracting. Aggregation is a useful
+technique to observe the general pattern of a collection of series and
+will be the topic of the next example.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -509,20 +542,18 @@ R> ggplot() +
 
 }
 
-\caption[asdfasd]{asdfasd}\label{fig:basic-manip}
+\caption[Glyph map of the mean maximum temperature by month for Victoria and New South Wales weather stations]{Glyph map of the mean maximum temperature by month for Victoria and New South Wales weather stations. On the top left corner is a detailed legend for station Cobar highlighted in the black box. Compared to 1971 - 1975,  the period 2016 - 2020 sees an increase of mean maximum temperature in spring and summer in Australia (end and beginning of the year). A larger increase during the first three months of the year is observed at stations with a lower latitude.}\label{fig:basic-manip}
 \end{figure}
 \end{CodeChunk}
 
-\hypertarget{aggregation}{%
-\subsubsection{Aggregation}\label{aggregation}}
+\hypertarget{australia-precipitation-pattern-in-2020}{%
+\subsection{Australia precipitation pattern in
+2020}\label{australia-precipitation-pattern-in-2020}}
 
-In figure \ref{fig:basic-manip}, there are a few stations around Sydney
-(151E, 34S) and New castle (152E, 33S). Aggregating them into averages
-or other statistics would give a better picture. This can be done with
-cubble through a hierarchical structure, where the cluster indicator is
-one level above the individual station.
-
-In Figure \ref{fig:basic-agg}
+In Figure \ref{fig:basic-agg}. Aggregating them into averages or other
+statistics would give a better picture. This can be done with cubble
+through a hierarchical structure, where the cluster indicator is one
+level above the individual station.
 
 The \texttt{weatherdata::climate\_full} data has daily climate data of
 639 Australia stations from 2016 to 2020.
