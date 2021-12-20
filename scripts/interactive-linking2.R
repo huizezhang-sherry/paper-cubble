@@ -1,5 +1,5 @@
-dt <- clean %>% tamp() 
-
+dt <- clean 
+state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
 dt %>% 
   ggplot() +
   geom_sf(data = state_map, aes(geometry = geometry), fill = "transparent") +
@@ -31,9 +31,10 @@ p1 <- nested %>%
 
 p2 <- long %>% 
   ggplot() +
-  geom_ribbon(aes(x = dummy_date, ymin = tmin, ymax = tmax, group = id), 
-              color = "grey30", fill = "grey70", alpha = 0.2) +
-  geom_point(aes(x = dummy_date, y = tmax), size = 0.1) + 
+  # geom_ribbon(aes(x = dummy_date, ymin = tmin, ymax = tmax, group = id), 
+  #             color = "grey30", fill = "grey30", alpha = 0.2) +
+  geom_line(aes(x = dummy_date, y = tmax, group = id), size = 0.1) + 
+  geom_line(aes(x = dummy_date, y = tmin, group = id), size = 0.1) + 
   scale_x_date(date_labels = "%b", date_breaks = "1 month") + 
   labs(x = "Month", y = "Temperature") + 
   theme_bw() + 
@@ -48,8 +49,8 @@ p2 <- long %>%
 out <- bscols(
   ggplotly(p1, width = 900, height = 700, tooltip = "label") %>%
     highlight(on = "plotly_selected", off = "plotly_deselect"),
-  ggplotly(p2, width = 850, height = 700, tooltip = "label") %>% 
-    highlight(on = "plotly_selected", off = "plotly_deselect", color = "grey30"),
-  widths = c(6, 6)
+  ggplotly(p2, width = 1200, height = 700, tooltip = "label") %>% 
+    highlight(on = "plotly_selected", off = "plotly_deselect", color = "red"),
+  widths = c(5, 5)
 )
 

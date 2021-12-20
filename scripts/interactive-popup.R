@@ -12,6 +12,7 @@ clean <-  weatherdata::climate_full %>%
   summarise(tmax = mean(tmax, na.rm = TRUE),
             diff = mean(diff, na.rm = TRUE)) %>% 
   ungroup(month) %>% 
+  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) %>% 
   tamp() %>%
   mutate(a = nrow(ts)) %>% 
   filter(a == 12) %>% 
@@ -24,7 +25,19 @@ clean <-  weatherdata::climate_full %>%
 
 i <- 1
 df_id <- clean$id %>% unique()
-p <- vector("list", length(df_id))
+p <- purrr::map(1:length(df_id), function(i){
+  dt <- clean %>% filter(id == df_id[i])
+  dt %>% 
+    ggplot(aes(x = dummy_date, ymin = tmax - diff, ymax = tmax, group = id)) + 
+    geom_ribbon(color = "grey50", fill = "grey50", alpha = 0.5) + 
+    theme_bw() + 
+    scale_x_date(date_labels = "%b", date_breaks = "1 month") + 
+    labs(x = "Month", y = "Temperature") + 
+    ylim(-10, 50) + 
+    ggtitle(paste0(stringr::str_to_title(unique(dt$name))))
+})
+
+
 for (i in 1:length(df_id)) {
   dt <- clean %>% 
     filter(id == df_id[i]) 
@@ -44,8 +57,8 @@ for (i in 1:length(df_id)) {
 
 nested <- tamp(clean) 
 domain <- nested$diff_year
-pal <- colorNumeric(colorspace::diverging_hcl(palette = "Purple-Green", 
-                                              n = 11, l2 = 80),
+pal <- colorNumeric(colorspace::sequential_hcl(palette = "Oslo", 
+                                              n = 11),
                     domain = domain)
 
 out <- leaflet(nested) %>% 
