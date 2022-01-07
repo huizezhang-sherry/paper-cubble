@@ -1,0 +1,63 @@
+---
+title: "4-5-interactive"
+output: html_document
+---
+## Interative graphic with cubble
+
+To visualise climate variables from all the stations in Australia, interactive graphics can be helpful. Here a plotly and a leaflet example is given to explore the yearly diurnal temperature range pattern in Australia. This would be useful to see how the average temperature range differs in various latitudes in Australia, whether there's a summer or winter effect, any coastline, mountain or desert topological considerations that would affect the temperature.
+
+Again, `weatherdata::climate_full` will be first processed to produce summarised monthly maximum and minimum temperature across 2016 to 2020. Then a shared data with the same group is created from the nested and long cubble to enable the cross-talking via the common column `id`. The map and temperature band is created separately with the two shared data objects and combined together with `crosstalk::bscols`. A sketch of the code to produce Figure \ref{fig:interactive-linking} is presented below:
+
+```{r eval = FALSE, echo = TRUE}
+# data processing
+clean <- weatherdata::climate_full %>% ...
+
+# created grouped instance for crosstalk
+nested <- clean %>% SharedData$new(~id, group = "cubble")
+long <- stretch(clean) %>% SharedData$new(~id, group = "cubble")
+
+# create the map with SharedData nested, the time series with SharedData long
+p1 <- nested %>% ...
+p2 <- long %>% ...
+
+# Combine p1 and p2
+crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
+
+```
+
+In Figure \ref{fig:interactive-linking}, the first row shows the default plot and when a selection is made, relevant component from both plots will be highlighted. For example, in the second row, the highest mean maximum temperature in July is selected on the time series and this corresponds to Kalumburu on the map where there is a larger diurnal temperature range in winter (June to August) than summer (December to February). The third row selects a station (Birdsville Airport) in the interior desert region that has a large average temperature difference on the map and the linked view shows a wide but constant diurnal temperature range throughout the year. The last row selects the lowest maximum temperature in July on the right plot and surprisingly, this links to the Thredbo airport at the boarder of Victoria and New South Wales, rather than any station in the Tasmania island! 
+
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Screenshots of the mean daily temperature difference averaged by month from 2016 to 2020 at various locations in Australia. Crossed linking between the map and the temperature band is implemented in both directions for exploring the temperature pattern interactively. The first row is the general appearance of the graph and the next three rows are examples from various selection to show different temperature patterns in Australia. The html version can be found at ...", fig.show='hold'}
+knitr::include_graphics(here::here("figures/linking.png"))
+knitr::include_graphics(here::here("figures/linking-north.png"))
+knitr::include_graphics(here::here("figures/linking-mid.png"))
+knitr::include_graphics(here::here("figures/linking-south.png"))
+```
+
+With leaflet popup, the temperature range can be displayed as a small plot upon clicking on the station on the map. This would require first creating all the popup plot separately in a vector and then add these plots to a leaflet map with `leafpop::addPopupGraphs()`:
+
+```{r eval = FALSE, echo = TRUE}
+# create subplots for each station
+df_id <- unique(clean$id)
+p <- map(1:length(df_id), function(i){
+  dt <- clean %>% filter(id == df_id[i])
+  dt %>% ...
+})
+
+# inset subplots as a popup in leaflet
+leaflet(clean) %>% 
+  addTiles() %>% 
+  addCircleMarkers(group = "a", ...) %>% 
+  leafpop::addPopupGraphs(graph = p, ...)
+
+```
+
+Figure \ref{fig:interactive-popup} shows more examples of temperature pattern that can be found in Australia. With the same latitude as Kalumburu but in the Pacific coastline, Cooktown airport shows a similarly high but constant temperature range throughout the year. With a slightly higher latitude than the Thredbo airport , Melbourne airport shows a less extreme temperature pattern Lastly, the Cape Grim Baps, in the north-west tip of the Tasmania island shows low and narrow temperature band, constantly betwee 10 and 20 degree throughout the year.
+
+```{r interactive-popup, echo = FALSE, out.width="45%", out.height="30%", fig.retina = 2, dpi = 300, fig.cap = "Screenshots of the diurnal temperature range averaged by month from 2016 to 2020 at various locations in Australia. The leaflet popup allows users to click on a single station for its temperature band as a small plot in the popup window. The html version can be found at ...", fig.show='hold'}
+knitr::include_graphics(here::here("figures/popup-north.png"))
+knitr::include_graphics(here::here("figures/popup-vic.png"))
+knitr::include_graphics(here::here("figures/popup-tas.png"))
+```
+
+

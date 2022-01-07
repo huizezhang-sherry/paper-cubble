@@ -1,0 +1,31 @@
+---
+title: "4-2-aggre"
+output: pdf_document
+---
+
+## Australia precipitation pattern in 2020
+
+
+In Figure \ref{fig:basic-agg}. Aggregating them into averages or other statistics would give a better picture. This can be done with cubble through a hierarchical structure, where the cluster indicator is one level above the individual station. 
+
+
+
+The `weatherdata::climate_full` data has daily climate data of `r nrow(weatherdata::climate_full)` Australia stations from 2016 to 2020. 
+
+calcluate distance matrix
+As an example to illustrate here, a kmean clustering algorithm based on the distance matrix is used and the number of centres is set to 20. More complex algorithms can also be used for more complex problem, as long as a mapping from each station id to the cluster id can be constructed. 
+
+
+<!-- Now we can obtain the aggregated series as described in the workflow diagram above and construct the glyph map with `GGally::glyphs()`: -->
+
+<!-- We can also look at the precipitation of each individual station within the same cluster: -->
+
+
+<!-- Lastly, there is one series on Tasmania island standing out from others, lets look at where it is: -->
+
+
+```{r basic-agg, out.width="100%", out.height="90%", fig.cap="sdfasdf"}
+knitr::include_graphics("figures/basic-agg.png")
+```
+
+

@@ -1,0 +1,55 @@
+---
+title: "4-examples"
+output: html_document
+---
+
+# Examples
+
+## Australia historical maximum temperature
+
+Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world and the dataset `weatherdata::historical_tmax` extracts the historical maximum temperature recorded for `r nrow(weatherdata::historical_tmax)` Australian stations. The data `historical_tmax` is already presented as a cubble, with `id` as the key, `date` as the index, and `c("longitude", "latitude")` as the coordinates. Other variables include `elevation`, `name`, `wmo_id`, `first_year`, and  `last_year` in the nested form and `tmax` in the long form. This example compares the maximum temperature in two periods: 1971 - 1975 and 2016 - 2020 for stations in Victoria and New South Wales.
+
+Stations in the two states can be subsetted on the station number: Australia GHCN station number starts with `ASN00` and followed by the [Bureau of Meteorology (BOM) station number](http://www.bom.gov.au/climate/cdo/about/site-num.shtml), where the 2nd and 3rd digit (7th and 8th in the GHCN number) denote the state a station belongs to. New South Wales stations start from 46 to 75 and Victoria stations then follow from 76 to 90. Extracting Victoria and New South Wales stations is a filter operation in the spatial dimension and hence is operated in the nested form: 
+
+```{r eval = FALSE, echo = TRUE}
+tmax <- weatherdata::historical_tmax %>%
+  filter(between(stringr::str_sub(id, 7, 8), 46, 90))
+```
+
+The five year window is chosen to remove the effect of a particular year and the historical period of 1971 - 1975 is used since all the stations have records from 1970. This following chunk filters on records in the two study periods and summarises the maximum temperature into monthly measure. `stretch()` is used to convert the nested form cubble into the long form for these operations:
+
+```{r eval=  FALSE, echo = TRUE}
+tmax <- tmax %>% 
+  stretch() %>%
+  filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) %>%
+  mutate(month = lubridate::month(date), 
+         group = as.factor(ifelse(lubridate::year(date) > 2015, 
+                                  "2016 ~ 2020", "1971 ~ 1975"))) %>%
+  group_by(month, group) %>%
+  summarise(tmax = mean(tmax, na.rm = TRUE))
+```  
+
+A data quality issue with GHCN data is that while the first and last year of each series is provided, years missing in this period is not reported. There are a few stations which don't have records during 1971 - 1975 and these stations are filtered out by examining whether the summarised `tmax` has a total of 24 months. This is again a station-wise operation and is operated in the nested form, which is switched to from the long form by  `tamp()`:
+
+```{r eval = FALSE, echo = TRUE}
+tmax <- tmax %>% 
+  tamp() %>%
+  filter(nrow(ts) == 24) 
+```
+
+Lastly, to create a glyph map, both the major (`longitude`, `latitude`) and minor (`month`, `tmax`) coordinates need to be in the same table. Spatial variables can be moved to the long form with `migrate()`:
+
+```{r eval = FALSE, echo = TRUE}  
+tmax <- tmax %>%   
+  stretch() %>%
+  migrate(latitude, longitude)
+```
+
+Figure \ref{fig:basic-manip} shows the glyph map made with the data after the wangling above. One issue with this map is that the similar pattern shown from a few nearby stations around Sydney (151E, 34S) and New castle (152E, 33S) can be distracting. Aggregation is a useful technique to observe the general pattern of a collection of series and will be the topic of the next example.
+
+```{r basic-manip, out.width="100%", out.height="70%", fig.cap="Glyph map of the mean maximum temperature by month for Victoria and New South Wales weather stations. On the top left corner is a detailed legend for station Cobar highlighted in the black box. Compared to 1971 - 1975,  the period 2016 - 2020 sees an increase of mean maximum temperature in spring and summer in Australia (end and beginning of the year). A larger increase during the first three months of the year is observed at stations with a lower latitude."}
+knitr::include_graphics("figures/basic-manip.png")
+```
+
+
+

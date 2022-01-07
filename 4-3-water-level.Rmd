@@ -1,0 +1,18 @@
+---
+title: "4-3-water-level"
+output: html_document
+---
+
+## River level data in Victria water gauges
+
+The water level data comes from [Bureau of Meteorology](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) and has a copy in `weatherdata`. Here we extract the water course level and add a column annotate this data of type `river`. For the rainfall data, we will still use the `weatherdata::climate_full`, filtering for Victorian stations in 2020 should be pretty familiar by now. Again, we first look at where these stations are on the map first:
+
+Now we use `match_sites()` to first pair the weather stations with the river gauges spatially and then apply the temporal matching on `prcp`. We will construct the interval based on peaks in `climate` since we would expect a lag effect for precipitation to flow into the river and cause a raise in river level, hence `temporal_independent = climate`. We select the 30 highest peak from the series to construct the match by setting `temporal_n_highest = 30`. This is a tuning parameter and you can start with 10% of the points of one series (here we have daily data for a year, 10% is roughly 30 points). `temporal_min_match` filters out pairs don't have enough match and to return all the pairs, set `temporal_min_match` to `0`.``
+
+The output from temporal matching is also a cubble, with additional column `.dist` and `.group` inherent from spatial matching and `n_match` for the number of matched temporal peaks. Then you can use this output to plot the location of match or to look at the series:
+
+
+```{r matching, out.width="100%", out.height="30%", fig.cap="asdfasd"}
+knitr::include_graphics("figures/matching.png")
+```
+
