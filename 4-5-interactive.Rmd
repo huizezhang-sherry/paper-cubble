@@ -4,19 +4,19 @@ output: html_document
 ---
 ## Interative graphic with cubble
 
-To visualise climate variables from all the stations in Australia, interactive graphics can be helpful. Here a plotly and a leaflet example is given to explore the yearly diurnal temperature range pattern in Australia. This would be useful to see how the average temperature range differs in various latitudes in Australia, whether there's a summer or winter effect, any coastline, mountain or desert topological considerations that would affect the temperature.
+With spatio-temporal data, users may wish to make plots to learn the spatial distribution of a variable or to find patterns such as trend or seasonality in the time series. Combining this two types of plot with interactivity let users to link between points on the map and their corresponding time series and explore the spatial and temporal dimension of the data simultaneously. Below is an example that describes the process of building an interactive graphic with `cubble` and `crosstalk`. 
 
-Again, `weatherdata::climate_full` will be first processed to produce summarised monthly maximum and minimum temperature across 2016 to 2020. Then a shared data with the same group is created from the nested and long cubble to enable the cross-talking via the common column `id`. The map and temperature band is created separately with the two shared data objects and combined together with `crosstalk::bscols`. A sketch of the code to produce Figure \ref{fig:interactive-linking} is presented below:
+Starting with the original data, some pre-processing may be required to summarise the data before the visualisation. This example explores the variation of monthly temperature range across `r nrow(weatherdata::climate_full)` weather stations in Australia and with `weatherdata::climate_full`, daily temperature range is first calculated as the difference between `tmax` and `tmin`. The three daily variables are then averaged into month over 2016 - 2020 in the long form. Variance of the temperature difference is then calculated for each station in the nested form. Then, a `SharedData` object is constructed for each form of the cubble and the same `group` argument ensures the cross-linking of the two forms via the common `id` column. The spatial map and time series plot are then made with each `SharedData` objects separately. In this example, stations on the Australia map, made from the nested form, are coloured by the calculated variance and a ribbon band is constructed using the long form cubble to show the maximum and minimum temperature of each station across month. With a different dataset, users are free to calculate any per station measure in the nested form or to make any time-wise summary of the data in the long form to customise the spatial or temporal view. And the cross-linking is always safeguarded by the shared `id` column embedded in the cubble structure. Below is the pseudo code that outlines the process to construct an interactive graphic described above:
 
 ```{r eval = FALSE, echo = TRUE}
-# data processing
+# data pre-processing
 clean <- weatherdata::climate_full %>% ...
 
-# created grouped instance for crosstalk
+# created SharedData instance for crosstalk
 nested <- clean %>% SharedData$new(~id, group = "cubble")
 long <- stretch(clean) %>% SharedData$new(~id, group = "cubble")
 
-# create the map with SharedData nested, the time series with SharedData long
+# create the spatial and temporal view each with a ShareData instance
 p1 <- nested %>% ...
 p2 <- long %>% ...
 
@@ -25,9 +25,9 @@ crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 
 ```
 
-In Figure \ref{fig:interactive-linking}, the first row shows the default plot and when a selection is made, relevant component from both plots will be highlighted. For example, in the second row, the highest mean maximum temperature in July is selected on the time series and this corresponds to Kalumburu on the map where there is a larger diurnal temperature range in winter (June to August) than summer (December to February). The third row selects a station (Birdsville Airport) in the interior desert region that has a large average temperature difference on the map and the linked view shows a wide but constant diurnal temperature range throughout the year. The last row selects the lowest maximum temperature in July on the right plot and surprisingly, this links to the Thredbo airport at the boarder of Victoria and New South Wales, rather than any station in the Tasmania island! 
+In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Overall, most regions in Australia have low variance of temperature range across different months while the north-west coastline, bottom of South Australia, and Victoria stands out with larger monthly changes. In the second row, Mount Elizabeth is selected on the map given its dark colour and this links to the ribbon on the right where there is a larger temperature range is presented in Australian winter (June to August). The third row selects the Grampian station in Victoria and the linked ribbon shows an opposite wider range in Australian summer period (December to February). The last row selects point with the lowest minimum temperature in August in the ribbon plot and surprisingly, this links to the Thredbo airport in the Victoria and New South Wales border, rather than somewhere in the Tasmania island! 
 
-```{r interactive-linking, echo = FALSE, out.width="100%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Screenshots of the mean daily temperature difference averaged by month from 2016 to 2020 at various locations in Australia. Crossed linking between the map and the temperature band is implemented in both directions for exploring the temperature pattern interactively. The first row is the general appearance of the graph and the next three rows are examples from various selection to show different temperature patterns in Australia. The html version can be found at ...", fig.show='hold'}
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="20%", fig.retina = 2, dpi = 300, fig.cap = "Screenshots of the mean daily temperature difference averaged by month from 2016 to 2020 at various locations in Australia. Crossed linking between the map and the temperature band is implemented in both directions for exploring the temperature pattern interactively. The first row is the general appearance of the graph and the next three rows are examples from various selection to show different temperature patterns in Australia. The html version can be found at ...", fig.show='hold'}
 knitr::include_graphics(here::here("figures/linking.png"))
 knitr::include_graphics(here::here("figures/linking-north.png"))
 knitr::include_graphics(here::here("figures/linking-mid.png"))
