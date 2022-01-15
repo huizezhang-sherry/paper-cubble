@@ -25,39 +25,44 @@ crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 
 ```
 
-In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Overall, most regions in Australia have low variance of temperature range across different months while the north-west coastline, bottom of South Australia, and Victoria stands out with larger monthly changes. In the second row, Mount Elizabeth is selected on the map given its dark colour and this links to the ribbon on the right where there is a larger temperature range is presented in Australian winter (June to August). The third row selects the Grampian station in Victoria and the linked ribbon shows an opposite wider range in Australian summer period (December to February). The last row selects point with the lowest minimum temperature in August in the ribbon plot and surprisingly, this links to the Thredbo airport in the Victoria and New South Wales border, rather than somewhere in the Tasmania island! 
+In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Overall, most regions in Australia have low variance of temperature range across different months while the north-west coastline, bottom of South Australia, and Victoria stands out with larger monthly changes. In the second row, Mount Elizabeth is selected on the map given its dark colour and this links to the ribbon on the right where there is a larger temperature range is presented in Australian winter (June to August). The third row selects the Grampian station in Victoria and the linked ribbon shows an opposite wider range in Australian summer period (December to February). The last row selects point with the lowest minimum temperature in August in the ribbon plot and surprisingly, this links to the Thredbo Airport in the Victoria and New South Wales border, rather than somewhere in the Tasmania island! 
 
-```{r interactive-linking, echo = FALSE, out.width="100%", out.height="20%", fig.retina = 2, dpi = 300, fig.cap = "Screenshots of the mean daily temperature difference averaged by month from 2016 to 2020 at various locations in Australia. Crossed linking between the map and the temperature band is implemented in both directions for exploring the temperature pattern interactively. The first row is the general appearance of the graph and the next three rows are examples from various selection to show different temperature patterns in Australia. The html version can be found at ...", fig.show='hold'}
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="20%", fig.retina = 2, dpi = 300, fig.cap = "Screenshots of variance of monthly temperature range from 2016 to 2020 in Australia. Crossed linking between the map and the temperature band is implemented in both directions to explore the temperature pattern interactively. The first row is the initial view of the graphic and the latter three show the interactive view after selecting on the map (row 2 and 3) and on the temperature band (row 4).", fig.show='hold'}
 knitr::include_graphics(here::here("figures/linking.png"))
 knitr::include_graphics(here::here("figures/linking-north.png"))
 knitr::include_graphics(here::here("figures/linking-mid.png"))
 knitr::include_graphics(here::here("figures/linking-south.png"))
 ```
 
-With leaflet popup, the temperature range can be displayed as a small plot upon clicking on the station on the map. This would require first creating all the popup plot separately in a vector and then add these plots to a leaflet map with `leafpop::addPopupGraphs()`:
+With leaflet popup, the temperature range can be displayed as a small subplot upon clicking on the map. This would require first creating the popup plots from the long form cubble as a vector and then add these plots to a leaflet map, created from the nested cubble, with `leafpop::addPopupGraphs()`:
 
 ```{r eval = FALSE, echo = TRUE}
-# create subplots for each station
+# data pre-processing
+clean <- weatherdata::climate_full %>% ...
+
+# use the long form to create subplots for each station
 df_id <- unique(clean$id)
 p <- map(1:length(df_id), function(i){
   dt <- clean %>% filter(id == df_id[i])
-  dt %>% ...
+  ggplot(dt) %>% ...
 })
 
-# inset subplots as a popup in leaflet
-leaflet(clean) %>% 
+# create nested form leaflet map with temperature band as subplots 
+nested <- tamp(clean)
+leaflet(nested) %>% 
   addTiles() %>% 
   addCircleMarkers(group = "a", ...) %>% 
   leafpop::addPopupGraphs(graph = p, ...)
 
 ```
 
-Figure \ref{fig:interactive-popup} shows more examples of temperature pattern that can be found in Australia. With the same latitude as Kalumburu but in the Pacific coastline, Cooktown airport shows a similarly high but constant temperature range throughout the year. With a slightly higher latitude than the Thredbo airport , Melbourne airport shows a less extreme temperature pattern Lastly, the Cape Grim Baps, in the north-west tip of the Tasmania island shows low and narrow temperature band, constantly betwee 10 and 20 degree throughout the year.
+Figure \ref{fig:interactive-popup} shows the same content as Figure \ref{fig:interactive-linking} but made with leaflet and popups. A few sites with low temperature variance are selected and these sites still show different patterns: Lady Elloit Island in the Pacific coastline shows a thin temperature band of 5 degree; Birdsville Airport, in the middle of Australia desert, shows a wide temperature range of 10 degree throughout the year; and King Island Airport, in the north-west tip of Tasmania island shows a similar narrow range as Lady Elloits but a maximum and minimum temperature in general. This would suggest variance on itself may not be enough to summarise the temperature variation in Australia and other summary statistics, for example, mean of temperature range or maximum temperature itself, could also be useful to find temperature pattern in Australia. 
 
-```{r interactive-popup, echo = FALSE, out.width="45%", out.height="30%", fig.retina = 2, dpi = 300, fig.cap = "Screenshots of the diurnal temperature range averaged by month from 2016 to 2020 at various locations in Australia. The leaflet popup allows users to click on a single station for its temperature band as a small plot in the popup window. The html version can be found at ...", fig.show='hold'}
-knitr::include_graphics(here::here("figures/popup-north.png"))
-knitr::include_graphics(here::here("figures/popup-vic.png"))
-knitr::include_graphics(here::here("figures/popup-tas.png"))
+```{r interactive-popup, echo = FALSE, out.width="45%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Screenshots of variance of monthly temperature range from 2016 to 2020 in Australia. Upon clicking a single station on the leaftlet up, the temperature band will be shown as a subplot in the popup box.", fig.show='hold'}
+knitr::include_graphics(here::here("figures/popup.png"))
+knitr::include_graphics(here::here("figures/popup-right.png"))
+knitr::include_graphics(here::here("figures/popup-mid.png"))
+knitr::include_graphics(here::here("figures/popup-south.png"))
 ```
 
 
