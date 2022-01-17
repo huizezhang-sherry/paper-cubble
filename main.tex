@@ -442,6 +442,49 @@ will then being reflected in the updated plots and Diagram
 \end{figure}
 \end{CodeChunk}
 
+\hypertarget{glyph-map}{%
+\subsection{Glyph map}\label{glyph-map}}
+
+Glyph map \citep{Wickham2012-yr} plots the time series as single glyph
+on the map. In \proglang{R}, \texttt{GGally} implements the glyph map
+through the \texttt{glyphs()} function, which outputs a data frame with
+calculated position (\texttt{gx}, \texttt{gy}, \texttt{gid}) of each
+point on the time series given the major and minor xy variable using
+linear algebra (Equation 1 and 2 in \citet{Wickham2012-yr}). The data
+can then be piped into \texttt{ggplot} to create the glyph map:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> library(ggplot2)
+R> gly <- glyphs(data, 
++               x_major = ..., x_minor = ..., 
++               y_major = ..., y_minor = ..., ...)
+R> 
+R> ggplot(gly, aes(gx, gy, group = gid)) + 
++   geom_path() 
+\end{CodeInput}
+\end{CodeChunk}
+
+While this calculation can be seen as part of the \texttt{setup\_data()}
+in a \texttt{ggproto}. A re-implementation of the glyph map as
+\texttt{GeomGlyph} has been made in \texttt{cubble} to create the glyph
+map with \texttt{geom\_glyph}:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> ggplot(data = data) +
++   geom_glyph(aes(x_major = ..., x_minor = ..., 
++                  y_major = ..., y_minor = ...))
+\end{CodeInput}
+\end{CodeChunk}
+
+Polar glyph map can be specify as a parameter, \texttt{polar\ =\ TRUE},
+in the \texttt{geom\_glyph()}, along with \texttt{width} and
+\texttt{height} in either absolute or relative value. Global and local
+scale can also be controlled by the parameter \texttt{global\_rescale},
+which default to \texttt{TRUE}. Reference box and line can be added with
+separate \texttt{geom\_glyph\_box()} and \texttt{geom\_glyph\_line()}.
+
 \newpage
 
 \hypertarget{examples}{%

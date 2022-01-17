@@ -53,3 +53,29 @@ The linking is also available from the time series plot to the map. The selectio
 ```{r illu-interactive, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon interactivity"}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
+
+## Glyph map
+
+Glyph map [@Wickham2012-yr] plots the time series as single glyph on the map. 
+<!-- Variation of glyph maps has been developed to visualise uncertainty in **Visumap** [@Lucchesi2021] and deal with irregular local grid [@Beecham2021-vk].  -->
+In \proglang{R}, `GGally` implements the glyph map through the `glyphs()` function, which outputs a data frame with calculated position (`gx`, `gy`, `gid`) of each point on the time series given the major and minor xy variable using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into `ggplot` to create the glyph map: 
+
+```{r eval = FALSE, echo = TRUE}
+library(ggplot2)
+gly <- glyphs(data, 
+              x_major = ..., x_minor = ..., 
+              y_major = ..., y_minor = ..., ...)
+
+ggplot(gly, aes(gx, gy, group = gid)) + 
+  geom_path() 
+```
+
+While this calculation can be seen as part of the `setup_data()` in a `ggproto`. A re-implementation of the glyph map as `GeomGlyph` has been made in `cubble` to create the glyph map with `geom_glyph`:
+
+```{r eval = FALSE, echo = TRUE}
+ggplot(data = data) +
+  geom_glyph(aes(x_major = ..., x_minor = ..., 
+                 y_major = ..., y_minor = ...))
+```
+
+Polar glyph map can be specify as a parameter, `polar = TRUE`, in the `geom_glyph()`, along with `width` and `height` in either absolute or relative value. Global and local scale can also be controlled by the parameter `global_rescale`, which default to `TRUE`. Reference box and line can be added with separate `geom_glyph_box()` and `geom_glyph_line()`.
