@@ -744,7 +744,7 @@ New South Wales border, rather than somewhere in the Tasmania island!
 
 }
 
-\caption[Screenshots of variance of monthly temperature range from 2016 to 2020 in Australia]{Screenshots of variance of monthly temperature range from 2016 to 2020 in Australia. Crossed linking between the map and the temperature band is implemented in both directions to explore the temperature pattern interactively. The first row is the initial view of the graphic and the latter three show the interactive view after selecting on the map (row 2 and 3) and on the temperature band (row 4).}\label{fig:interactive-linking}
+\caption[Exploring temperature variation using linkning of a map and seasonal display]{Exploring temperature variation using linkning of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiels. Selecting a location with high variance on the map produces the plot in the second row. The maximum nad minimum temperature is shown using a ribbon.}\label{fig:interactive-linking}
 \end{figure}
 \end{CodeChunk}
 
@@ -776,23 +776,12 @@ R> leaflet(nested) %>%
 \end{CodeChunk}
 
 Figure \ref{fig:interactive-popup} shows the same content as Figure
-\ref{fig:interactive-linking} but made with leaflet and popups. A few
-sites with low temperature variance are selected and these sites still
-show different patterns: Lady Elloit Island in the Pacific coastline
-shows a thin temperature band of 5 degree; Birdsville Airport, in the
-middle of Australia desert, shows a wide temperature range of 10 degree
-throughout the year; and King Island Airport, in the north-west tip of
-Tasmania island shows a similar narrow range as Lady Elloits but a
-maximum and minimum temperature in general. This would suggest variance
-on itself may not be enough to summarise the temperature variation in
-Australia and other summary statistics, for example, mean of temperature
-range or maximum temperature itself, could also be useful to find
-temperature pattern in Australia.
+\ref{fig:interactive-linking} but made with leaflet and popups.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/popup} \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/popup-right} \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/popup-mid} \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/popup-south} 
+{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/popup-mid} 
 
 }
 

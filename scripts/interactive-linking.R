@@ -40,7 +40,9 @@ p1 <- nested %>%
 
 p2 <- long %>% 
   ggplot(aes(x = dummy_date, group = id, fill = temp_diff_var, color = temp_diff_var)) +
-  geom_ribbon(aes(ymin = tmin, ymax = tmax), size = 0.1) + 
+  geom_ribbon(aes(ymin = tmin, ymax = tmax), size = 0.1, alpha = 0.3) + 
+  geom_line(aes(y = tmin), alpha = 0.1) + 
+  geom_line(aes(y = tmax), alpha = 0.1) + 
   geom_point(aes(y = tmax), size = 0.1) + 
   geom_point(aes(y = tmin), size = 0.1) + 
   colorspace::scale_fill_continuous_sequential(
@@ -59,7 +61,7 @@ out <- bscols(
   ggplotly(p1, width = 900, height = 700, tooltip = "label") %>%
     highlight(on = "plotly_selected", off = "plotly_deselect", opacityDim = 0.1),
   ggplotly(p2, width = 1200, height = 700, tooltip = "label") %>% 
-    highlight(on = "plotly_selected", off = "plotly_deselect", opacityDim = 0.01),
+    highlight(on = "plotly_selected", off = "plotly_deselect", opacityDim = 0.012),
   widths = c(5, 5)
 )
 
