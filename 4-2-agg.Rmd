@@ -47,7 +47,7 @@ cluster_long <- cluster_nested %>%
 
 With the four cubbles: `station_nested`, `station_long`, `cluster_nested`, and `cluster_long`, all the information at both levels are accessible. This allows us to make glyph map on the cluster level, looking at station composition of each cluster, and plot the individual series to check for consistency within groups. Figure \ref{fig:basic-agg} composes of the three plots together to show the precipitation in Australia.
 
-```{r basic-agg, out.width="100%", out.height="90%", fig.cap="sdfasdf"}
+```{r basic-agg, out.width="100%", fig.cap="Aggregated precipitation in Australia."}
 knitr::include_graphics("figures/basic-agg.png")
 ```
 

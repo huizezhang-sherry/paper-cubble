@@ -18,46 +18,60 @@ station_long <- station_nested %>%
   stretch(ts) %>% 
   mutate(wk = lubridate::week(date)) %>% 
   group_by(wk) %>% 
-  summarise(prcp = sum(prcp, na.rm = TRUE))
+  summarise(prcp = sum(prcp, na.rm = TRUE)) %>% 
+  migrate(cluster)
 
 cluster_long <- cluster_nested %>% 
   stretch(ts) %>% 
   mutate(wk = lubridate::week(date)) %>% 
-  group_by(wk) %>% 
+  group_by(id, wk) %>% 
+  summarise(prcp = sum(prcp, na.rm = TRUE)) %>% 
+  ungroup(id) %>% 
   summarise(prcp = mean(prcp, na.rm = TRUE)) %>% 
   migrate(cent_long, cent_lat)
 
 state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
-p1 <- plot_map(state_map) +
+
+ggplot_smooth <- cluster_long %>% 
+  ggplot() +
+  geom_smooth(aes(x = wk, y = prcp, group = cluster)) 
+
+smoother <- layer_data(ggplot_smooth) %>% 
+  left_join(cluster_long %>% select(cluster, cent_long, cent_lat), by = c("group" = "cluster"))
+
+p1 <- ggplot(data = smoother, 
+             aes(x_minor = x, y_minor = y, x_major = cent_long, y_major = cent_lat)) + 
+  geom_sf(data = state_map, inherit.aes = FALSE,
+          color = "grey80", alpha = 0.4, linetype = 3) + 
   geom_text(data = cluster_nested, 
-            aes(x = cent_long, y = cent_lat, label = cluster)) +
-  geom_glyph(data = cluster_long, 
-             aes(x_major = cent_long, x_minor = wk, y_major = cent_lat, y_minor = prcp), 
-             height = 2, width = 4)
+            aes(x = cent_long, y = cent_lat, label = cluster), inherit.aes = FALSE) +
+  geom_glyph(height = 2, width = 4) + 
+  theme_void()
 
-tas_latlong <- station_long %>% 
-  ungroup(wk, id) %>% 
-  filter(cluster == 7) %>% 
-  filter(prcp == max(prcp)) %>% 
-  tamp()
+# tas_latlong <- station_long %>% 
+#   filter(cluster == 7) %>% 
+#   switch_key(cluster) %>% 
+#   filter(prcp == max(prcp)) %>% 
+#   tamp()
+# 
+# tas_id <- tas_latlong %>% pull(id)
+# tas_long <- station_long %>% filter(id == tas_id)
 
-tas_id <- tas_latlong %>% pull(id)
-tas_long <- station_long %>% ungroup(wk, id) %>% filter(id == tas_id)
-
-p2 <- station_long %>%
-  ggplot(aes(x = wk, y = prcp, group = id)) +
-  geom_line(alpha = .3) +
-  geom_line(data = tas_long, color = "red") + 
-  facet_wrap(vars(cluster), scales = "free_y", ncol = 4) +
-  theme_bw()
+# p2 <- station_long %>%
+#   ggplot(aes(x = wk, y = prcp, group = id)) +
+#   geom_line(size = 0.1) +
+#   geom_smooth(se = FALSE, inherit.aes = FALSE, aes(x = wk, y = prcp)) + 
+#   geom_line(data = tas_long, color = "red") + 
+#   facet_wrap(vars(cluster), scales = "free_y", ncol = 4) +
+#   theme_bw()
 
 
 p3 <- plot_map(state_map) +
   geom_point(data = station_nested, aes(x = long, y = lat), size = 0.5) +
   ggforce::geom_mark_hull(data = cluster_nested %>% tidyr::unnest(hull),
                           expand = 0, radius = 0,
-                          aes(x = long, y = lat, group = cluster)) + 
-  geom_point(data = tas_latlong, aes(x = long, y = lat), col = "red")
+                          aes(x = long, y = lat, group = cluster)) 
+  #geom_point(data = tas_latlong, aes(x = long, y = lat), col = "red")
 
-(p1 | p3)/ p2 + plot_annotation(tag_levels = 'A')
-ggsave(filename = "figures/basic-agg.png", width = 7, height = 9)
+(p1 | p3) + plot_annotation(tag_levels = 'A')
+ggsave(filename = "figures/basic-agg.png", width = 15, height = 7)
