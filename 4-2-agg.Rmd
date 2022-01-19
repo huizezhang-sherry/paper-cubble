@@ -5,24 +5,47 @@ output: pdf_document
 
 ## Australia precipitation pattern in 2020
 
+With recent climate, there are `r nrow(weatherdata::climate_full)` stations in Australia that records daily maximum and minimum temperature and precipitation. While it would be too much series to show on a glyph map, stations close to each other should have similar precipitation pattern. Aggregation can be helpful here to cluster series into groups and visualise them with glyph map.
 
-In Figure \ref{fig:basic-agg}. Aggregating them into averages or other statistics would give a better picture. This can be done with cubble through a hierarchical structure, where the cluster indicator is one level above the individual station. 
+A simple kmean algorithm is used based on the distance matrix to cluster the stations into 20 groups. 
+This creates `station_nested` as a station level nested cubble with a cluster column indicating which group each station belongs to. More complex algorithms can be used for more complex problem, as long as a mapping from each station id to the cluster id can be constructed. 
 
+```{r}
+load(here::here("data/station_nested.rda"))
+station_nested
+```
 
+To create a group level cubble, use `switch_key()` with the new key variable, `cluster`: 
 
-The `weatherdata::climate_full` data has daily climate data of `r nrow(weatherdata::climate_full)` Australia stations from 2016 to 2020. 
+```{r echo = TRUE}
+cluster_nested <- station_nested %>% switch_key(cluster) 
+```
 
-calcluate distance matrix
-As an example to illustrate here, a kmean clustering algorithm based on the distance matrix is used and the number of centres is set to 20. More complex algorithms can also be used for more complex problem, as long as a mapping from each station id to the cluster id can be constructed. 
+With the group level cubble, it is useful to compute the centroid of each cluster as the location of group level glyph map. `get_centroid()` is a shortcut for doing so or you can manually find the convex hull, its centroid, and extract the longitude and latitude: 
 
+```{r eval = FALSE, echo = TRUE}
+cluster_nested <- cluster_nested %>% 
+  get_centroid()
+```
 
-<!-- Now we can obtain the aggregated series as described in the workflow diagram above and construct the glyph map with `GGally::glyphs()`: -->
+Long form cubble at both levels can be access through stretching the nested form. Here weekly averages of the precipitation is calculated:
 
-<!-- We can also look at the precipitation of each individual station within the same cluster: -->
+```{r eval = FALSE, echo = TRUE}
+station_long <- station_nested %>% 
+  stretch(ts) %>% 
+  mutate(wk = lubridate::week(date)) %>% 
+  group_by(wk) %>% 
+  summarise(prcp = sum(prcp, na.rm = TRUE))
 
+cluster_long <- cluster_nested %>% 
+  stretch(ts) %>% 
+  mutate(wk = lubridate::week(date)) %>% 
+  group_by(wk) %>% 
+  summarise(prcp = mean(prcp, na.rm = TRUE)) %>% 
+  migrate(cent_long, cent_lat)
+```
 
-<!-- Lastly, there is one series on Tasmania island standing out from others, lets look at where it is: -->
-
+With the four cubbles: `station_nested`, `station_long`, `cluster_nested`, and `cluster_long`, all the information at both levels are accessible. This allows us to make glyph map on the cluster level, looking at station composition of each cluster, and plot the individual series to check for consistency within groups. Figure \ref{fig:basic-agg} composes of the three plots together to show the precipitation in Australia.
 
 ```{r basic-agg, out.width="100%", out.height="90%", fig.cap="sdfasdf"}
 knitr::include_graphics("figures/basic-agg.png")

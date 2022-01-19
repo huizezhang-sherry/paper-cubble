@@ -327,7 +327,7 @@ and nested form. By specifying
 the cubble re-defines the cubble key from \texttt{id} in
 \texttt{station\_nested} to \texttt{cluster} in
 \texttt{cluster\_nested}. All the spatial variables variant to
-\texttt{cluster} is now nested into a \texttt{.val} column and cluster
+\texttt{cluster} are now nested into a \texttt{.val} column and cluster
 level variables can be computed in the same fashion as station level
 variables in \texttt{station\_nested}. Following the same principal of
 \texttt{stretch}, the long form cluster level cubble expands the time
@@ -577,19 +577,84 @@ will be the topic of the next example.
 \subsection{Australia precipitation pattern in
 2020}\label{australia-precipitation-pattern-in-2020}}
 
-In Figure \ref{fig:basic-agg}. Aggregating them into averages or other
-statistics would give a better picture. This can be done with cubble
-through a hierarchical structure, where the cluster indicator is one
-level above the individual station.
+With recent climate, there are 639 stations in Australia that records
+daily maximum and minimum temperature and precipitation. While it would
+be too much series to show on a glyph map, stations close to each other
+should have similar precipitation pattern. Aggregation can be helpful
+here to cluster series into groups and visualise them with glyph map.
 
-The \texttt{weatherdata::climate\_full} data has daily climate data of
-639 Australia stations from 2016 to 2020.
-
-calcluate distance matrix As an example to illustrate here, a kmean
-clustering algorithm based on the distance matrix is used and the number
-of centres is set to 20. More complex algorithms can also be used for
-more complex problem, as long as a mapping from each station id to the
+A simple kmean algorithm is used based on the distance matrix to cluster
+the stations into 20 groups. This creates \texttt{station\_nested} as a
+station level nested cubble with a cluster column indicating which group
+each station belongs to. More complex algorithms can be used for more
+complex problem, as long as a mapping from each station id to the
 cluster id can be constructed.
+
+\begin{CodeChunk}
+\begin{CodeOutput}
+# cubble:   id [639]: nested form
+# bbox:     [113.53, -43.66, 153.64, -10.05]
+# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+  id            lat  long  elev name             wmo_id ts               cluster
+  <chr>       <dbl> <dbl> <dbl> <chr>             <dbl> <list>             <int>
+1 ASN00001006 -15.5  128.   3.8 wyndham aero      95214 <tibble [1,827 ~       3
+2 ASN00001007 -13.8  126.   6   troughton island  94102 <tibble [1,827 ~       3
+3 ASN00001018 -16.4  126. 546   mount elizabeth   94211 <tibble [1,460 ~      16
+4 ASN00001019 -14.3  127.  23   kalumburu         94100 <tibble [1,827 ~       3
+5 ASN00001020 -14.1  126.  51   truscott          95101 <tibble [1,827 ~       3
+# ... with 634 more rows
+\end{CodeOutput}
+\end{CodeChunk}
+
+To create a group level cubble, use \texttt{switch\_key()} with the new
+key variable, \texttt{cluster}:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> cluster_nested <- station_nested %>% switch_key(cluster) 
+\end{CodeInput}
+\end{CodeChunk}
+
+With the group level cubble, it is useful to compute the centroid of
+each cluster as the location of group level glyph map.
+\texttt{get\_centroid()} is a shortcut for doing so or you can manually
+find the convex hull, its centroid, and extract the longitude and
+latitude:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> cluster_nested <- cluster_nested %>% 
++   get_centroid()
+\end{CodeInput}
+\end{CodeChunk}
+
+Long form cubble at both levels can be access through stretching the
+nested form. Here weekly averages of the precipitation is calculated:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> station_long <- station_nested %>% 
++   stretch(ts) %>% 
++   mutate(wk = lubridate::week(date)) %>% 
++   group_by(wk) %>% 
++   summarise(prcp = sum(prcp, na.rm = TRUE))
+R> 
+R> cluster_long <- cluster_nested %>% 
++   stretch(ts) %>% 
++   mutate(wk = lubridate::week(date)) %>% 
++   group_by(wk) %>% 
++   summarise(prcp = mean(prcp, na.rm = TRUE)) %>% 
++   migrate(cent_long, cent_lat)
+\end{CodeInput}
+\end{CodeChunk}
+
+With the four cubbles: \texttt{station\_nested}, \texttt{station\_long},
+\texttt{cluster\_nested}, and \texttt{cluster\_long}, all the
+information at both levels are accessible. This allows us to make glyph
+map on the cluster level, looking at station composition of each
+cluster, and plot the individual series to check for consistency within
+groups. Figure \ref{fig:basic-agg} composes of the three plots together
+to show the precipitation in Australia.
 
 \begin{CodeChunk}
 \begin{figure}
