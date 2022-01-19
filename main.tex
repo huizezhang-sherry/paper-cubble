@@ -314,44 +314,26 @@ considerations}\label{advanced-features-considerations}}
 \hypertarget{hierarchical-structure}{%
 \subsection{Hierarchical structure}\label{hierarchical-structure}}
 
-Imposing a clustering structure can be thought of as building a
-hierarchical structure where stations are nested within clusters. This
-can be useful when there's intrinsic nesting structure in the data
-(i.e.~country nested in the continent, county nested in the state) or
-there's some clustering. When we have access to both level,
-\texttt{switch\_key()} is the function to re-structure the data as one
-cluster per row. Temporal observations from different stations while
-within the same cluster are bound in the nested column \texttt{ts}.
-
-One thing we hope to do with the cluster is to find the coordinates of
-the centroid. These are variables variant to the station but invariant
-to the cluster and it would be nice to have a function that structure
-each cluster as a row. \texttt{switch\_key()} is the function that does
-this: it lets you to specify a new key, say \texttt{cluster} and nests
-all spatial variables variant to \texttt{cluster} into a column. Spatial
-variables are all nested inside a new column \texttt{.val}. Temporal
-observations from different stations while within the same cluster are
-bound in the nested column \texttt{ts}.
-
-This structure makes it easy to compute cluster level variable, for
-example, the convex hull and the centroid coordinate of each cluster.
-These can be amended into the nested form with function
-\texttt{get\_centroid}.
-
-After we have got \texttt{cluster\_nested}, spatial and temporal data at
-both levels can be easily obtained. Figure \ref{fig:illu-hier}
-illustrate the relationship between the long and nested form cubble at
-both site and cluster level. More description on this. Start with the
-original \texttt{station\_nested}, \texttt{stretch()} expands the
-\texttt{ts} column with each station (\texttt{id}) forming a group and
-attach variables invariant to \texttt{id} as an attribute.
-\texttt{switch\_key()} changes the \texttt{key} from \texttt{id} to
-\texttt{cluster} and nests all the spatial variables that variant to
-\texttt{cluster}. \texttt{stretch()} \texttt{cluster\_nested} will store
-variables that are invariant to \texttt{cluster} as a tibble in the
-attribute.
-
-this fit into the remaining data pipeline.
+Spatial locations can have further grouping structure either in nature
+(i.e.~countries are nested in continents), or calculated by some
+clustering algorithms. Rather than investigate the read from individual
+locations, group character summarised from multiple locations can give a
+clearer picture of the local dynamic. In cubble, \texttt{switch\_key()}
+can be used to create a new level of grouping of spatial location by
+specifying a clustering variable. Figure \ref{fig:illu-hier} illustrates
+the relationship of cubbles at site and cluster level, in both the long
+and nested form. By specifying
+\texttt{cluster\_nested\ \textless{}-\ station\_nested\ \%\textgreater{}\%\ switch\_key(key\ =\ cluster)},
+the cubble re-defines the cubble key from \texttt{id} in
+\texttt{station\_nested} to \texttt{cluster} in
+\texttt{cluster\_nested}. All the spatial variables variant to
+\texttt{cluster} is now nested into a \texttt{.val} column and cluster
+level variables can be computed in the same fashion as station level
+variables in \texttt{station\_nested}. Following the same principal of
+\texttt{stretch}, the long form cluster level cubble expands the time
+series variables with both indices: \texttt{cluster} and \texttt{id}.
+All the cluster level variables are stored separately for recovering the
+nested from from the long form.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -360,7 +342,7 @@ this fit into the remaining data pipeline.
 
 }
 
-\caption[Hierarchical structure]{Hierarchical structure}\label{fig:illu-hier}
+\caption[Relationship between the station and cluster level cubble in both long and nested form]{Relationship between the station and cluster level cubble in both long and nested form.}\label{fig:illu-hier}
 \end{figure}
 \end{CodeChunk}
 

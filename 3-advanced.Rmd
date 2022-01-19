@@ -7,18 +7,9 @@ output: pdf_document
 
 ## Hierarchical structure
 
+Spatial locations can have further grouping structure either in nature (i.e. countries are nested in continents), or calculated by some clustering algorithms. Rather than investigate the read from individual locations, group character summarised from multiple locations can give a clearer picture of the local dynamic. In cubble, `switch_key()` can be used to create a new level of grouping of spatial location by specifying a clustering variable. Figure \ref{fig:illu-hier} illustrates the relationship of cubbles at site and cluster level, in both the long and nested form. By specifying `cluster_nested <- station_nested %>% switch_key(key = cluster)`, the cubble re-defines the cubble key from `id` in `station_nested` to `cluster` in `cluster_nested`. All the spatial variables variant to `cluster` are now nested into a `.val` column and cluster level variables can be computed in the same fashion as station level variables in `station_nested`. Following the same principal of `stretch`, the long form cluster level cubble expands the time series variables with both indices: `cluster` and `id`. All the cluster level variables are stored separately for recovering the nested from from the long form.
 
-Imposing a clustering structure can be thought of as building a hierarchical structure where stations are nested within clusters. This can be useful when there's intrinsic nesting structure in the data (i.e. country nested in the continent, county nested in the state) or there's some clustering. When we have access to both level, `switch_key()` is the function to re-structure the data as one cluster per row. Temporal observations from different stations while within the same cluster are bound in the nested column `ts`.
-
-One thing we hope to do with the cluster is to find the coordinates of the centroid. These are variables variant to the station but invariant to the cluster and it would be nice to have a function that structure each cluster as a row. `switch_key()` is the function that does this: it lets you to specify a new key, say `cluster` and nests all spatial variables variant to `cluster` into a column. Spatial variables are all nested inside a new column `.val`. Temporal observations from different stations while within the same cluster are bound in the nested column `ts`.
-
-This structure makes it easy to compute cluster level variable, for example, the convex hull and the centroid coordinate of each cluster. These can be amended into the nested form with function `get_centroid`.
-
-After we have got `cluster_nested`, spatial and temporal data at both levels can be easily obtained. Figure \ref{fig:illu-hier} illustrate the relationship between the long and nested form cubble at both site and cluster level. More description on this. Start with the original `station_nested`, `stretch()` expands the `ts` column with each station (`id`) forming a group and attach variables invariant to `id` as an attribute. `switch_key()` changes the `key` from `id` to `cluster` and nests all the spatial variables that variant to `cluster`. `stretch()` `cluster_nested` will store variables that are invariant to `cluster` as a tibble in the attribute.
-
-this fit into the remaining data pipeline. 
-
-```{r illu-hier, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "Hierarchical structure"}
+```{r illu-hier, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "Relationship between the station and cluster level cubble in both long and nested form."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
 ```
 
