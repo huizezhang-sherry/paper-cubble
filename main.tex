@@ -349,33 +349,29 @@ nested from from the long form.
 \hypertarget{data-fusion-and-matching}{%
 \subsection{Data fusion and matching}\label{data-fusion-and-matching}}
 
-Temporal matching checks how spatially matched pairs align temporally.
-We use the following chart to illustrate how the temporal matching
-works:
+Data fusion is a process that consider combining multiple multiple data
+sources. widely used in remote sensing
 
-For each spatially matched pair, say \texttt{A} and \texttt{a}, we first
-find the largest \texttt{n} points in each series, colored in brown
-points here. Here we use the largest three but you can tune this number
-by \texttt{temporal\_n\_highest}. Then we construct the interval of the
-largest points from one series and see how many points, from the other
-series, fall into the intervals. The series used to construct the
-interval is controlled by \texttt{temporal\_independent} and the window
-size by \texttt{temporal\_window} with a default of 5.
-
-In this illustration, we construct the interval based on series
-\texttt{A} and two of the three peaks from \texttt{a} falls into this
-interval at Time 7 and 27.
-
-There's another mandatory argument that hasn't been introduced above:
-\texttt{temporal\_var\_to\_match}. This argument controls the variable
-to match and it needs to appear in both the \texttt{major} and
-\texttt{minor} set. In the water level matching example, we match the
-variable \texttt{Water\_course\_level} from \texttt{river} to
-\texttt{prcp} from \texttt{climate}, hence need to manually rename one
-of them to match the other, here we rename \texttt{Water\_course\_level}
-to \texttt{prcp} in \texttt{river}:
-
-Figure \ref{fig:illu-matching}
+Meteorological and hydrological data have been matched in the applied
+studies in the literature to understand drought, \ldots{} {[}ref{]}. To
+be a valid pair of matching, the matched pair from different data
+sources need to be spatially close to each other and temporally
+{[}\ldots{]}. {[} can also think about matching as a form of correlation
+between series from a statistics point of view.{]} Cubble has
+\texttt{match\_sites()} to match data from multiple sources spatially
+and temporally. \texttt{match\_sites()} first matches the two data
+source spatially through computing the distance {[}more details on
+spatial matching - keep one, max dist{]} and then computes the number of
+peaks in the two time series that fall within in a fixed length window.
+Figure \ref{fig:illu-matching} illustrates the temporal matching. With
+temporal matching, a \texttt{temporal\_var\_to\_match} needs to be first
+specified. Another parameter needs to be specified is
+\texttt{temporal\_independent} which determines the series for construct
+the interval. In Figure \ref{fig:illu-matching}, series A moves before
+series a and an interval is constructed after the three highest peaks.
+Then the highest three peak from series a is identified and two of them
+falls into the interval constructed. There are two matches here at Time
+5 and 27.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -387,6 +383,26 @@ Figure \ref{fig:illu-matching}
 \caption[sdfasdf]{sdfasdf}\label{fig:illu-matching}
 \end{figure}
 \end{CodeChunk}
+
+Several arguments are available in \texttt{match\_sites()} to adjust the
+matching:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{spatial\_n\_keep}: the number of matching to keep
+\item
+  \texttt{spatial\_dist\_max}: the maximum distance allowed between
+  matched pair
+\item
+  \texttt{temporal\_n\_highest}: the number of highest peak used for
+  temporal matching
+\item
+  \texttt{temporal\_window}: the temporal window
+\item
+  \texttt{temporal\_min\_match}: the minimum number of peak matching for
+  temporal matching
+\end{itemize}
 
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}

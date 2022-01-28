@@ -15,21 +15,23 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Data fusion and matching
 
-Temporal matching checks how spatially matched pairs align temporally. We use the following chart to illustrate how the temporal matching works:
+Data fusion is a process that consider combining multiple multiple data sources. 
+widely used in remote sensing 
 
-For each spatially matched pair, say `A` and `a`, we first find the largest `n` points in each series, colored in brown points here. Here we use the largest three but you can tune this number by `temporal_n_highest`. Then we construct the interval of the largest points from one series and see how many points, from the other series, fall into the intervals. The series used to construct the interval is controlled by `temporal_independent` and the window size by `temporal_window` with a default of 5.
-
-In this illustration, we construct the interval based on series `A` and two of the three peaks from `a` falls into this interval at Time 7 and 27.
-
-There's another mandatory argument that hasn't been introduced above: `temporal_var_to_match`. This argument controls the variable to match and it needs to appear in both the `major` and `minor` set. In the water level matching example, we match the variable `Water_course_level` from `river` to `prcp` from `climate`, hence need to manually rename one of them to match the other, here we rename `Water_course_level` to `prcp` in `river`:
-
-
-
-Figure \ref{fig:illu-matching}
+Meteorological and hydrological data have been matched in the applied studies in the literature to understand drought, ... [ref]. To be a valid pair of matching, the matched pair from different data sources need to be spatially close to each other and temporally [...]. [
+can also think about matching as a form of correlation between series from a statistics point of view.] Cubble has `match_sites()` to match data from multiple sources spatially and temporally. `match_sites()` first matches the two data source spatially through computing the distance [more details on spatial matching - keep one, max dist] and then computes the number of peaks in the two time series that fall within in a fixed length window. Figure \ref{fig:illu-matching} illustrates the temporal matching. With temporal matching, a `temporal_var_to_match` needs to be first specified. Another parameter needs to be specified is `temporal_independent` which determines the series for construct the interval. In Figure \ref{fig:illu-matching}, series A moves before series a and an interval is constructed after the three highest peaks. Then the highest three peak from series a is identified and two of them falls into the interval constructed. There are two matches here at Time 5 and 27.
 
 ```{r illu-matching, out.width="100%", out.height="30%", fig.cap="sdfasdf"}
 knitr::include_graphics("figures/illu-matching.png")
 ```
+
+Several arguments are available in `match_sites()` to adjust the matching: 
+
+ - `spatial_n_keep`: the number of matching to keep
+ - `spatial_dist_max`: the maximum distance allowed between matched pair
+ - `temporal_n_highest`: the number of highest peak used for temporal matching
+ - `temporal_window`: the temporal window 
+ - `temporal_min_match`: the minimum number of peak matching for temporal matching
 
 ## Interactive graphics
 

@@ -46,7 +46,7 @@ p1 <- plot_map(vic_map) +
 res_long <- res %>%
   stretch(ts) %>%
   migrate(group, type) %>%
-  mutate(prcp = scale(prcp)[, 1])
+  mutate(prcp = (prcp - min(prcp, na.rm = TRUE))/ (max(prcp, na.rm = TRUE) - min(prcp, na.rm = TRUE))) 
 
 p2 <- res_long %>% 
   ggplot(aes(x = date, y = prcp, color = type, group = id)) +
