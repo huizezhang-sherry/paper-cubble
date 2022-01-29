@@ -15,23 +15,26 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Data fusion and matching
 
-Data fusion is a process that consider combining multiple multiple data sources. 
-widely used in remote sensing 
+Data fusion is a process that consider combining multiple multiple data sources and it has been applied widely in the remote sensing community.
 
-Meteorological and hydrological data have been matched in the applied studies in the literature to understand drought, ... [ref]. To be a valid pair of matching, the matched pair from different data sources need to be spatially close to each other and temporally [...]. [
-can also think about matching as a form of correlation between series from a statistics point of view.] Cubble has `match_sites()` to match data from multiple sources spatially and temporally. `match_sites()` first matches the two data source spatially through computing the distance [more details on spatial matching - keep one, max dist] and then computes the number of peaks in the two time series that fall within in a fixed length window. Figure \ref{fig:illu-matching} illustrates the temporal matching. With temporal matching, a `temporal_var_to_match` needs to be first specified. Another parameter needs to be specified is `temporal_independent` which determines the series for construct the interval. In Figure \ref{fig:illu-matching}, series A moves before series a and an interval is constructed after the three highest peaks. Then the highest three peak from series a is identified and two of them falls into the interval constructed. There are two matches here at Time 5 and 27.
+Meteorological and hydrological data have been matched in the applied studies in the literature to understand drought, ... [ref]. To be a valid pair of matching, the matched pair from different data sources need to
 
-```{r illu-matching, out.width="100%", out.height="30%", fig.cap="sdfasdf"}
+  - be spatially close to each other, and 
+  - have similar temporal movement
+  
+`match_sites()` from `cubble` matches data based on these two criteria. It first matches the two data sources spatially through computing the pairwise distance based on latitude and longitude. Pairs that pass the spatial matching are then matched temporally through computing the number of matched peaks within a fixed length window. Figure \ref{fig:illu-matching} illustrate this temporal matching in more details. Given two series `A` and `a`, 3 peaks have been picked in each series. An interval, with default length of 5, is constructed for each peak in series `A` and the peaks in series `a` are tested against whether they fall into the any of the intervals. In this illustration, there are 2 matches for these two series. Several arguments are available in `match_sites()` to fine-tune the matching: 
+
+<!-- [can also think about matching as a form of correlation between series from a statistics point of view.] -->
+
+```{r illu-matching, out.width="100%", fig.cap="An illustration of temporal matching in cubble. Three highest peaks are identified in each series and intervals are constructed on series A. Two peaks in series a fall into the intervals and hence the two series are considered to have 2 matches."}
 knitr::include_graphics("figures/illu-matching.png")
 ```
 
-Several arguments are available in `match_sites()` to adjust the matching: 
-
- - `spatial_n_keep`: the number of matching to keep
- - `spatial_dist_max`: the maximum distance allowed between matched pair
- - `temporal_n_highest`: the number of highest peak used for temporal matching
- - `temporal_window`: the temporal window 
- - `temporal_min_match`: the minimum number of peak matching for temporal matching
+ - `spatial_n_keep`: the number of spatial match for each site to keep
+ - `spatial_dist_max`: the maximum distance allowed for a matched pair 
+ - `temporal_n_highest`: the number of peak used - 3 in the example above
+ - `temporal_window`: the length of the interval - 5 in the example above
+ - `temporal_min_match`: the minimum number of matched peak for a valid matched pair
 
 ## Interactive graphics
 

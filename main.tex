@@ -350,58 +350,63 @@ nested from from the long form.
 \subsection{Data fusion and matching}\label{data-fusion-and-matching}}
 
 Data fusion is a process that consider combining multiple multiple data
-sources. widely used in remote sensing
+sources and it has been applied widely in the remote sensing community.
 
 Meteorological and hydrological data have been matched in the applied
 studies in the literature to understand drought, \ldots{} {[}ref{]}. To
 be a valid pair of matching, the matched pair from different data
-sources need to be spatially close to each other and temporally
-{[}\ldots{]}. {[} can also think about matching as a form of correlation
-between series from a statistics point of view.{]} Cubble has
-\texttt{match\_sites()} to match data from multiple sources spatially
-and temporally. \texttt{match\_sites()} first matches the two data
-source spatially through computing the distance {[}more details on
-spatial matching - keep one, max dist{]} and then computes the number of
-peaks in the two time series that fall within in a fixed length window.
-Figure \ref{fig:illu-matching} illustrates the temporal matching. With
-temporal matching, a \texttt{temporal\_var\_to\_match} needs to be first
-specified. Another parameter needs to be specified is
-\texttt{temporal\_independent} which determines the series for construct
-the interval. In Figure \ref{fig:illu-matching}, series A moves before
-series a and an interval is constructed after the three highest peaks.
-Then the highest three peak from series a is identified and two of them
-falls into the interval constructed. There are two matches here at Time
-5 and 27.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics[width=1\linewidth,height=0.3\textheight]{figures/illu-matching} 
-
-}
-
-\caption[sdfasdf]{sdfasdf}\label{fig:illu-matching}
-\end{figure}
-\end{CodeChunk}
-
-Several arguments are available in \texttt{match\_sites()} to adjust the
-matching:
+sources need to
 
 \begin{itemize}
 \tightlist
 \item
-  \texttt{spatial\_n\_keep}: the number of matching to keep
+  be spatially close to each other, and
 \item
-  \texttt{spatial\_dist\_max}: the maximum distance allowed between
+  have similar temporal movement
+\end{itemize}
+
+\texttt{match\_sites()} from \texttt{cubble} matches data based on these
+two criteria. It first matches the two data sources spatially through
+computing the pairwise distance based on latitude and longitude. Pairs
+that pass the spatial matching are then matched temporally through
+computing the number of matched peaks within a fixed length window.
+Figure \ref{fig:illu-matching} illustrate this temporal matching in more
+details. Given two series \texttt{A} and \texttt{a}, 3 peaks have been
+picked in each series. An interval, with default length of 5, is
+constructed for each peak in series \texttt{A} and the peaks in series
+\texttt{a} are tested against whether they fall into the any of the
+intervals. In this illustration, there are 2 matches for these two
+series. Several arguments are available in \texttt{match\_sites()} to
+fine-tune the matching:
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{figures/illu-matching} 
+
+}
+
+\caption[An illustration of temporal matching in cubble]{An illustration of temporal matching in cubble. Three highest peaks are identified in each series and intervals are constructed on series A. Two peaks in series a fall into the intervals and hence the two series are considered to have 2 matches.}\label{fig:illu-matching}
+\end{figure}
+\end{CodeChunk}
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{spatial\_n\_keep}: the number of spatial match for each site
+  to keep
+\item
+  \texttt{spatial\_dist\_max}: the maximum distance allowed for a
   matched pair
 \item
-  \texttt{temporal\_n\_highest}: the number of highest peak used for
-  temporal matching
+  \texttt{temporal\_n\_highest}: the number of peak used - 3 in the
+  example above
 \item
-  \texttt{temporal\_window}: the temporal window
+  \texttt{temporal\_window}: the length of the interval - 5 in the
+  example above
 \item
-  \texttt{temporal\_min\_match}: the minimum number of peak matching for
-  temporal matching
+  \texttt{temporal\_min\_match}: the minimum number of matched peak for
+  a valid matched pair
 \end{itemize}
 
 \hypertarget{interactive-graphics}{%
