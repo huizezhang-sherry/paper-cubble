@@ -598,20 +598,23 @@ will be the topic of the next example.
 \subsection{Australia precipitation pattern in
 2020}\label{australia-precipitation-pattern-in-2020}}
 
-With recent climate, there are 639 stations in Australia that records
-daily maximum and minimum temperature and precipitation. While it would
-be too much series to show on a glyph map, stations close to each other
-should have similar precipitation pattern. Aggregation can be helpful
-here to cluster series into groups and visualise them with glyph map.
+There are 639 stations that record daily precipitation in Australia and
+these series will overlay on top of each other in a glyph map.
+Aggregation can be helpful to group series into clusters before
+visualising the cluster with glyph map. This example shows how to
+organise data at both level with the cubble function
+\texttt{switch\_key()}.
 
-A simple kmean algorithm is used based on the distance matrix to cluster
-the stations into 20 groups. This creates \texttt{station\_nested} as a
-station level nested cubble with a cluster column indicating which group
-each station belongs to. More complex algorithms can be used for more
-complex problem, as long as a mapping from each station id to the
-cluster id can be constructed.
+A simple kmean algorithm based on the distance matrix is used here to
+create 20 clusters. This creates \texttt{station\_nested} as a station
+level nested cubble with a cluster column indicating which group each
+station belongs to. More complex algorithms can be used for other
+problem, as long as there is a mapping from each station to a cluster.
 
 \begin{CodeChunk}
+\begin{CodeInput}
+R> station_nested
+\end{CodeInput}
 \begin{CodeOutput}
 # cubble:   id [639]: nested form
 # bbox:     [113.53, -43.66, 153.64, -10.05]
@@ -636,46 +639,24 @@ R> cluster_nested <- station_nested %>% switch_key(cluster)
 \end{CodeInput}
 \end{CodeChunk}
 
-With the group level cubble, it is useful to compute the centroid of
-each cluster as the location of group level glyph map.
-\texttt{get\_centroid()} is a shortcut for doing so or you can manually
-find the convex hull, its centroid, and extract the longitude and
-latitude:
+With the group level cubble, \texttt{get\_centroid()} is useful to
+compute the centroid of each cluster, which will be used as the major
+axis for the glyph map later:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cluster_nested <- cluster_nested %>% 
-+   get_centroid()
+R> cluster_nested <- cluster_nested %>% get_centroid()
 \end{CodeInput}
 \end{CodeChunk}
 
 Long form cubble at both levels can be access through stretching the
-nested form. Here weekly averages of the precipitation is calculated:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> station_long <- station_nested %>% 
-+   stretch(ts) %>% 
-+   mutate(wk = lubridate::week(date)) %>% 
-+   group_by(wk) %>% 
-+   summarise(prcp = sum(prcp, na.rm = TRUE))
-R> 
-R> cluster_long <- cluster_nested %>% 
-+   stretch(ts) %>% 
-+   mutate(wk = lubridate::week(date)) %>% 
-+   group_by(wk) %>% 
-+   summarise(prcp = mean(prcp, na.rm = TRUE)) %>% 
-+   migrate(cent_long, cent_lat)
-\end{CodeInput}
-\end{CodeChunk}
-
-With the four cubbles: \texttt{station\_nested}, \texttt{station\_long},
-\texttt{cluster\_nested}, and \texttt{cluster\_long}, all the
-information at both levels are accessible. This allows us to make glyph
-map on the cluster level, looking at station composition of each
-cluster, and plot the individual series to check for consistency within
-groups. Figure \ref{fig:basic-agg} composes of the three plots together
-to show the precipitation in Australia.
+nested form and operations applicable to long form cubble are still
+available. With access to both station and cluster level cubbles,
+various plots can be made to understand the cluster. Figure
+\ref{fig:basic-agg} shows two example plots that can be made with this
+data: subplot A makes a glyph map with cluster level cubble and subplot
+B inspects the station membership of each cluster using the nested
+station level cubble.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -684,7 +665,7 @@ to show the precipitation in Australia.
 
 }
 
-\caption[Aggregated precipitation in Australia]{Aggregated precipitation in Australia.}\label{fig:basic-agg}
+\caption[Profile of aggregated precipitation from 639 weather stations in Australia]{Profile of aggregated precipitation from 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number of printed in the middle of y minor axis and can be used as a reference line to read the magnitude of precipitation. Subplot B shows the station membership of each cluster}\label{fig:basic-agg}
 \end{figure}
 \end{CodeChunk}
 
