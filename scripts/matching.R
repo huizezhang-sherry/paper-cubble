@@ -22,7 +22,8 @@ plot_map(vic_map) +
              aes(x = long, y = lat, color = type)) + 
   scale_color_brewer(palette = "Dark2") +
   theme_bw() + 
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") + 
+  labs(x = "Longitude", y = "Latitude")
 ggsave(filename = "figures/matching-map.png", width = 10, height = 5)  
 
 res <- match_sites(river, climate,
@@ -58,7 +59,9 @@ p2 <- res_long %>%
   scale_x_date(date_labels = "%b") + 
   labs(x = "Week", y = "Precipitation/ water level")
 
-(p1 | p2) + patchwork::plot_layout(guides = "collect") &
+(p1 | p2) + 
+  patchwork::plot_layout(guides = "collect") + 
+  plot_annotation(tag_levels = 'A')&
   theme(legend.position = "bottom")
 
-ggsave(filename = "figures/matching.png", width = 8, height = 4)  
+ggsave(filename = "figures/matching.png", width = 10, height = 5)  

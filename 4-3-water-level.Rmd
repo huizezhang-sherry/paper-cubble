@@ -5,9 +5,9 @@ output: html_document
 
 ## River level data in Victria water gauges
 
-Water data is collected by the [Bureau of Meteorology](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full). This includes ... water gauges, variables collected. In particular, water level will interactive with the climate variable precipitation as rains fall into the river will raise the water level. Figure \ref{fig:matching-map} shows the available weather station and water gauges in Victoria, Melbourne.
+Bureau of Meteorology also collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges, which includes electrical conductivity, turbidity, water course discharge, water course level, and water temperature. In particular, water level will interactive with precipitation from the climate data since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} gives the location of available weather station and water gauges in Victoria.
 
-```{r echo = TRUE}
+```{r eval = FALSE}
 climate <- weatherdata::climate_full %>%
   filter(between(stringr::str_sub(id, 7, 8), 76, 90)) %>%
   stretch() %>%
@@ -23,13 +23,11 @@ river <- weatherdata::water %>%
   mutate(type = "river")
 ```
 
-```{r matching-map, out.width="100%", fig.cap="asdfasd"}
+```{r matching-map, out.width="100%", fig.cap="Location of climate station and river gauges in Victoria, Australia."}
 knitr::include_graphics("figures/matching-map.png")
 ```
 
-From the map, a few water gauges and weather stations are close to each other and we may be able to observe a spontaneous increase in the precipitation and water level from the measures, potential with a little delay in the river gauges. `match_sites()` matches one source of data with another source in both spatial and temporal dimension in a cubble. 
-
-<!-- Now we use `match_sites()` to first pair the weather stations with the river gauges spatially and then apply the temporal matching on `prcp`. We will construct the interval based on peaks in `climate` since we would expect a lag effect for precipitation to flow into the river and cause a raise in river level, hence `temporal_independent = climate`. We select the 30 highest peak from the series to construct the match by setting `temporal_n_highest = 30`. This is a tuning parameter and you can start with 10% of the points of one series (here we have daily data for a year, 10% is roughly 30 points). `temporal_min_match` filters out pairs don't have enough match and to return all the pairs, set `temporal_min_match` to `0`.`` -->
+From the map, a few water gauges and weather stations are close to each other and there is the potential that fluctuation of the water level can reflect the precipitation measured by the climate station. As introduced in Section 3.2, `match_sites()` can be used to match one source of data with another source in a cubble. Here `prcp` in `climate` will be matched to `Water_course_level` in `river`, which is specified in the argument `temporal_var_to_match`. `temporal_independent` controls the dataset that will be used to construct the interval (see the illustration in section 3.2 for details on this). Here the goal is to see if precipitation will be reflected by the water level in the river and hence a lagged effect of water level on precipitation. This will put precipitation data, `climate`, as the independent. Given there is one year worth of data, the number of peak (`temporal_n_highest`) to consider is slightly raised from a default 20 to 30. `temporal_min_match` filters out pairs don't have enough match and to return all the pairs, set `temporal_min_match` to `0`
 
 ```{r echo = TRUE}
 res <- match_sites(river, climate,
@@ -39,16 +37,15 @@ res <- match_sites(river, climate,
                    temporal_min_match = 15)
 ```
 
-The output from temporal matching is also a cubble, with additional column `dist` and `group` produced from spatial matching and `n_match` from the number of peak matched temporally. 
+The output from matching is also a cubble, with additional column `dist` and `group` produced from spatial matching and `n_match` from the temporal matching. 
 
 ```{r}
-res
+res %>% print(n = 8)
 ```
 
-Then plots can be made to inspect the matched pairs on the map or to view the co-movement of the two series:
+Figure \ref{fig:matching} plots the matched pairs on the map or to view the matched series and with the chosen parameter, there are four pairs of matches, which all locates in the middle Victoria and the concurrent increase of precipitation and water level can be observed.
 
-```{r matching, out.width="100%", fig.cap="asdfasd"}
+```{r matching, out.width="100%", fig.cap="Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The increases in the precipitation is reflected well by the water level."}
 knitr::include_graphics("figures/matching.png")
 ```
 
-With the chosen parameter, four pairs of stations stands out, which all locates in the middle Victoria and the concurrent increase of precipitation and water level can be observed.

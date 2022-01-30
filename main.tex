@@ -673,31 +673,14 @@ station level cubble.
 \subsection{River level data in Victria water
 gauges}\label{river-level-data-in-victria-water-gauges}}
 
-Water data is collected by the
-\href{http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full}{Bureau
-of Meteorology}. This includes \ldots{} water gauges, variables
-collected. In particular, water level will interactive with the climate
-variable precipitation as rains fall into the river will raise the water
-level. Figure \ref{fig:matching-map} shows the available weather station
-and water gauges in Victoria, Melbourne.
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> climate <- weatherdata::climate_full %>%
-+   filter(between(stringr::str_sub(id, 7, 8), 76, 90)) %>%
-+   stretch() %>%
-+   filter(lubridate::year(date) == 2020) %>%
-+   tamp() %>%
-+   mutate(type = "climate")
-R> 
-R> river <- weatherdata::water %>%
-+   stretch() %>%
-+   select(date, Water_course_level) %>%
-+   rename(prcp = Water_course_level) %>% 
-+   tamp() %>%
-+   mutate(type = "river")
-\end{CodeInput}
-\end{CodeChunk}
+Bureau of Meteorology also collects
+\href{http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full}{water
+data} from river gauges, which includes electrical conductivity,
+turbidity, water course discharge, water course level, and water
+temperature. In particular, water level will interactive with
+precipitation from the climate data since rainfall will raise the water
+level in the river. Figure \ref{fig:matching-map} gives the location of
+available weather station and water gauges in Victoria.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -706,16 +689,28 @@ R> river <- weatherdata::water %>%
 
 }
 
-\caption[asdfasd]{asdfasd}\label{fig:matching-map}
+\caption[Location of climate station and river gauges in Victoria, Australia]{Location of climate station and river gauges in Victoria, Australia.}\label{fig:matching-map}
 \end{figure}
 \end{CodeChunk}
 
 From the map, a few water gauges and weather stations are close to each
-other and we may be able to observe a spontaneous increase in the
-precipitation and water level from the measures, potential with a little
-delay in the river gauges. \texttt{match\_sites()} matches one source of
-data with another source in both spatial and temporal dimension in a
-cubble.
+other and there is the potential that fluctuation of the water level can
+reflect the precipitation measured by the climate station. As introduced
+in Section 3.2, \texttt{match\_sites()} can be used to match one source
+of data with another source in a cubble. Here \texttt{prcp} in
+\texttt{climate} will be matched to \texttt{Water\_course\_level} in
+\texttt{river}, which is specified in the argument
+\texttt{temporal\_var\_to\_match}. \texttt{temporal\_independent}
+controls the dataset that will be used to construct the interval (see
+the illustration in section 3.2 for details on this). Here the goal is
+to see if precipitation will be reflected by the water level in the
+river and hence a lagged effect of water level on precipitation. This
+will put precipitation data, \texttt{climate}, as the independent. Given
+there is one year worth of data, the number of peak
+(\texttt{temporal\_n\_highest}) to consider is slightly raised from a
+default 20 to 30. \texttt{temporal\_min\_match} filters out pairs don't
+have enough match and to return all the pairs, set
+\texttt{temporal\_min\_match} to \texttt{0}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -727,9 +722,9 @@ R> res <- match_sites(river, climate,
 \end{CodeInput}
 \end{CodeChunk}
 
-The output from temporal matching is also a cubble, with additional
-column \texttt{dist} and \texttt{group} produced from spatial matching
-and \texttt{n\_match} from the number of peak matched temporally.
+The output from matching is also a cubble, with additional column
+\texttt{dist} and \texttt{group} produced from spatial matching and
+\texttt{n\_match} from the temporal matching.
 
 \begin{CodeChunk}
 \begin{CodeOutput}
@@ -743,12 +738,16 @@ and \texttt{n\_match} from the number of peak matched temporally.
 3 404207      HOLLAND CREEK @ ~ -36.6  146. <tibble [~ river  8.54    10      21
 4 ASN00082170 benalla airport   -36.6  146. <tibble [~ clim~  8.54    10      21
 5 230200      MARIBYRNONG RIVE~ -37.7  145. <tibble [~ river  6.17     6      19
-# ... with 3 more rows
+6 ASN00086038 essendon airport  -37.7  145. <tibble [~ clim~  6.17     6      19
+7 406213      CAMPASPE RIVER @~ -37.0  145. <tibble [~ river  1.84     1      18
+8 ASN00088051 redesdale         -37.0  145. <tibble [~ clim~  1.84     1      18
 \end{CodeOutput}
 \end{CodeChunk}
 
-Then plots can be made to inspect the matched pairs on the map or to
-view the co-movement of the two series:
+Figure \ref{fig:matching} plots the matched pairs on the map or to view
+the matched series and with the chosen parameter, there are four pairs
+of matches, which all locates in the middle Victoria and the concurrent
+increase of precipitation and water level can be observed.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -757,13 +756,9 @@ view the co-movement of the two series:
 
 }
 
-\caption[asdfasd]{asdfasd}\label{fig:matching}
+\caption[Matched weather stations and river gauges on the map (A) and across time (B)]{Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The increases in the precipitation is reflected well by the water level.}\label{fig:matching}
 \end{figure}
 \end{CodeChunk}
-
-With the chosen parameter, four pairs of stations stands out, which all
-locates in the middle Victoria and the concurrent increase of
-precipitation and water level can be observed.
 
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis
