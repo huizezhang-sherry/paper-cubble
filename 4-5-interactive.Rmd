@@ -27,11 +27,11 @@ crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 
 In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Overall, most regions in Australia have low variance of temperature range across different months while the north-west coastline, bottom of South Australia, and Victoria stands out with larger monthly changes. In the second row, Mount Elizabeth is selected on the map given its dark colour and this links to the ribbon on the right where there is a larger temperature range is presented in Australian winter (June to August). The third row selects the Grampian station in Victoria and the linked ribbon shows an opposite wider range in Australian summer period (December to February). The last row selects point with the lowest minimum temperature in August in the ribbon plot and surprisingly, this links to the Thredbo Airport in the Victoria and New South Wales border, rather than somewhere in the Tasmania island! 
 
-```{r interactive-linking, echo = FALSE, out.width="100%", out.height="20%", fig.retina = 2, dpi = 300, fig.cap = "Exploring temperature variation using linkning of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiels. Selecting a location with high variance on the map produces the plot in the second row. The maximum nad minimum temperature is shown using a ribbon.", fig.show='hold'}
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum nad minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in Auguest in the seasonal display. A location in the Tasmania Island is then selected and surprisingly, it is actually warmer than the Thredbo AWS.", fig.show='hold'}
 knitr::include_graphics(here::here("figures/linking.png"))
 knitr::include_graphics(here::here("figures/linking-north.png"))
-knitr::include_graphics(here::here("figures/linking-mid.png"))
-knitr::include_graphics(here::here("figures/linking-south.png"))
+knitr::include_graphics(here::here("figures/linking-lower.png"))
+#knitr::include_graphics(here::here("figures/linking-south.png"))
 ```
 
 With leaflet popup, the temperature range can be displayed as a small subplot upon clicking on the map. This would require first creating the popup plots from the long form cubble as a vector and then add these plots to a leaflet map, created from the nested cubble, with `leafpop::addPopupGraphs()`:
