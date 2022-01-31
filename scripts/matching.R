@@ -9,12 +9,7 @@ climate <- weatherdata::climate_full %>%
   tamp() %>%
   mutate(type = "climate")
 
-river <- weatherdata::water %>%
-  stretch() %>%
-  select(date, Water_course_level) %>%
-  rename(prcp = Water_course_level) %>% 
-  tamp() %>%
-  mutate(type = "river")
+river <- weatherdata::water %>% mutate(type = "river")
 
 vic_map <- rmapshaper::ms_simplify(ozmaps::abs_ste %>% filter(NAME == "Victoria"))  
 plot_map(vic_map) +
@@ -27,8 +22,8 @@ plot_map(vic_map) +
 ggsave(filename = "figures/matching-map.png", width = 10, height = 5)  
 
 res <- match_sites(river, climate,
-                   temporal_var_to_match = prcp,
-                   temporal_independent = climate,  
+                   temporal_var_to_match = c("Water_course_level" = "prcp"),
+                   temporal_independent = "prcp",  
                    temporal_n_highest = 30,
                    temporal_min_match = 15)
 
@@ -47,6 +42,7 @@ p1 <- plot_map(vic_map) +
 res_long <- res %>%
   stretch(ts) %>%
   migrate(group, type) %>%
+  rename(prcp = matched_var) %>% 
   mutate(prcp = (prcp - min(prcp, na.rm = TRUE))/ (max(prcp, na.rm = TRUE) - min(prcp, na.rm = TRUE))) 
 
 p2 <- res_long %>% 
