@@ -7,7 +7,7 @@ output: html_document
 
 Bureau of Meteorology also collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges, which includes electrical conductivity, turbidity, water course discharge, water course level, and water temperature. In particular, water level will interactive with precipitation from the climate data since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} gives the location of available weather station and water gauges in Victoria.
 
-```{r eval = FALSE}
+```{r}
 climate <- weatherdata::climate_full %>%
   filter(between(stringr::str_sub(id, 7, 8), 76, 90)) %>%
   stretch() %>%
@@ -16,10 +16,6 @@ climate <- weatherdata::climate_full %>%
   mutate(type = "climate")
 
 river <- weatherdata::water %>%
-  stretch() %>%
-  select(date, Water_course_level) %>%
-  rename(prcp = Water_course_level) %>% 
-  tamp() %>%
   mutate(type = "river")
 ```
 
@@ -30,11 +26,13 @@ knitr::include_graphics("figures/matching-map.png")
 From the map, a few water gauges and weather stations are close to each other and there is the potential that fluctuation of the water level can reflect the precipitation measured by the climate station. As introduced in Section 3.2, `match_sites()` can be used to match one source of data with another source in a cubble. Here `prcp` in `climate` will be matched to `Water_course_level` in `river`, which is specified in the argument `temporal_var_to_match`. `temporal_independent` controls the dataset that will be used to construct the interval (see the illustration in section 3.2 for details on this). Here the goal is to see if precipitation will be reflected by the water level in the river and hence a lagged effect of water level on precipitation. This will put precipitation data, `climate`, as the independent. Given there is one year worth of data, the number of peak (`temporal_n_highest`) to consider is slightly raised from a default 20 to 30. `temporal_min_match` filters out pairs don't have enough match and to return all the pairs, set `temporal_min_match` to `0`
 
 ```{r echo = TRUE}
-res <- match_sites(river, climate,
-                   temporal_var_to_match = prcp,
-                   temporal_independent = climate,  
-                   temporal_n_highest = 30,
-                   temporal_min_match = 15)
+res <- match_sites(
+  river, climate,
+  temporal_var_to_match = c("Water_course_level" = "prcp"),
+  temporal_independent = "prcp",  
+  temporal_n_highest = 30,
+  temporal_min_match = 15
+)
 ```
 
 The output from matching is also a cubble, with additional column `dist` and `group` produced from spatial matching and `n_match` from the temporal matching. 
