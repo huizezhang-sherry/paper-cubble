@@ -714,11 +714,13 @@ have enough match and to return all the pairs, set
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> res <- match_sites(river, climate,
-+                    temporal_var_to_match = prcp,
-+                    temporal_independent = climate,  
-+                    temporal_n_highest = 30,
-+                    temporal_min_match = 15)
+R> res <- match_sites(
++   river, climate,
++   temporal_var_to_match = c("Water_course_level" = "prcp"),
++   temporal_independent = "prcp",  
++   temporal_n_highest = 30,
++   temporal_min_match = 15
++ )
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -765,6 +767,19 @@ increase of precipitation and water level can be observed.
 data}\label{era5-climate-reanalysis-data}}
 
 \newpage
+
+Figure \ref{fig:netcdf}
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/netcdf} 
+
+}
+
+\caption[sdf]{sdf}\label{fig:netcdf}
+\end{figure}
+\end{CodeChunk}
 
 \hypertarget{interative-graphic-with-cubble}{%
 \subsection{Interative graphic with
@@ -841,7 +856,7 @@ New South Wales border, rather than somewhere in the Tasmania island!
 
 }
 
-\caption[Exploring temperature variation using linking of a map and seasonal display]{Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum nad minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in Auguest in the seasonal display. A location in the Tasmania Island is then selected and surprisingly, it is actually warmer than the Thredbo AWS.}\label{fig:interactive-linking}
+\caption[Exploring temperature variation using linking of a map and seasonal display]{Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum nad minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in Auguest in the seasonal display. A location in the Tasmania Island is then selected and it is actually warmer than the Thredbo AWS.}\label{fig:interactive-linking}
 \end{figure}
 \end{CodeChunk}
 
