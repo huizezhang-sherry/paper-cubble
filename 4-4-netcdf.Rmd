@@ -8,7 +8,7 @@ output: pdf_document
 
 NetCDF (Network Common Data Form) is a data format commonly used in climatology community to deliver global mapping of atmosphere, ocean, and land. It has two major components: dimension to define the spatiotemporal grid (longitude, latitude, and time) and variable which populates the defined grid. Attributes are usually associated with dimension and variable in the NetCDF format data and a [metadata convention for climate and forecast](http://cfconventions.org/) has been designed to standardise this data format. Current packages on manipulating NetCDF data in R include a high-level R interface: `ncdf4`[@ncdf4], a low-level interface that calls C-interface: `RNetCDF`[@rnetcdf; @michna2013rnetcdf], and a tidyverse implementation: `tidync`[@tidync].
 
-Cubble provides an `as_cubble()` method to coerce the `ncdf4` class from the `ncdf4` package into a `cubble`. It maps each combination of latitude and longitude into a unit. 
+Cubble provides an `as_cubble()` method to coerce the `ncdf4` class from the `ncdf4` package into a `cubble`. It maps each combination of longitude and latitude into an `id` (the `key`) and nests time and variables in the nested form:
 
 ```{r echo = TRUE, eval = FALSE}
 # read in the .nc file as a ncdf4 class
@@ -18,23 +18,20 @@ raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
 dt <- as_cubble(raw, vars = c("q", "z"))
 ```
 
-Since each combination of latitude and longitude grid is regarded as a site, the number of site quickly goes up when mapping on a global scale. 
-
-  - For a southern hemisphere bounding box of [-5, -180, -90, 180], 491,040 id, 8 timestamp, 15MB -> 11 sec
-  - For an Australia bounding box of [-12, 115, -43, 153], 19125 id, 1,827 times tamp, 133 MB -> 1 mins . 
-  
-This shows a computation on the time dimension is cheaper than the spatial dimension. Argument `long_range` and `lat_range` are available to subset to a looser grid when reading in global level resolution. `era5-pressure.nc` has 0.25 degree resolution and to read in the data in whole degree, use:
+Memory limit with Netcdf data in cubble depends on longitude grid point x latitude grid point x time grid point x number of variable. Cubble can handle slightly more than 300 x 300 (longitude x longitude) grid points for 3 variables in one year and spatial grid can be reduced to trade for longer time period and more variables. A 300 by 300 spatial grid can be a bounding box of [100, -80, 180, 0] at 0.25 degree resolution or global bounding box [-180, -90, 180, -90] at 1 degree resolution. Subsetting longitude and latitude grid is available through `long_range` and `lat_range` if the Netcdf file has finer resolution than needed.
 
 ```{r eval = FALSE, echo = TRUE}
-dt <- as_cubble(raw, vars = c("q", "z"), 
+# Assume `my_ncdf` has bounding box of [-180, -90, 180, -90] 
+# at 0.25 degree resolution and subset it to have 
+# 1 degree resolution:
+dt <- as_cubble(my_ncdf, vars = c("q", "z"), 
                 long_range = seq(-180, 180, 1), 
                 lat_range = seq(-90, 90, 1))
 ```
 
+Figure \ref{fig:netcdf} gives an example of reproducing Figure 19 in @hersbach2020era5 using ERA5 data. ERA5 data [@hersbach2020era5] is the latest reanalysis of global atmosphere, land surface, and ocean waves from 1950 onwards and is available in the NetCDF format. It can be directly downloaded from the [Copernicus Climate Data Store (CDS)](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=overview) website or programmatically via R package `ecmwfr`[@ecwmfr]. Variable Specific humidity and geopotential are queried on the 10 hPa pressure level for four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04 adn once downloaded, the data can be read into a cubble using the code above. Readers who are interested in the details of can refer to @simmons2020global and @simmons2005ecmwf.
 
-Here an example in Figure \ref{fig:netcdf} is given to reproduce Figure 19 in @hersbach2020era5 from the ERA5 data. ERA5 data [@hersbach2020era5] is the latest reanalysis of global atmosphere, land surface, and ocean waves from 1950 onwards and is available in the NetCDF format. It can be directly downloaded from the [Copernicus Climate Data Store (CDS)](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=overview) website or programmatically via R package `ecmwfr`[@ecwmfr]. Variable Specific humidity and geopotential are queried on the 10 hPa pressure level for four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Readers who are interested in the details of  can refer to @simmons2020global and @simmons2005ecmwf.
-
-```{r netcdf, out.width="100%", fig.cap = "sdf"}
+```{r netcdf, out.width="100%", fig.cap = "A reproduction of the second row of Figure 19 in  Hersbach (2020)."}
 knitr::include_graphics(here::here("figures/netcdf.png"))
 ```
 

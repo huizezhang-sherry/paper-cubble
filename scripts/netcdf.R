@@ -11,7 +11,7 @@ my_request <- list(
   day = c("04", "22", "26", "30"),
   time = "00:00",
   area = c(-5, -180, -90, 180),
-  variable = c("specific_humidity", 'geopotential', 'potential_vorticity', 'temperature'),
+  variable = c("specific_humidity", 'geopotential'),
   dataset_short_name = "reanalysis-era5-pressure-levels",
   target = "era5-pressure.nc"
 )
@@ -22,16 +22,15 @@ wf_request(
   transfer = TRUE,
   path = "~/Documents/research/paper-cubble/data/")
 
-raw <- ncdf4::nc_open(file.choose())
-dt <- as_cubble(raw, vars = c("q", "z", "pv", "t"))
+raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
+dt <- as_cubble(raw, vars = c("q", "z"))
 
 date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") %>% as.Date()
 res <- dt %>% 
   stretch() %>% 
   filter(lubridate::date(time) %in% date) %>%
   migrate(long, lat) %>% 
-  mutate(q =  q* 10^6,
-         mq = z + pv / t)
+  mutate(q =  q* 10^6)
   
 box = c(xmin = -180, ymin = -90, xmax = 180, ymax = -5)
 sf::sf_use_s2(FALSE)

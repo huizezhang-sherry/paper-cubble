@@ -781,8 +781,9 @@ tidyverse implementation: \texttt{tidync}\citep{tidync}.
 
 Cubble provides an \texttt{as\_cubble()} method to coerce the
 \texttt{ncdf4} class from the \texttt{ncdf4} package into a
-\texttt{cubble}. It maps each combination of latitude and longitude into
-a unit.
+\texttt{cubble}. It maps each combination of longitude and latitude into
+an \texttt{id} (the \texttt{key}) and nests time and variables in the
+nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -794,35 +795,30 @@ R> dt <- as_cubble(raw, vars = c("q", "z"))
 \end{CodeInput}
 \end{CodeChunk}
 
-Since each combination of latitude and longitude grid is regarded as a
-site, the number of site quickly goes up when mapping on a global scale.
-
-\begin{itemize}
-\tightlist
-\item
-  For a southern hemisphere bounding box of {[}-5, -180, -90, 180{]},
-  491,040 id, 8 timestamp, 15MB -\textgreater{} 11 sec
-\item
-  For an Australia bounding box of {[}-12, 115, -43, 153{]}, 19125 id,
-  1,827 times tamp, 133 MB -\textgreater{} 1 mins .
-\end{itemize}
-
-This shows a computation on the time dimension is cheaper than the
-spatial dimension. Argument \texttt{long\_range} and \texttt{lat\_range}
-are available to subset to a looser grid when reading in global level
-resolution. \texttt{era5-pressure.nc} has 0.25 degree resolution and to
-read in the data in whole degree, use:
+Memory limit with Netcdf data in cubble depends on longitude grid point
+x latitude grid point x time grid point x number of variable. Cubble can
+handle slightly more than 300 x 300 (longitude x longitude) grid points
+for 3 variables in one year and spatial grid can be reduced to trade for
+longer time period and more variables. A 300 by 300 spatial grid can be
+a bounding box of {[}100, -80, 180, 0{]} at 0.25 degree resolution or
+global bounding box {[}-180, -90, 180, -90{]} at 1 degree resolution.
+Subsetting longitude and latitude grid is available through
+\texttt{long\_range} and \texttt{lat\_range} if the Netcdf file has
+finer resolution than needed.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> dt <- as_cubble(raw, vars = c("q", "z"), 
+R> # Assume `my_ncdf` has bounding box of [-180, -90, 180, -90] 
+R> # at 0.25 degree resolution and subset it to have 
+R> # 1 degree resolution:
+R> dt <- as_cubble(my_ncdf, vars = c("q", "z"), 
 +                 long_range = seq(-180, 180, 1), 
 +                 lat_range = seq(-90, 90, 1))
 \end{CodeInput}
 \end{CodeChunk}
 
-Here an example in Figure \ref{fig:netcdf} is given to reproduce Figure
-19 in \citet{hersbach2020era5} from the ERA5 data. ERA5 data
+Figure \ref{fig:netcdf} gives an example of reproducing Figure 19 in
+\citet{hersbach2020era5} using ERA5 data. ERA5 data
 \citep{hersbach2020era5} is the latest reanalysis of global atmosphere,
 land surface, and ocean waves from 1950 onwards and is available in the
 NetCDF format. It can be directly downloaded from the
@@ -830,7 +826,8 @@ NetCDF format. It can be directly downloaded from the
 Climate Data Store (CDS)} website or programmatically via R package
 \texttt{ecmwfr}\citep{ecwmfr}. Variable Specific humidity and
 geopotential are queried on the 10 hPa pressure level for four dates:
-2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Readers who are
+2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04 adn once downloaded,
+the data can be read into a cubble using the code above. Readers who are
 interested in the details of can refer to \citet{simmons2020global} and
 \citet{simmons2005ecmwf}.
 
@@ -841,7 +838,7 @@ interested in the details of can refer to \citet{simmons2020global} and
 
 }
 
-\caption[sdf]{sdf}\label{fig:netcdf}
+\caption[A reproduction of the second row of Figure 19 in  Hersbach (2020)]{A reproduction of the second row of Figure 19 in  Hersbach (2020).}\label{fig:netcdf}
 \end{figure}
 \end{CodeChunk}
 
