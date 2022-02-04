@@ -5,16 +5,17 @@ output: pdf_document
 
 ## Australia precipitation pattern in 2020
 
-There are `r nrow(weatherdata::climate_full)` stations that record daily precipitation in Australia and these series will overlay on top of each other in a glyph map. Aggregation can be helpful to group series into clusters before visualising the cluster with glyph map. This example shows how to organise data at both level with the cubble function `switch_key()`.
+In the previous example, there has already been some overlapping of the glyphs for a few stations near (151E, 34S) and (152E, 33S) and this will be a problem when mapping more stations in the national level. Aggregation can be helpful to group series into clusters before visualising the cluster with glyph map. 
 
-A simple kmean algorithm based on the distance matrix is used here to create 20 clusters. This creates `station_nested` as a station level nested cubble with a cluster column indicating which group each station belongs to. More complex algorithms can be used for other problem, as long as there is a mapping from each station to a cluster.
+This example shows how to organise data at both level with `switch_key()`. The dataset used is `weatherdata::climate_full`, which records daily precipitation and maximum/ minimum temperature for `r nrow(weatherdata::climate_full)` stations in Australia from 2016 to 2020. A simple kmean algorithm based on the distance matrix is used here to create 20 clusters. This creates `station_nested` as a station level nested cubble with a cluster column indicating the group each station belongs to. More complex algorithms can be used for other problem, as long as there is a mapping from each station to a cluster.
 
 ```{r}
 load(here::here("data/station_nested.rda"))
 ```
 
-```{r echo = TRUE}
-station_nested
+```{r echo = TRUE, eval = FALSE}
+station_nested <- weatherdata::climate_full %>% 
+  mutate(cluster = ...)
 ```
 
 To create a group level cubble, use `switch_key()` with the new key variable, `cluster`: 

@@ -19,11 +19,14 @@ Langrené, Patricia Menéndez}
 \Plaintitle{cubble: An R Package for Structuring Spatio-temporal Data}
 
 \Abstract{
-The abstract of the article.
+Sptio-temporal data naturally has two levels of observations: site and
+time level. {[}problem{]}. In this paper, a new data structure,
+\texttt{cubble}, is proposed for manipulating and visualising
+spatio-temporal data.
 }
 
-\Keywords{spatio-temporal data, \proglang{R}}
-\Plainkeywords{spatio-temporal data, R}
+\Keywords{spatio-temporal data, \proglang{R}, climate data}
+\Plainkeywords{spatio-temporal data, R, climate data}
 
 %% publication information
 %% \Volume{50}
@@ -40,7 +43,7 @@ The abstract of the article.
 
 % Pandoc header
 
-\usepackage{amsmath} \usepackage{array}
+\usepackage{amsmath} \usepackage{array} \usepackage{xcolor}
 
 \begin{document}
 
@@ -92,8 +95,14 @@ spatial or temporal dimension separately, while leaves the linking of
 two dimensions to \pkg{cubble}. The software is available from the
 Comprehensive R Archive Network (CRAN) at {[}CRAN link{]}. \newline
 
-The rest of the paper will be divided as follows: {[}complete when the
-paper structure is more solid{]}
+The rest of the paper will be divided as follows: Section 2 presents the
+workflow of data manipulation in cubble. Section 3 explains how cubble
+deals with some advanced considerations including data with hierarchical
+structure, data matching, and how cubble fits with existing static and
+interactive visualisation tools. Section 4 gives examples of the
+features introduced in the previous two sections with climate and
+hydrology data. An example on how cubble handle Netcdf data is also
+provided. Section 5 concludes the paper
 
 \newpage
 
@@ -103,8 +112,8 @@ paper structure is more solid{]}
 Spatio-temporal data usually come in various forms and Figure
 \ref{fig:illu-input} shows four examples of this. No matter which form
 the data is in, these formats share some common components that
-characterise spatio-temporal data. A spatial identifier (\texttt{id} in
-the diagram) is the unique identifier of each site. The temporal
+characterise the spatio-temporal data. A spatial identifier (\texttt{id}
+in the diagram) is the unique identifier of each site. The temporal
 identifier (\texttt{t} in the diagram) prescribes the time stamp each
 site is recorded. Coordinates, comprising of latitude and longitude
 (\texttt{lon} and \texttt{lat} in the diagram), locates each site on the
@@ -112,12 +121,12 @@ map. These identifiers will be the building blocks for the data
 structure introduced below. Other variables in the data can be
 categorised into two groups: spatial variables that are invariant at
 each time stamp for every site, i.e.~the name or code of the weather
-station and temporal variables that varies with time.
+station, and temporal variables that varies with time.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.15\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
 
 }
 
@@ -131,8 +140,8 @@ attributes. The decision on which form to use is output-oriented,
 meaning analysts need to first think about whether the output of a
 particular operation is identified only by the spatial identifier, or a
 combination of spatial and temporal identifier. The nested cubble is
-suitable for working with operations that are only identified by site
-and this type of operation can be a pure manipulation of spatial
+suitable for working with operations that are only identified by the
+site and this type of operation can be a pure manipulation of spatial
 variables, or a summary of temporal variables by site (i.e.~the output
 of counting the number of raining day is only identified by sites and
 hence should be performed with the nested form). Underneath the nested
@@ -164,16 +173,21 @@ time stamp while not dropping information from spatial variables.
 \subsection{Create a cubble in the nested
 form}\label{create-a-cubble-in-the-nested-form}}
 
-To use functionalities from cubble, data analysts first need to create a
-cubble. \texttt{as\_cubble} create a \pkg{cubble} by supplying the three
-key components: \texttt{key} as the spatial identifier; \texttt{index}
-as the temporal identifier; and a vector of \texttt{coords} in the order
-of longitude first and then latitude. The naming of \texttt{key} and
+\textcolor{red}{To use functionalities from cubble, data analysts first need to create a cubble.}
+\texttt{as\_cubble()} creates a \pkg{cubble} by supplying the three key
+components: \texttt{key} as the spatial identifier; \texttt{index} as
+the temporal identifier; and a vector of \texttt{coords} in the order of
+longitude first and then latitude. The naming of \texttt{key} and
 \texttt{index} follows the convention in the \pkg{tsibble} package. The
 cubble created by default is in the nested form. Below is an example of
 creating a cubble: \newline
 
 \begin{CodeChunk}
+\begin{CodeInput}
+R> cubble_nested <- cubble::climate_flat %>%
++   as_cubble(key = id, index = date, coords = c("long", "lat"))
+R> cubble_nested
+\end{CodeInput}
 \begin{CodeOutput}
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
@@ -189,15 +203,10 @@ creating a cubble: \newline
 \end{CodeChunk}
 
 There are a few information in the \pkg{cubble} header: the name of the
-\texttt{key} variable, bbox, and also the name of variable nested in the
-\texttt{ts} column. In this example, each site is identifier is
-\texttt{id} and the number in the bracket means there are 5 unique
-\texttt{id} in this dataset. The bbox in the second row gives the range
-of the coordinates. The temporal variables are all nested in the
-\texttt{ts} column, but it could be useful to know the name these
-variables. The third row in the cubble header shows these names and in
-this example this includes: precipitation, \texttt{prcp}, maximum
-temperature, \texttt{tmax}, and minimum temperature, \texttt{tmin}.
+\texttt{key} variable (\texttt{id}) and its number (5), bounding box
+(\texttt{{[}115.97,\ -32.94,\ 133.55,\ -12.42{]}}), and also the name of
+variable nested in the \texttt{ts} column with its type
+(\texttt{date\ {[}date{]},\ prcp\ {[}dbl{]},\ tmax\ {[}dbl{]},\ tmin\ {[}dbl{]}}).
 
 \hypertarget{stretch-a-nested-cubble-into-the-long-form}{%
 \subsection{Stretch a nested cubble into the long
@@ -210,6 +219,10 @@ separate tibble and store in the \texttt{spatial} attribute and then
 unnests the \texttt{ts} column:
 
 \begin{CodeChunk}
+\begin{CodeInput}
+R> cubble_long <- cubble_nested %>% stretch(ts)
+R> cubble_long
+\end{CodeInput}
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
@@ -225,8 +238,9 @@ unnests the \texttt{ts} column:
 \end{CodeOutput}
 \end{CodeChunk}
 
-Notice here that the third line in the header now shows the name of
-spatial variables rather than the temporal variables.
+Notice here that the third line in the header now shows the name and
+type of spatial variables
+(\texttt{lat\ {[}dbl{]},\ long\ {[}dbl{]},\ elev\ {[}dbl{]},\ name\ {[}chr{]},\ wmo\_id\ {[}dbl{]}}).
 
 \hypertarget{tamp-a-long-cubble-back-to-the-nested-form}{%
 \subsection{Tamp a long cubble back to the nested
@@ -234,12 +248,15 @@ form}\label{tamp-a-long-cubble-back-to-the-nested-form}}
 
 Manipulation on the spatial and temporal dimension can be an iterative
 process. Many times, analysts will need to go back and forth between the
-nested and long cubble. The \texttt{stretch()} function introduced in
-the previous section switches a nested cubble into a long cubble and
-function \texttt{tamp()} is its inverse function to switch a long cubble
-back to the nested cubble:
+nested and long cubble. \texttt{tamp()} inverses the \texttt{stretch()}
+that introduced in the previous section, to switch from a long cubble to
+the nested cubble:
 
 \begin{CodeChunk}
+\begin{CodeInput}
+R> cubble_back <- cubble_long %>% tamp()
+R> cubble_back
+\end{CodeInput}
 \begin{CodeOutput}
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
@@ -258,10 +275,9 @@ back to the nested cubble:
 \subsection{Migrate spatial variables to a long
 cubble}\label{migrate-spatial-variables-to-a-long-cubble}}
 
-As a final data output for modelling or visualisation, spatio-temporal
-data is usually expected to be in a single table. Function
-\texttt{migrate()} moves the spatial variables from the \texttt{spatial}
-attribute into the long cubble:
+\textcolor{red}{As a final data output for modelling or visualisation, spatio-temporal data is usually expected to be in a single table.}
+Function \texttt{migrate()} moves the spatial variables from the
+\texttt{spatial} attribute into the long cubble:
 
 \begin{CodeChunk}
 \begin{CodeOutput}
@@ -279,12 +295,6 @@ attribute into the long cubble:
 \end{CodeOutput}
 \end{CodeChunk}
 
-In this workflow described above, data objects come into cubble in the
-nested form, then various operations on the spatial and temporal
-dimension can go back and forth between the nested and long form, and
-finally, the data will come out of cubble in the long form for further
-modelling or visualisation.
-
 Building from an underlying \texttt{tbl\_df} structure, it is natural to
 implement methods available in \texttt{dplyr} to \texttt{cubble}.
 Supported methods in the \texttt{cubble} with \texttt{dplyr} generics
@@ -298,12 +308,12 @@ slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample
 \end{tabular}
 \end{center}
 
-\pkg{cubble} is also compatible with \pkg{tsibble} in the sense that the
-original list-column can be a \texttt{tbl\_ts} object. Duplicates and
-gaps should be first checked before structuring the data into a cubble.
+\pkg{cubble} is also compatible with \pkg{tsibble} where each element
+list-column in the nested form can be a \texttt{tbl\_ts} object.
+\textcolor{red}{Duplicates and gaps should be first checked before structuring the data into a cubble.}
 If the input data is a \pkg{tsibble} object, the long form cubble is
 also a \pkg{tsibble} where users can directly apply time series
-operations.
+operations. \textcolor{red}{more experiment with tsibble}
 
 \newpage
 
@@ -314,15 +324,16 @@ considerations}\label{advanced-features-considerations}}
 \hypertarget{hierarchical-structure}{%
 \subsection{Hierarchical structure}\label{hierarchical-structure}}
 
-Spatial locations can have further grouping structure either in nature
-(i.e.~countries are nested in continents), or calculated by some
-clustering algorithms. Rather than investigate the read from individual
-locations, group character summarised from multiple locations can give a
-clearer picture of the local dynamic. In cubble, \texttt{switch\_key()}
-can be used to create a new level of grouping of spatial location by
-specifying a clustering variable. Figure \ref{fig:illu-hier} illustrates
-the relationship of cubbles at site and cluster level, in both the long
-and nested form. By specifying
+Spatial locations can have grouping structure that is either inherent to
+the data (i.e.~countries are nested in continents), or formed by
+clustering. Rather than analysing variables in the site level,
+summarised variables in the cluster level can give a clearer picture of
+\textcolor{red}{local dynamic}. In cubble, \texttt{switch\_key()} can be
+used to create a new level of grouping of spatial location by specifying
+a clustering variable. Figure \ref{fig:illu-hier} illustrates the
+relationship of cubbles at site and cluster level, in both the long and
+nested form. \textcolor{red}{unify the use of site/ station}. By
+specifying
 \texttt{cluster\_nested\ \textless{}-\ station\_nested\ \%\textgreater{}\%\ switch\_key(key\ =\ cluster)},
 the cubble re-defines the cubble key from \texttt{id} in
 \texttt{station\_nested} to \texttt{cluster} in
@@ -338,7 +349,7 @@ nested from from the long form.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
 
 }
 
@@ -349,8 +360,8 @@ nested from from the long form.
 \hypertarget{data-fusion-and-matching}{%
 \subsection{Data fusion and matching}\label{data-fusion-and-matching}}
 
-To be a valid pair of matching, the matched pair from different data
-sources need to
+\textcolor{red}{refine the beginning.} To be a valid pair of matching,
+the matched pair from different data sources need to
 
 \begin{itemize}
 \tightlist
@@ -414,27 +425,27 @@ sources are combined together.
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}
 
-The cubble structure fits in naturally with the interactive graphic
-pipeline discussed in the literature
+Cubble fits in naturally with the interactive graphic pipeline discussed
+in the literature
 \citep{buja1988elements, buja1996interactive, sutherland2000orca, xie2014reactive, cheng2016enabling}.
-Diagram \ref{fig:illu-interactive} illustrates how linking works with
-the two forms in a cubble, where a time series plot is created with the
-long cubble and a map is created with the nested cubble. When a user
-action is captured from the map, the site will be activated in the
-nested cubble. Then, the nested cubble will communicate to the long
-cubble to activate all the observations with the same \texttt{id}. The
-long cubble will then highlight the activated series in the time series
-plot.
+Diagram \ref{fig:illu-interactive} illustrates how linking works from
+the map to the time series with the two forms of a cubble. The map and
+time series plot is associated with the nested or long cubble
+respectively and when a user action is captured on the map, the site
+will be activated in the nested cubble (left). The nested cubble will
+communicate to the long cubble to activate all the observations with the
+same \texttt{id} (middle). The long cubble will then highlight the
+activated series in the time series plot (right).
 
 The linking is also available from the time series plot to the map. The
-selection on the time series is through selecting the point on the time
-series and once a point is selected, it will be activated in the long
-cubble. All the observations that share the same \texttt{id}, either in
-the long and nested cubble, are then activated. This includes other
-points in the same time series in the long cubble and the corresponding
-observation of site in the nested cubble. These activated observations
-will then being reflected in the updated plots and Diagram
-\ref{fig:illu-interactive-2} in the Appendix illustrates this process.
+selection(s) on the time series is through selecting the point(s) on the
+time series and once a point is selected, it will be activated in the
+long cubble. All the observations that share the same \texttt{id} are
+then activated and this includes other points in the same time series in
+the long cubble and the corresponding observation of site in the nested
+cubble. These activated observations will then being reflected in the
+updated plots and Diagram \ref{fig:illu-interactive-2} in the Appendix
+illustrates this process.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -451,12 +462,12 @@ will then being reflected in the updated plots and Diagram
 \subsection{Glyph map}\label{glyph-map}}
 
 Glyph map \citep{Wickham2012-yr} plots the time series as single glyph
-on the map. In \proglang{R}, \texttt{GGally} implements the glyph map
-through the \texttt{glyphs()} function, which outputs a data frame with
-calculated position (\texttt{gx}, \texttt{gy}, \texttt{gid}) of each
-point on the time series given the major and minor xy variable using
-linear algebra (Equation 1 and 2 in \citet{Wickham2012-yr}). The data
-can then be piped into \texttt{ggplot} to create the glyph map:
+on the map and in \proglang{R}, \texttt{GGally} implements the glyph map
+through the \texttt{glyphs()} function. The function construct a data
+frame with calculated position (\texttt{gx}, \texttt{gy}, \texttt{gid})
+of each point on the time series using linear algebra (Equation 1 and 2
+in \citet{Wickham2012-yr}). The data can then be piped into
+\texttt{ggplot} to create the glyph map as:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -470,10 +481,9 @@ R> ggplot(gly, aes(gx, gy, group = gid)) +
 \end{CodeInput}
 \end{CodeChunk}
 
-While this calculation can be seen as part of the \texttt{setup\_data()}
-in a \texttt{ggproto}. A re-implementation of the glyph map as
-\texttt{GeomGlyph} has been made in \texttt{cubble} to create the glyph
-map with \texttt{geom\_glyph}:
+A re-implementation of the glyph map as a ggproto \texttt{GeomGlyph} has
+been made in the \texttt{cubble} package so that the glyph map can be
+created with \texttt{geom\_glyph()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -486,9 +496,10 @@ R> ggplot(data = data) +
 Polar glyph map can be specify as a parameter, \texttt{polar\ =\ TRUE},
 in the \texttt{geom\_glyph()}, along with \texttt{width} and
 \texttt{height} in either absolute or relative value. Global and local
-scale can also be controlled by the parameter \texttt{global\_rescale},
-which default to \texttt{TRUE}. Reference box and line can be added with
-separate \texttt{geom\_glyph\_box()} and \texttt{geom\_glyph\_line()}.
+scale can be controlled by the parameter \texttt{global\_rescale}, which
+default to \texttt{TRUE} for global scaling. Reference box and line can
+be added with separate \texttt{geom\_glyph\_box()} and
+\texttt{geom\_glyph\_line()}.
 
 \newpage
 
@@ -501,26 +512,23 @@ temperature}\label{australia-historical-maximum-temperature}}
 
 Global Historical Climatology Network (GHCN) provides daily climate
 measures from stations across the world and the dataset
-\texttt{weatherdata::historical\_tmax} extracts the historical maximum
-temperature recorded for 236 Australian stations. The data
+\texttt{weatherdata::historical\_tmax} extracts the maximum temperature
+for 236 Australian stations. All the stations start recording from year
+1969 with the longest back to year 1859. The data
 \texttt{historical\_tmax} is already presented as a cubble, with
 \texttt{id} as the key, \texttt{date} as the index, and
-\texttt{c("longitude",\ "latitude")} as the coordinates. Other variables
-include \texttt{elevation}, \texttt{name}, \texttt{wmo\_id},
-\texttt{first\_year}, and \texttt{last\_year} in the nested form and
-\texttt{tmax} in the long form. This example compares the maximum
-temperature in two periods: 1971 - 1975 and 2016 - 2020 for stations in
-Victoria and New South Wales.
+\texttt{c("longitude",\ "latitude")} as the coordinates. This example
+compares the maximum temperature in two periods: 1971 - 1975 and 2016 -
+2020 for stations in Victoria and New South Wales.
 
 Stations in the two states can be subsetted on the station number:
-Australia GHCN station number starts with \texttt{ASN00} and followed by
-the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Bureau
-of Meteorology (BOM) station number}, where the 2nd and 3rd digit (7th
-and 8th in the GHCN number) denote the state a station belongs to. New
-South Wales stations start from 46 to 75 and Victoria stations then
-follow from 76 to 90. Extracting Victoria and New South Wales stations
-is a filter operation in the spatial dimension and hence is operated in
-the nested form:
+Australia GHCN station number starts with ``ASN00'' and followed by the
+\href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Bureau of
+Meteorology (BOM) station number}, where the 2nd and 3rd digit (7th and
+8th in the GHCN number) define the state of the station. New South Wales
+stations start from 46 to 75 and Victoria stations follow from 76 to 90.
+Filtering Victoria and New South Wales stations is an operation in the
+spatial dimension and hence uses the nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -529,18 +537,24 @@ R> tmax <- weatherdata::historical_tmax %>%
 \end{CodeInput}
 \end{CodeChunk}
 
-The five year window is chosen to remove the effect of a particular year
-and the historical period of 1971 - 1975 is used since all the stations
-have records from 1970. This following chunk filters on records in the
-two study periods and summarises the maximum temperature into monthly
-measure. \texttt{stretch()} is used to convert the nested form cubble
-into the long form for these operations:
+Filtering for the period 1971: 1975 and 2016:2020 is an operation on the
+time dimension and the nested cubble needs to be switched to the long
+cubble by \texttt{stretch()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> tmax <- tmax %>% 
 +   stretch() %>%
-+   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) %>%
++   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) 
+\end{CodeInput}
+\end{CodeChunk}
+
+A monthly average is used for both periods to smooth the maximum
+temperature and it is again an operation on the time dimension:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> tmax <- tmax %>%
 +   mutate(month = lubridate::month(date), 
 +          group = as.factor(ifelse(lubridate::year(date) > 2015, 
 +                                   "2016 ~ 2020", "1971 ~ 1975"))) %>%
@@ -549,19 +563,16 @@ R> tmax <- tmax %>%
 \end{CodeInput}
 \end{CodeChunk}
 
-A data quality issue with GHCN data is that while the first and last
-year of each series is provided, years missing in this period is not
-reported. There are a few stations which don't have records during 1971
-- 1975 and these stations are filtered out by examining whether the
-summarised \texttt{tmax} has a total of 24 months. This is again a
-station-wise operation and is operated in the nested form, which is
-switched to from the long form by \texttt{tamp()}:
+There are a few stations which don't have records during 1971 - 1975 and
+further investigation shows that while the first and last year of each
+series is recorded, the missing years in this period is not reported.
+These stations are filtered out by examining whether the summarised time
+series has a total of 24 months. The long cubble needs to be switched to
+the nested form for this spatial operation using \texttt{tamp()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax %>% 
-+   tamp() %>%
-+   filter(nrow(ts) == 24) 
+R> tmax <- tmax %>% tamp() %>% filter(nrow(ts) == 24) 
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -572,18 +583,30 @@ form with \texttt{migrate()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax %>%   
-+   stretch() %>%
-+   migrate(latitude, longitude)
+R> tmax <- tmax %>% stretch() %>% migrate(latitude, longitude)
 \end{CodeInput}
 \end{CodeChunk}
 
-Figure \ref{fig:basic-manip} shows the glyph map made with the data
-after the wangling above. One issue with this map is that the similar
-pattern shown from a few nearby stations around Sydney (151E, 34S) and
-New castle (152E, 33S) can be distracting. Aggregation is a useful
-technique to observe the general pattern of a collection of series and
-will be the topic of the next example.
+\texttt{tmax} can then be supplied to \texttt{geom\_glyph()} for the
+glyph map in Figure \ref{fig:basic-manip} with a station inset on the
+top left corner:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> nsw_vic <- ozmaps::abs_ste %>% 
++   filter(NAME %in% c("Victoria", "New South Wales"))
+R> 
+R> ggplot() + 
++   geom_sf(data = nsw_vic, 
++           fill = "transparent", color = "grey", linetype = "dotted") + 
++   geom_glyph(data = tmax, 
++              aes(x_major = longitude, x_minor = month, 
++                  y_major = latitude, y_minor = tmax,
++                  group = interaction(id, group), color = group),
++              width = 1, height = 0.5) +
++   ...
+\end{CodeInput}
+\end{CodeChunk}
 
 \begin{CodeChunk}
 \begin{figure}
@@ -592,7 +615,7 @@ will be the topic of the next example.
 
 }
 
-\caption[Glyph map of the mean maximum temperature by month for Victoria and New South Wales weather stations]{Glyph map of the mean maximum temperature by month for Victoria and New South Wales weather stations. On the top left corner is a detailed legend for station Cobar highlighted in the black box. Compared to 1971 - 1975,  the period 2016 - 2020 sees an increase of mean maximum temperature in spring and summer in Australia (end and beginning of the year). A larger increase during the first three months of the year is observed at stations with a lower latitude.}\label{fig:basic-manip}
+\caption[A glyph map of the mean maximum temperature by month for Victoria and New South Wales weather stations in Australia]{A glyph map of the mean maximum temperature by month for Victoria and New South Wales weather stations in Australia. On the top left corner is an insetted plot of station Cobar, which is highlighted in the black box.}\label{fig:basic-manip}
 \end{figure}
 \end{CodeChunk}
 
@@ -600,36 +623,27 @@ will be the topic of the next example.
 \subsection{Australia precipitation pattern in
 2020}\label{australia-precipitation-pattern-in-2020}}
 
-There are 639 stations that record daily precipitation in Australia and
-these series will overlay on top of each other in a glyph map.
+In the previous example, there has already been some overlapping of the
+glyphs for a few stations near (151E, 34S) and (152E, 33S) and this will
+be a problem when mapping more stations in the national level.
 Aggregation can be helpful to group series into clusters before
 visualising the cluster with glyph map. This example shows how to
-organise data at both level with the cubble function
-\texttt{switch\_key()}.
+organise data at both level with \texttt{switch\_key()}. The dataset
+used is \texttt{weatherdata::climate\_full}, which records daily
+precipitation and maximum/ minimum temperature for 639 stations in
+Australia from 2016 to 2020.
 
 A simple kmean algorithm based on the distance matrix is used here to
 create 20 clusters. This creates \texttt{station\_nested} as a station
-level nested cubble with a cluster column indicating which group each
+level nested cubble with a cluster column indicating the group each
 station belongs to. More complex algorithms can be used for other
 problem, as long as there is a mapping from each station to a cluster.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> station_nested
+R> station_nested <- weatherdata::climate_full %>% 
++   mutate(cluster = ...)
 \end{CodeInput}
-\begin{CodeOutput}
-# cubble:   id [639]: nested form
-# bbox:     [113.53, -43.66, 153.64, -10.05]
-# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name             wmo_id ts               cluster
-  <chr>       <dbl> <dbl> <dbl> <chr>             <dbl> <list>             <int>
-1 ASN00001006 -15.5  128.   3.8 wyndham aero      95214 <tibble [1,827 ~       3
-2 ASN00001007 -13.8  126.   6   troughton island  94102 <tibble [1,827 ~       3
-3 ASN00001018 -16.4  126. 546   mount elizabeth   94211 <tibble [1,460 ~      16
-4 ASN00001019 -14.3  127.  23   kalumburu         94100 <tibble [1,827 ~       3
-5 ASN00001020 -14.1  126.  51   truscott          95101 <tibble [1,827 ~       3
-# ... with 634 more rows
-\end{CodeOutput}
 \end{CodeChunk}
 
 To create a group level cubble, use \texttt{switch\_key()} with the new
@@ -734,17 +748,17 @@ The output from matching is also a cubble, with additional column
 \begin{CodeOutput}
 # cubble:   id [8]: nested form
 # bbox:     [144.52, -37.73, 146.06, -36.55]
-# temporal: date [date], prcp [dbl]
-  id          name                lat  long ts         type   dist group n_match
-  <chr>       <chr>             <dbl> <dbl> <list>     <chr> <dbl> <int>   <int>
-1 405234      SEVEN CREEKS @ D~ -36.9  146. <tibble [~ river  6.15     5      21
-2 ASN00082042 strathbogie       -36.8  146. <tibble [~ clim~  6.15     5      21
-3 404207      HOLLAND CREEK @ ~ -36.6  146. <tibble [~ river  8.54    10      21
-4 ASN00082170 benalla airport   -36.6  146. <tibble [~ clim~  8.54    10      21
-5 230200      MARIBYRNONG RIVE~ -37.7  145. <tibble [~ river  6.17     6      19
-6 ASN00086038 essendon airport  -37.7  145. <tibble [~ clim~  6.17     6      19
-7 406213      CAMPASPE RIVER @~ -37.0  145. <tibble [~ river  1.84     1      18
-8 ASN00088051 redesdale         -37.0  145. <tibble [~ clim~  1.84     1      18
+# temporal: date [date], matched_var [dbl]
+  id          name                lat  long type    dist group ts        n_match
+  <chr>       <chr>             <dbl> <dbl> <chr>  <dbl> <int> <list>      <int>
+1 405234      SEVEN CREEKS @ D~ -36.9  146. river   6.15     5 <tibble ~      21
+2 404207      HOLLAND CREEK @ ~ -36.6  146. river   8.54    10 <tibble ~      21
+3 ASN00082042 strathbogie       -36.8  146. clima~  6.15     5 <tibble ~      21
+4 ASN00082170 benalla airport   -36.6  146. clima~  8.54    10 <tibble ~      21
+5 230200      MARIBYRNONG RIVE~ -37.7  145. river   6.17     6 <tibble ~      19
+6 ASN00086038 essendon airport  -37.7  145. clima~  6.17     6 <tibble ~      19
+7 406213      CAMPASPE RIVER @~ -37.0  145. river   1.84     1 <tibble ~      18
+8 ASN00088051 redesdale         -37.0  145. clima~  1.84     1 <tibble ~      18
 \end{CodeOutput}
 \end{CodeChunk}
 

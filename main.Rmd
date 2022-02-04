@@ -33,14 +33,15 @@ title:
   # For running headers, if needed
   # short:     "\\pkg{foo}: A Capitalized Title"
 abstract: >
-  The abstract of the article.
+  Sptio-temporal data naturally has two levels of observations: site and time level. [problem]. In this paper, a new data structure, `cubble`, is proposed for manipulating and visualising spatio-temporal data.
 keywords:
   # at least one keyword must be supplied
-  formatted: [spatio-temporal data,  "\\proglang{R}"]
-  plain:     [spatio-temporal data, R]
+  formatted: [spatio-temporal data,  "\\proglang{R}", climate data]
+  plain:     [spatio-temporal data, R, climate data]
 preamble: >
   \usepackage{amsmath}
   \usepackage{array}
+  \usepackage{xcolor}
 output: rticles::jss_article
 bibliography: references.bib
 ---

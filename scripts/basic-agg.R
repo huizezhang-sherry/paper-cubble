@@ -48,30 +48,11 @@ p1 <- ggplot(data = smoother,
   geom_glyph(height = 2, width = 4) + 
   theme_void()
 
-# tas_latlong <- station_long %>% 
-#   filter(cluster == 7) %>% 
-#   switch_key(cluster) %>% 
-#   filter(prcp == max(prcp)) %>% 
-#   tamp()
-# 
-# tas_id <- tas_latlong %>% pull(id)
-# tas_long <- station_long %>% filter(id == tas_id)
-
-# p2 <- station_long %>%
-#   ggplot(aes(x = wk, y = prcp, group = id)) +
-#   geom_line(size = 0.1) +
-#   geom_smooth(se = FALSE, inherit.aes = FALSE, aes(x = wk, y = prcp)) + 
-#   geom_line(data = tas_long, color = "red") + 
-#   facet_wrap(vars(cluster), scales = "free_y", ncol = 4) +
-#   theme_bw()
-
-
 p3 <- plot_map(state_map) +
   geom_point(data = station_nested, aes(x = long, y = lat), size = 0.5) +
   ggforce::geom_mark_hull(data = cluster_nested %>% tidyr::unnest(hull),
                           expand = 0, radius = 0,
                           aes(x = long, y = lat, group = cluster)) 
-  #geom_point(data = tas_latlong, aes(x = long, y = lat), col = "red")
 
 (p1 | p3) + plot_annotation(tag_levels = 'A')
 ggsave(filename = "figures/basic-agg.png", width = 15, height = 7)

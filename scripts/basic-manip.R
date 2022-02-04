@@ -22,20 +22,22 @@ tmax <- weatherdata::historical_tmax %>%
   stretch() %>%
   migrate(latitude, longitude)
 
-gly <- glyphs(tmax, "longitude", "month", "latitude", "tmax",
-              height = 0.5, width = 1)
 
 nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria", "New South Wales"))
 
 p1 <- ggplot() + 
   geom_sf(data = nsw_vic, fill = "transparent", color = "grey", linetype = "dotted") + 
-  geom_path(data = gly, 
-            aes(gx, gy, group = interaction(id, group), color = group)) +
+  geom_glyph(data = tmax, 
+             aes(x_major = longitude, x_minor = month, 
+                 y_major = latitude, y_minor = tmax,
+                 group = interaction(id, group), color = group),
+             width = 1, height = 0.5) +
   scale_color_brewer(palette = "Dark2") + 
   theme_bw() + 
   coord_sf(xlim = c(141, 154)) + 
   theme(legend.position = "bottom") +
   labs(x = "Longitude", y = "Latitude")
+
 
 #################
 # inset

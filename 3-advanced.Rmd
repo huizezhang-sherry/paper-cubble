@@ -7,15 +7,15 @@ output: pdf_document
 
 ## Hierarchical structure
 
-Spatial locations can have further grouping structure either in nature (i.e. countries are nested in continents), or calculated by some clustering algorithms. Rather than investigate the read from individual locations, group character summarised from multiple locations can give a clearer picture of the local dynamic. In cubble, `switch_key()` can be used to create a new level of grouping of spatial location by specifying a clustering variable. Figure \ref{fig:illu-hier} illustrates the relationship of cubbles at site and cluster level, in both the long and nested form. By specifying `cluster_nested <- station_nested %>% switch_key(key = cluster)`, the cubble re-defines the cubble key from `id` in `station_nested` to `cluster` in `cluster_nested`. All the spatial variables variant to `cluster` are now nested into a `.val` column and cluster level variables can be computed in the same fashion as station level variables in `station_nested`. Following the same principal of `stretch`, the long form cluster level cubble expands the time series variables with both indices: `cluster` and `id`. All the cluster level variables are stored separately for recovering the nested from from the long form.
+Spatial locations can have grouping structure that is either inherent to the data  (i.e. countries are nested in continents), or formed by clustering. Rather than analysing variables in the site level, summarised variables in the cluster level can give a clearer picture of \textcolor{red}{local dynamic}. In cubble, `switch_key()` can be used to create a new level of grouping of spatial location by specifying a clustering variable. Figure \ref{fig:illu-hier} illustrates the relationship of cubbles at site and cluster level, in both the long and nested form. \textcolor{red}{unify the use of site/ station}. By specifying `cluster_nested <- station_nested %>% switch_key(key = cluster)`, the cubble re-defines the cubble key from `id` in `station_nested` to `cluster` in `cluster_nested`. All the spatial variables variant to `cluster` are now nested into a `.val` column and cluster level variables can be computed in the same fashion as station level variables in `station_nested`. Following the same principal of `stretch`, the long form cluster level cubble expands the time series variables with both indices: `cluster` and `id`. All the cluster level variables are stored separately for recovering the nested from from the long form.
 
-```{r illu-hier, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "Relationship between the station and cluster level cubble in both long and nested form."}
+```{r illu-hier, echo = FALSE, fig.align="center",out.height="40%", out.width = "100%", fig.cap = "Relationship between the station and cluster level cubble in both long and nested form."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
 ```
 
 ## Data fusion and matching
 
-To be a valid pair of matching, the matched pair from different data sources need to
+\textcolor{red}{refine the beginning.} To be a valid pair of matching, the matched pair from different data sources need to
 
   - be spatially close to each other, and 
   - have similar temporal movement
@@ -42,9 +42,9 @@ This functionality can be seen as a matching [@stuart2010matching; @mcintosh2018
 
 <!-- While many graphic implementations present worked examples to illustrate the usage of the package, few documents the underlying pipeline that transforms the raw data step-by-step to the final view on the screen. There have been some early work in building the data pipeline for (interactive) graphics [@buja1988elements; @buja1996interactive;  @sutherland2000orca] and more recent discussions include @wickham2009plumbing, @xie2014reactive, and @cheng2016enabling. -->
 
-The cubble structure fits in naturally with the interactive graphic pipeline discussed in the literature [@buja1988elements; @buja1996interactive;  @sutherland2000orca; @xie2014reactive; @cheng2016enabling]. Diagram \ref{fig:illu-interactive} illustrates how linking works with the two forms in a cubble, where a time series plot is created with the long cubble and a map is created with the nested cubble. When a user action is captured from the map, the site will be activated in the nested cubble. Then, the nested cubble will communicate to the long cubble to activate all the observations with the same `id`. The long cubble will then highlight the  activated series in the time series plot. 
+Cubble fits in naturally with the interactive graphic pipeline discussed in the literature [@buja1988elements; @buja1996interactive;  @sutherland2000orca; @xie2014reactive; @cheng2016enabling]. Diagram \ref{fig:illu-interactive} illustrates how linking works from the map to the time series with the two forms of a cubble. The map and time series plot is associated with the nested or long cubble respectively and when a user action is captured on the map, the site will be activated in the nested cubble (left). The nested cubble will communicate to the long cubble to activate all the observations with the same `id` (middle). The long cubble will then highlight the activated series in the time series plot (right). 
 
-The linking is also available from the time series plot to the map. The selection on the time series is through selecting the point on the time series and once a point is selected, it will be activated in the long cubble. All the observations that share the same `id`,  either in the long and nested cubble, are then activated. This includes other points in the same time series in the long cubble and the corresponding observation of site in the nested cubble. These activated observations will then being reflected in the updated plots and Diagram \ref{fig:illu-interactive-2} in the Appendix illustrates this process. 
+The linking is also available from the time series plot to the map. The selection(s) on the time series is through selecting the point(s) on the time series and once a point is selected, it will be activated in the long cubble. All the observations that share the same `id` are then activated and this includes other points in the same time series in the long cubble and the corresponding observation of site in the nested cubble. These activated observations will then being reflected in the updated plots and Diagram \ref{fig:illu-interactive-2} in the Appendix illustrates this process. 
 
 ```{r illu-interactive, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "demon interactivity"}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
@@ -52,9 +52,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Glyph map
 
-Glyph map [@Wickham2012-yr] plots the time series as single glyph on the map. 
-<!-- Variation of glyph maps has been developed to visualise uncertainty in **Visumap** [@Lucchesi2021] and deal with irregular local grid [@Beecham2021-vk].  -->
-In \proglang{R}, `GGally` implements the glyph map through the `glyphs()` function, which outputs a data frame with calculated position (`gx`, `gy`, `gid`) of each point on the time series given the major and minor xy variable using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into `ggplot` to create the glyph map: 
+Glyph map [@Wickham2012-yr] plots the time series as single glyph on the map and in \proglang{R}, `GGally` implements the glyph map through the `glyphs()` function. The function construct a data frame with calculated position (`gx`, `gy`, `gid`) of each point on the time series using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into `ggplot` to create the glyph map as: 
 
 ```{r eval = FALSE, echo = TRUE}
 library(ggplot2)
@@ -66,7 +64,7 @@ ggplot(gly, aes(gx, gy, group = gid)) +
   geom_path() 
 ```
 
-While this calculation can be seen as part of the `setup_data()` in a `ggproto`. A re-implementation of the glyph map as `GeomGlyph` has been made in `cubble` to create the glyph map with `geom_glyph`:
+A re-implementation of the glyph map as a ggproto `GeomGlyph` has been made in the `cubble` package so that the glyph map can be created with `geom_glyph()`:
 
 ```{r eval = FALSE, echo = TRUE}
 ggplot(data = data) +
@@ -74,4 +72,4 @@ ggplot(data = data) +
                  y_major = ..., y_minor = ...))
 ```
 
-Polar glyph map can be specify as a parameter, `polar = TRUE`, in the `geom_glyph()`, along with `width` and `height` in either absolute or relative value. Global and local scale can also be controlled by the parameter `global_rescale`, which default to `TRUE`. Reference box and line can be added with separate `geom_glyph_box()` and `geom_glyph_line()`.
+Polar glyph map can be specify as a parameter, `polar = TRUE`, in the `geom_glyph()`, along with `width` and `height` in either absolute or relative value. Global and local scale can be controlled by the parameter `global_rescale`, which default to `TRUE` for global scaling. Reference box and line can be added with separate `geom_glyph_box()` and `geom_glyph_line()`.
