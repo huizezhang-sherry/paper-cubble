@@ -33,8 +33,8 @@ abstract: >
   Sptio-temporal data naturally has two levels of observations: site and time level. [problem]. In this paper, a new data structure, `cubble`, is proposed for manipulating and visualising spatio-temporal data.
 keywords:
   # at least one keyword must be supplied
-  formatted: [spatio-temporal data,  "\\proglang{R}", climate data]
-  plain:     [spatio-temporal data, R, climate data]
+  formatted: [spatio temporal,  "\\proglang{R}", climate weather station, data analysis]
+  plain:     [spatio temporal, R, climate weather station, data analysis]
 preamble: >
   \usepackage{amsmath}
   \usepackage{array}
