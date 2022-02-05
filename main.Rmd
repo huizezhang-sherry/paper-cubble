@@ -18,7 +18,7 @@ author:
     # email:  ursula.laa@boku.ac.at
   - name: Nicolas Langrené
     # department: 34 Village Street, Docklands VIC 3008 Australia
-    affiliation: 'CSIRO Data61 \AND'
+    affiliation: 'BNU-HKBU United International College \AND'
     # location: Melbourne, Australia
     # email: nicolas.langrene@csiro.au
   - name: Patricia Menéndez
