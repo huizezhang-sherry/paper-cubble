@@ -17,7 +17,7 @@ author:
     email:  ursula.laa@boku.ac.at
   - name: Nicolas Langrené
     affiliation: 'BNU-HKBU United International College \AND'
-    addresss: 2000 Jintong Road, Tangjiawan, Zhuhai, Guangdong Province, China
+    address: 2000 Jintong Road, Tangjiawan, Zhuhai, Guangdong Province, China
     email: nicolas@langrene.com
   - name: Patricia Menéndez
     affiliation: 'Monash University \AND'
