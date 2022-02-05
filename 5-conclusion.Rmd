@@ -4,10 +4,12 @@ output: pdf_document
 ---
 # Conclusion
 
+This paper describes the \proglang{R} package `cubble` for manipulating and visualising spatio-temporal data. A new data structure, that builds from the `rowwise_df` and `grouped_df` class in the tidyverse ecosystem, is proposed to connect the spatial and temporal variables in the spatio-temporal data. This design frees the data analysts from spending time on organising variables of different observational units. The data structure is also flexible to the techniques and packages analysts use to analyse the data, for example, in the matching example in section 4.3, users are free to use algorithms from another pacakge to cluster stations. Further development and maintenance of the package involves responding to changes in the tidyverse packages that `cubble` imports, in particular, `tibble`, `tidyr`, and `dplyr`. Another area for further development is to extend `cubble` to other spatial objects other than points.
+
 
 # Acknowledgement
 
-This work is funded by the Commonwealth Scientific and Industrial Research Organisation (CSIRO) Data61 Scholarship and started while Nicolas Langrené was affiliated with CSIRO's Data61. The article is created using `knitr` [@knitr] and `rmarkdown` [@rmarkdown] in R. The source code for reproducing this paper can be found [here](https://github.com/huizezhang-sherry/paper-cubble).
+This work is funded by the Commonwealth Scientific and Industrial Research Organisation (CSIRO) Data61 Scholarship and started while Nicolas Langrené was affiliated with CSIRO's Data61. The article is created using `knitr` [@knitr] and `rmarkdown` [@rmarkdown] in R. The source code for reproducing this paper can be found at: https://github.com/huizezhang-sherry/paper-cubble.
 
 
 

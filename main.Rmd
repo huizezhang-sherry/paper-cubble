@@ -2,30 +2,27 @@
 documentclass: jss
 author:
   - name: H. Sherry Zhang
-    # department: Department of Econometrics and Business Statistics
     affiliation: Monash University
-    #location: Melbourne, Australia
+    address: 21 Chancellors Walk, Clayton VIC 3800 Australia
+    department: Department of Econometrics and Business Statistics
     email: \email{huize.zhang@monash.edu}
   - name: Dianne Cook
-    # department: Department of Econometrics and Business Statistics
     affiliation: 'Monash University \AND'
+    address: 21 Chancellors Walk, Clayton VIC 3800 Australia
     # location: Melbourne, Australia
-    # email:  dicook@monash.edu
+    email:  dicook@monash.edu
   - name: Ursula Laa
-    # department: Institute of Statistics
     affiliation: 'University of Natural Resources and Life Sciences \AND'
-    # location: Vienna, Austria
-    # email:  ursula.laa@boku.ac.at
+    address: Gregor-Mendel-Straße 33, 1180 Wien, Austria
+    email:  ursula.laa@boku.ac.at
   - name: Nicolas Langrené
-    # department: 34 Village Street, Docklands VIC 3008 Australia
     affiliation: 'BNU-HKBU United International College \AND'
-    # location: Melbourne, Australia
-    # email: nicolas.langrene@csiro.au
+    addresss: 2000 Jintong Road, Tangjiawan, Zhuhai, Guangdong Province, China
+    email: nicolas@langrene.com
   - name: Patricia Menéndez
-    # department: Department of Econometrics and Business Statistics
     affiliation: 'Monash University \AND'
-    # location: Melbourne, Australia
-    # email:  patricia.menendez@monash.edu
+    address: 21 Chancellors Walk, Clayton VIC 3800 Australia
+    email:  patricia.menendez@monash.edu
 title:
   formatted: "\\pkg{cubble}: An R Package for Structuring Spatio-temporal Data"
   # If you use tex in the formatted title, alsoge supply version without
