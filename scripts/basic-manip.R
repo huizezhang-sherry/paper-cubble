@@ -7,10 +7,9 @@ tmax <- weatherdata::historical_tmax %>%
   # filter out observations in between 1971-1975 and 2016 - 2020
   stretch() %>%
   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) %>%
-  mutate(month = lubridate::month(date), 
+  group_by(month = lubridate::month(date), 
          group = as.factor(ifelse(lubridate::year(date) > 2015, 
                                   "2016 ~ 2020", "1971 ~ 1975"))) %>%
-  group_by(month, group) %>%
   # summarise tmax into monthly mean for both periods
   summarise(tmax = mean(tmax, na.rm = TRUE)) %>% 
   

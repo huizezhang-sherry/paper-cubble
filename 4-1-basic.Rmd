@@ -7,16 +7,16 @@ output: html_document
 
 ## Australia historical maximum temperature
 
-Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world and the dataset `weatherdata::historical_tmax` extracts the maximum temperature for `r nrow(weatherdata::historical_tmax)` Australian stations. All the stations start recording from year `r range(weatherdata::historical_tmax$first_year)[2]` with the longest back to year `r range(weatherdata::historical_tmax$first_year)[1]`. The data `historical_tmax` is already presented as a cubble, with `id` as the key, `date` as the index, and `c("longitude", "latitude")` as the coordinates. This example compares the maximum temperature in two periods: 1971 - 1975 and 2016 - 2020 for stations in Victoria and New South Wales.
+Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world and the dataset `weatherdata::historical_tmax` extracts the maximum temperature for `r nrow(weatherdata::historical_tmax)` Australian stations. All the stations start recording from year `r range(weatherdata::historical_tmax$first_year)[2]` with the longest back to year `r range(weatherdata::historical_tmax$first_year)[1]`. The data `historical_tmax` is already presented as a cubble, with `id` as the key, `date` as the index, and `c(longitude, latitude)` as the coordinates. This example compares the maximum temperature in two periods: 1971 - 1975 and 2016 - 2020 for stations in Victoria and New South Wales.
 
-Stations in the two states can be subsetted on the station number: Australia GHCN station number starts with "ASN00" and followed by the [Bureau of Meteorology (BOM) station number](http://www.bom.gov.au/climate/cdo/about/site-num.shtml), where the 2nd and 3rd digit (7th and 8th in the GHCN number) define the state of the station. New South Wales stations start from 46 to 75 and Victoria stations follow from 76 to 90. Filtering Victoria and New South Wales stations is an operation in the spatial dimension and hence uses the nested form: 
+Stations in the two states can be subsetted by the station number: Australia GHCN station number starts with "ASN00" and followed by the [Bureau of Meteorology (BOM) station number](http://www.bom.gov.au/climate/cdo/about/site-num.shtml), where the 2nd and 3rd digit (7th and 8th in the GHCN number) define the state of the station. New South Wales stations start from 46 to 75 and Victoria stations follow from 76 to 90. Filtering Victoria and New South Wales stations is an operation in the spatial dimension and hence uses the nested form: 
 
 ```{r eval = FALSE, echo = TRUE}
 tmax <- weatherdata::historical_tmax %>%
   filter(between(stringr::str_sub(id, 7, 8), 46, 90))
 ```
 
-Filtering for the period 1971: 1975 and 2016:2020 is an operation on the time dimension and the nested cubble needs to be switched to the long cubble by `stretch()`: 
+Filtering for the period 1971 ~ 1975 and 2016 ~ 2020 is an operation on the time dimension and the nested cubble needs to be switched to the long cubble by `stretch()`: 
 
 ```{r eval=  FALSE, echo = TRUE}
 tmax <- tmax %>% 
@@ -28,10 +28,9 @@ A monthly average is used for both periods to smooth the maximum temperature and
 
 ```{r eval=  FALSE, echo = TRUE}
 tmax <- tmax %>%
-  mutate(month = lubridate::month(date), 
+  group_by(month = lubridate::month(date), 
          group = as.factor(ifelse(lubridate::year(date) > 2015, 
                                   "2016 ~ 2020", "1971 ~ 1975"))) %>%
-  group_by(month, group) %>%
   summarise(tmax = mean(tmax, na.rm = TRUE))
 ```  
 

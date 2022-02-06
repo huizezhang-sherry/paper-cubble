@@ -130,8 +130,6 @@ features introduced in the previous two sections with climate and
 hydrology data. An example on how cubble handle Netcdf data is also
 provided. Section 5 concludes the paper.
 
-\newpage
-
 \hypertarget{the-cubble-package}{%
 \section{The cubble package}\label{the-cubble-package}}
 
@@ -199,7 +197,6 @@ time stamp while not dropping information from spatial variables.
 \subsection{Create a cubble in the nested
 form}\label{create-a-cubble-in-the-nested-form}}
 
-\textcolor{red}{To use functionalities from cubble, data analysts first need to create a cubble.}
 \texttt{as\_cubble()} creates a \pkg{cubble} by supplying the three key
 components: \texttt{key} as the spatial identifier; \texttt{index} as
 the temporal identifier; and a vector of \texttt{coords} in the order of
@@ -211,7 +208,7 @@ creating a cubble: \newline
 \begin{CodeChunk}
 \begin{CodeInput}
 R> cubble_nested <- cubble::climate_flat %>%
-+   as_cubble(key = id, index = date, coords = c("long", "lat"))
++   as_cubble(key = id, index = date, coords = c(long, lat))
 R> cubble_nested
 \end{CodeInput}
 \begin{CodeOutput}
@@ -265,8 +262,8 @@ R> cubble_long
 \end{CodeChunk}
 
 Notice here that the third line in the header now shows the name and
-type of spatial variables
-(\texttt{lat\ {[}dbl{]},\ long\ {[}dbl{]},\ elev\ {[}dbl{]},\ name\ {[}chr{]},\ wmo\_id\ {[}dbl{]}}).
+type of spatial variables:
+\texttt{lat\ {[}dbl{]},\ long\ {[}dbl{]},\ elev\ {[}dbl{]},\ name\ {[}chr{]},\ wmo\_id\ {[}dbl{]}}.
 
 \hypertarget{tamp-a-long-cubble-back-to-the-nested-form}{%
 \subsection{Tamp a long cubble back to the nested
@@ -301,11 +298,16 @@ R> cubble_back
 \subsection{Migrate spatial variables to a long
 cubble}\label{migrate-spatial-variables-to-a-long-cubble}}
 
-\textcolor{red}{As a final data output for modelling or visualisation, spatio-temporal data is usually expected to be in a single table.}
-Function \texttt{migrate()} moves the spatial variables from the
-\texttt{spatial} attribute into the long cubble:
+Some functions require time invariant variables to be in the same table
+as the time varying ones. In cubble, this can be done through
+\texttt{migrate()}, which moves the time invariant variables into the
+long cubble:
 
 \begin{CodeChunk}
+\begin{CodeInput}
+R> cubble_mig <- cubble_long %>% migrate(long, lat)
+R> cubble_mig
+\end{CodeInput}
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
@@ -321,27 +323,92 @@ Function \texttt{migrate()} moves the spatial variables from the
 \end{CodeOutput}
 \end{CodeChunk}
 
-Building from an underlying \texttt{tbl\_df} structure, it is natural to
-implement methods available in \texttt{dplyr} to \texttt{cubble}.
-Supported methods in the \texttt{cubble} with \texttt{dplyr} generics
-includes:
+Notice that these added time invariant variables will not be remembered
+the cubble and will disappear if switched to the nested form and then
+switched back. Hence they should most likely been used at the last step
+of the analysis:
 
-\begin{center}
-\begin{tabular}{ | m{5em} | m{15cm}| } 
-basics & \textbf{mutate}, \textbf{filter}, \textbf{summarise}, \textbf{select}, \textbf{arrange}, \textbf{rename}, \textbf{left\_join} \\
-grouping &  \textbf{group\_by}, \textbf{ungroup}\\
-slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample}, \textbf{slice\_min} and \textbf{slice\_max} \\
-\end{tabular}
-\end{center}
+\begin{CodeChunk}
+\begin{CodeInput}
+R> cubble_mig %>% tamp() %>% stretch()
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:  date, id [5]: long form
+# bbox:    [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
+# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id [dbl]
+  id          date        prcp  tmax  tmin
+  <chr>       <date>     <dbl> <dbl> <dbl>
+1 ASN00009021 2020-01-01     0  31.9  15.3
+2 ASN00009021 2020-01-02     0  24.9  16.4
+3 ASN00009021 2020-01-03     6  23.2  13  
+4 ASN00009021 2020-01-04     0  28.4  12.4
+5 ASN00009021 2020-01-05     0  35.3  11.6
+# ... with 1,825 more rows
+\end{CodeOutput}
+\end{CodeChunk}
 
-\pkg{cubble} is also compatible with \pkg{tsibble} where each element
-list-column in the nested form can be a \texttt{tbl\_ts} object.
-\textcolor{red}{Duplicates and gaps should be first checked before structuring the data into a cubble.}
-If the input data is a \pkg{tsibble} object, the long form cubble is
-also a \pkg{tsibble} where users can directly apply time series
-operations. \textcolor{red}{more experiment with tsibble}
+\hypertarget{compatibility-with-existing-packages}{%
+\subsection{Compatibility with existing
+packages}\label{compatibility-with-existing-packages}}
 
-\newpage
+Building from an \texttt{tbl\_df} class, \texttt{cubble} has implemented
+methods for \texttt{dplyr} generics, which includes:
+
+\begin{itemize}
+\tightlist
+\item
+  basic: mutate, filter, summarise, select, arrange, rename, left\_join
+\item
+  grouping: group\_by, ungroup
+\item
+  slice family: slice\_head, slice\_tail, slice\_sample, slice\_min,
+  slice\_max
+\end{itemize}
+
+\pkg{cubble} is also compatible with \pkg{tsibble}. When creating a
+cubble from a tsibble, Only the \texttt{coords} argument need to be
+specified. In the created nested form, each element of the list-column
+\texttt{ts} is of \texttt{tbl\_ts} class so that existing operations on
+the tsibble class can still be applied:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> # casting a tsibble into cubble
+R> dt <- climate_flat %>% 
++   tsibble::as_tsibble(key = id, index = date) %>% 
++   cubble::as_cubble(coords = c(long, lat))
+R> dt
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:   id [5]: nested form
+# bbox:     [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
+# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+  id            lat  long  elev name           wmo_id ts                
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tbl_ts [366 x 4]>
+2 ASN00010311 -31.9  117. 179   york            94623 <tbl_ts [366 x 4]>
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tbl_ts [366 x 4]>
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tbl_ts [366 x 4]>
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tbl_ts [366 x 4]>
+\end{CodeOutput}
+\begin{CodeInput}
+R> # add station-based features in the nested form.
+R> dt %>% 
++   mutate(fabletools::features(ts, tmax, list(tmax_mean = mean, tmax_var = var)))
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:   id [5]: nested form
+# bbox:     [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
+# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+  id            lat  long  elev name           wmo_id ts      tmax_mean tmax_var
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>      <dbl>    <dbl>
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tbl_t~      25.7    38.6 
+2 ASN00010311 -31.9  117. 179   york            94623 <tbl_t~      26.2    51.1 
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tbl_t~      23.7    45.4 
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tbl_t~      33.1     3.02
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tbl_t~      34.6    24.7 
+\end{CodeOutput}
+\end{CodeChunk}
 
 \hypertarget{advanced-features-considerations}{%
 \section{Advanced features/
@@ -353,13 +420,12 @@ considerations}\label{advanced-features-considerations}}
 Spatial locations can have grouping structure that is either inherent to
 the data (i.e.~countries are nested in continents), or formed by
 clustering. Rather than analysing variables in the site level,
-summarised variables in the cluster level can give a clearer picture of
-\textcolor{red}{local dynamic}. In cubble, \texttt{switch\_key()} can be
-used to create a new level of grouping of spatial location by specifying
-a clustering variable. Figure \ref{fig:illu-hier} illustrates the
-relationship of cubbles at site and cluster level, in both the long and
-nested form. \textcolor{red}{unify the use of site/ station}. By
-specifying
+summarised variables in the cluster level can give a crisper picture of
+local areas. In cubble, \texttt{switch\_key()} can be used to create a
+new level of grouping of spatial location by specifying a clustering
+variable. Figure \ref{fig:illu-hier} illustrates the relationship of
+cubbles at station and cluster level, in both the long and nested form.
+By specifying
 \texttt{cluster\_nested\ \textless{}-\ station\_nested\ \%\textgreater{}\%\ switch\_key(key\ =\ cluster)},
 the cubble re-defines the cubble key from \texttt{id} in
 \texttt{station\_nested} to \texttt{cluster} in
@@ -527,8 +593,6 @@ default to \texttt{TRUE} for global scaling. Reference box and line can
 be added with separate \texttt{geom\_glyph\_box()} and
 \texttt{geom\_glyph\_line()}.
 
-\newpage
-
 \hypertarget{examples}{%
 \section{Examples}\label{examples}}
 
@@ -543,11 +607,11 @@ for 236 Australian stations. All the stations start recording from year
 1969 with the longest back to year 1859. The data
 \texttt{historical\_tmax} is already presented as a cubble, with
 \texttt{id} as the key, \texttt{date} as the index, and
-\texttt{c("longitude",\ "latitude")} as the coordinates. This example
+\texttt{c(longitude,\ latitude)} as the coordinates. This example
 compares the maximum temperature in two periods: 1971 - 1975 and 2016 -
 2020 for stations in Victoria and New South Wales.
 
-Stations in the two states can be subsetted on the station number:
+Stations in the two states can be subsetted by the station number:
 Australia GHCN station number starts with ``ASN00'' and followed by the
 \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Bureau of
 Meteorology (BOM) station number}, where the 2nd and 3rd digit (7th and
@@ -563,9 +627,10 @@ R> tmax <- weatherdata::historical_tmax %>%
 \end{CodeInput}
 \end{CodeChunk}
 
-Filtering for the period 1971: 1975 and 2016:2020 is an operation on the
-time dimension and the nested cubble needs to be switched to the long
-cubble by \texttt{stretch()}:
+Filtering for the period 1971 \textasciitilde{} 1975 and 2016
+\textasciitilde{} 2020 is an operation on the time dimension and the
+nested cubble needs to be switched to the long cubble by
+\texttt{stretch()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -581,10 +646,9 @@ temperature and it is again an operation on the time dimension:
 \begin{CodeChunk}
 \begin{CodeInput}
 R> tmax <- tmax %>%
-+   mutate(month = lubridate::month(date), 
++   group_by(month = lubridate::month(date), 
 +          group = as.factor(ifelse(lubridate::year(date) > 2015, 
 +                                   "2016 ~ 2020", "1971 ~ 1975"))) %>%
-+   group_by(month, group) %>%
 +   summarise(tmax = mean(tmax, na.rm = TRUE))
 \end{CodeInput}
 \end{CodeChunk}

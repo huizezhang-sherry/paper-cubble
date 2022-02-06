@@ -74,20 +74,14 @@ library(patchwork)
 ```{r child = "1-intro.Rmd"}
 
 ```
-\newpage
 
 ```{r child = "2-the-cubble-pkg.Rmd"}
 
 ```
 
-\newpage
-
-
 ```{r child = "3-advanced.Rmd"}
 
 ```
-
-\newpage
 
 ```{r child = "4-1-basic.Rmd"}
 

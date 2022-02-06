@@ -21,15 +21,15 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Create a cubble in the nested form
 
-\textcolor{red}{To use functionalities from cubble, data analysts first need to create a cubble.} `as_cubble()` creates a \pkg{cubble} by supplying the three key components: `key` as the spatial identifier; `index` as the temporal identifier; and a vector of `coords` in the order of longitude first and then latitude. The naming of `key` and `index` follows the convention in the \pkg{tsibble} package. The cubble created by default is in the nested form. Below is an example of creating a cubble: \newline
+`as_cubble()` creates a \pkg{cubble} by supplying the three key components: `key` as the spatial identifier; `index` as the temporal identifier; and a vector of `coords` in the order of longitude first and then latitude. The naming of `key` and `index` follows the convention in the \pkg{tsibble} package. The cubble created by default is in the nested form. Below is an example of creating a cubble:
 
 ```{r echo = TRUE}
 cubble_nested <- cubble::climate_flat %>%
-  as_cubble(key = id, index = date, coords = c("long", "lat"))
+  as_cubble(key = id, index = date, coords = c(long, lat))
 cubble_nested
 ```
 
-There are a few information in the \pkg{cubble} header: the name of the `key` variable (`id`) and its number (5), bounding box (`[115.97, -32.94, 133.55, -12.42]`), and also the name of variable nested in the `ts` column with its type (`date [date], prcp [dbl], tmax [dbl], tmin [dbl]`). 
+There are a few information in the \pkg{cubble} header: the name of the `key` variable (`id`) and its number (5), bounding box (`[115.97, -32.94, 133.55, -12.42]`), and also the name of variable nested in the `ts` column with its type: `date [date], prcp [dbl], tmax [dbl], tmin [dbl]`. 
 
 ## Stretch a nested cubble into the long form
 
@@ -40,7 +40,7 @@ cubble_long <- cubble_nested %>% stretch(ts)
 cubble_long
 ```
 
-Notice here that the third line in the header now shows the name and type of spatial variables (`lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]`).
+Notice here that the third line in the header now shows the name and type of spatial variables: `lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]`.
 
 ## Tamp a long cubble back to the nested form
 
@@ -53,24 +53,42 @@ cubble_back
 
 ## Migrate spatial variables to a long cubble
 
-\textcolor{red}{As a final data output for modelling or visualisation, spatio-temporal data is usually expected to be in a single table.} Function `migrate()` moves the spatial variables from the `spatial` attribute into the long cubble:
+Some functions require time invariant variables to be in the same table as the time varying ones. In cubble, this can be done through `migrate()`, which moves the time invariant variables into the long cubble:
 
-```{r}
-cubble_long %>% migrate(long, lat)
+```{r echo = TRUE}
+cubble_mig <- cubble_long %>% migrate(long, lat)
+cubble_mig
 ```
 
-<!-- In the workflow described above, data objects come into cubble in the nested form, then various operations on the spatial and temporal dimension can go back and forth between the nested and long form, and finally, the data will come out of cubble in the long form for further modelling or visualisation. -->
+Notice that these added time invariant variables will not be remembered the cubble and will disappear if switched to the nested form and then switched back. Hence they should most likely been used at the last step of the analysis:
 
-Building from an underlying `tbl_df` structure, it is natural to implement methods available in `dplyr` to `cubble`. Supported methods in the `cubble` with `dplyr` generics includes:
-
-```{=tex}
-\begin{center}
-\begin{tabular}{ | m{5em} | m{15cm}| } 
-basics & \textbf{mutate}, \textbf{filter}, \textbf{summarise}, \textbf{select}, \textbf{arrange}, \textbf{rename}, \textbf{left\_join} \\
-grouping &  \textbf{group\_by}, \textbf{ungroup}\\
-slice family & \textbf{slice\_head}, \textbf{slice\_tail}, \textbf{slice\_sample}, \textbf{slice\_min} and \textbf{slice\_max} \\
-\end{tabular}
-\end{center}
+```{r echo = TRUE}
+cubble_mig %>% tamp() %>% stretch()
 ```
 
-\pkg{cubble} is also compatible with \pkg{tsibble} where each element list-column in the nested form can be a `tbl_ts` object. \textcolor{red}{Duplicates and gaps should be first checked before structuring the data into a cubble.} If the input data is a \pkg{tsibble} object, the long form cubble is also a \pkg{tsibble} where users can directly apply time series operations. \textcolor{red}{more experiment with tsibble}
+## Compatibility with existing packages
+
+Building from an `tbl_df` class, `cubble` has implemented methods for `dplyr` generics, which includes:
+
+  - basic: mutate, filter, summarise, select, arrange, rename, left_join
+  - grouping: group_by, ungroup
+  - slice family: slice_head, slice_tail, slice_sample, slice_min, slice_max
+
+\pkg{cubble} is also compatible with \pkg{tsibble}. When creating a cubble from a tsibble, Only the `coords` argument need to be specified: 
+
+```{r echo = TRUE}
+# casting a tsibble into cubble
+dt <- climate_flat %>% 
+  tsibble::as_tsibble(key = id, index = date) %>% 
+  cubble::as_cubble(coords = c(long, lat))
+dt
+```
+
+In the created nested form, each element of the list-column `ts` is of `tbl_ts` class so that existing operations on the tsibble class can still be applied:
+  
+```{r echo = TRUE}
+# add station-based features in the nested form.
+dt %>% 
+  mutate(fabletools::features(ts, tmax, list(tmax_mean = mean, tmax_var = var)))
+```
+
