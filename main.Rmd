@@ -4,7 +4,6 @@ author:
   - name: H. Sherry Zhang
     affiliation: Monash University
     address: 21 Chancellors Walk, Clayton VIC 3800 Australia
-    department: Department of Econometrics and Business Statistics
     email: \email{huize.zhang@monash.edu}
   - name: Dianne Cook
     affiliation: 'Monash University \AND'

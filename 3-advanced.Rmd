@@ -7,7 +7,7 @@ output: pdf_document
 
 ## Hierarchical structure
 
-Spatial locations can have grouping structure that is either inherent to the data  (i.e. countries are nested in continents), or formed by clustering. Rather than analysing variables in the site level, summarised variables in the cluster level can give a crisper picture of local areas. In cubble, `switch_key()` can be used to create a new level of grouping of spatial location by specifying a clustering variable. Figure \ref{fig:illu-hier} illustrates the relationship of cubbles at station and cluster level, in both the long and nested form. By specifying `cluster_nested <- station_nested %>% switch_key(key = cluster)`, the cubble re-defines the cubble key from `id` in `station_nested` to `cluster` in `cluster_nested`. All the spatial variables variant to `cluster` are now nested into a `.val` column and cluster level variables can be computed in the same fashion as station level variables in `station_nested`. Following the same principal of `stretch`, the long form cluster level cubble expands the time series variables with both indices: `cluster` and `id`. All the cluster level variables are stored separately for recovering the nested from from the long form.
+Spatial locations can have grouping structure that is either inherent to the data  (i.e. countries are nested in continents), or formed by clustering. Rather than analysing variables in the site level, summarised variables in the cluster level can give a crisper picture of local areas. In cubble, \code{switch_key()} can be used to create a new level of grouping of spatial location by specifying a clustering variable. Figure \ref{fig:illu-hier} illustrates the relationship of cubbles at station and cluster level, in both the long and nested form. By specifying \code{cluster_nested <- station_nested \%>\% switch_key(key = cluster)}, the cubble re-defines the cubble key from \code{id} in \code{station_nested} to \code{cluster} in \code{cluster_nested}. All the spatial variables variant to \code{cluster} are now nested into a \code{.val} column and cluster level variables can be computed in the same fashion as station level variables in \code{station_nested}. Following the same principal of \code{stretch}. the long form cluster level cubble expands the time series variables with both indices: \code{cluster} and \code{id}. All the cluster level variables are stored separately for recovering the nested from from the long form.
 
 ```{r illu-hier, echo = FALSE, fig.align="center",out.height="40%", out.width = "100%", fig.cap = "Relationship between the station and cluster level cubble in both long and nested form."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
@@ -20,7 +20,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
   - be spatially close to each other, and 
   - have similar temporal movement
   
-`match_sites()` from `cubble` matches data based on these two criteria. It first matches the two data sources spatially through computing the pairwise distance based on latitude and longitude. Pairs that pass the spatial matching are then matched temporally through computing the number of matched peaks within a fixed length window. Figure \ref{fig:illu-matching} illustrate this temporal matching in more details. Given two series `A` and `a`, 3 peaks have been picked in each series. An interval, with default length of 5, is constructed for each peak in series `A` and the peaks in series `a` are tested against whether they fall into the any of the intervals. In this illustration, there are 2 matches for these two series. Several arguments are available in `match_sites()` to fine-tune the matching: 
+`match_sites()} from \pkg{cubble} matches data based on these two criteria. It first matches the two data sources spatially through computing the pairwise distance based on latitude and longitude. Pairs that pass the spatial matching are then matched temporally through computing the number of matched peaks within a fixed length window. Figure \ref{fig:illu-matching} illustrate this temporal matching in more details. Given two series \code{A} and \code{a}. 3 peaks have been picked in each series. An interval, with default length of 5, is constructed for each peak in series \code{A} and the peaks in series \code{a} are tested against whether they fall into the any of the intervals. In this illustration, there are 2 matches for these two series. Several arguments are available in \code{match_sites()} to fine-tune the matching: 
 
 <!-- [can also think about matching as a form of correlation between series from a statistics point of view.] -->
 
@@ -28,11 +28,11 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 knitr::include_graphics("figures/illu-matching.png")
 ```
 
- - `spatial_n_keep`: the number of spatial match for each site to keep
- - `spatial_dist_max`: the maximum distance allowed for a matched pair 
- - `temporal_n_highest`: the number of peak used - 3 in the example above
- - `temporal_window`: the length of the interval - 5 in the example above
- - `temporal_min_match`: the minimum number of matched peak for a valid matched pair
+ - \code{spatial_n_keep}. the number of spatial match for each site to keep
+ - \code{spatial_dist_max}. the maximum distance allowed for a matched pair 
+ - \code{temporal_n_highest}. the number of peak used - 3 in the example above
+ - \code{temporal_window}. the length of the interval - 5 in the example above
+ - \code{temporal_min_match}. the minimum number of matched peak for a valid matched pair
 
 This functionality can be seen as a matching [@stuart2010matching; @mcintosh2018using] exercise in the spatio-temporal domain to pair up nearby observatoins. It can also be considered as a form of data fusion [@castanedo2013review; @cocchi2019data], where data from multiple sources are combined together. 
 
@@ -42,9 +42,9 @@ This functionality can be seen as a matching [@stuart2010matching; @mcintosh2018
 
 <!-- While many graphic implementations present worked examples to illustrate the usage of the package, few documents the underlying pipeline that transforms the raw data step-by-step to the final view on the screen. There have been some early work in building the data pipeline for (interactive) graphics [@buja1988elements; @buja1996interactive;  @sutherland2000orca] and more recent discussions include @wickham2009plumbing, @xie2014reactive, and @cheng2016enabling. -->
 
-Cubble fits in naturally with the interactive graphic pipeline discussed in the literature [@buja1988elements; @buja1996interactive;  @sutherland2000orca; @xie2014reactive; @cheng2016enabling]. Diagram \ref{fig:illu-interactive} illustrates how linking works from the map to the time series with the two forms of a cubble. The map and time series plot is associated with the nested or long cubble respectively and when a user action is captured on the map, the site will be activated in the nested cubble (left). The nested cubble will communicate to the long cubble to activate all the observations with the same `id` (middle). The long cubble will then highlight the activated series in the time series plot (right). 
+Cubble fits in naturally with the interactive graphic pipeline discussed in the literature [@buja1988elements; @buja1996interactive;  @sutherland2000orca; @xie2014reactive; @cheng2016enabling]. Diagram \ref{fig:illu-interactive} illustrates how linking works from the map to the time series with the two forms of a cubble. The map and time series plot is associated with the nested or long cubble respectively and when a user action is captured on the map, the site will be activated in the nested cubble (left). The nested cubble will communicate to the long cubble to activate all the observations with the same \code{id} (middle). The long cubble will then highlight the activated series in the time series plot (right). 
 
-The linking is also available from the time series plot to the map. The selection(s) on the time series is through selecting the point(s) on the time series and once a point is selected, it will be activated in the long cubble. All the observations that share the same `id` are then activated and this includes other points in the same time series in the long cubble and the corresponding observation of site in the nested cubble. These activated observations will then being reflected in the updated plots and Diagram \ref{fig:illu-interactive-2} in the Appendix illustrates this process. 
+The linking is also available from the time series plot to the map. The selection(s) on the time series is through selecting the point(s) on the time series and once a point is selected, it will be activated in the long cubble. All the observations that share the same \code{id} are then activated and this includes other points in the same time series in the long cubble and the corresponding observation of site in the nested cubble. These activated observations will then being reflected in the updated plots and Diagram \ref{fig:illu-interactive-2} in the Appendix illustrates this process. 
 
 ```{r illu-interactive, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "An illustration of the data model under interactive graphics with cubble. The line plot and map is made separately with the long and nested cubble. When a station is selected on the map (left), the corresponding row in the nested cubble will be activated. This will link to all the rows with the same id in the long cubble (middle) and update the line plot (right)."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
@@ -52,7 +52,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Glyph map
 
-Glyph map [@Wickham2012-yr] plots the time series as single glyph on the map and in \proglang{R}, `GGally` implements the glyph map through the `glyphs()` function. The function construct a data frame with calculated position (`gx`, `gy`, `gid`) of each point on the time series using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into `ggplot` to create the glyph map as: 
+Glyph map [@Wickham2012-yr] plots the time series as single glyph on the map and in \proglang{R}, \pkg{GGally} implements the glyph map through the \code{glyphs()} function. The function construct a data frame with calculated position (`gx}. \code{gy}. \code{gid}. of each point on the time series using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into \code{ggplot} to create the glyph map as: 
 
 ```{r eval = FALSE, echo = TRUE}
 library(ggplot2)
@@ -64,7 +64,7 @@ ggplot(gly, aes(gx, gy, group = gid)) +
   geom_path() 
 ```
 
-A re-implementation of the glyph map as a ggproto `GeomGlyph` has been made in the `cubble` package so that the glyph map can be created with `geom_glyph()`:
+A re-implementation of the glyph map as a ggproto \code{GeomGlyph} has been made in the \pkg{cubble} package so that the glyph map can be created with \code{geom_glyph()}:
 
 ```{r eval = FALSE, echo = TRUE}
 ggplot(data = data) +
@@ -72,4 +72,4 @@ ggplot(data = data) +
                  y_major = ..., y_minor = ...))
 ```
 
-Polar glyph map can be specify as a parameter, `polar = TRUE`, in the `geom_glyph()`, along with `width` and `height` in either absolute or relative value. Global and local scale can be controlled by the parameter `global_rescale`, which default to `TRUE` for global scaling. Reference box and line can be added with separate `geom_glyph_box()` and `geom_glyph_line()`.
+Polar glyph map can be specify as a parameter, \code{polar = TRUE}. in the \code{geom_glyph()}. along with \code{width} and \code{height} in either absolute or relative value. Global and local scale can be controlled by the parameter \code{global_rescale}. which default to \code{TRUE} for global scaling. Reference box and line can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()`.

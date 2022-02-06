@@ -23,7 +23,7 @@ river <- weatherdata::water %>%
 knitr::include_graphics("figures/matching-map.png")
 ```
 
-From the map, a few water gauges and weather stations are close to each other and there is the potential that fluctuation of the water level can reflect the precipitation measured by the climate station. As introduced in Section 3.2, `match_sites()` can be used to match one source of data with another source in a cubble. Here `prcp` in `climate` will be matched to `Water_course_level` in `river`, which is specified in the argument `temporal_var_to_match`. `temporal_independent` controls the dataset that will be used to construct the interval (see the illustration in section 3.2 for details on this). Here the goal is to see if precipitation will be reflected by the water level in the river and hence a lagged effect of water level on precipitation. This will put precipitation data, `climate`, as the independent. Given there is one year worth of data, the number of peak (`temporal_n_highest`) to consider is slightly raised from a default 20 to 30. `temporal_min_match` filters out pairs don't have enough match and to return all the pairs, set `temporal_min_match` to `0`
+From the map, a few water gauges and weather stations are close to each other and there is the potential that fluctuation of the water level can reflect the precipitation measured by the climate station. As introduced in Section 3.2, \code{match_sites()} can be used to match one source of data with another source in a cubble. Here \code{prcp} in \code{climate} will be matched to \code{Water_course_level} in \code{river}, which is specified in the argument \code{temporal_var_to_match}. \code{temporal_independent} controls the dataset that will be used to construct the interval (see the illustration in section 3.2 for details on this). Here the goal is to see if precipitation will be reflected by the water level in the river and hence a lagged effect of water level on precipitation. This will put precipitation data, \code{climate}, as the independent. Given there is one year worth of data, the number of peak (\code{temporal_n_highest}) to consider is slightly raised from a default 20 to 30. \code{temporal_min_match} filters out pairs don't have enough match and to return all the pairs, set \code{temporal_min_match} to 0.
 
 ```{r echo = TRUE}
 res <- match_sites(
@@ -35,7 +35,7 @@ res <- match_sites(
 )
 ```
 
-The output from matching is also a cubble, with additional column `dist` and `group` produced from spatial matching and `n_match` from the temporal matching. 
+The output from matching is also a cubble, with additional column \code{dist} and \code{group} produced from spatial matching and \code{n_match} from the temporal matching. 
 
 ```{r}
 res %>% print(n = 8)
