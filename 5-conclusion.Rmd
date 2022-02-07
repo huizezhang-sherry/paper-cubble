@@ -4,7 +4,9 @@ output: pdf_document
 ---
 # Conclusion
 
-This paper describes the \proglang{R} package \pkg{cubble} for manipulating and visualising spatio-temporal data. A new data structure, that builds from the \code{rowwise_df} and \code{grouped_df} class in the tidyverse ecosystem, is proposed to connect the spatial and temporal variables in the spatio-temporal data. This design frees the data analysts from spending time on organising variables of different observational units. The data structure is also flexible to the techniques and packages analysts use to analyse the data, for example, in the matching example in section 4.3, users are free to use algorithms from another package to cluster stations. Further development and maintenance of the package involves responding to changes in the tidyverse packages that \pkg{cubble} imports, in particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. Another area for further development is to extend \pkg{cubble} to other spatial objects other than points.
+This paper describes an \proglang{R} package \pkg{cubble} for manipulating and visualising spatio-temporal data. A new data structure, \code{cubble} that builds from the \code{rowwise_df} and \code{grouped_df} class in the tidyverse ecosystem, is proposed to connect the time invariant and varying variables in the spatio-temporal data. This design frees the data analysts from spending time on organising variables of different observational units. The data structure is also flexible to the techniques and packages analysts use to analyse the data, for example, in the matching example in section 4.3, users are free to use algorithms from another package to cluster stations. 
+
+Further development and maintenance of the package involves responding to changes in the tidyverse packages that \pkg{cubble} imports, in particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. Another area for further development is to extend \pkg{cubble} to other spatial objects other than points.
 
 
 # Acknowledgement
