@@ -5,7 +5,7 @@ output: pdf_document
 
 # The cubble package
 
-Spatio-temporal data usually come in various forms and Figure \ref{fig:illu-input} shows four examples of this. No matter which form the data is in, these formats share some common components that characterise the spatio-temporal data. A spatial identifier (\code{id} in the diagram) is the unique identifier of each site. The temporal identifier (\code{t} in the diagram) prescribes the time stamp each site is recorded. Coordinates, comprising of latitude and longitude (\code{lat} and \code{(long)} in the diagram), locates each site on the map. These identifiers will be the building blocks for the data structure introduced below. Other variables in the data can be categorised into two groups: spatial variables that are invariant at each time stamp for every site, i.e. the name or code of the weather station, and temporal variables that varies with time.
+Spatio-temporal data usually come in various forms and Figure \ref{fig:illu-input} shows four examples of this. These four examples show some common characters of the spatio-temporal data: 1) a spatial identifier, that uniquely identifies each site, 2) a temporal identifier, that prescribes the time stamp each site is recorded, 3) Coordinates, comprising of latitude and longitude, that locate each site on the map. These identifiers will be the building blocks for cubble. Spatio-temporal data can also be thought of as a data cube with three axes: id, time, and variable. Notice that in the time-variable face, time invariant variables share the same value across all the time stamps while time varying variables have values varying across time. This heterogeneity will be used to split the data into two forms in cubble.
 
 ```{r illu-input, echo = FALSE, out.width = "100%", fig.cap="Illustration of incoming data formats for spatio-temporal data. (1) Data comes in as a single table; (2) Separate tables for spatial and temporal variables; (3) A single table with all the parameters used to query the database and a separate table for queried data; and (4) Cubical data in array or NetCDF format.", fig.align='center', out.height = "40%"}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
@@ -21,7 +21,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Create a cubble in the nested form
 
-`as_cubble()} creates a \pkg{cubble} by supplying the three key components: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order of longitude first and then latitude. The naming of \code{key} and \code{index} follows the convention in the \pkg{tsibble} package. The cubble created by default is in the nested form. Below is an example of creating a cubble:
+\code{as_cubble()} creates a cubble by supplying the three key components: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order of longitude first and then latitude. The naming of \code{key} and \code{index} follows the convention in the \pkg{tsibble} package. The cubble created by default is in the nested form. Below is an example of creating a cubble:
 
 ```{r echo = TRUE}
 cubble_nested <- cubble::climate_flat %>%
@@ -29,7 +29,7 @@ cubble_nested <- cubble::climate_flat %>%
 cubble_nested
 ```
 
-There are a few information in the \pkg{cubble} header: the name of the \code{key} variable (`id`) and its number (5), bounding box (`[115.97, -32.94, 133.55, -12.42]`), and also the name of variable nested in the \code{ts} column with its type: \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}. 
+There are a few information in the cubble header: the name of the \code{key} variable (`id`) and its number (5), bounding box (`[115.97, -32.94, 133.55, -12.42]`), and also the name of variable nested in the \code{ts} column with its type: \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}. 
 
 ## Stretch a nested cubble into the long form
 
@@ -68,7 +68,7 @@ cubble_mig %>% tamp() %>% stretch()
 
 ## Compatibility with existing packages
 
-Building from an \code{tbl_df} class, \pkg{cubble} has implemented methods for \pkg{dplyr} generics, which includes:
+Building from an \code{tbl_df} class, cubble has implemented methods for \pkg{dplyr} generics, which includes:
 
   - basic: mutate, filter, summarise, select, arrange, rename, left_join
   - grouping: group_by, ungroup

@@ -140,18 +140,17 @@ provided. Section 5 concludes the paper.
 \section{The cubble package}\label{the-cubble-package}}
 
 Spatio-temporal data usually come in various forms and Figure
-\ref{fig:illu-input} shows four examples of this. No matter which form
-the data is in, these formats share some common components that
-characterise the spatio-temporal data. A spatial identifier (\code{id}
-in the diagram) is the unique identifier of each site. The temporal
-identifier (\code{t} in the diagram) prescribes the time stamp each site
-is recorded. Coordinates, comprising of latitude and longitude
-(\code{lat} and \code{(long)} in the diagram), locates each site on the
-map. These identifiers will be the building blocks for the data
-structure introduced below. Other variables in the data can be
-categorised into two groups: spatial variables that are invariant at
-each time stamp for every site, i.e.~the name or code of the weather
-station, and temporal variables that varies with time.
+\ref{fig:illu-input} shows four examples of this. These four examples
+show some common characters of the spatio-temporal data: 1) a spatial
+identifier, that uniquely identifies each site, 2) a temporal
+identifier, that prescribes the time stamp each site is recorded, 3)
+Coordinates, comprising of latitude and longitude, that locate each site
+on the map. These identifiers will be the building blocks for cubble.
+Spatio-temporal data can also be thought of as a data cube with three
+axes: id, time, and variable. Notice that in the time-variable face,
+time invariant variables share the same value across all the time stamps
+while time varying variables have values varying across time. This
+heterogeneity will be used to split the data into two forms in cubble.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -203,7 +202,7 @@ time stamp while not dropping information from spatial variables.
 \subsection{Create a cubble in the nested
 form}\label{create-a-cubble-in-the-nested-form}}
 
-`as\_cubble()\} creates a \pkg{cubble} by supplying the three key
+\code{as_cubble()} creates a cubble by supplying the three key
 components: \code{key} as the spatial identifier; \code{index} as the
 temporal identifier; and a vector of \code{coords} in the order of
 longitude first and then latitude. The naming of \code{key} and
@@ -231,7 +230,7 @@ R> cubble_nested
 \end{CodeOutput}
 \end{CodeChunk}
 
-There are a few information in the \pkg{cubble} header: the name of the
+There are a few information in the cubble header: the name of the
 \code{key} variable (\texttt{id}) and its number (5), bounding box
 (\texttt{{[}115.97,\ -32.94,\ 133.55,\ -12.42{]}}), and also the name of
 variable nested in the \code{ts} column with its type:
@@ -357,8 +356,8 @@ R> cubble_mig %>% tamp() %>% stretch()
 \subsection{Compatibility with existing
 packages}\label{compatibility-with-existing-packages}}
 
-Building from an \code{tbl_df} class, \pkg{cubble} has implemented
-methods for \pkg{dplyr} generics, which includes:
+Building from an \code{tbl_df} class, cubble has implemented methods for
+\pkg{dplyr} generics, which includes:
 
 \begin{itemize}
 \tightlist
@@ -473,7 +472,7 @@ the matched pair from different data sources need to
   have similar temporal movement
 \end{itemize}
 
-`match\_sites()\} from \pkg{cubble} matches data based on these two
+\code{match_sites()} from \pkg{cubble} matches data based on these two
 criteria. It first matches the two data sources spatially through
 computing the pairwise distance based on latitude and longitude. Pairs
 that pass the spatial matching are then matched temporally through
@@ -566,8 +565,8 @@ illustrates this process.
 Glyph map \citep{Wickham2012-yr} plots the time series as single glyph
 on the map and in \proglang{R}, \pkg{GGally} implements the glyph map
 through the \code{glyphs()} function. The function construct a data
-frame with calculated position (`gx\}. \code{gy}. \code{gid}. of each
-point on the time series using linear algebra (Equation 1 and 2 in
+frame with calculated position (\code{gx}. \code{gy}. \code{gid}. of
+each point on the time series using linear algebra (Equation 1 and 2 in
 \citet{Wickham2012-yr}). The data can then be piped into \code{ggplot}
 to create the glyph map as:
 
@@ -600,8 +599,7 @@ the \code{geom_glyph()}. along with \code{width} and \code{height} in
 either absolute or relative value. Global and local scale can be
 controlled by the parameter \code{global_rescale}. which default to
 \code{TRUE} for global scaling. Reference box and line can be added with
-separate \code{geom_glyph_box()} and
-\textbackslash code\{geom\_glyph\_line()`.
+separate \code{geom_glyph_box()} and \code{geom_glyph_line()}.
 
 \hypertarget{examples}{%
 \section{Examples}\label{examples}}
@@ -922,7 +920,7 @@ resolution than needed.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> # Assume \code{my_ncdf} has bounding box of [-180, -90, 180, -90] 
+R> # Assume my_ncdf has bounding box of [-180, -90, 180, -90] 
 R> # at 0.25 degree resolution and subset it to have 
 R> # 1 degree resolution:
 R> dt <- as_cubble(my_ncdf, vars = c("q", "z"), 
@@ -967,7 +965,7 @@ interactivity let users to link between points on the map and their
 corresponding time series and explore the spatial and temporal dimension
 of the data simultaneously. Below is an example that describes the
 process of building an interactive graphic with \pkg{cubble} and
-\textbackslash pkg\{crosstalk\{.
+\pkg{crosstalk}.
 
 Starting with the original data, some pre-processing may be required to
 summarise the data before the visualisation. This example explores the

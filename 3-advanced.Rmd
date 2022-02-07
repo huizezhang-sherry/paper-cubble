@@ -20,7 +20,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
   - be spatially close to each other, and 
   - have similar temporal movement
   
-`match_sites()} from \pkg{cubble} matches data based on these two criteria. It first matches the two data sources spatially through computing the pairwise distance based on latitude and longitude. Pairs that pass the spatial matching are then matched temporally through computing the number of matched peaks within a fixed length window. Figure \ref{fig:illu-matching} illustrate this temporal matching in more details. Given two series \code{A} and \code{a}. 3 peaks have been picked in each series. An interval, with default length of 5, is constructed for each peak in series \code{A} and the peaks in series \code{a} are tested against whether they fall into the any of the intervals. In this illustration, there are 2 matches for these two series. Several arguments are available in \code{match_sites()} to fine-tune the matching: 
+\code{match_sites()} from \pkg{cubble} matches data based on these two criteria. It first matches the two data sources spatially through computing the pairwise distance based on latitude and longitude. Pairs that pass the spatial matching are then matched temporally through computing the number of matched peaks within a fixed length window. Figure \ref{fig:illu-matching} illustrate this temporal matching in more details. Given two series \code{A} and \code{a}. 3 peaks have been picked in each series. An interval, with default length of 5, is constructed for each peak in series \code{A} and the peaks in series \code{a} are tested against whether they fall into the any of the intervals. In this illustration, there are 2 matches for these two series. Several arguments are available in \code{match_sites()} to fine-tune the matching: 
 
 <!-- [can also think about matching as a form of correlation between series from a statistics point of view.] -->
 
@@ -52,7 +52,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Glyph map
 
-Glyph map [@Wickham2012-yr] plots the time series as single glyph on the map and in \proglang{R}, \pkg{GGally} implements the glyph map through the \code{glyphs()} function. The function construct a data frame with calculated position (`gx}. \code{gy}. \code{gid}. of each point on the time series using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into \code{ggplot} to create the glyph map as: 
+Glyph map [@Wickham2012-yr] plots the time series as single glyph on the map and in \proglang{R}, \pkg{GGally} implements the glyph map through the \code{glyphs()} function. The function construct a data frame with calculated position (\code{gx}. \code{gy}. \code{gid}. of each point on the time series using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into \code{ggplot} to create the glyph map as: 
 
 ```{r eval = FALSE, echo = TRUE}
 library(ggplot2)
@@ -72,4 +72,4 @@ ggplot(data = data) +
                  y_major = ..., y_minor = ...))
 ```
 
-Polar glyph map can be specify as a parameter, \code{polar = TRUE}. in the \code{geom_glyph()}. along with \code{width} and \code{height} in either absolute or relative value. Global and local scale can be controlled by the parameter \code{global_rescale}. which default to \code{TRUE} for global scaling. Reference box and line can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()`.
+Polar glyph map can be specify as a parameter, \code{polar = TRUE}. in the \code{geom_glyph()}. along with \code{width} and \code{height} in either absolute or relative value. Global and local scale can be controlled by the parameter \code{global_rescale}. which default to \code{TRUE} for global scaling. Reference box and line can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()}.
