@@ -5,7 +5,9 @@ output: pdf_document
 
 # The cubble package
 
-Spatio-temporal data usually come to the analysts in various forms and Figure \ref{fig:illu-input} shows four examples of this. These four examples show the common characters of the spatio-temporal data: 1) a spatial identifier that uniquely identifies each site, 2) a temporal identifier that prescribes the time stamp each site is recorded, 3) Coordinates, comprising of latitude and longitude, that locate the site on the map. These identifiers will be the building blocks for cubble. Another way to structure the spatio-temporal data is to think of it as a data cube with three axes: id, time, and variable. Notice that in the time-variable face of this cube, time invariant variables would share the same value across all the time stamps, while time varying variables have values varying across time. (Maybe add a cube diagram here). This heterogeneity will be used to split the data into two forms in cubble.
+Spatio-temporal data usually come to the analysts in various forms and Figure \ref{fig:illu-input} shows four examples of this. The first three are variations of tabular data that uses a single table (1) or multiple tables (2 & 3) while the fourth uses a cube or hyper-cube to to represent the data. An example of the fourth type is the NetCDF (Network Common Data Form), commonly used in the climatology community to deliver global mapping of atmosphere, ocean, and land. 
+
+These four examples show the common characters of the spatio-temporal data: 1) a spatial identifier that uniquely identifies each site, 2) a temporal identifier that prescribes the time stamp each site is recorded, 3) Coordinates, comprising of latitude and longitude, that locate the site on the map. These identifiers will be the building blocks for cubble. Another way to structure the spatio-temporal data is to think of it as a data cube with three axes: id, time, and variable. Notice that in the time-variable face of this cube, time invariant variables would share the same value across all the time stamps, while time varying variables have values varying across time. (Maybe add a cube diagram here). This heterogeneity will be used to split the data into two forms in cubble.
 
 ```{r illu-input, echo = FALSE, out.width = "100%", fig.cap="An illustration of different spatio-temporal data format: (1) a single table for all the variables; (2) separate tables for spatial and temporal variables; (3) a table of metadata used to query the database and a separate table for queried data; and (4) an array data structure of cube or hypercube.", fig.align='center', out.height = "40%"}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
@@ -13,7 +15,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 In a cubble, there are two forms: nested form and long form, and Figure \ref{fig:illu-cubble} sketches the two forms with the associated attributes. The decision on which form to use in data manipulation is output-oriented, meaning analysts need to first think about whether the output of an operation is identified only by the spatial identifier, or a combination of spatial and temporal identifier. The nested cubble is suitable for working with operations that are only identified by the site and this type of operation can be a pure manipulation of time invariant variables, or an operation that summarises time varying variables into site. Underneath the nested form, a cubble is built from a \code{rowwise_df} data frame where each site forms a separate group. This structure simplifies the calculation that involves temporal variables by avoiding the use of \code{purrr::map()} syntax when working with list-column.
 
-For those operations whose output involves both a spatial and temporal identifier, long form should be used. The long form uses a  \code{`grouped_df`} data frame to forms all the time of a site as a group. Time invariant variables are stored separately as an special attribute of the long cubble. This design avoids repeating the spatial variables at each time stamp while not dropping information from spatial variables.
+For those operations whose output involves both a spatial and temporal identifier, long form should be used. The long form uses a  \code{grouped_df} data frame to forms all the time of a site as a group. Time invariant variables are stored separately as an special attribute of the long cubble. This design avoids repeating the spatial variables at each time stamp while not dropping information from spatial variables.
 
 ```{r illu-cubble, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the nested and long form in cubble. The nested form defines each site in a row and nests the time varying variables into a single column \\code{ts}. The long form cubble uses \\code{id} and \\code{t} to identify each row and store the time invariant variables as an attribute, \\code{spatial}."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
@@ -28,11 +30,11 @@ cubble_nested <- cubble::climate_flat %>%
 cubble_nested
 ```
 
-There are a few information in the cubble header: the name of the \code{key} variable (`id`) and its number (5), the bounding box: \code{[115.97, -32.94, 133.55, -12.42]} , and also the name of variable nested in the \code{ts} column with its type: \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}. 
+There are a few information in the cubble header: the name of the \code{key} variable: \code{id} and its number: 5, the bounding box: \code{[115.97, -32.94, 133.55, -12.42]} , and also the name of variable nested in the \code{ts} column with its type: \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}. 
 
 ## Stretch a nested cubble into the long form
 
-The long cubble is suitable to manipulate the time dimension of the data and  \code{stretch()} switches the nested cubble into the long cubble. It first extracts all the spatial variables into a separate tibble and then unnests the \code{ts} column. The spatial variables are then attached as an attributes of the long cubble and can be accessed through `spatial()`
+The long cubble is suitable to manipulate the time dimension of the data and  \code{stretch()} switches the nested cubble into the long cubble. It first extracts all the spatial variables into a separate tibble and then unnests the \code{ts} column. The spatial variables are then attached as an attributes of the long cubble and can be accessed through `spatial()`:
 
 ```{r echo = TRUE}
 cubble_long <- cubble_nested %>% stretch(ts)
@@ -54,14 +56,14 @@ cubble_back
 
 ## Migrate spatial variables to a long cubble
 
-Analysts may need the time invariant/ varying variable to be in the same table to apply certain function. In cubble, this can be done through \code{migrate()}, which moves the time invariant variables into the long cubble:
+Analysts may need the time invariant and varying variable to be in the same table to apply certain function. In cubble, this can be done through \code{migrate()}, which moves the time invariant variables into the long cubble:
 
 ```{r echo = TRUE}
 cubble_mig <- cubble_long %>% migrate(long, lat)
 cubble_mig
 ```
 
-Notice that these added time invariant variables will not be remembered by cubble and will disappear if switched to the nested form and then switched back. Hence, \code{migrat} should usually be used as the last step of the analysis:
+Notice that these added time invariant variables will not be remembered by cubble and will disappear if switched to the nested form and then switched back. Hence, \code{migrate()} should usually be used as the last step of the analysis:
 
 ```{r echo = TRUE}
 cubble_mig %>% tamp() %>% stretch()
@@ -69,13 +71,17 @@ cubble_mig %>% tamp() %>% stretch()
 
 ## Compatibility with existing packages
 
+### dplyr
+
 Building from an \code{tbl_df} class, cubble has implemented methods for \pkg{dplyr} generics, which includes:
 
   - basic: mutate, filter, summarise, select, arrange, rename, left_join
   - grouping: group_by, ungroup
   - slice family: slice_head, slice_tail, slice_sample, slice_min, slice_max
 
-\pkg{cubble} is also compatible with \pkg{tsibble}. When creating a cubble from a tsibble, Only the \code{coords} argument need to be specified: 
+### tsibble
+
+Cubble is also compatible with \pkg{tsibble}. When creating a cubble from a tsibble, Only the \code{coords} argument needs to be specified: 
 
 ```{r echo = TRUE}
 # casting a tsibble into cubble
@@ -93,3 +99,33 @@ dt %>%
   mutate(fabletools::features(ts, tmax, list(tmax_mean = mean, tmax_var = var)))
 ```
 
+### sf
+
+\textcolor{red}{add content}
+
+
+
+### netcdf
+
+NetCDF data has two main components: *dimension* for defining the spatio-temporal grid (longitude, latitude, and time) and *variable* that populates the defined grid. Attributes are usually associated with dimension and variable in the NetCDF format data and a [metadata convention for climate and forecast](http://cfconventions.org/) has been designed to standardise the format of the attributes. A few packages in R exists for manipulating NetCDF data and this includes a high-level R interface: \pkg{ncdf4} [@ncdf4], a low-level interface that calls C-interface: \pkg{RNetCDF} [@rnetcdf; @michna2013rnetcdf], and a tidyverse implementation: \pkg{tidync} [@tidync].
+
+Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble}. It maps each combination of longitude and latitude into an \code{id} as the \code{key}:
+
+```{r echo = TRUE, eval = FALSE}
+# read in the .nc file as a ncdf4 class
+raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
+
+# convert the variable q and z in the ncdf4 into a cubble
+dt <- as_cubble(raw, vars = c("q", "z"))
+```
+
+Memory limit with NetCDF data in cubble depends on longitude grid point x latitude grid point x time grid point x number of variable. Cubble can handle slightly more than 300 x 300 (longitude x longitude) grid points for 3 variables in one year and spatial grid can be reduced to trade for longer time period and more variables. A 300 by 300 spatial grid can be a bounding box of [100, -80, 180, 0] at 0.25 degree resolution or a global bounding box [-180, -90, 180, -90] at 1 degree resolution. Subsetting longitude and latitude grid is available through \code{long_range} and \code{lat_range} if the NetCDF file has finer resolution than needed.
+
+```{r eval = FALSE, echo = TRUE}
+# Assume my_ncdf has bounding box of [-180, -90, 180, -90] 
+# at 0.25 degree resolution and subset it to have 
+# 1 degree resolution:
+dt <- as_cubble(my_ncdf, vars = c("q", "z"), 
+                long_range = seq(-180, 180, 1), 
+                lat_range = seq(-90, 90, 1))
+```

@@ -3,7 +3,7 @@ title: "3-advanced"
 output: pdf_document
 ---
 
-# Advanced features/ considerations
+# Other features and considerations
 
 ## Hierarchical structure
 
@@ -48,7 +48,9 @@ The linking is also available from the time series plot to the map. The selectio
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
 
-## Glyph map
+## Spatio-temporal transformations
+
+\textcolor{red}{Glyph map + transforming on time (calendar plot) + projections (linear combination).}
 
 Glyph map [@Wickham2012-yr] plots the time series as single glyph on the map and in \proglang{R}, \pkg{GGally} implements the glyph map through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}. \code{gy}. \code{gid}) of each point on the time series using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into \code{ggplot} to create the glyph map as: 
 

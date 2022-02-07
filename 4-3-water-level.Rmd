@@ -3,7 +3,7 @@ title: "4-3-water-level"
 output: html_document
 ---
 
-## River level data in Victria water gauges
+## River level data in Victoria water gauges
 
 Bureau of Meteorology collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges and this includes variables: electrical conductivity, turbidity, water course discharge, water course level, and water temperature. In particular, water level will interactive with precipitation from the climate data since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} gives the location of available weather station and water gauges in Victoria.
 
@@ -23,12 +23,12 @@ river <- weatherdata::water %>%
 knitr::include_graphics("figures/matching-map.png")
 ```
 
-From the map, a few water gauges and weather stations are close to each other and the fluctuation of the water level could be matched up with precipitation measured by the climate station. As introduced in Section 3.2, \code{match_sites()} can be used to match one source of data with another source in a cubble. Here \code{Water_course_level} in \code{river} will be matched to \code{prcp} in \code{climate} in 2020. The two datasets need to be specified as the first two arguments and the variable to match can be specified in \code{temporal_var_to_match} using the \code{by} syntax in \code{join}. \code{temporal_independent} controls the variable used to construct the interval and the goal here is to see if precipitation will be reflected by the water level in the river. This puts precipitation \code{prcp}, as the independent. Given there is one year worth of data, the number of peak (\code{temporal_n_highest}) to consider is slightly raised from a default 20 to 30 and \code{temporal_min_match} is raised correspondingly. To return all the pairs of the match, \code{temporal_min_match} can be set to 0.
+From the map, a few water gauges and weather stations are close to each other and the fluctuation of the water level could be matched up with precipitation measured by the climate station. As introduced in Section 3.2, \code{match_sites()} can be used to match one source of data with another source in a cubble. Here \code{Water_course_level} in \code{river} will be matched to \code{prcp} in \code{climate} in 2020. The two datasets need to be specified as the first two arguments and the variable to match can be specified in \code{temporal_by} using the \code{by} syntax in \code{join}. \code{temporal_independent} controls the variable used to construct the interval and the goal here is to see if precipitation will be reflected by the water level in the river. This puts precipitation \code{prcp}, as the independent. Given there is one year worth of data, the number of peak (\code{temporal_n_highest}) to consider is slightly raised from a default 20 to 30 and \code{temporal_min_match} is raised correspondingly. To return all the pairs of the match, \code{temporal_min_match} can be set to 0.
 
 ```{r echo = TRUE}
 res <- match_sites(
   river, climate,
-  temporal_var_to_match = c("Water_course_level" = "prcp"),
+  temporal_by = c("Water_course_level" = "prcp"),
   temporal_independent = "prcp",  
   temporal_n_highest = 30,
   temporal_min_match = 15

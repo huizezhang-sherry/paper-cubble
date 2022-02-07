@@ -24,12 +24,13 @@ can be identified by the spatial identifier, or the time varying ones
 that cross-identified by the spatial and temporal identifiers. In this
 paper, a new data structure, \code{cubble}, is proposed for manipulating
 and visualising spatio-temporal data. The new data structure uses two
-forms to organise time invariant/ varying variables so that the spatial
-and temporal dimension of the data can be manipulated separately while
-keep synchronised. Advanced considerations are given to illustrate data
-with hierarchical structure, data matching, and how cubble fits with the
-interactive graphics pipeline. Examples are given to analysing Australia
-meteorology data, river level data, and climate reanalysis (ERA5).
+forms to organise time invariant and varying variables so that the
+spatial and temporal dimension of the data can be manipulated separately
+while keep synchronised. Advanced considerations are given to illustrate
+data with hierarchical structure, data matching, and how cubble fits
+with the interactive graphics pipeline. Examples are given to analysing
+Australia meteorology data, river level data, and climate reanalysis
+(ERA5).
 }
 
 \Keywords{spatio temporal, \proglang{R}, climate weather station, data
@@ -138,18 +139,25 @@ provided. Section 5 concludes the paper.
 \section{The cubble package}\label{the-cubble-package}}
 
 Spatio-temporal data usually come to the analysts in various forms and
-Figure \ref{fig:illu-input} shows four examples of this. These four
-examples show the common characters of the spatio-temporal data: 1) a
-spatial identifier that uniquely identifies each site, 2) a temporal
-identifier that prescribes the time stamp each site is recorded, 3)
-Coordinates, comprising of latitude and longitude, that locate the site
-on the map. These identifiers will be the building blocks for cubble.
-Another way to structure the spatio-temporal data is to think of it as a
-data cube with three axes: id, time, and variable. Notice that in the
-time-variable face of this cube, time invariant variables would share
-the same value across all the time stamps, while time varying variables
-have values varying across time. (Maybe add a cube diagram here). This
-heterogeneity will be used to split the data into two forms in cubble.
+Figure \ref{fig:illu-input} shows four examples of this. The first three
+are variations of tabular data that uses a single table (1) or multiple
+tables (2 \& 3) while the fourth uses a cube or hyper-cube to to
+represent the data. An example of the fourth type is the NetCDF (Network
+Common Data Form), commonly used in the climatology community to deliver
+global mapping of atmosphere, ocean, and land.
+
+These four examples show the common characters of the spatio-temporal
+data: 1) a spatial identifier that uniquely identifies each site, 2) a
+temporal identifier that prescribes the time stamp each site is
+recorded, 3) Coordinates, comprising of latitude and longitude, that
+locate the site on the map. These identifiers will be the building
+blocks for cubble. Another way to structure the spatio-temporal data is
+to think of it as a data cube with three axes: id, time, and variable.
+Notice that in the time-variable face of this cube, time invariant
+variables would share the same value across all the time stamps, while
+time varying variables have values varying across time. (Maybe add a
+cube diagram here). This heterogeneity will be used to split the data
+into two forms in cubble.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -179,10 +187,10 @@ with list-column.
 
 For those operations whose output involves both a spatial and temporal
 identifier, long form should be used. The long form uses a
-\code{`grouped_df`} data frame to forms all the time of a site as a
-group. Time invariant variables are stored separately as an special
-attribute of the long cubble. This design avoids repeating the spatial
-variables at each time stamp while not dropping information from spatial
+\code{grouped_df} data frame to forms all the time of a site as a group.
+Time invariant variables are stored separately as an special attribute
+of the long cubble. This design avoids repeating the spatial variables
+at each time stamp while not dropping information from spatial
 variables.
 
 \begin{CodeChunk}
@@ -229,7 +237,7 @@ R> cubble_nested
 \end{CodeChunk}
 
 There are a few information in the cubble header: the name of the
-\code{key} variable (\texttt{id}) and its number (5), the bounding box:
+\code{key} variable: \code{id} and its number: 5, the bounding box:
 \code{[115.97, -32.94, 133.55, -12.42]} , and also the name of variable
 nested in the \code{ts} column with its type:
 \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
@@ -243,7 +251,7 @@ and \code{stretch()} switches the nested cubble into the long cubble. It
 first extracts all the spatial variables into a separate tibble and then
 unnests the \code{ts} column. The spatial variables are then attached as
 an attributes of the long cubble and can be accessed through
-\texttt{spatial()}
+\texttt{spatial()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -314,10 +322,10 @@ R> cubble_back
 \subsection{Migrate spatial variables to a long
 cubble}\label{migrate-spatial-variables-to-a-long-cubble}}
 
-Analysts may need the time invariant/ varying variable to be in the same
-table to apply certain function. In cubble, this can be done through
-\code{migrate()}, which moves the time invariant variables into the long
-cubble:
+Analysts may need the time invariant and varying variable to be in the
+same table to apply certain function. In cubble, this can be done
+through \code{migrate()}, which moves the time invariant variables into
+the long cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -341,8 +349,8 @@ R> cubble_mig
 
 Notice that these added time invariant variables will not be remembered
 by cubble and will disappear if switched to the nested form and then
-switched back. Hence, \code{migrat} should usually be used as the last
-step of the analysis:
+switched back. Hence, \code{migrate()} should usually be used as the
+last step of the analysis:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -367,6 +375,9 @@ R> cubble_mig %>% tamp() %>% stretch()
 \subsection{Compatibility with existing
 packages}\label{compatibility-with-existing-packages}}
 
+\hypertarget{dplyr}{%
+\subsubsection{dplyr}\label{dplyr}}
+
 Building from an \code{tbl_df} class, cubble has implemented methods for
 \pkg{dplyr} generics, which includes:
 
@@ -381,9 +392,11 @@ Building from an \code{tbl_df} class, cubble has implemented methods for
   slice\_max
 \end{itemize}
 
-\pkg{cubble} is also compatible with \pkg{tsibble}. When creating a
-cubble from a tsibble, Only the \code{coords} argument need to be
-specified:
+\hypertarget{tsibble}{%
+\subsubsection{tsibble}\label{tsibble}}
+
+Cubble is also compatible with \pkg{tsibble}. When creating a cubble
+from a tsibble, Only the \code{coords} argument needs to be specified:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -431,9 +444,66 @@ R> dt %>%
 \end{CodeOutput}
 \end{CodeChunk}
 
-\hypertarget{advanced-features-considerations}{%
-\section{Advanced features/
-considerations}\label{advanced-features-considerations}}
+\hypertarget{sf}{%
+\subsubsection{sf}\label{sf}}
+
+\textcolor{red}{add content}
+
+\hypertarget{netcdf}{%
+\subsubsection{netcdf}\label{netcdf}}
+
+NetCDF data has two main components: \emph{dimension} for defining the
+spatio-temporal grid (longitude, latitude, and time) and \emph{variable}
+that populates the defined grid. Attributes are usually associated with
+dimension and variable in the NetCDF format data and a
+\href{http://cfconventions.org/}{metadata convention for climate and
+forecast} has been designed to standardise the format of the attributes.
+A few packages in R exists for manipulating NetCDF data and this
+includes a high-level R interface: \pkg{ncdf4} \citep{ncdf4}, a
+low-level interface that calls C-interface: \pkg{RNetCDF}
+\citep{rnetcdf, michna2013rnetcdf}, and a tidyverse implementation:
+\pkg{tidync} \citep{tidync}.
+
+Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4}
+class from the \pkg{ncdf4} package into a \code{cubble}. It maps each
+combination of longitude and latitude into an \code{id} as the
+\code{key}:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> # read in the .nc file as a ncdf4 class
+R> raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
+R> 
+R> # convert the variable q and z in the ncdf4 into a cubble
+R> dt <- as_cubble(raw, vars = c("q", "z"))
+\end{CodeInput}
+\end{CodeChunk}
+
+Memory limit with NetCDF data in cubble depends on longitude grid point
+x latitude grid point x time grid point x number of variable. Cubble can
+handle slightly more than 300 x 300 (longitude x longitude) grid points
+for 3 variables in one year and spatial grid can be reduced to trade for
+longer time period and more variables. A 300 by 300 spatial grid can be
+a bounding box of {[}100, -80, 180, 0{]} at 0.25 degree resolution or a
+global bounding box {[}-180, -90, 180, -90{]} at 1 degree resolution.
+Subsetting longitude and latitude grid is available through
+\code{long_range} and \code{lat_range} if the NetCDF file has finer
+resolution than needed.
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> # Assume my_ncdf has bounding box of [-180, -90, 180, -90] 
+R> # at 0.25 degree resolution and subset it to have 
+R> # 1 degree resolution:
+R> dt <- as_cubble(my_ncdf, vars = c("q", "z"), 
++                 long_range = seq(-180, 180, 1), 
++                 lat_range = seq(-90, 90, 1))
+\end{CodeInput}
+\end{CodeChunk}
+
+\hypertarget{other-features-and-considerations}{%
+\section{Other features and
+considerations}\label{other-features-and-considerations}}
 
 \hypertarget{hierarchical-structure}{%
 \subsection{Hierarchical structure}\label{hierarchical-structure}}
@@ -564,8 +634,11 @@ illustrates this process.
 \end{figure}
 \end{CodeChunk}
 
-\hypertarget{glyph-map}{%
-\subsection{Glyph map}\label{glyph-map}}
+\hypertarget{spatio-temporal-transformations}{%
+\subsection{Spatio-temporal
+transformations}\label{spatio-temporal-transformations}}
+
+\textcolor{red}{Glyph map + transforming on time (calendar plot) + projections (linear combination).}
 
 Glyph map \citep{Wickham2012-yr} plots the time series as single glyph
 on the map and in \proglang{R}, \pkg{GGally} implements the glyph map
@@ -788,9 +861,9 @@ using the station level cubble in the nested form.
 \end{figure}
 \end{CodeChunk}
 
-\hypertarget{river-level-data-in-victria-water-gauges}{%
-\subsection{River level data in Victria water
-gauges}\label{river-level-data-in-victria-water-gauges}}
+\hypertarget{river-level-data-in-victoria-water-gauges}{%
+\subsection{River level data in Victoria water
+gauges}\label{river-level-data-in-victoria-water-gauges}}
 
 Bureau of Meteorology collects
 \href{http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full}{water
@@ -819,22 +892,21 @@ precipitation measured by the climate station. As introduced in Section
 another source in a cubble. Here \code{Water_course_level} in
 \code{river} will be matched to \code{prcp} in \code{climate} in 2020.
 The two datasets need to be specified as the first two arguments and the
-variable to match can be specified in \code{temporal_var_to_match} using
-the \code{by} syntax in \code{join}. \code{temporal_independent}
-controls the variable used to construct the interval and the goal here
-is to see if precipitation will be reflected by the water level in the
-river. This puts precipitation \code{prcp}, as the independent. Given
-there is one year worth of data, the number of peak
-(\code{temporal_n_highest}) to consider is slightly raised from a
-default 20 to 30 and \code{temporal_min_match} is raised
-correspondingly. To return all the pairs of the match,
-\code{temporal_min_match} can be set to 0.
+variable to match can be specified in \code{temporal_by} using the
+\code{by} syntax in \code{join}. \code{temporal_independent} controls
+the variable used to construct the interval and the goal here is to see
+if precipitation will be reflected by the water level in the river. This
+puts precipitation \code{prcp}, as the independent. Given there is one
+year worth of data, the number of peak (\code{temporal_n_highest}) to
+consider is slightly raised from a default 20 to 30 and
+\code{temporal_min_match} is raised correspondingly. To return all the
+pairs of the match, \code{temporal_min_match} can be set to 0.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> res <- match_sites(
 +   river, climate,
-+   temporal_var_to_match = c("Water_course_level" = "prcp"),
++   temporal_by = c("Water_course_level" = "prcp"),
 +   temporal_independent = "prcp",  
 +   temporal_n_highest = 30,
 +   temporal_min_match = 15
@@ -884,68 +956,16 @@ increase of precipitation and water level can be observed.
 \subsection{ERA5: climate reanalysis
 data}\label{era5-climate-reanalysis-data}}
 
-NetCDF (Network Common Data Form) is a data format commonly used in the
-climatology community to deliver global mapping of atmosphere, ocean,
-and land. It has two major components: \emph{dimension} for defining the
-spatio-temporal grid (longitude, latitude, and time) and \emph{variable}
-that populates the defined grid. Attributes are usually associated with
-dimension and variable in the NetCDF format data and a
-\href{http://cfconventions.org/}{metadata convention for climate and
-forecast} has been designed to standardise the format of the attributes.
-Current packages for manipulating NetCDF data in R include a high-level
-R interface: \pkg{ncdf4} \citep{ncdf4}, a low-level interface that calls
-C-interface: \pkg{RNetCDF} \citep{rnetcdf, michna2013rnetcdf}, and a
-tidyverse implementation: \pkg{tidync} \citep{tidync}.
-
-Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4}
-class from the \pkg{ncdf4} package into a \code{cubble}. It maps each
-combination of longitude and latitude into an \code{id} as the
-\code{key}:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> # read in the .nc file as a ncdf4 class
-R> raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
-R> 
-R> # convert the variable q and z in the ncdf4 into a cubble
-R> dt <- as_cubble(raw, vars = c("q", "z"))
-\end{CodeInput}
-\end{CodeChunk}
-
-Memory limit with NetCDF data in cubble depends on longitude grid point
-x latitude grid point x time grid point x number of variable. Cubble can
-handle slightly more than 300 x 300 (longitude x longitude) grid points
-for 3 variables in one year and spatial grid can be reduced to trade for
-longer time period and more variables. A 300 by 300 spatial grid can be
-a bounding box of {[}100, -80, 180, 0{]} at 0.25 degree resolution or a
-global bounding box {[}-180, -90, 180, -90{]} at 1 degree resolution.
-Subsetting longitude and latitude grid is available through
-\code{long_range} and \code{lat_range} if the NetCDF file has finer
-resolution than needed.
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> # Assume my_ncdf has bounding box of [-180, -90, 180, -90] 
-R> # at 0.25 degree resolution and subset it to have 
-R> # 1 degree resolution:
-R> dt <- as_cubble(my_ncdf, vars = c("q", "z"), 
-+                 long_range = seq(-180, 180, 1), 
-+                 lat_range = seq(-90, 90, 1))
-\end{CodeInput}
-\end{CodeChunk}
-
-Figure \ref{fig:netcdf} gives an example of reproducing Figure 19 in
-\citet{hersbach2020era5} using ERA5 data. ERA5 data
-\citep{hersbach2020era5} is the latest reanalysis of global atmosphere,
-land surface, and ocean waves from 1950 onwards and is available in the
-NetCDF format from European Centre for Medium-Range Weather Forecasts
-(ECMWF). The data can be directly downloaded from
+ERA5 data \citep{hersbach2020era5} is the latest reanalysis of global
+atmosphere, land surface, and ocean waves from 1950 onwards and is
+available in the NetCDF format from European Centre for Medium-Range
+Weather Forecasts (ECMWF). The data can be directly downloaded from
 \href{https://cds.climate.copernicus.eu/cdsapp\#!/dataset/reanalysis-era5-pressure-levels?tab=overview}{Copernicus
 Climate Data Store (CDS)} website or programmatically via an R package
-\pkg{ecmwfr} \citep{ecwmfr}. Variable \emph{specific humidity} and
-\emph{geopotential} are queried on the 10 hPa pressure level on four
-dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Once
-downloaded, the data can be read into a cubble as:
+\pkg{ecmwfr} \citep{ecwmfr}. The \code{era5-pressure} data contains
+variable \emph{specific humidity} and \emph{geopotential} on the 10 hPa
+pressure level on four dates: 2002-09-22, 2002-09-26, 2002-09-30, and
+2002-10-04. Once downloaded, the data can be read into a cubble as:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -954,8 +974,12 @@ R> dt <- as_cubble(raw, vars = c("q", "z"))
 \end{CodeInput}
 \end{CodeChunk}
 
-Readers who are interested in the analysis of the figure can refer to
-\citet{simmons2020global} and \citet{simmons2005ecmwf} for more details.
+Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in
+\citet{hersbach2020era5}. It shows the southern polar vortex splits into
+two on 2002-09-26 and further splits into four on 2002-10-04 in the
+stratosphere. Readers interested in the analysis of this figure can
+refer to \citet{hersbach2020era5}, \citet{simmons2020global} and
+\citet{simmons2005ecmwf} for more details.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -1094,11 +1118,13 @@ organising variables of different observational units. The data
 structure is also flexible to the techniques and packages analysts use
 to analyse the data, for example, in the matching example in section
 4.3, users are free to use algorithms from another package to cluster
-stations. Further development and maintenance of the package involves
-responding to changes in the tidyverse packages that \pkg{cubble}
-imports, in particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}.
-Another area for further development is to extend \pkg{cubble} to other
-spatial objects other than points.
+stations.
+
+Further development and maintenance of the package involves responding
+to changes in the tidyverse packages that \pkg{cubble} imports, in
+particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. Another area for
+further development is to extend \pkg{cubble} to other spatial objects
+other than points.
 
 \hypertarget{acknowledgement}{%
 \section{Acknowledgement}\label{acknowledgement}}
