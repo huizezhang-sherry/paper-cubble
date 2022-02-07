@@ -108,7 +108,7 @@ more recent implementations. \pkg{spatstat} \citep{spatstat} implements
 a \texttt{ppp} class for point pattern data; and more recent,
 \pkg{stars} \citep{stars} implements a spatio-temporal array with the
 dplyr's data cube structure \pkg{cubelyr} \citep{cubelyr} as its
-backend. While these implementations either store spatial and temporal
+back-end. While these implementations either store spatial and temporal
 variables all in a single table, hence duplicate the spatial variables
 for each temporal unit; or split them into two separate tables that has
 the problem of manually joining, mentioned in the previously. This
@@ -133,7 +133,7 @@ deals with some advanced considerations including data with hierarchical
 structure, data matching, and how cubble fits with existing static and
 interactive visualisation tools. Section 4 gives examples of the
 features introduced in the previous two sections with climate and
-hydrology data. An example on how cubble handle Netcdf data is also
+hydrology data. An example on how cubble handle NetCDF data is also
 provided. Section 5 concludes the paper.
 
 \hypertarget{the-cubble-package}{%
@@ -518,7 +518,7 @@ fine-tune the matching:
 
 This functionality can be seen as a matching
 \citep{stuart2010matching, mcintosh2018using} exercise in the
-spatio-temporal domain to pair up nearby observatoins. It can also be
+spatio-temporal domain to pair up nearby observations. It can also be
 considered as a form of data fusion
 \citep{castanedo2013review, cocchi2019data}, where data from multiple
 sources are combined together.
@@ -906,7 +906,7 @@ R> dt <- as_cubble(raw, vars = c("q", "z"))
 \end{CodeInput}
 \end{CodeChunk}
 
-Memory limit with Netcdf data in cubble depends on longitude grid point
+Memory limit with NetCDF data in cubble depends on longitude grid point
 x latitude grid point x time grid point x number of variable. Cubble can
 handle slightly more than 300 x 300 (longitude x longitude) grid points
 for 3 variables in one year and spatial grid can be reduced to trade for
@@ -914,7 +914,7 @@ longer time period and more variables. A 300 by 300 spatial grid can be
 a bounding box of {[}100, -80, 180, 0{]} at 0.25 degree resolution or
 global bounding box {[}-180, -90, 180, -90{]} at 1 degree resolution.
 Subsetting longitude and latitude grid is available through
-\code{long_range} and \code{lat_range} if the Netcdf file has finer
+\code{long_range} and \code{lat_range} if the NetCDF file has finer
 resolution than needed.
 
 \begin{CodeChunk}
@@ -1085,7 +1085,7 @@ analysts from spending time on organising variables of different
 observational units. The data structure is also flexible to the
 techniques and packages analysts use to analyse the data, for example,
 in the matching example in section 4.3, users are free to use algorithms
-from another pacakge to cluster stations. Further development and
+from another package to cluster stations. Further development and
 maintenance of the package involves responding to changes in the
 tidyverse packages that \pkg{cubble} imports, in particular,
 \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. Another area for further
