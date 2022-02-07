@@ -7,7 +7,7 @@ output: pdf_document
 
 Spatio-temporal data usually come in various forms and Figure \ref{fig:illu-input} shows four examples of this. These four examples show some common characters of the spatio-temporal data: 1) a spatial identifier, that uniquely identifies each site, 2) a temporal identifier, that prescribes the time stamp each site is recorded, 3) Coordinates, comprising of latitude and longitude, that locate each site on the map. These identifiers will be the building blocks for cubble. Spatio-temporal data can also be thought of as a data cube with three axes: id, time, and variable. Notice that in the time-variable face, time invariant variables share the same value across all the time stamps while time varying variables have values varying across time. This heterogeneity will be used to split the data into two forms in cubble.
 
-```{r illu-input, echo = FALSE, out.width = "100%", fig.cap="Illustration of incoming data formats for spatio-temporal data. (1) Data comes in as a single table; (2) Separate tables for spatial and temporal variables; (3) A single table with all the parameters used to query the database and a separate table for queried data; and (4) Cubical data in array or NetCDF format.", fig.align='center', out.height = "40%"}
+```{r illu-input, echo = FALSE, out.width = "100%", fig.cap="An illustration of different spatio-temporal data format: (1) a single table for all the variables; (2) separate tables for spatial and temporal variables; (3) a table of metadata used to query the database and a separate table for queried data; and (4) an array data structure of cube or hypercube.", fig.align='center', out.height = "40%"}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
 ```
 
@@ -15,7 +15,7 @@ In a cubble, there are two forms: nested form and long form, and Figure \ref{fig
 
 For those operations whose output involves both a spatial and temporal dimension, long form should be used. The long form is identified by both the spatial and temporal identifier and adopts a grouped dataframe (`grouped_df`) to forms each site as a group. Spatial variables are stored separately in a \pkg{tibble} as an special attribute of the long cubble. This design avoids repeating the spatial variables at each time stamp while not dropping information from spatial variables.
 
-```{r illu-cubble, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "Illustration of nested and long cubble."}
+```{r illu-cubble, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the nested and long form in cubble. The nested form defines each site in a row and nests the time varying variables into a single column \\code{ts}. The long form cubble uses \\code{id} and \\code{t} to identify each row and store the time invariant variables as an attribute, \\code{spatial}."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
 ```
 

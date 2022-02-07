@@ -9,7 +9,7 @@ output: pdf_document
 
 Spatial locations can have grouping structure that is either inherent to the data  (i.e. countries are nested in continents), or formed by clustering. Rather than analysing variables in the site level, summarised variables in the cluster level can give a crisper picture of local areas. In cubble, \code{switch_key()} can be used to create a new level of grouping of spatial location by specifying a clustering variable. Figure \ref{fig:illu-hier} illustrates the relationship of cubbles at station and cluster level, in both the long and nested form. By specifying \code{cluster_nested <- station_nested \%>\% switch_key(key = cluster)}, the cubble re-defines the cubble key from \code{id} in \code{station_nested} to \code{cluster} in \code{cluster_nested}. All the spatial variables variant to \code{cluster} are now nested into a \code{.val} column and cluster level variables can be computed in the same fashion as station level variables in \code{station_nested}. Following the same principal of \code{stretch}. the long form cluster level cubble expands the time series variables with both indices: \code{cluster} and \code{id}. All the cluster level variables are stored separately for recovering the nested from from the long form.
 
-```{r illu-hier, echo = FALSE, fig.align="center",out.height="40%", out.width = "100%", fig.cap = "Relationship between the station and cluster level cubble in both long and nested form."}
+```{r illu-hier, echo = FALSE, fig.align="center",out.height="40%", out.width = "100%", fig.cap = "An illustration of the original and cluster level cubble in the nested form long form for hierarchical structure data. \\code{switch\\_key()} changes the station level cubble into a cluster level cubble and both can be stretched into the long form."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
 ```
 
@@ -24,7 +24,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 <!-- [can also think about matching as a form of correlation between series from a statistics point of view.] -->
 
-```{r illu-matching, out.width="100%", fig.cap="An illustration of temporal matching in cubble. Three highest peaks are identified in each series and intervals are constructed on series A. Two peaks in series a fall into the intervals and hence the two series are considered to have 2 matches."}
+```{r illu-matching, out.width="100%", fig.cap="An illustration of temporal matching in cubble. Three highest peaks are identified in each series and intervals are constructed on series \\code{A}. Two peaks in series \\code{a} fall into the intervals and hence the two series are considered to have 2 matches."}
 knitr::include_graphics("figures/illu-matching.png")
 ```
 
@@ -46,7 +46,7 @@ Cubble fits in naturally with the interactive graphic pipeline discussed in the 
 
 The linking is also available from the time series plot to the map. The selection(s) on the time series is through selecting the point(s) on the time series and once a point is selected, it will be activated in the long cubble. All the observations that share the same \code{id} are then activated and this includes other points in the same time series in the long cubble and the corresponding observation of site in the nested cubble. These activated observations will then being reflected in the updated plots and Diagram \ref{fig:illu-interactive-2} in the Appendix illustrates this process. 
 
-```{r illu-interactive, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "An illustration of the data model under interactive graphics with cubble. The line plot and map is made separately with the long and nested cubble. When a station is selected on the map (left), the corresponding row in the nested cubble will be activated. This will link to all the rows with the same id in the long cubble (middle) and update the line plot (right)."}
+```{r illu-interactive, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "An illustration of the data model under interactive graphics with cubble. The line plot and the map is made separately with the long and nested cubble. When a station is selected on the map (left), the corresponding row in the nested cubble will be activated. This will link to all the rows with the same id in the long cubble (middle) and update the line plot (right)."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
 

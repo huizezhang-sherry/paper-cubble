@@ -63,7 +63,7 @@ ggplot() +
   ...
 ```
 
-```{r basic-manip, out.width="100%", out.height="70%", fig.cap="A glyph map of the mean maximum temperature by month for Victoria and New South Wales weather stations in Australia. On the top left corner is an insetted plot of station Cobar, which is highlighted in the black box."}
+```{r basic-manip, out.width="100%", out.height="70%", fig.cap="A glyph map of the average maximum temperature by month of Victoria and New South Wales weather stations in Australia. On the top left corner is an insetted plot of station Cobar highlighted in the black box."}
 knitr::include_graphics("figures/basic-manip.png")
 ```
 

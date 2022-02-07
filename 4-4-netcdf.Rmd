@@ -6,7 +6,7 @@ output: pdf_document
 
 ## ERA5: climate reanalysis data
 
-NetCDF (Network Common Data Form) is a data format commonly used in climatology community to deliver global mapping of atmosphere, ocean, and land. It has two major components: dimension to define the spatiotemporal grid (longitude, latitude, and time) and variable which populates the defined grid. Attributes are usually associated with dimension and variable in the NetCDF format data and a [metadata convention for climate and forecast](http://cfconventions.org/) has been designed to standardise this data format. Current packages on manipulating NetCDF data in R include a high-level R interface: \pkg{ncdf4} [@ncdf4], a low-level interface that calls C-interface: \pkg{RNetCDF} [@rnetcdf; @michna2013rnetcdf], and a tidyverse implementation: \pkg{tidync} [@tidync].
+NetCDF (Network Common Data Form) is a data format commonly used in climatology community to deliver global mapping of atmosphere, ocean, and land. It has two major components: dimension to define the spatio-temporal grid (longitude, latitude, and time) and variable which populates the defined grid. Attributes are usually associated with dimension and variable in the NetCDF format data and a [metadata convention for climate and forecast](http://cfconventions.org/) has been designed to standardise this data format. Current packages on manipulating NetCDF data in R include a high-level R interface: \pkg{ncdf4} [@ncdf4], a low-level interface that calls C-interface: \pkg{RNetCDF} [@rnetcdf; @michna2013rnetcdf], and a tidyverse implementation: \pkg{tidync} [@tidync].
 
 Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble}. It maps each combination of longitude and latitude into an \code{id} (the \code{key}) and nests time and variables in the nested form:
 
@@ -31,7 +31,7 @@ dt <- as_cubble(my_ncdf, vars = c("q", "z"),
 
 Figure \ref{fig:netcdf} gives an example of reproducing Figure 19 in @hersbach2020era5 using ERA5 data. ERA5 data [@hersbach2020era5] is the latest reanalysis of global atmosphere, land surface, and ocean waves from 1950 onwards and is available in the NetCDF format. It can be directly downloaded from the [Copernicus Climate Data Store (CDS)](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=overview) website or programmatically via R package \pkg{ecmwfr} [@ecwmfr]. Variable Specific humidity and geopotential are queried on the 10 hPa pressure level for four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04 and once downloaded, the data can be read into a cubble using the code above. Readers who are interested in the details of can refer to @simmons2020global and @simmons2005ecmwf.
 
-```{r netcdf, out.width="100%", fig.cap = "A reproduction of the second row of Figure 19 in  Hersbach (2020)."}
+```{r netcdf, out.width="100%", fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in  Hersbach et al (2020)."}
 knitr::include_graphics(here::here("figures/netcdf.png"))
 ```
 

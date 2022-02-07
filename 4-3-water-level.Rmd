@@ -19,7 +19,7 @@ river <- weatherdata::water %>%
   mutate(type = "river")
 ```
 
-```{r matching-map, out.width="100%", fig.cap="Location of climate station and river gauges in Victoria, Australia."}
+```{r matching-map, out.width="100%", fig.cap="Location of weather stations and river gauges in Victoria, Australia."}
 knitr::include_graphics("figures/matching-map.png")
 ```
 
@@ -43,7 +43,7 @@ res %>% print(n = 8)
 
 Figure \ref{fig:matching} plots the matched pairs on the map or to view the matched series and with the chosen parameter, there are four pairs of matches, which all locates in the middle Victoria and the concurrent increase of precipitation and water level can be observed.
 
-```{r matching, out.width="100%", fig.cap="Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The increases in the precipitation is reflected well by the water level."}
+```{r matching, out.width="100%", fig.cap="Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The increases in the precipitation is reflected by the water level."}
 knitr::include_graphics("figures/matching.png")
 ```
 

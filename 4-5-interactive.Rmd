@@ -27,7 +27,7 @@ crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 
 In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Overall, most regions in Australia have low variance of temperature range across different months while the north-west coastline, bottom of South Australia, and Victoria stands out with larger monthly changes. In the second row, Mount Elizabeth is selected on the map given its dark colour and this links to the ribbon on the right where there is a larger temperature range is presented in Australian winter (June to August). The third row selects the Grampian station in Victoria and the linked ribbon shows an opposite wider range in Australian summer period (December to February). The last row selects point with the lowest minimum temperature in August in the ribbon plot and surprisingly, this links to the Thredbo Airport in the Victoria and New South Wales border, rather than somewhere in the Tasmania island! 
 
-```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum nad minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in Auguest in the seasonal display. A location in the Tasmania Island is then selected and surprisingly, it is actually warmer than the Thredbo AWS.", fig.show='hold'}
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum nad minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in Auguest in the seasonal display. A location in the Tasmania Island is then selected to compare the temperature variation with Thredbo AWS.", fig.show='hold'}
 knitr::include_graphics(here::here("figures/linking.png"))
 knitr::include_graphics(here::here("figures/linking-north.png"))
 knitr::include_graphics(here::here("figures/linking-lower.png"))
@@ -58,7 +58,7 @@ leaflet(nested) %>%
 
 Figure \ref{fig:interactive-popup} shows the same content as Figure \ref{fig:interactive-linking} but made with leaflet and popups. 
 
-```{r interactive-popup, echo = FALSE, out.width="45%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Screenshots of variance of monthly temperature range from 2016 to 2020 in Australia. Upon clicking a single station on the leaftlet up, the temperature band will be shown as a subplot in the popup box.", fig.show='hold'}
+```{r interactive-popup, echo = FALSE, out.width="45%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Same as FIgure 11 with thetemperature variation shown as a popup in the leaflet map.", fig.show='hold'}
 knitr::include_graphics(here::here("figures/popup-mid.png")) 
 ```
 
