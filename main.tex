@@ -444,10 +444,74 @@ R> dt %>%
 \end{CodeOutput}
 \end{CodeChunk}
 
-\hypertarget{sf}{%
-\subsubsection{sf}\label{sf}}
+\hypertarget{sf-and-s2}{%
+\subsubsection{sf and s2}\label{sf-and-s2}}
 
-\textcolor{red}{add content}
+Cubble is compatible with simple feature geometry list-column
+(\code{sfc}) in \pkg{sf} and \code{s2_lnglat} vector in \pkg{S2} in the
+nested form. After creating a cubble, analysts can add the geometry
+vectors as needed to perform spatial operations:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> library(s2)
+R> # create a cubble
+R> cb <- climate_flat %>% 
++   cubble::as_cubble(key = id, index = date, coords = c(long, lat))
+R> 
+R> # western australia map
+R> wa <- ozmaps::abs_ste %>% filter(NAME == "Western Australia")
+R> 
+R> # create a `s2_lnglat` vector based on long and lat and filter stations in wa
+R> cb %>%
++   mutate(ll = s2_lnglat(long, lat)) %>% 
++   filter(s2_within(ll, wa))
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:   id [3]: nested form
+# bbox:     [115.97, -32.94, 117.18, -31.89]
+# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+  id            lat  long  elev name          wmo_id ts                 ll      
+  <chr>       <dbl> <dbl> <dbl> <chr>          <dbl> <list>             <s2_lng>
+1 ASN00009021 -31.9  116.  15.4 perth airport  94610 <tibble [366 x 4]> (115.97~
+2 ASN00010311 -31.9  117. 179   york           94623 <tibble [366 x 4]> (116.76~
+3 ASN00010614 -32.9  117. 338   narrogin       94627 <tibble [366 x 4]> (117.17~
+\end{CodeOutput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> library(sf)
+R> # simplify australia map
+R> aus <- ozmaps::abs_ste %>% rmapshaper::ms_simplify(keep = 0.01)
+R> 
+R> dt <- cb %>%
++   mutate(
++     # create `sfc` column based on long and lat
++     ll = st_sfc(
++       purrr::map2(long, lat, ~st_point(c(.x, .y))),
++       crs = st_crs(aus)),
++     # append state multi-polygon based on the `sfc` created
++     state = aus$geometry[st_within(ll, aus, sparse = FALSE)],
++     # adopt a different projection: lambert conformal conic (EPSG:3112)
++     state = st_transform(state, crs = "EPSG:3112"))
+R> 
+R> dt
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:   id [5]: nested form
+# bbox:     [115.97, -32.94, 133.55, -12.42]
+# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+  id            lat  long  elev name         wmo_id ts                        ll
+  <chr>       <dbl> <dbl> <dbl> <chr>         <dbl> <list>           <POINT [°]>
+1 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 <tibble~ (115.9764 -31.9275)
+2 ASN00010311 -31.9  117. 179   york          94623 <tibble~  (116.765 -31.8997)
+3 ASN00010614 -32.9  117. 338   narrogin      94627 <tibble~ (117.1797 -32.9342)
+4 ASN00014015 -12.4  131.  30.4 darwin airp~  94120 <tibble~ (130.8925 -12.4239)
+5 ASN00015131 -17.6  134. 220   elliott       94236 <tibble~ (133.5407 -17.5521)
+# ... with 1 more variable: state <MULTIPOLYGON [m]>
+\end{CodeOutput}
+\end{CodeChunk}
 
 \hypertarget{netcdf}{%
 \subsubsection{netcdf}\label{netcdf}}
@@ -638,13 +702,19 @@ illustrates this process.
 \subsection{Spatio-temporal
 transformations}\label{spatio-temporal-transformations}}
 
-\textcolor{red}{Glyph map + transforming on time (calendar plot) + projections (linear combination).}
+Spatio-temporal transformation is a useful technique to extract
+information form spatio-temporal data. Glyph maps \citep{Wickham2012-yr}
+transform the time coordinates into the space coordinates to plot the
+time series of different locations on the map. Calendar plots
+\citep{wang2020calendar} reconstructs time into calendar-based grid to
+discover weekday and weekend pattern. Projection, or linear combination,
+of variables summarises multivariate information into lower dimension to
+further digest. This section elaborates on the glyph map.
 
-Glyph map \citep{Wickham2012-yr} plots the time series as single glyph
-on the map and in \proglang{R}, \pkg{GGally} implements the glyph map
-through the \code{glyphs()} function. The function constructs a data
-frame with calculated position (\code{gx}. \code{gy}. \code{gid}) of
-each point on the time series using linear algebra (Equation 1 and 2 in
+In \proglang{R}, \pkg{GGally} implements glyph maps through the
+\code{glyphs()} function. The function constructs a data frame with
+calculated position (\code{gx}. \code{gy}. \code{gid}) of each point on
+the time series using linear algebra (Equation 1 and 2 in
 \citet{Wickham2012-yr}). The data can then be piped into \code{ggplot}
 to create the glyph map as:
 

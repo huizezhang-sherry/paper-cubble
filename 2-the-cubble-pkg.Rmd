@@ -99,10 +99,43 @@ dt %>%
   mutate(fabletools::features(ts, tmax, list(tmax_mean = mean, tmax_var = var)))
 ```
 
-### sf
+### sf and s2
 
-\textcolor{red}{add content}
+Cubble is compatible with simple feature geometry list-column (\code{sfc}) in \pkg{sf} and  \code{s2_lnglat} vector in \pkg{S2} in the nested form. After creating a cubble, analysts can add the geometry vectors as needed to perform spatial operations: 
 
+```{r echo = TRUE}
+library(s2)
+# create a cubble
+cb <- climate_flat %>% 
+  cubble::as_cubble(key = id, index = date, coords = c(long, lat))
+
+# western australia map
+wa <- ozmaps::abs_ste %>% filter(NAME == "Western Australia")
+
+# create a `s2_lnglat` vector based on long and lat and filter stations in wa
+cb %>%
+  mutate(ll = s2_lnglat(long, lat)) %>% 
+  filter(s2_within(ll, wa))
+```
+
+```{r echo = TRUE}
+library(sf)
+# simplify australia map
+aus <- ozmaps::abs_ste %>% rmapshaper::ms_simplify(keep = 0.01)
+
+dt <- cb %>%
+  mutate(
+    # create `sfc` column based on long and lat
+    ll = st_sfc(
+      purrr::map2(long, lat, ~st_point(c(.x, .y))),
+      crs = st_crs(aus)),
+    # append state multi-polygon based on the `sfc` created
+    state = aus$geometry[st_within(ll, aus, sparse = FALSE)],
+    # adopt a different projection: lambert conformal conic (EPSG:3112)
+    state = st_transform(state, crs = "EPSG:3112"))
+
+dt
+```
 
 
 ### netcdf
