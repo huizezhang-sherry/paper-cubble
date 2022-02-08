@@ -659,8 +659,8 @@ available in \code{match_sites()} to fine-tune the matching:
 This functionality can be seen as a matching exercise
 \citep{stuart2010matching, mcintosh2018using} in the spatio-temporal
 domain to pair up nearby observations. It can also be considered as a
-form of data fusion \citep{castanedo2013review, cocchi2019data}, where
-data from multiple sources are combined together.
+form of data fusion \citep{cocchi2019data}, where data from multiple
+sources are combined together.
 
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}
@@ -1162,7 +1162,8 @@ R> leaflet(nested) %>%
 \end{CodeChunk}
 
 Figure \ref{fig:interactive-popup} shows Figure
-\ref{fig:interactive-linking} made made with leaflet and popups.
+\ref{fig:interactive-linking} made made with leaflet and popups
+\citep{leafpop}.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -1206,6 +1207,8 @@ created using \pkg{knitr} \citep{knitr} and \pkg{rmarkdown}
 \citep{rmarkdown} in R. The source code for reproducing this paper can
 be found at: \url{https://github.com/huizezhang-sherry/paper-cubble}.
 
+\newpage
+
 \hypertarget{appendix}{%
 \section{Appendix}\label{appendix}}
 
@@ -1219,6 +1222,8 @@ be found at: \url{https://github.com/huizezhang-sherry/paper-cubble}.
 \caption[An illustration of the data model under interactive graphics with cubble]{An illustration of the data model under interactive graphics with cubble. When a point on the time series is selected, the corresponding row in the long cubble will be activated. This will link to all the rows with the same id in the long cubble and the row in the nested cubble with the smae id (middle). Both plots will be updated with the full line selected and the point highlighted on the map (right).}\label{fig:illu-interactive-2}
 \end{figure}
 \end{CodeChunk}
+
+\newpage
 
 \bibliography{references.bib}
 

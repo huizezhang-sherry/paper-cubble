@@ -32,7 +32,7 @@ knitr::include_graphics("figures/illu-matching.png")
  - \code{temporal_window}: the length of the interval - 5 in the example above
  - \code{temporal_min_match}: the minimum number of matched peak for a valid matched pair
 
-This functionality can be seen as a matching exercise [@stuart2010matching; @mcintosh2018using] in the spatio-temporal domain to pair up nearby observations. It can also be considered as a form of data fusion [@castanedo2013review; @cocchi2019data], where data from multiple sources are combined together. 
+This functionality can be seen as a matching exercise [@stuart2010matching; @mcintosh2018using] in the spatio-temporal domain to pair up nearby observations. It can also be considered as a form of data fusion [@cocchi2019data], where data from multiple sources are combined together. 
 
 ## Interactive graphics
 
