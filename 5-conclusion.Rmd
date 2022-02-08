@@ -8,12 +8,13 @@ This paper describes an \proglang{R} package \pkg{cubble} for manipulating and v
 
 Further development and maintenance of the package involves responding to changes in the tidyverse packages that \pkg{cubble} imports, in particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. Another area for further development is to extend \pkg{cubble} to other spatial objects other than points.
 
+\newpage
 
 # Acknowledgement
 
 This work is funded by the Commonwealth Scientific and Industrial Research Organisation (CSIRO) Data61 Scholarship and started while Nicolas Langrené was affiliated with CSIRO's Data61. The article is created using \pkg{knitr} [@knitr] and \pkg{rmarkdown} [@rmarkdown] in R. The source code for reproducing this paper can be found at: https://github.com/huizezhang-sherry/paper-cubble.
 
-\newpage
+
 
 # Appendix
 
