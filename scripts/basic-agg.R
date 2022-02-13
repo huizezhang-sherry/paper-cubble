@@ -24,9 +24,9 @@ station_long <- station_nested %>%
 cluster_long <- cluster_nested %>% 
   stretch(ts) %>% 
   mutate(wk = lubridate::week(date)) %>% 
-  group_by(id, wk) %>% 
-  summarise(prcp = sum(prcp, na.rm = TRUE)) %>% 
-  ungroup(id) %>% 
+  group_by(id, wk) %>%
+  summarise(prcp = sum(prcp, na.rm = TRUE)) %>%
+  ungroup(id) %>%
   summarise(prcp = mean(prcp, na.rm = TRUE)) %>% 
   migrate(cent_long, cent_lat)
 
@@ -34,7 +34,7 @@ state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
 
 ggplot_smooth <- cluster_long %>% 
   ggplot() +
-  geom_smooth(aes(x = wk, y = prcp, group = cluster)) 
+  geom_smooth(aes(x = wk, y = prcp, group = cluster), span = 0.4) 
 
 smoother <- layer_data(ggplot_smooth) %>% 
   left_join(cluster_long %>% select(cluster, cent_long, cent_lat), by = c("group" = "cluster"))
@@ -48,11 +48,14 @@ p1 <- ggplot(data = smoother,
   geom_glyph(height = 2, width = 4) + 
   theme_void()
 
-p3 <- plot_map(state_map) +
+p3 <- ggplot() + 
+  geom_sf(data = state_map, inherit.aes = FALSE,
+          color = "grey80", alpha = 0.4, linetype = 3) + 
   geom_point(data = station_nested, aes(x = long, y = lat), size = 0.5) +
   ggforce::geom_mark_hull(data = cluster_nested %>% tidyr::unnest(hull),
                           expand = 0, radius = 0,
-                          aes(x = long, y = lat, group = cluster)) 
+                          aes(x = long, y = lat, group = cluster)) + 
+  theme_void()
 
 (p1 | p3) + plot_annotation(tag_levels = 'A')
 ggsave(filename = "figures/basic-agg.png", width = 15, height = 7)

@@ -15,14 +15,11 @@ vic_map <- rmapshaper::ms_simplify(ozmaps::abs_ste %>% filter(NAME == "Victoria"
 plot_map(vic_map) +
   geom_point(data = dplyr::bind_rows(river, climate), 
              aes(x = long, y = lat, color = type)) + 
-  scale_color_brewer(palette = "Dark2") +
-  theme_bw() + 
-  theme(legend.position = "bottom") + 
-  labs(x = "Longitude", y = "Latitude")
+  scale_color_brewer(palette = "Dark2") 
 ggsave(filename = "figures/matching-map.png", width = 10, height = 5)  
 
 res <- match_sites(river, climate,
-                   temporal_var_to_match = c("Water_course_level" = "prcp"),
+                   temporal_by = c("Water_course_level" = "prcp"),
                    temporal_independent = "prcp",  
                    temporal_n_highest = 30,
                    temporal_min_match = 15)
@@ -31,13 +28,7 @@ p1 <- plot_map(vic_map) +
   geom_point(data = res, aes(x = long, y = lat, color = type)) +
   ggrepel::geom_label_repel(
     data = res %>% filter(type == "river"), aes(x = long, y = lat, label = group)) +
-  scale_color_brewer(palette = "Dark2") +
-  theme_minimal() +
-  theme(
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  ) + 
-  labs(x = "Longitude", y = "Latitude")
+  scale_color_brewer(palette = "Dark2") 
 
 res_long <- res %>%
   stretch(ts) %>%
@@ -51,9 +42,8 @@ p2 <- res_long %>%
   facet_wrap(vars(group)) +
   scale_color_brewer(palette = "Dark2", guide = "none") +
   theme_bw() +
-  labs(x = "week") +
   scale_x_date(date_labels = "%b") + 
-  labs(x = "Week", y = "Precipitation/ water level")
+  labs(x = "Date", y = "Precipitation/ water level")
 
 (p1 | p2) + 
   patchwork::plot_layout(guides = "collect") + 

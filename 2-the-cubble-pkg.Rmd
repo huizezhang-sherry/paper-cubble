@@ -81,7 +81,7 @@ Building from an \code{tbl_df} class, cubble has implemented methods for \pkg{dp
 
 ### tsibble
 
-Cubble is also compatible with \pkg{tsibble}. When creating a cubble from a tsibble, Only the \code{coords} argument needs to be specified: 
+Cubble is also compatible with \pkg{tsibble}. When creating a cubble from a tsibble, only the \code{coords} argument needs to be specified: 
 
 ```{r echo = TRUE}
 # casting a tsibble into cubble
