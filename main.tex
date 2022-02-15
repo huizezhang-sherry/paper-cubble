@@ -87,36 +87,60 @@ analysis}
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-Spatio-temporal data concerns variables in the spatial coordinates
-across time. Some variables are invariant to time and can be solely
-identified by its spatial location while other time varying variables
-need both the spatial and temporal identifiers to identify. Manipulating
-data in these two levels is usually done separately and the third tidy
-data principal \citep{tidydata} recommends each type of observational
-unit to form a table. Another feature for a spatio-temporal data
-structure to have is that variables created from subsequent operations
-can be automatically added to the existing table with the same level.
-This is better than an output that index the variables with the
-identifiers since otherwise analysts will need to manually join this
-output with existing variables in the same level.
+Spatio-temporal data concerns variables in the space across time.
+\textcolor{red}{Elaborate on variable, space, and time}. If the time
+interval is regular and each site has fixed point location, it can also
+be thought of as a data cube with three axes: spatial identifier,
+temporal identifier, and variable. In this cubical layout, variables can
+be those that are invariant to time, i.e.~the longitude and latitude
+coordinates, or those that varying across time. While conceptually the
+data format is relatively simple, the actual data object that comes to
+the analysts can be in various forms in practice. Figure
+\ref{fig:illu-input} shows four examples where the first one combines
+the time invariant and varying variables into a single table through
+duplicating the time invariant variables; 2) splits those variables into
+two separate sheets; 3) \ldots; and lastly 4) considers the array-based
+data, like NetCDF (Network Common Data Form) data, which is commonly
+used in earth science, e.g.~climatology, meteorology, and oceanography,
+among others, to organise multivariate data in a spatio-temporal grid.
 
-Currently, available spatio-temporal data structures in R includes:
-\pkg{spacetime} \citep{spacetime}, which proposes four space-time
-layouts: Full grid (STF), sparse grid(STS), irregular (STI), and
-trajectory (STT). \pkg{spacetime} is built on \pkg{sp} \citep{sp} and
-\pkg{xts} \citep{xts}, both of which have been replaced by more recent
-implementations. \pkg{spatstat} \citep{spatstat} implements a
+\textcolor{red}{think through a cube of long x lat x time vs. id x time x variable}
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
+
+}
+
+\caption[An illustration of different spatio-temporal data format]{An illustration of different spatio-temporal data format: (1) a single table for all the variables; (2) separate tables for spatial and temporal variables; (3) a table of metadata used to query the database and a separate table for queried data; and (4) an array data structure of cube or hypercube.}\label{fig:illu-input}
+\end{figure}
+\end{CodeChunk}
+
+\textcolor{red}{more beginning like "working with such data different authors ..."}
+Currently, there's various different spatio-temporal data structures in
+R includes: \pkg{spacetime} \citep{spacetime}, which proposes four
+space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI),
+and trajectory (STT). \pkg{spacetime} is built on \pkg{sp} \citep{sp}
+and \pkg{xts} \citep{xts}, both of which have been replaced by more
+recent implementations. \pkg{spatstat} \citep{spatstat} implements a
 \texttt{ppp} class for point pattern data; and more recent, \pkg{stars}
 \citep{stars} implements a spatio-temporal for vector and raster
-spatio-temporal data. While these implementations either store spatial
-and temporal variables all in a single table, hence duplicate the
-spatial variables at each temporal unit; or split them into two separate
-tables that analysts need to manually join the data constantly when
-doing the analysis. This creates a gap in the software development. The
-requirement for such a tool is important given the ubiquity of
-spatio-temporal vector data in the wild: climate observations from
-weather stations, air quality variables from air monitoring stations, or
-any variables that are measured at fixed location across time.
+spatio-temporal data.
+
+In spatio-temporal data analysis, analysts will receive one of the
+various data formats depends on the data provider and need to manually
+rearrange the data to fit into one of the data object in \proglang{R}
+before starting any analysis on the data itself. Looking at spatial or
+temporal data analysis, data objects like \pkg{sf} \citep{sf} and
+\pkg{tsibble} \citep{tsibble} have smoothed the data analysis in these
+two domains while there has not yet been a spatio-temporal data
+structure that makes it easy to explore spatio-temporal data and this
+creates a gap in the software development. The requirement for such a
+tool is important given the ubiquity of spatio-temporal vector data in
+the wild: climate observations from weather stations, air quality
+variables from air monitoring stations, or any variables that are
+measured at fixed location across time.
 
 This paper describes the implementation of a new spatio-temporal data
 structure: \pkg{cubble}. \pkg{Cubble} implements a data structure that
@@ -138,52 +162,20 @@ provided. Section 5 concludes the paper.
 \hypertarget{the-cubble-package}{%
 \section{The cubble package}\label{the-cubble-package}}
 
-Spatio-temporal data usually come to the analysts in various forms and
-Figure \ref{fig:illu-input} shows four examples of this. The first three
-are variations of tabular data that uses a single table (1) or multiple
-tables (2 \& 3) while the fourth uses a cube or hyper-cube to to
-represent the data. An example of the fourth type is the NetCDF (Network
-Common Data Form), commonly used in the climatology community to deliver
-global mapping of atmosphere, ocean, and land.
-
-These four examples show the common characters of the spatio-temporal
-data: 1) a spatial identifier that uniquely identifies each site, 2) a
-temporal identifier that prescribes the time stamp each site is
-recorded, 3) Coordinates, comprising of latitude and longitude, that
-locate the site on the map. These identifiers will be the building
-blocks for cubble. Another way to structure the spatio-temporal data is
-to think of it as a data cube with three axes: id, time, and variable.
-Notice that in the time-variable face of this cube, time invariant
-variables would share the same value across all the time stamps, while
-time varying variables have values varying across time. (Maybe add a
-cube diagram here). This heterogeneity will be used to split the data
-into two forms in cubble.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
-
-}
-
-\caption[An illustration of different spatio-temporal data format]{An illustration of different spatio-temporal data format: (1) a single table for all the variables; (2) separate tables for spatial and temporal variables; (3) a table of metadata used to query the database and a separate table for queried data; and (4) an array data structure of cube or hypercube.}\label{fig:illu-input}
-\end{figure}
-\end{CodeChunk}
-
-In a cubble, there are two forms: nested form and long form, and Figure
-\ref{fig:illu-cubble} sketches the two forms with the associated
-attributes. The decision on which form to use in data manipulation is
-output-oriented, meaning analysts need to first think about whether the
-output of an operation is identified only by the spatial identifier, or
-a combination of spatial and temporal identifier. The nested cubble is
-suitable for working with operations that are only identified by the
-site and this type of operation can be a pure manipulation of time
-invariant variables, or an operation that summarises time varying
-variables into site. Underneath the nested form, a cubble is built from
-a \code{rowwise_df} data frame where each site forms a separate group.
-This structure simplifies the calculation that involves temporal
-variables by avoiding the use of \code{purrr::map()} syntax when working
-with list-column.
+\textcolor{red}{more beginning} In cubble data can represented in two
+formats: nested form and long form, and Figure \ref{fig:illu-cubble}
+sketches the two forms with the associated attributes. The decision on
+which form to use in data manipulation is output-oriented, meaning
+analysts need to first think about whether the output of an operation is
+identified only by the spatial identifier, or a combination of spatial
+and temporal identifier. The nested cubble is suitable for working with
+operations that are only identified by the site and this type of
+operation can be a pure manipulation of time invariant variables, or an
+operation that summarises time varying variables into site. Underneath
+the nested form, a cubble is built from a \code{rowwise_df} data frame
+where each site forms a separate group. This structure simplifies the
+calculation that involves temporal variables by avoiding the use of
+\code{purrr::map()} syntax when working with list-column.
 
 For those operations whose output involves both a spatial and temporal
 identifier, long form should be used. The long form uses a
@@ -208,13 +200,15 @@ variables.
 \subsection{Create a cubble in the nested
 form}\label{create-a-cubble-in-the-nested-form}}
 
-A cubble can be created with \code{as_cubble()} by supplying the three
-key components: \code{key} as the spatial identifier; \code{index} as
-the temporal identifier; and a vector of \code{coords} in the order of
-longitude and latitude. The naming of \code{key} and \code{index}
-follows the convention in the \pkg{tsibble} package. Below is an example
-of creating a cubble and by default, the cubble created is in the nested
-form:
+\textcolor{red}{more beginning} A cubble can be created with
+\code{as_cubble()} by supplying the three key components: \code{key} as
+the spatial identifier; \code{index} as the temporal identifier; and a
+vector of \code{coords} in the order of longitude and latitude. The
+naming of \code{key} and \code{index} follows the convention in the
+\pkg{tsibble} package.
+\textcolor{red}{give some context of the data about to be used: a subset of a larger data etc}
+Below is an example of creating a cubble and by default, the cubble
+created is in the nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -375,6 +369,9 @@ R> cubble_mig %>% tamp() %>% stretch()
 \subsection{Compatibility with existing
 packages}\label{compatibility-with-existing-packages}}
 
+\textcolor{red}{A beginning sentence that summarises the subsection}.
+\textcolor{red}{Given more details and examples when going through each subsection}
+
 \hypertarget{dplyr}{%
 \subsubsection{dplyr}\label{dplyr}}
 
@@ -396,7 +393,7 @@ Building from an \code{tbl_df} class, cubble has implemented methods for
 \subsubsection{tsibble}\label{tsibble}}
 
 Cubble is also compatible with \pkg{tsibble}. When creating a cubble
-from a tsibble, Only the \code{coords} argument needs to be specified:
+from a tsibble, only the \code{coords} argument needs to be specified:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -601,9 +598,9 @@ same fashion as station level variables in \code{station_nested}.
 \hypertarget{data-fusion-and-matching}{%
 \subsection{Data fusion and matching}\label{data-fusion-and-matching}}
 
-Cubble provides functionality for matching sites from two data sources.
-To be a valid pair of matching, the matched pair from different data
-sources need to:
+\textcolor{red}{more beginning} Cubble provides functionality for
+matching sites from two data sources. To be a valid pair of matching,
+the matched pair from different data sources need to:
 
 \begin{itemize}
 \tightlist

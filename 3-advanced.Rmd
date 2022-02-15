@@ -15,7 +15,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Data fusion and matching
 
-Cubble provides functionality for matching sites from two data sources. To be a valid pair of matching, the matched pair from different data sources need to:
+\textcolor{red}{more beginning} Cubble provides functionality for matching sites from two data sources. To be a valid pair of matching, the matched pair from different data sources need to:
 
   - be spatially close to each other, and 
   - have similar temporal movement
