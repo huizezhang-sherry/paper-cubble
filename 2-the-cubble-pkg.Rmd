@@ -5,9 +5,9 @@ output: pdf_document
 
 # The cubble package
 
-\textcolor{red}{more beginning} In cubble data can represented in two formats: nested form and long form, and Figure \ref{fig:illu-cubble} sketches the two forms with the associated attributes. The decision on which form to use in data manipulation is output-oriented, meaning analysts need to first think about whether the output of an operation is identified only by the spatial identifier, or a combination of spatial and temporal identifier. The nested cubble is suitable for working with operations that are only identified by the site and this type of operation can be a pure manipulation of time invariant variables, or an operation that summarises time varying variables into site. Underneath the nested form, a cubble is built from a \code{rowwise_df} data frame where each site forms a separate group. This structure simplifies the calculation that involves temporal variables by avoiding the use of \code{purrr::map()} syntax when working with list-column.
+\textcolor{red}{more beginning} In cubble data can represented in two formats: nested form and long form, and Figure \ref{fig:illu-cubble} sketches the two forms with the associated attributes. The decision on which form to use in data manipulation is output-oriented, meaning analysts need to first think about whether the output of an operation is identified only by the spatial identifier, or a combination of spatial and temporal identifier. The nested cubble is suitable for working with operations that are only identified by the site and this type of operation can be a pure manipulation of time invariant variables, or an operation that summarises time varying variables into site. Underneath the nested form, a cubble is built from a \code{rowwise_df} class where each site forms a separate group. This structure simplifies the calculation that involves temporal variables by avoiding the use of \code{purrr::map()} syntax when working with list-column.
 
-For those operations whose output involves both a spatial and temporal identifier, long form should be used. The long form uses a  \code{grouped_df} data frame to forms all the time of a site as a group. Time invariant variables are stored separately as an special attribute of the long cubble. This design avoids repeating the spatial variables at each time stamp while not dropping information from spatial variables.
+For those operations whose output involves both a spatial and temporal identifier, long form should be used. The long form uses a  \code{grouped_df} class to forms all the time of a site as a group. Time invariant variables are stored separately as an special attribute of the long cubble. This design avoids repeating the spatial variables at each time stamp while not dropping information from spatial variables.
 
 ```{r illu-cubble, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the nested and long form in cubble. The nested form defines each site in a row and nests the time varying variables into a single column \\code{ts}. The long form cubble uses \\code{id} and \\code{t} to identify each row and store the time invariant variables as an attribute, \\code{spatial}."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
@@ -15,7 +15,9 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Create a cubble in the nested form
 
-\textcolor{red}{more beginning} A cubble can be created with \code{as_cubble()} by supplying the three key components: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order of longitude and latitude. The naming of \code{key} and \code{index} follows the convention in the \pkg{tsibble} package. \textcolor{red}{give some context of the data about to be used: a subset of a larger data etc} Below is an example of creating a cubble and by default, the cubble created is in the nested form: 
+To use functions in the `cubble` package, an analyst will need to first turn the data object into a \code{cubble} class. \code{as_cubble()} does this through supplying the three key components: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order of longitude and latitude. The use of \code{key} and \code{index} follows the convention in the \pkg{tsibble} package. The cubble created by default is in the nested form.
+
+Before the formal examples in Section \ref{examples}, each function introduced in this section will be demonstrated with a short example with a data that contains 5 Australia weather stations, a subset of hundreds of weather stations in Australia. This dataset contains spatial information of each station: station id, latitude, longitude, elevation, station name and World Meteorology Organisation ID and also daily temporal information: date, maximum and minimum temperature and precipitation for 2020. \code{climate_flat} stores this data in format 1) in Figure \ref{fig:illu-input} and the code below creates a cubble out of \code{climate_flat} with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
 
 ```{r echo = TRUE}
 cubble_nested <- cubble::climate_flat %>%
@@ -23,20 +25,22 @@ cubble_nested <- cubble::climate_flat %>%
 cubble_nested
 ```
 
-There are a few information in the cubble header: the name of the \code{key} variable: \code{id} and its number: 5, the bounding box: \code{[115.97, -32.94, 133.55, -12.42]} , and also the name of variable nested in the \code{ts} column with its type: \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}. 
+There are a few information in the cubble header: the name of the \code{key} variable: \code{id} and its unique number: 5, the bounding box: \code{[115.97, -32.94, 133.55, -12.42]} , and also the name of variable nested in the \code{ts} column with its type: \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}. 
 
 ## Stretch a nested cubble into the long form
 
-The long cubble is suitable to manipulate the time dimension of the data and  \code{stretch()} switches the nested cubble into the long cubble. It first extracts all the spatial variables into a separate tibble and then unnests the \code{ts} column. The spatial variables are then attached as an attributes of the long cubble and can be accessed through `spatial()`:
+The nested format is convenient for those operations whose output doesn't contain a time dimension, for those that are identified by both the spatial and temporal identifier, a long cubble is more suitable. Analysts will need to switch the nested cubble into a long cubble for such operation and \code{stretch()} is designed for this purpose: it first extracts all the spatial variables into a separate tibble and then unnests the \code{ts} column. This code switches the nested cubble just created into its long form:
 
 ```{r echo = TRUE}
 cubble_long <- cubble_nested %>% stretch(ts)
 cubble_long
-
-spatial(cubble_long)
 ```
 
-Notice that the third line in the header now shows the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}.
+Notice that the third line in the header now shows the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. The spatial variables are still part of the data object but as a \code{spatial} attribute:
+
+```{r}
+attr(cubble_long, "spatial")
+```
 
 ## Tamp a long cubble back to the nested form
 
@@ -49,14 +53,14 @@ cubble_back
 
 ## Migrate spatial variables to a long cubble
 
-Analysts may need the time invariant and varying variable to be in the same table to apply certain function. In cubble, this can be done through \code{migrate()}, which moves the time invariant variables into the long cubble:
+Sometimes, analysts may need the spatial and temporal variable to be in the same table to apply some variable transformation. Cubble allows this operation through \code{migrate()}, which  moves the specified spatial variables into the long cubble:
 
 ```{r echo = TRUE}
 cubble_mig <- cubble_long %>% migrate(long, lat)
 cubble_mig
 ```
 
-Notice that these added time invariant variables will not be remembered by cubble and will disappear if switched to the nested form and then switched back. Hence, \code{migrate()} should usually be used as the last step of the analysis:
+This operation should generally be used in the last step of the analysis since it is a temporary operation, meaning meaning these added spatial variables will disappear if switched to the nested form and then switched back: 
 
 ```{r echo = TRUE}
 cubble_mig %>% tamp() %>% stretch()
@@ -64,9 +68,7 @@ cubble_mig %>% tamp() %>% stretch()
 
 ## Compatibility with existing packages
 
-\textcolor{red}{A beginning sentence that summarises the subsection}. 
-\textcolor{red}{Given more details and examples when going through each subsection}
-
+The last 4 subsections introduces operations specific to the \code{cubble} class and this section will demonstrate how the \code{cubble} class interacts with existing packages, specifically, \code{dplyr}, \code{tsibble}, \code{sf}, and \code{netcdf4}.
 
 ### dplyr
 

@@ -172,18 +172,17 @@ and temporal identifier. The nested cubble is suitable for working with
 operations that are only identified by the site and this type of
 operation can be a pure manipulation of time invariant variables, or an
 operation that summarises time varying variables into site. Underneath
-the nested form, a cubble is built from a \code{rowwise_df} data frame
-where each site forms a separate group. This structure simplifies the
+the nested form, a cubble is built from a \code{rowwise_df} class where
+each site forms a separate group. This structure simplifies the
 calculation that involves temporal variables by avoiding the use of
 \code{purrr::map()} syntax when working with list-column.
 
 For those operations whose output involves both a spatial and temporal
 identifier, long form should be used. The long form uses a
-\code{grouped_df} data frame to forms all the time of a site as a group.
-Time invariant variables are stored separately as an special attribute
-of the long cubble. This design avoids repeating the spatial variables
-at each time stamp while not dropping information from spatial
-variables.
+\code{grouped_df} class to forms all the time of a site as a group. Time
+invariant variables are stored separately as an special attribute of the
+long cubble. This design avoids repeating the spatial variables at each
+time stamp while not dropping information from spatial variables.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -200,15 +199,26 @@ variables.
 \subsection{Create a cubble in the nested
 form}\label{create-a-cubble-in-the-nested-form}}
 
-\textcolor{red}{more beginning} A cubble can be created with
-\code{as_cubble()} by supplying the three key components: \code{key} as
-the spatial identifier; \code{index} as the temporal identifier; and a
-vector of \code{coords} in the order of longitude and latitude. The
-naming of \code{key} and \code{index} follows the convention in the
-\pkg{tsibble} package.
-\textcolor{red}{give some context of the data about to be used: a subset of a larger data etc}
-Below is an example of creating a cubble and by default, the cubble
-created is in the nested form:
+To use functions in the \texttt{cubble} package, an analyst will need to
+first turn the data object into a \code{cubble} class.
+\code{as_cubble()} does this through supplying the three key components:
+\code{key} as the spatial identifier; \code{index} as the temporal
+identifier; and a vector of \code{coords} in the order of longitude and
+latitude. The use of \code{key} and \code{index} follows the convention
+in the \pkg{tsibble} package. The cubble created by default is in the
+nested form.
+
+Before the formal examples in Section \ref{examples}, each function
+introduced in this section will be demonstrated with a short example
+with a data that contains 5 Australia weather stations, a subset of
+hundreds of weather stations in Australia. This dataset contains spatial
+information of each station: station id, latitude, longitude, elevation,
+station name and World Meteorology Organisation ID and also daily
+temporal information: date, maximum and minimum temperature and
+precipitation for 2020. \code{climate_flat} stores this data in format
+1) in Figure \ref{fig:illu-input} and the code below creates a cubble
+out of \code{climate_flat} with \code{id} as the key, \code{date} as the
+index, and \code{c(long, lat)} as the coordinates:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -218,7 +228,7 @@ R> cubble_nested
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   id [5]: nested form
-# bbox:     [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
+# bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
   id            lat  long  elev name           wmo_id ts                
   <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
@@ -231,21 +241,23 @@ R> cubble_nested
 \end{CodeChunk}
 
 There are a few information in the cubble header: the name of the
-\code{key} variable: \code{id} and its number: 5, the bounding box:
-\code{[115.97, -32.94, 133.55, -12.42]} , and also the name of variable
-nested in the \code{ts} column with its type:
+\code{key} variable: \code{id} and its unique number: 5, the bounding
+box: \code{[115.97, -32.94, 133.55, -12.42]} , and also the name of
+variable nested in the \code{ts} column with its type:
 \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
 
 \hypertarget{stretch-a-nested-cubble-into-the-long-form}{%
 \subsection{Stretch a nested cubble into the long
 form}\label{stretch-a-nested-cubble-into-the-long-form}}
 
-The long cubble is suitable to manipulate the time dimension of the data
-and \code{stretch()} switches the nested cubble into the long cubble. It
+The nested format is convenient for those operations whose output
+doesn't contain a time dimension, for those that are identified by both
+the spatial and temporal identifier, a long cubble is more suitable.
+Analysts will need to switch the nested cubble into a long cubble for
+such operation and \code{stretch()} is designed for this purpose: it
 first extracts all the spatial variables into a separate tibble and then
-unnests the \code{ts} column. The spatial variables are then attached as
-an attributes of the long cubble and can be accessed through
-\texttt{spatial()}:
+unnests the \code{ts} column. This code switches the nested cubble just
+created into its long form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -265,9 +277,15 @@ R> cubble_long
 5 ASN00009021 2020-01-05     0  35.3  11.6
 # ... with 1,825 more rows
 \end{CodeOutput}
-\begin{CodeInput}
-R> spatial(cubble_long)
-\end{CodeInput}
+\end{CodeChunk}
+
+Notice that the third line in the header now shows the name and type of
+spatial variables:
+\code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. The
+spatial variables are still part of the data object but as a
+\code{spatial} attribute:
+
+\begin{CodeChunk}
 \begin{CodeOutput}
 # A tibble: 5 x 6
   id            lat  long  elev name           wmo_id
@@ -279,10 +297,6 @@ R> spatial(cubble_long)
 5 ASN00015131 -17.6  134. 220   elliott         94236
 \end{CodeOutput}
 \end{CodeChunk}
-
-Notice that the third line in the header now shows the name and type of
-spatial variables:
-\code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}.
 
 \hypertarget{tamp-a-long-cubble-back-to-the-nested-form}{%
 \subsection{Tamp a long cubble back to the nested
@@ -300,7 +314,7 @@ R> cubble_back
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   id [5]: nested form
-# bbox:     [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
+# bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
   id            lat  long  elev name           wmo_id ts                
   <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
@@ -316,10 +330,10 @@ R> cubble_back
 \subsection{Migrate spatial variables to a long
 cubble}\label{migrate-spatial-variables-to-a-long-cubble}}
 
-Analysts may need the time invariant and varying variable to be in the
-same table to apply certain function. In cubble, this can be done
-through \code{migrate()}, which moves the time invariant variables into
-the long cubble:
+Sometimes, analysts may need the spatial and temporal variable to be in
+the same table to apply some variable transformation. Cubble allows this
+operation through \code{migrate()}, which moves the specified spatial
+variables into the long cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -328,7 +342,7 @@ R> cubble_mig
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
-# bbox:    [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
+# bbox:    [115.97, -32.94, 133.55, -12.42]
 # spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin  long   lat
   <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
@@ -341,10 +355,10 @@ R> cubble_mig
 \end{CodeOutput}
 \end{CodeChunk}
 
-Notice that these added time invariant variables will not be remembered
-by cubble and will disappear if switched to the nested form and then
-switched back. Hence, \code{migrate()} should usually be used as the
-last step of the analysis:
+This operation should generally be used in the last step of the analysis
+since it is a temporary operation, meaning meaning these added spatial
+variables will disappear if switched to the nested form and then
+switched back:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -352,7 +366,7 @@ R> cubble_mig %>% tamp() %>% stretch()
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
-# bbox:    [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
+# bbox:    [115.97, -32.94, 133.55, -12.42]
 # spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
@@ -369,8 +383,10 @@ R> cubble_mig %>% tamp() %>% stretch()
 \subsection{Compatibility with existing
 packages}\label{compatibility-with-existing-packages}}
 
-\textcolor{red}{A beginning sentence that summarises the subsection}.
-\textcolor{red}{Given more details and examples when going through each subsection}
+The last 4 subsections introduces operations specific to the
+\code{cubble} class and this section will demonstrate how the
+\code{cubble} class interacts with existing packages, specifically,
+\code{dplyr}, \code{tsibble}, \code{sf}, and \code{netcdf4}.
 
 \hypertarget{dplyr}{%
 \subsubsection{dplyr}\label{dplyr}}
@@ -405,7 +421,7 @@ R> dt
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   id [5]: nested form
-# bbox:     [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
+# bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
   id            lat  long  elev name           wmo_id ts                
   <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
@@ -429,7 +445,7 @@ R> dt %>%
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   id [5]: nested form
-# bbox:     [115.97, -32.94, 133.55, -12.42]- check gap on long and lat
+# bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
   id            lat  long  elev name           wmo_id ts      tmax_mean tmax_var
   <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>      <dbl>    <dbl>
