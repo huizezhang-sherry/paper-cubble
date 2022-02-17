@@ -87,24 +87,25 @@ analysis}
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-Spatio-temporal data concerns variables in the space across time.
-\textcolor{red}{Elaborate on variable, space, and time}. If the time
-interval is regular and each site has fixed point location, it can also
-be thought of as a data cube with three axes: spatial identifier,
-temporal identifier, and variable. In this cubical layout, variables can
-be those that are invariant to time, i.e.~the longitude and latitude
-coordinates, or those that varying across time. While conceptually the
-data format is relatively simple, the actual data object that comes to
-the analysts can be in various forms in practice. Figure
-\ref{fig:illu-input} shows four examples where the first one combines
-the time invariant and varying variables into a single table through
-duplicating the time invariant variables; 2) splits those variables into
-two separate sheets; 3) \ldots; and lastly 4) considers the array-based
-data, like NetCDF (Network Common Data Form) data, which is commonly
-used in earth science, e.g.~climatology, meteorology, and oceanography,
-among others, to organise multivariate data in a spatio-temporal grid.
+Spatio-temporal data concerns variables observed in the space across
+time and this paper focuses on the spatio-temporal vector data with
+fixed locations and regular time interval. This type of data can
+naturally been considered as a data cube and here a cube with three
+axes: spatial identifier, temporal identifier, and variable can be used
+to conceptualise spatio-temporal data. In this cubic formation, space
+only occupy one dimension, rather than two, to avoid the needs of
+hypercube for multivariate spatio-temporal data.
 
-\textcolor{red}{think through a cube of long x lat x time vs. id x time x variable}
+While conceptually the data format is relatively simple, the actual data
+object that comes to the analysts in the analysis can be in various
+forms. Figure \ref{fig:illu-input} shows four examples of wild
+spatio-temporal data: 1) combines the time invariant and varying
+variables into a single table through duplicating the time invariant
+variables; 2) splits those variables into a separate spatial table and a
+temporal table; 3) \ldots; and lastly 4) is array-based data, like
+NetCDF (Network Common Data Form) data, which is commonly used in earth
+science, e.g.~climatology, meteorology, and oceanography, among others,
+to organise multivariate data in a spatio-temporal grid.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -113,34 +114,34 @@ among others, to organise multivariate data in a spatio-temporal grid.
 
 }
 
-\caption[An illustration of different spatio-temporal data format]{An illustration of different spatio-temporal data format: (1) a single table for all the variables; (2) separate tables for spatial and temporal variables; (3) a table of metadata used to query the database and a separate table for queried data; and (4) an array data structure of cube or hypercube.}\label{fig:illu-input}
+\caption[An illustration of different spatio-temporal data format]{An illustration of different spatio-temporal data format: (1) a single table for all the variables; (2) separate tables for spatial and temporal variables; (3) a table of metadata used to query the database and a separate table for queried data; and (4) an array data structure.}\label{fig:illu-input}
 \end{figure}
 \end{CodeChunk}
 
-\textcolor{red}{more beginning like "working with such data different authors ..."}
-Currently, there's various different spatio-temporal data structures in
-R includes: \pkg{spacetime} \citep{spacetime}, which proposes four
-space-time layouts: Full grid (STF), sparse grid(STS), irregular (STI),
-and trajectory (STT). \pkg{spacetime} is built on \pkg{sp} \citep{sp}
-and \pkg{xts} \citep{xts}, both of which have been replaced by more
-recent implementations. \pkg{spatstat} \citep{spatstat} implements a
-\texttt{ppp} class for point pattern data; and more recent, \pkg{stars}
-\citep{stars} implements a spatio-temporal for vector and raster
-spatio-temporal data.
+Different authors have proposed various data objects to work with
+spatial temporal data in \proglang{R} and this includes: \pkg{spacetime}
+\citep{spacetime} is built on the \pkg{sp} \citep{sp} and \pkg{xts}
+\citep{xts} class and both of which have been replaced by more recent
+spatial and temporal data objects. \pkg{spatstat} \citep{spatstat}
+implements a \texttt{ppp} class for analysing point pattern data; and
+more recent, \pkg{stars} \citep{stars} has implemented an
+spatio-temporal array for wrangling both vector and raster data.
 
+\textcolor{red}{Think again on the motivation and why it is hard to work existing tools.}
 In spatio-temporal data analysis, analysts will receive one of the
 various data formats depends on the data provider and need to manually
 rearrange the data to fit into one of the data object in \proglang{R}
-before starting any analysis on the data itself. Looking at spatial or
-temporal data analysis, data objects like \pkg{sf} \citep{sf} and
-\pkg{tsibble} \citep{tsibble} have smoothed the data analysis in these
-two domains while there has not yet been a spatio-temporal data
-structure that makes it easy to explore spatio-temporal data and this
-creates a gap in the software development. The requirement for such a
-tool is important given the ubiquity of spatio-temporal vector data in
-the wild: climate observations from weather stations, air quality
-variables from air monitoring stations, or any variables that are
-measured at fixed location across time.
+before starting any analysis on the data itself.
+
+Looking at spatial or temporal data analysis, data objects like \pkg{sf}
+\citep{sf} and \pkg{tsibble} \citep{tsibble} have smoothed the data
+analysis in these two domains while there has not yet been a
+spatio-temporal data structure that makes it easy to explore
+spatio-temporal data and this creates a gap in the software development.
+The requirement for such a tool is important given the ubiquity of
+spatio-temporal vector data in the wild: climate observations from
+weather stations, air quality variables from air monitoring stations, or
+any variables that are measured at fixed location across time.
 
 This paper describes the implementation of a new spatio-temporal data
 structure: \pkg{cubble}. \pkg{Cubble} implements a data structure that
