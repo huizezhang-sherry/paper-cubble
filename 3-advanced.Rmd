@@ -48,7 +48,7 @@ The linking is also available from the time series plot to the map. The selectio
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
 
-## Spatio-temporal transformations
+## Spatio-temporal transformations {#st_transformation}
 
 Spatio-temporal transformation is a useful technique to extract information form spatio-temporal data. Glyph maps [@Wickham2012-yr] transform the time coordinates into the space coordinates to plot the time series of different locations on the map. Calendar plots [@wang2020calendar] reconstructs time into calendar-based grid to discover weekday and weekend pattern. Projection, or linear combination, of variables summarises multivariate information into lower dimension to further digest. This section elaborates on the glyph map. 
 
