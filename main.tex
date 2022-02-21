@@ -88,21 +88,18 @@ analysis}
 \section{Introduction}\label{introduction}}
 
 Spatio-temporal data concerns variables observed in the space across
-time and this paper focuses on the spatio-temporal vector data with
-fixed locations and regular time interval. This type of data can
-naturally been considered as a data cube and here a cube with three
-axes: spatial identifier, temporal identifier, and variable can be used
-to conceptualise spatio-temporal data. In this cubic formation, space
-only occupy one dimension, rather than two, to avoid the needs of
-hypercube for multivariate spatio-temporal data. While conceptually the
-data format is relatively simple, the actual data object that comes to
-the analysts in the analysis can be in various forms. Figure
-\ref{fig:illu-input} shows four examples of wild spatio-temporal data:
-1) combines the time invariant and varying variables into a single table
-through duplicating the time invariant variables; 2) splits those
-variables into a separate spatial table and a temporal table; 3) \ldots;
-and lastly 4) is array-based data, like NetCDF (Network Common Data
-Form) data, which is commonly used in earth science, e.g.~climatology,
+time and this paper focuses on spatio-temporal vector data with fixed
+locations and regular time interval. This type of data can naturally
+been considered as a data cube with three axes: spatial identifier,
+temporal identifier, and variable. In this cubic formation, space only
+occupies one axis, rather than two, to avoid hypercubes for multivariate
+spatio-temporal data. While conceptually the data format is relatively
+simple, the data objects coming to the analysts can vary in forms in the
+analysis. Figure \ref{fig:illu-input} shows four examples of wild
+spatio-temporal data: 1) a single table that includes both the spatial
+and temporal variables; 2) separate tables for spatial and temporal
+variables; 3) array-based data, i.e.~NetCDF (Network Common Data Form)
+data, which is commonly used in earth science, e.g.~climatology,
 meteorology, and oceanography, among others, to organise multivariate
 data in a spatio-temporal grid.
 
@@ -113,66 +110,66 @@ data in a spatio-temporal grid.
 
 }
 
-\caption[An illustration of different spatio-temporal data format]{An illustration of different spatio-temporal data format: (1) a single table for all the variables; (2) separate tables for spatial and temporal variables; (3) a table of metadata used to query the database and a separate table for queried data; and (4) an array data structure.}\label{fig:illu-input}
+\caption[An illustration of different spatio-temporal data layout]{An illustration of different spatio-temporal data layout: (1) a single table for both spatial and temporal variables; (2) separate tables for spatial and temporal variables; and (3) an array data structure that populates variables into a gridded longitude-latitude-time (hyper)cube.}\label{fig:illu-input}
 \end{figure}
 \end{CodeChunk}
 
-Different authors have proposed various data objects to work with
-spatial temporal data in \proglang{R}. \pkg{spacetime} \citep{spacetime}
-is built on the \pkg{sp} \citep{sp} and \pkg{xts} \citep{xts} class and
-both of which have been replaced by more recent spatial and temporal
-data objects. \pkg{spatstat} \citep{spatstat} implements a \texttt{ppp}
-class for analysing point pattern data; and more recent, \pkg{stars}
-\citep{stars} has implemented an spatio-temporal array for wrangling
-both vector and raster data.
-
 None of these three formats in Figure \ref{fig:illu-input} is not
-particularly convenient to work with. To augment a one-site-per-row
-summary with the original spatial variables in a single table format
-(example 1 in Figure \ref{fig:illu-input}), analysts will need to first
-make a distinct one-site-per-row summary of the original spatial
-variables before the join. This step adds few value to the analyais but
-is a tedious step that first select all the spatial variables and then
-find the distinct row of each. In another type of operation that filter
-the sites based on per-site summary, intermediate objects, like the
-per-station summary and the filtered station id vector, will need be
-created as standalone objects in the environment. The spirit of using
+particularly convenient to work with. In the single table format, to
+avoid plotting duplicated points of the same sites on the map, analysts
+always need to create a spatial variables table from the original single
+table. This can be a tedious step if needs to performed many times
+during the analysis. In another type of operation that filter the sites
+based on certain statistics, intermediate objects, like the per-station
+summary of the statistic and the filtered station ID vector, will need
+be created as standalone objects in the environment. The spirit of using
 pipe reduces the intermediate data objects that are unnecessarily
 created in the analysis while in this case, these only-used-once data
-objects are hard to be incorporated into a piping workflow. In addition,
-if the data is organised as a separate spatial and temporal table as
-example 2 in Figure \ref{fig:illu-input}, the filter on site ID will
-need to performed twice in each table to keep them both up-to-date. With
-the array data structure, although it can easily store and wrangle large
-spatio-temporal data, the 3D or higher array can be less intuitive than
-a 2D tabular data in data wrangling.
+objects can hardly be incorporated into a piping workflow in the
+analysis. In addition, if the data is organised as a separate spatial
+and temporal table as format 2 in Figure \ref{fig:illu-input}, the
+filter on site ID will need to performed twice in each table to keep
+them both up-to-date. With the array data structure, although it can
+easily store and wrangle large spatio-temporal data, the 3D or higher-D
+array can be less intuitive than a 2D tabular data structure for some
+analysts in data wrangling.
 
-Data objects like \pkg{sf} \citep{sf} and \pkg{tsibble} \citep{tsibble}
-have smoothed the data analysis in spatial or temporal data analysis,
-while there has not yet been a spatio-temporal data structure that makes
-it easy to explore spatio-temporal data and this creates a gap in the
-software development. The requirement for such a tool is important given
-the ubiquity of spatio-temporal vector data in the wild: climate
-observations from weather stations, air quality variables from air
-monitoring stations, or any variables that are measured at fixed
-location across time.
+In the \proglang{R} community, different data objects have been proposed
+to work with spatio-temporal data. \pkg{spacetime} \citep{spacetime} is
+built on class \pkg{sp} \citep{sp} and \pkg{xts} \citep{xts} and both of
+which have been replaced by more recent spatial and temporal data
+objects. \pkg{spatstat} \citep{spatstat} implements a \texttt{ppp} class
+for analysing point pattern data; and more recent, \pkg{stars}
+\citep{stars} has implemented a spatio-temporal array for wrangling both
+vector and raster data. While these data objects are useful for its
+designed tasks, there has not yet been a data object that makes it easy
+to explore spatio-temporal data. Data objects like \pkg{sf} \citep{sf}
+and \pkg{tsibble} \citep{tsibble} are good examples of this in the
+spatial and temporal data analysis and hence there is a gap in software
+development for spatio-temporal data. The requirement for such a tool is
+important given the ubiquity of spatio-temporal vector data in the wild:
+climate observations from weather stations, air quality variables from
+air monitoring stations, or any data collected at fixed location across
+time.
 
-This paper describes the a new tabular data object: \pkg{cubble} for
+This paper describes a new tabular data object: \pkg{cubble} for
 wrangling spatio-temporal data. \pkg{Cubble} overcomes the inconvenience
-in data wrangling mentioned above through a nested form to organise
-spatial variables and a long form to organise temporal variables. With
-this structure, analysts can explore the spatio-temporal data with less
-efforts spend on \ldots{} The software is available from the
-Comprehensive R Archive Network (CRAN) at {[}CRAN link{]}.
+in data wrangling mentioned above through wiring the separate spatial
+and temporal table into a single data object. With the new data object,
+analysts can spend less time organising spatial and temporal variables
+at different observational units and focus more on exploring the data
+itself. The software is available from the Comprehensive R Archive
+Network (CRAN) at {[}CRAN link{]}.
 
-The rest of the paper is divided as follows: Section 2 presents the
-workflow of data manipulation in cubble. Section 3 explains how cubble
-deals with some advanced considerations including data with hierarchical
-structure, data matching, and how cubble fits with existing static and
-interactive visualisation tools. Section 4 gives examples of the
-features introduced in the previous two sections with climate and
-hydrology data. An example on how cubble handle NetCDF data is also
-provided. Section 5 concludes the paper.
+The rest of the paper is divided as follows: Section 2 presents the main
+design and functionality of \pkg{cubble}. Section 3 explains how cubble
+deals with more advanced considerations including data with hierarchical
+structure, data matching, how cubble fits with existing static and
+interactive visualisation tools, and spatio-temporal data
+transformation. Section 4 uses Australia weather station data and river
+level data as examples to demonstrate the use with \pkg{cubble}. An
+example on how \pkg{cubble} handles NetCDF data is also provided.
+Section 5 concludes the paper.
 
 \hypertarget{the-cubble-package}{%
 \section{The cubble package}\label{the-cubble-package}}
@@ -183,11 +180,11 @@ illustrate how to work with these two formats in short examples. Lastly,
 a subsection will dedicate to how existing packages, in spatial and
 temporal analysis, fit in with cubble.
 
-In cubble, data can represented in two formats: nested form and long
-form, and Figure \ref{fig:illu-cubble} sketches the two forms with the
-associated attributes. The decision on which form to use in data
-manipulation is output-oriented, meaning analysts need to first think
-about whether the output of an operation is identified only by the
+In cubble, a single data object can be arranged into two forms: nested
+form and long form, and Figure \ref{fig:illu-cubble} sketches the two
+forms with the associated attributes. The decision on which form to use
+in data wrangling is output-oriented, meaning analysts need to first
+think about whether the output of an operation is identified only by the
 spatial identifier, or a combination of spatial and temporal identifier.
 The nested cubble is suitable for working with operations that are only
 identified by the site and this type of operation can be a pure
