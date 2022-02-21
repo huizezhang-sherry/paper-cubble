@@ -29,11 +29,14 @@ title:
   # For running headers, if needed
   # short:     "\\pkg{foo}: A Capitalized Title"
 abstract: >
-  Exploring spatio-temporal data can sometimes be discouraging given the various different formats spatio-temporal data can present themselves in practice. Moreover, the two observational units naturally exist in spatio-temporal data can cost analysts many time and efforts on organising variables and results and switching between a single table and multiple tables in the analysis. In this paper, a new data structure, \code{cubble}, is proposed for wrangling and visualising spatio-temporal data. The new data structure uses a single data object to organise spatial and temporal variables in two forms so that they can be wrangled separately while keep syncronised. Advanced considerations are given to illustrate data with hierarchical structure, data matching, how cubble fits with the interactive graphics pipeline, and spatio-temporal transformation. Examples are given to analysing Australia meteorology data, river level data, and climate reanalysis (ERA5). 
+
+  \textcolor{red}{start with describing the data: spatial and temporal, then what's the problem, then propose cubble.}
+  
+  \textcolor{red}{Exploring spatio-temporal data can sometimes be discouraging given the various different formats spatio-temporal data can present themselves in practice}. Moreover, the two observational units naturally exist in spatio-temporal data \textcolor{red}{can cost analysts many time and efforts} on organising variables and results and switching between a single table and multiple tables in the analysis. In this paper, a new data structure, \code{cubble}, is proposed for wrangling and visualising spatio-temporal data. The new data structure uses a single data object to organise spatial and temporal variables in two forms so that they can be wrangled separately while keep syncronised. Advanced considerations are given to illustrate data with hierarchical structure, data matching, how cubble fits with the interactive graphics pipeline, and spatio-temporal transformation. Examples are given to analysing Australia meteorology data, river level data, and climate reanalysis (ERA5). 
 keywords:
   # at least one keyword must be supplied
-  formatted: [spatio temporal,  "\\proglang{R}", climate weather station, data analysis]
-  plain:     [spatio temporal, R, climate weather station, data analysis]
+  formatted: [spatial, temporal, spatio temporal, "\\proglang{R}", environmental data, exploratory data analysis]
+  plain:     [spatial, temporal, spatio temporal, R, environmental data, exploratory data analysis]
 preamble: >
   \usepackage{amsmath}
   \usepackage{array}

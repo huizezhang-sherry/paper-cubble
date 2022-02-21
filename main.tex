@@ -19,10 +19,10 @@ Langrené, Patricia Menéndez}
 \Plaintitle{cubble: An R Package for Structuring Spatio-temporal Data}
 
 \Abstract{
-Exploring spatio-temporal data can sometimes be discouraging given the
-various different formats spatio-temporal data can present themselves in
-practice. Moreover, the two observational units naturally exist in
-spatio-temporal data can cost analysts many time and efforts on
+\textcolor{red}{start with describing the data: spatial and temporal, then what's the problem, then propose cubble.}
+\textcolor{red}{Exploring spatio-temporal data can sometimes be discouraging given the various different formats spatio-temporal data can present themselves in practice}.
+Moreover, the two observational units naturally exist in spatio-temporal
+data \textcolor{red}{can cost analysts many time and efforts} on
 organising variables and results and switching between a single table
 and multiple tables in the analysis. In this paper, a new data
 structure, \code{cubble}, is proposed for wrangling and visualising
@@ -36,10 +36,10 @@ Australia meteorology data, river level data, and climate reanalysis
 (ERA5).
 }
 
-\Keywords{spatio temporal, \proglang{R}, climate weather station, data
-analysis}
-\Plainkeywords{spatio temporal, R, climate weather station, data
-analysis}
+\Keywords{spatial, temporal, spatio
+temporal, \proglang{R}, environmental data, exploratory data analysis}
+\Plainkeywords{spatial, temporal, spatio temporal, R, environmental
+data, exploratory data analysis}
 
 %% publication information
 %% \Volume{50}
@@ -90,7 +90,7 @@ analysis}
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-Spatio-temporal data concerns variables observed in the space across
+Spatio-temporal data involves variables observed in the space across
 time and this paper focuses on spatio-temporal vector data with fixed
 locations and regular time interval. This type of data can naturally
 been considered as a data cube with three axes: spatial identifier,
@@ -109,13 +109,15 @@ data in a spatio-temporal grid.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
+{\centering \includegraphics[width=1\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
 
 }
 
 \caption[An illustration of different spatio-temporal data layout]{An illustration of different spatio-temporal data layout: (1) a single table for both spatial and temporal variables; (2) separate tables for spatial and temporal variables; and (3) an array data structure that populates variables into a gridded longitude-latitude-time (hyper)cube.}\label{fig:illu-input}
 \end{figure}
 \end{CodeChunk}
+
+\textcolor{red}{start with "we need something to do exploratory data analysis for spatio-temporal data", then why it is hard to work with. This section needs to be abstract a bit further.}
 
 None of these three formats in Figure \ref{fig:illu-input} is not
 particularly convenient to work with. In the single table format, to
