@@ -7,7 +7,7 @@ output: pdf_document
 
 This section will present two formats that cubble uses to arrange spatio-temporal data. Main cubble functions will then be introduced to illustrate how to work with these two formats in short examples. Lastly, a subsection will dedicate to how existing packages, in spatial and temporal analysis, fit in with cubble.
 
-In cubble, data can represented in two formats: nested form and long form, and Figure \ref{fig:illu-cubble} sketches the two forms with the associated attributes. The decision on which form to use in data manipulation is output-oriented, meaning analysts need to first think about whether the output of an operation is identified only by the spatial identifier, or a combination of spatial and temporal identifier. The nested cubble is suitable for working with operations that are only identified by the site and this type of operation can be a pure manipulation of time invariant variables, or an operation that summarises time varying variables into site. Underneath the nested form, a cubble is built from a \code{rowwise_df} class where each site forms a separate group. This structure simplifies the calculation that involves temporal variables by avoiding the use of \code{purrr::map()} syntax when working with list-column.
+In cubble, a single data object can be arranged into two forms: nested form and long form, and Figure \ref{fig:illu-cubble} sketches the two forms with the associated attributes. The decision on which form to use in data wrangling is output-oriented, meaning analysts need to first think about whether the output of an operation is identified only by the spatial identifier, or a combination of spatial and temporal identifier. The nested cubble is suitable for working with operations that are only identified by the site and this type of operation can be a pure manipulation of time invariant variables, or an operation that summarises time varying variables into site. Underneath the nested form, a cubble is built from a \code{rowwise_df} class where each site forms a separate group. This structure simplifies the calculation that involves temporal variables by avoiding the use of \code{purrr::map()} syntax when working with list-column.
 
 For those operations whose output involves both a spatial and temporal identifier, long form should be used. The long form uses a  \code{grouped_df} class to forms all the time of a site as a group. Time invariant variables are stored separately as an special attribute of the long cubble. This design avoids repeating the spatial variables at each time stamp while not dropping information from spatial variables.
 
@@ -78,8 +78,6 @@ The \code{dplyr} package has provided many tools for data wrangling tasks and th
 
  > `mutate`, `filter`, `summarise`, `select`, `arrange`, `rename`, `left_join`, and the slice family (`slice_head`, `slice_tail`, `slice_sample`, `slice_min`, `slice_max`)
   
-\textcolor{red}{more work on groupby} The grouping pair, \code{group_by} and \code{ungroup}, can only be used in the long form to define grouping on the time but not in the nested form.
-
 ### tsibble
 
 \code{tsibble} is a temporal data structure that uses \code{index} and \code{key} to identify the time and different series and \code{cubble} can be seen as a natural extension of \code{tsibble} for spatio-temporal data with an additional coordinates component and using two forms to arrange variables. This makes it easy to cast a \code{tsibble} into a \code{cubble} as only the \code{coords} argument needs to be supplied:

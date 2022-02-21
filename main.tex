@@ -429,10 +429,6 @@ family (\texttt{slice\_head}, \texttt{slice\_tail},
 \texttt{slice\_sample}, \texttt{slice\_min}, \texttt{slice\_max})
 \end{quote}
 
-\textcolor{red}{more work on groupby} The grouping pair, \code{group_by}
-and \code{ungroup}, can only be used in the long form to define grouping
-on the time but not in the nested form.
-
 \hypertarget{tsibble}{%
 \subsubsection{tsibble}\label{tsibble}}
 
@@ -664,30 +660,24 @@ same fashion as station level variables in \code{station_nested}.
 \hypertarget{data-fusion-and-matching}{%
 \subsection{Data fusion and matching}\label{data-fusion-and-matching}}
 
-\textcolor{red}{more beginning} Cubble provides functionality for
-matching sites from two data sources. To be a valid pair of matching,
-the matched pair from different data sources need to:
-
-\begin{itemize}
-\tightlist
-\item
-  be spatially close to each other, and
-\item
-  have similar temporal movement
-\end{itemize}
-
-\code{match_sites()} matches data based on these two criteria: it first
-matches the two data sources spatially through computing the pairwise
-distance on latitude and longitude. Pairs that pass the spatial matching
-are then matched temporally through computing the number of matched
-peaks within a fixed length window. Figure \ref{fig:illu-matching}
-illustrates this temporal matching in more details. Given two series
-\code{A} and \code{a}, 3 peaks have been picked in each series. An
-interval, with default length of 5, is constructed for each peak in
-series \code{A} and the peaks in series \code{a} are tested against
-whether they fall into the any of the intervals. In this illustration,
-there are 2 matches for these two series. Several arguments are
-available in \code{match_sites()} to fine-tune the matching:
+One task that may interest analysts in spatio-temporal data is to find
+how similar the time series from nearby sites are. This can be seen as a
+matching problem \citep{stuart2010matching, mcintosh2018using} that
+pairs up similar similar time series in nearby locations or a data
+fusing exercise that merges data collected from different sources
+\citep{cocchi2019data}. \code{match_sites()} in \pkg{cubble} provides a
+simple algorithm for this task. The algorithm first matches the two data
+sources spatially through computing the pairwise distance on latitude
+and longitude. Pairs that pass the spatial matching are then matched
+temporally through computing the number of matched peaks within a fixed
+length window. Figure \ref{fig:illu-matching} illustrates this temporal
+matching in more details. Given two series \code{A} and \code{a}, 3
+peaks have been picked in each series. An interval, with default length
+of 5, is constructed for each peak in series \code{A} and the peaks in
+series \code{a} are tested against whether they fall into the any of the
+intervals. In this illustration, there are 2 matches for these two
+series. Several arguments are available in \code{match_sites()} to
+fine-tune the matching:
 
 \begin{CodeChunk}
 \begin{figure}
@@ -718,12 +708,6 @@ available in \code{match_sites()} to fine-tune the matching:
   \code{temporal_min_match}: the minimum number of matched peak for a
   valid matched pair
 \end{itemize}
-
-This functionality can be seen as a matching exercise
-\citep{stuart2010matching, mcintosh2018using} in the spatio-temporal
-domain to pair up nearby observations. It can also be considered as a
-form of data fusion \citep{cocchi2019data}, where data from multiple
-sources are combined together.
 
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}
