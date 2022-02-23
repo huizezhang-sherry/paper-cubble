@@ -3,9 +3,6 @@
 
 \usepackage[utf8]{inputenc}
 
-\providecommand{\tightlist}{%
-  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-
 \author{
 H. Sherry Zhang\\Monash University \And Dianne Cook\\Monash University
 \AND Ursula Laa\\University of Natural Resources and Life Sciences
@@ -18,22 +15,25 @@ H. Sherry Zhang\\Monash University \And Dianne Cook\\Monash University
 Langrené, Patricia Menéndez}
 \Plaintitle{cubble: An R Package for Structuring Spatio-temporal Data}
 
+
 \Abstract{
-\textcolor{red}{start with describing the data: spatial and temporal, then what's the problem, then propose cubble.}
-\textcolor{red}{Exploring spatio-temporal data can sometimes be discouraging given the various different formats spatio-temporal data can present themselves in practice}.
-Moreover, the two observational units naturally exist in spatio-temporal
-data \textcolor{red}{can cost analysts many time and efforts} on
-organising variables and results and switching between a single table
-and multiple tables in the analysis. In this paper, a new data
-structure, \code{cubble}, is proposed for wrangling and visualising
-spatio-temporal data. The new data structure uses a single data object
-to organise spatial and temporal variables in two forms so that they can
-be wrangled separately while keep syncronised. Advanced considerations
-are given to illustrate data with hierarchical structure, data matching,
-how cubble fits with the interactive graphics pipeline, and
-spatio-temporal transformation. Examples are given to analysing
-Australia meteorology data, river level data, and climate reanalysis
-(ERA5).
+Spatio-temporal data have two types of variables: spatial variables have
+fixed value across time in the same location while temporal variables
+need both the location and timestamp to identify its value. These
+variables can be organised in two separate tables, each focusing on one
+aspect of the data, or a single table that combines all the variables
+together. For exploratory data analysis and visualisation, analysts
+needs both formats for different types of exploration, while it can be
+tedious to constantly split and join variables in order to cast the data
+into the desireable shape. In this paper, a new data structure,
+\code{cubble}, is proposed for exploring spatio-temporal data. The new
+data structure organises spatial and temporal variables as two forms of
+a single data object so that they can be wrangled separately while keep
+syncronised. Considerations are given to data with hierarchical
+structure, data matching and explain how \pkg{cubble} fits in with the
+interactive graphics pipeline and spatio-temporal transformation.
+Examples are given to analysing Australia meteorology data, river level
+data, and climate reanalysis (ERA5) data.
 }
 
 \Keywords{spatial, temporal, spatio
@@ -77,13 +77,19 @@ data, exploratory data analysis}
   
   }
 
-% Pandoc citation processing
 
-% Pandoc header
+% tightlist command for lists without linebreak
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
 
 \usepackage{amsmath} \usepackage{array} \usepackage{xcolor}
 
 \begin{document}
+
+
 
 \newpage
 
@@ -1274,6 +1280,7 @@ be found at: \url{https://github.com/huizezhang-sherry/paper-cubble}.
 \newpage
 
 \bibliography{references.bib}
+
 
 
 \end{document}
