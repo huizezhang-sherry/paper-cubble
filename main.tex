@@ -18,27 +18,27 @@ Langrené, Patricia Menéndez}
 
 \Abstract{
 Spatio-temporal data refers to measurements taken across space over
-time. In practise, spatial and temporal data many times need to be
+time. In practice, spatial and temporal data many times need to be
 combined in order to form a spatio-temporal data set. However, these two
 types of data are collected at different observational units and this
-poses a problem on which format to use for different data wrangling
-tasks. Analysts can either organised the data in a single table format
-that combines all the variables together, or in two separate tables,
-each focusing on the spatial or temporal aspect of the data. Both
-formats are useful in exploratory data analysis, visualisation, and,
-modelling, however it can be labourious to constantly switch between the
-two formats during the analysis and write code to cast the data into the
-desireable shape. This paper presents a new \proglang{R} package,
-\pkg{cubble}, that provides a new data sturcture to ease the
-transformation between the two formats in spatio-temporal data. The new
-data structure organises spatial and temporal variables as two forms of
-a single data object so that they can be wrangled separately while
-syncronised as a whole piece. \pkg{Cubble} also provides capability for
-handling data with hierarchical structure, matching data from multiple
-sources, constructing interactive graphics and performing
-spatio-temporal transformation. The paper will also demonstrate
-\pkg{cubble} with examples using Australia climate weather stations,
-river level data, and climate reanalysis (ERA5) data.
+poses a problem on how to structure the data for different wrangling
+tasks. Analysts can either organise the data in a single table format
+that combines all the variables, or in two separate tables, each
+focusing on the spatial or temporal aspect of the data. Both formats are
+useful in exploratory data analysis, visualisation, and, modelling,
+however, it can be labourious to constantly switch between the two
+formats during the analysis and write code to cast the data into the
+desirable shape. This paper presents a new \proglang{R} package,
+\pkg{cubble}, that provides a new data structure to ease the conversion
+between the two formats in spatio-temporal data. The new data structure
+organises spatial and temporal variables as two forms of a single data
+object so that they can be wrangled separately while synchronised as a
+whole piece. \pkg{Cubble} also provides the capability for handling data
+with hierarchical structure, matching data from multiple sources,
+constructing interactive graphics, and performing spatio-temporal
+transformation. The paper will demonstrate \pkg{cubble} with examples
+using Australian climate weather stations, river level data, and climate
+reanalysis (ERA5) data.
 }
 
 \Keywords{spatial, temporal, spatio
@@ -103,10 +103,10 @@ data, exploratory data analysis}
 
 Spatio-temporal data involves variables observed in the space across
 time and this paper focuses on spatio-temporal vector data with fixed
-locations and regular time interval. This type of data can naturally
-been considered as a data cube with three axes: spatial identifier,
-temporal identifier, and variable. In this cubic formation, space only
-occupies one axis, rather than two, to avoid hypercubes for multivariate
+locations and regular time intervals. This type of data can naturally be
+considered as a data cube with three axes: spatial identifier, temporal
+identifier, and variable. In this cubic formation, space only occupies
+one axis, rather than two, to avoid hypercubes for multivariate
 spatio-temporal data. While conceptually the data format is relatively
 simple, the data objects coming to the analysts can vary in forms in the
 analysis. Figure \ref{fig:illu-input} shows three examples of wild
@@ -128,51 +128,48 @@ data in a spatio-temporal grid.
 \end{figure}
 \end{CodeChunk}
 
-While the data is enriched the information in both the spatial and
-temporal dimension, it also brings variables in two different
-observational units, which poses the problem of organising data for
-various operations in exploratory data analysis, visualisation, and
-modelling. The single table format is convenient for spatio-temporal
-operations, however, it makes duplicates of spatial variables and is not
-convenient for spatial operations. The two tables format allows separate
-spatial and temporal operations on each table while analysts need to
-work with two data objects simultaneously and dedicate efforts to make
-sure the sites in both tables are matched up. This data organising issue
-can also raise during the analysis, for example, a spatial summary of
-the temporal or spatio-temporal data naturally introduces an additional
-spatial table and makes the data in the separate table format. With the
-current tools, at each step, analysts need to decide on the format to
-operate on, perform the operation, and organise the result with existing
-data.
+While incorporating both spatial and temporal information enriches the
+data in the analysis, spatio-temporal data can sometimes be hard to work
+with given its two observational units in the variables. The single
+table format in Figure \ref{fig:illu-input} is convenient for
+spatio-temporal operations that involve both types of variables,
+however, it makes duplicates of spatial variables and is not ideal when
+only looking at the spatial aspect of the data. The two tables format
+allows separate operations on spatial and temporal variables while
+analysts need to work with two data objects simultaneously and join them
+together into the single table format for spatio-temporal operations.
+Neither of the two formats is desirable at the same time for spatial,
+temporal, and spatio-temporal operations. This issue implies analysts
+need to constantly think about the data format and arrange variables
+into the proper shape before the actual operations, which can be a
+laborious step when switching between the two formats back and forth
+several times during the analysis.
 
-In the \proglang{R} community, different data objects have been proposed
-to work with spatio-temporal data when the specific task is known, while
-few have the capability to freely explore the data for exploratory data
-analysis. \pkg{spacetime} \citep{spacetime} is built on class \pkg{sp}
-\citep{sp} and \pkg{xts} \citep{xts} and both of which have been
-replaced by more recent spatial and temporal data objects. A more
-implementation, \pkg{stars} \citep{stars}, uses a spatio-temporal array
-for wrangling both vector and raster data, but for raw data already in
-tabular format, need to convert the data into the array structure, also
-convert at vis. While there has not yet been a data object that makes it
-easy to explore spatio-temporal data that overcomes the difficulties of
-wrangling spatio-temporal data, this motivates developing a new tool
-that hopefully can solve this problem. The requirement for such a tool
-is important given the ubiquity of spatio-temporal vector data in the
-wild: climate observations from weather stations, air quality variables
-from air monitoring stations, or any data collected at fixed location
-across time. The requirement can also comes from spatial data analysts
-wanting to incorporate a temporal dimension in their data or vice versa.
+In the \proglang{R} community, many data objects have been proposed to
+work with specific spatio-temporal tasks, while few can freely explore
+the data. \pkg{spacetime} \citep{spacetime} is an attempt for such a
+data object, but the spatial and temporal class it built on have now
+been gradually replaced by more recent implementations. The \pkg{stars}
+\citep{stars} package uses an array to wrangle spatio-temporal data, but
+the dense array it uses can quickly exhaust the memory for data in the
+irregular spatial grid. While there has not yet been a data object that
+makes it easy to wrangle spatio-temporal data, there is a strong need
+for such tools given the ubiquitous spatial and temporal data collected
+in the society, i.e., climate observations from weather stations, air
+quality variables from air monitoring stations. The demand for such
+tools can also come from spatial data analysts wishing to incorporate
+temporal data in their analysis or vice versa.
 
-This paper proposes an \proglang{R} package, \pkg{cubble}, for
-exploratory data analysis in spatio-temporal data. The proposed new data
-structure, also called \code{cubble}, overcomes the inconvenience in
-data wrangling mentioned above through wiring the separate spatial and
-temporal table into a single data object. With the new data object,
-analysts can spend less time organising spatial and temporal variables
-and focus more on the exploratory data analysis itself. The software is
-available from the Comprehensive R Archive Network (CRAN) at {[}CRAN
-link{]}.
+This paper presents a new \proglang{R} package, \pkg{cubble}, to
+overcome the problem with organising variables in different levels when
+working with spatio-temporal data. In the package a new data structure,
+also called \code{cubble}, is proposed to organise spatial and temporal
+variables as two forms of a single data object so that they can be
+wrangled separately while synchronised as a whole piece. With the new
+data object, analysts can spend less time writing codes to organise
+spatial and temporal variables and focus more on the exploratory data
+analysis itself. The software is available from the Comprehensive R
+Archive Network (CRAN) at {[}CRAN link{]}.
 
 The rest of the paper is divided as follows: Section 2 presents the main
 design and functionality of \pkg{cubble}. Section 3 explains how cubble
