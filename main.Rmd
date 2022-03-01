@@ -9,7 +9,7 @@ author:
     affiliation: 'Monash University \AND'
     address: 21 Chancellors Walk, Clayton VIC 3800 Australia
     # location: Melbourne, Australia
-    email:  dicook@monash.edu
+    email: dicook@monash.edu
   - name: Ursula Laa
     affiliation: 'University of Natural Resources and Life Sciences \AND'
     address: Gregor-Mendel-Straße 33, 1180 Wien, Austria
@@ -17,7 +17,7 @@ author:
   - name: Nicolas Langrené
     affiliation: 'BNU-HKBU United International College \AND'
     address: 2000 Jintong Road, Tangjiawan, Zhuhai, Guangdong Province, China
-    email: nicolas@langrene.com
+    email: nicolaslangrene@uic.edu.cn
   - name: Patricia Menéndez
     affiliation: 'Monash University \AND'
     address: 21 Chancellors Walk, Clayton VIC 3800 Australia
@@ -29,7 +29,7 @@ title:
   # For running headers, if needed
   # short:     "\\pkg{foo}: A Capitalized Title"
 abstract: >
-  Spatio-temporal data refers to measurements taken across space over time. In practice, spatial and temporal data many times need to be combined in order to form a spatio-temporal data set. However, these two types of data are collected at different observational units and this poses a problem on how to structure the data for different wrangling tasks. Analysts can either organise the data in a single table format that combines all the variables, or in two separate tables, each focusing on the spatial or temporal aspect of the data. Both formats are useful in exploratory data analysis, visualisation, and, modelling, however, it can be labourious to constantly switch between the two formats during the analysis and write code to cast the data into the desirable shape. This paper presents a new \proglang{R} package, \pkg{cubble}, that provides a new data structure to ease the conversion between the two formats in spatio-temporal data. The new data structure organises spatial and temporal variables as two forms of a single data object so that they can be wrangled separately while synchronised as a whole piece. \pkg{Cubble} also provides the capability for handling data with hierarchical structure, matching data from multiple sources, constructing interactive graphics, and performing spatio-temporal transformation. The paper will demonstrate \pkg{cubble} with examples using Australian climate weather stations, river level data, and climate reanalysis (ERA5) data.
+  Spatio-temporal data refers to measurements taken across space over time. In practice, spatial and temporal data often need to be combined in order to form a spatio-temporal data set. However, different types of data might be collected at different observational units, which poses a problem on how to structure the data for different wrangling tasks. Analysts can either organise the data in a single table format that combines all the variables, or in two separate tables, each focusing on the spatial or temporal aspect of the data. Both formats are useful in exploratory data analysis, visualisation, and, modelling; however, it can be laborious to constantly switch between the two formats during the analysis and write code to cast the data into the desirable shape. This paper presents a new \proglang{R} package, \pkg{cubble}, that provides a new data structure to ease the conversion between the two formats in spatio-temporal data. The new data structure organises spatial and temporal variables as two forms of a single data object so that they can be wrangled separately while synchronised as a whole piece. \pkg{Cubble} also provides the capability for handling data with hierarchical structure, matching data from multiple sources, constructing interactive graphics, and performing spatio-temporal transformation. The paper demonstrates these capabilities \pkg{cubble} with examples using Australian climate weather stations, river level data, and climate reanalysis (ERA5) data.
 keywords:
   # at least one keyword must be supplied
   formatted: [spatial, temporal, spatio temporal, "\\proglang{R}", environmental data, exploratory data analysis]
@@ -51,7 +51,7 @@ knitr::opts_chunk$set(
   fig.path = "figures/",
   fig.height = 10
 )
-options(prompt = "R> ", continue = "+ ", 
+options(prompt = "R> ", continue = "+ ",
         tibble.print_max = 5, tibble.print_min = 5)
 ```
 
