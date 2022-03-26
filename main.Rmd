@@ -74,6 +74,11 @@ library(patchwork)
 
 ```
 
+```{r child = "2-0-cube.Rmd"}
+
+```
+
+
 ```{r child = "2-the-cubble-pkg.Rmd"}
 
 ```

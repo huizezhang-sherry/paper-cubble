@@ -180,20 +180,73 @@ level data as examples to demonstrate the use of \pkg{cubble}. An
 example on how \pkg{cubble} handles NetCDF data is also provided.
 Section 5 concludes the paper.
 
+\hypertarget{conceptual-framework}{%
+\section{Conceptual framework}\label{conceptual-framework}}
+
+Multivariate spatio-temporal data can be conceptualised using a cubical
+data model with reference to variables, time and space. This naturally
+motivates the usage of array to represent and store spatio-temporal
+data, as evident by satellite imageries, large climate models, among
+others. The work by \citet{lu_multidimensional_2018} has discussed the
+suitability of this representation through array algebra and practical
+spatio-temporal tasks and software implementation has been seen in many
+R packages: \pkg{raster} \citep{raster}, \pkg{terra} \citep{terra}, and
+\pkg{stars} \citep{stars}.
+
+While it is efficient to represent spatio-temporal data in an array,
+there are situation where array {[}is not the best solution{]}.
+Sometimes, one may want to create a new
+
+Also, array is not the best solution for a large subset of data,
+specifically, the vector spatio-temporal data. With vector data, spatial
+and temporal variables are commonly collected in separate 2D tables and
+there is usually a location ID to link the spatial and temporal
+information. Sometimes, the geometrical shape of the location may not
+present and an additional linking is needed to incorporate the map data.
+With the multiple pieces in 2D data frame format, there should be a
+solution to organise all these data from multiple sources in a 2D
+structure, without needing to convert it into higher dimensional
+representation.
+
+Reliable software and data structure has been proposed in the spatial
+and temporal domain, while a direct extension to spatio-temporal data is
+not ideal. The main issue here lays in the format that spatial and
+temporal data is stored. For spatial data, \pkg{sf} \citep{sf} covers a
+wide range of geometrical operations and is the format most map data
+stored. When incorporating the time dimension, a time wide format,
+introduced in \citet{spacetime}, is usually adopted. This treats time as
+variable name rather than value and makes it inconvenient to wrangle
+time, as per the tidy data principle \citep{tidydata}. In the temporal
+domain, \pkg{tsibble} \citep{tsibble} follows the tidy data principle to
+arrange the time in the long format, while when adding spatial
+variables, a long format implies repeating variables at each time and
+this can make a huge difference when the repetition is on large
+geometrical shapes with long time period.
+
+However, with all the benefit of conceptualising the data into a cube,
+the cubical structure is not particular convenient for, using the
+tidyverse word, mutating new variables in the data object. This is
+because an array is a higher dimensional object than the 2D data frame
+and adding a new column doesn't clearly define how a vector should be
+added to an (multidimensional) array.
+
+The cubble package is a collection of tools to work with vector
+spatio-temporal data from multiple sources.
+
 \hypertarget{the-cubble-package}{%
 \section{The cubble package}\label{the-cubble-package}}
 
 This section will present two formats that cubble uses to arrange
-spatio-temporal data. Main cubble functions will then be introduced to
-illustrate how to work with these two formats in short examples. Lastly,
-a subsection will dedicate to how existing packages, in spatial and
-temporal analysis, fit in with cubble.
+spatio-temporal data. The main cubble functions will then be introduced
+to illustrate how to work with these two formats in short examples.
+Lastly, a subsection will be dedicated to how existing packages, in
+spatial and temporal analysis, fit in with cubble.
 
 In cubble, a single data object can be arranged into two forms: nested
-form and long form, and Figure \ref{fig:illu-cubble} sketches the two
-forms with the associated attributes. The decision on which form to use
-in data wrangling is output-oriented, meaning analysts need to first
-think about whether the output of an operation is identified only by the
+form and long form. Figure \ref{fig:illu-cubble} sketches the two forms
+with the associated attributes. The decision on which form to use in
+data wrangling is output-oriented, meaning analysts need to first think
+about whether the output of an operation is identified only by the
 spatial identifier, or a combination of spatial and temporal identifier.
 The nested cubble is suitable for working with operations that are only
 identified by the site and this type of operation can be a pure
@@ -218,7 +271,7 @@ time stamp while not dropping information from spatial variables.
 
 }
 
-\caption{An illustration of the nested and long form in cubble. The nested form defines each site in a row and nests the time varying variables into a single column \code{ts}. The long form cubble uses \code{id} and \code{t} to identify each row and store the time invariant variables as an attribute, \code{spatial}.}\label{fig:illu-cubble}
+\caption{An illustration of the nested and long form in cubble. The nested form defines each site in a row and nests the time varying variables into a single column \code{ts}. The long form cubble uses \code{id} and \code{t} to identify each row and stores the time invariant variables as an attribute, \code{spatial}.}\label{fig:illu-cubble}
 \end{figure}
 \end{CodeChunk}
 
@@ -278,8 +331,8 @@ variable nested in the \code{ts} column with its type:
 \subsection{Stretch a nested cubble into the long
 form}\label{stretch-a-nested-cubble-into-the-long-form}}
 
-The nested format is convenient for those operations whose output
-doesn't contain a time dimension, for those outputs that are
+The nested format is convenient for those operations whose output does
+not contain a time dimension. For those outputs that are
 cross-identified by the spatial and temporal identifier, a long cubble
 needs to be used. The function \code{stretch()} is designed to switch
 the cubble from the nested form to the long form. This code shows how to
@@ -362,9 +415,10 @@ cubble}\label{migrate-spatial-variables-to-a-long-cubble}}
 Sometimes, analysts may need to apply some variable transformation that
 involves both the spatial and temporal variable. An example of this is
 the transformation of temporal variables into the spatial dimension in
-glyph maps(which will be elaborated in section \ref{st_transformation}).
-Cubble allows this operation through \code{migrate()}, which moves the
-specified spatial variables into the long cubble:
+glyph maps (which will be elaborated in section
+\ref{st_transformation}). Cubble allows this operation through
+\code{migrate()}, which moves the specified spatial variables into the
+long cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -398,7 +452,7 @@ R> cubble_mig %>% tamp() %>% stretch()
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]
-# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id [dbl]
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
 1 ASN00009021 2020-01-01     0  31.9  15.3
@@ -439,19 +493,19 @@ family (\texttt{slice\_head}, \texttt{slice\_tail},
 \subsubsection{tsibble}\label{tsibble}}
 
 \code{tsibble} is a temporal data structure that uses \code{index} and
-\code{key} to identify the time and different series and \code{cubble}
-can be seen as a natural extension of \code{tsibble} for spatio-temporal
+\code{key} to identify the time and different series. \code{cubble} can
+be seen as a natural extension of \code{tsibble} for spatio-temporal
 data with an additional coordinates component and using two forms to
 arrange variables. This makes it easy to cast a \code{tsibble} into a
 \code{cubble} as only the \code{coords} argument needs to be supplied:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> # demonstrate with a tsibble created from climate_flat
-R> raw <- climate_flat %>% 
-+   tsibble::as_tsibble(key = id, index = date) 
+R> # example with a tsibble created from climate_flat
+R> raw <- climate_flat %>%
++   tsibble::as_tsibble(key = id, index = date)
 R> 
-R> dt <-  raw %>% 
+R> dt <-  raw %>%
 +   cubble::as_cubble(coords = c(long, lat))
 R> dt
 \end{CodeInput}
@@ -477,20 +531,20 @@ features of the maximum temperature:
 \begin{CodeChunk}
 \begin{CodeInput}
 R> # add station-based features in the nested form.
-R> dt %>% 
+R> dt %>%
 +   mutate(fabletools::features(ts, tmax, list(tmax_mean = mean, tmax_var = var)))
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      tmax_mean tmax_var
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>      <dbl>    <dbl>
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tbl_t~      25.7    38.6 
-2 ASN00010311 -31.9  117. 179   york            94623 <tbl_t~      26.2    51.1 
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tbl_t~      23.7    45.4 
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tbl_t~      33.1     3.02
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tbl_t~      34.6    24.7 
+  id            lat  long  elev name          wmo_id ts       tmax_mean tmax_var
+  <chr>       <dbl> <dbl> <dbl> <chr>          <dbl> <list>       <dbl>    <dbl>
+1 ASN00009021 -31.9  116.  15.4 perth airport  94610 <tbl_ts>      25.7    38.6 
+2 ASN00010311 -31.9  117. 179   york           94623 <tbl_ts>      26.2    51.1 
+3 ASN00010614 -32.9  117. 338   narrogin       94627 <tbl_ts>      23.7    45.4 
+4 ASN00014015 -12.4  131.  30.4 darwin airpo~  94120 <tbl_ts>      33.1     3.02
+5 ASN00015131 -17.6  134. 220   elliott        94236 <tbl_ts>      34.6    24.7 
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -502,21 +556,21 @@ list-column (\code{sfc}) in the data frame to provide spatial operations
 on various geometry types (\code{POINT}, \code{LINESTRING},
 \code{POLYGON}, \code{MULTIPOLYGON}, etc). These spatial operations are
 also valuable for spatio-temporal data analysis, but an \code{sf} object
-\emph{usually} don't contain temporal variables. This means \code{sf}
-can't be directly cast into a \code{cubble}, however, \code{cubble} does
-support \code{sfc} columns in the nested form and spatial operations
-applied to the \code{sfc} column in \code{sf} can still be applied to
-the \code{sfc} column in a cubble. The following example shows how to
-create an \code{sfc} column of \code{POINT} type from latitude and
-longitude in cubble. Then \code{sf::st_within} is used to add the state
-\code{MULTIPOLYGON} of each weather station before a coordinate
-transformation is made.
+\emph{usually} does not contain temporal variables. This means \code{sf}
+cannot be directly cast into a \code{cubble}, however, \code{cubble}
+does support \code{sfc} columns in the nested form and spatial
+operations applied to the \code{sfc} column in \code{sf} can still be
+applied to the \code{sfc} column in a cubble. The following example
+shows how to create an \code{sfc} column of \code{POINT} type from
+latitude and longitude in cubble. Then \code{sf::st_within} is used to
+add the state \code{MULTIPOLYGON} of each weather station before a
+coordinate transformation is made.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> library(sf)
 R> # create a cubble
-R> cb <- climate_flat %>% 
+R> cb <- climate_flat %>%
 +   cubble::as_cubble(key = id, index = date, coords = c(long, lat))
 R> 
 R> aus <- ozmaps::abs_ste
@@ -527,10 +581,10 @@ R> dt <- cb %>%
 +     ll = st_sfc(
 +       purrr::map2(long, lat, ~st_point(c(.x, .y))),
 +       crs = st_crs(aus)),
-+     
++ 
 +     # append state multi-polygon based on the `sfc` created
 +     state = aus$geometry[st_within(ll, aus, sparse = FALSE)],
-+     
++ 
 +     # adopt a different projection: lambert conformal conic (EPSG:3112)
 +     state = st_transform(state, crs = "EPSG:3112")
 +     )
@@ -541,13 +595,13 @@ R> dt
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name         wmo_id ts                        ll
-  <chr>       <dbl> <dbl> <dbl> <chr>         <dbl> <list>           <POINT [°]>
-1 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 <tibble~ (115.9764 -31.9275)
-2 ASN00010311 -31.9  117. 179   york          94623 <tibble~  (116.765 -31.8997)
-3 ASN00010614 -32.9  117. 338   narrogin      94627 <tibble~ (117.1797 -32.9342)
-4 ASN00014015 -12.4  131.  30.4 darwin airp~  94120 <tibble~ (130.8925 -12.4239)
-5 ASN00015131 -17.6  134. 220   elliott       94236 <tibble~ (133.5407 -17.5521)
+  id            lat  long  elev name   wmo_id ts                        ll
+  <chr>       <dbl> <dbl> <dbl> <chr>   <dbl> <list>           <POINT [°]>
+1 ASN00009021 -31.9  116.  15.4 perth~  94610 <tibble> (115.9764 -31.9275)
+2 ASN00010311 -31.9  117. 179   york    94623 <tibble>  (116.765 -31.8997)
+3 ASN00010614 -32.9  117. 338   narro~  94627 <tibble> (117.1797 -32.9342)
+4 ASN00014015 -12.4  131.  30.4 darwi~  94120 <tibble> (130.8925 -12.4239)
+5 ASN00015131 -17.6  134. 220   ellio~  94236 <tibble> (133.5407 -17.5521)
 # ... with 1 more variable: state <MULTIPOLYGON [m]>
 \end{CodeOutput}
 \end{CodeChunk}
@@ -558,12 +612,12 @@ An \pkg{s2} \code{lnglat} vector can similarly be created as an
 \begin{CodeChunk}
 \begin{CodeInput}
 R> library(s2)
-R> # western australia map
+R> # Western Australia map
 R> wa <- ozmaps::abs_ste %>% filter(NAME == "Western Australia")
 R> 
 R> # mutate a `s2_lnglat` vector on `cb` created in the last chunk
 R> cb %>%
-+   mutate(ll = s2_lnglat(long, lat)) %>% 
++   mutate(ll = s2_lnglat(long, lat)) %>%
 +   filter(s2_within(ll, wa))
 \end{CodeInput}
 \begin{CodeOutput}
@@ -608,24 +662,25 @@ R> dt <- as_cubble(raw, vars = c("q", "z"))
 \end{CodeInput}
 \end{CodeChunk}
 
-Memory limit with NetCDF data in cubble depends on longitude grid point
-x latitude grid point x time grid point x number of variable. Cubble can
+The memory limit with NetCDF data in cubble depends on the number of
+longitude grid points times the number of latitude grid points times the
+number of time grid points times the number of variables. Cubble can
 handle slightly more than 300 x 300 (longitude x longitude) grid points
-for 3 variables in one year and spatial grid can be reduced to trade for
-longer time period and more variables. A 300 by 300 spatial grid can be
-a bounding box of {[}100, -80, 180, 0{]} at 0.25 degree resolution or a
-global bounding box {[}-180, -90, 180, -90{]} at 1 degree resolution.
-Subsetting longitude and latitude grid is available through
-\code{long_range} and \code{lat_range} if the NetCDF file has finer
-resolution than needed.
+for 3 variables in one year. The spatial grid can be reduced to trade
+for longer time periods and more variables. A 300 by 300 spatial grid
+can be a bounding box of {[}100, -80, 180, 0{]} at 0.25 degree
+resolution or a global bounding box {[}-180, -90, 180, -90{]} at 1
+degree resolution. Subsetting longitude and latitude grids is available
+through \code{long_range} and \code{lat_range} if the NetCDF file has
+finer resolution than needed.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> # Assume my_ncdf has bounding box of [-180, -90, 180, -90] 
-R> # at 0.25 degree resolution and subset it to have 
+R> # Assume my_ncdf has bounding box of [-180, -90, 180, -90]
+R> # at 0.25 degree resolution and subset it to have
 R> # 1 degree resolution:
-R> dt <- as_cubble(my_ncdf, vars = c("q", "z"), 
-+                 long_range = seq(-180, 180, 1), 
+R> dt <- as_cubble(my_ncdf, vars = c("q", "z"),
++                 long_range = seq(-180, 180, 1),
 +                 lat_range = seq(-90, 90, 1))
 \end{CodeInput}
 \end{CodeChunk}
@@ -1045,16 +1100,16 @@ The output from matching is also a cubble, with additional column
 # cubble:   id [8]: nested form
 # bbox:     [144.52, -37.73, 146.06, -36.55]
 # temporal: date [date], matched_var [dbl]
-  id          name                lat  long type    dist group ts        n_match
-  <chr>       <chr>             <dbl> <dbl> <chr>  <dbl> <int> <list>      <int>
-1 405234      SEVEN CREEKS @ D~ -36.9  146. river   6.15     5 <tibble ~      21
-2 404207      HOLLAND CREEK @ ~ -36.6  146. river   8.54    10 <tibble ~      21
-3 ASN00082042 strathbogie       -36.8  146. clima~  6.15     5 <tibble ~      21
-4 ASN00082170 benalla airport   -36.6  146. clima~  8.54    10 <tibble ~      21
-5 230200      MARIBYRNONG RIVE~ -37.7  145. river   6.17     6 <tibble ~      19
-6 ASN00086038 essendon airport  -37.7  145. clima~  6.17     6 <tibble ~      19
-7 406213      CAMPASPE RIVER @~ -37.0  145. river   1.84     1 <tibble ~      18
-8 ASN00088051 redesdale         -37.0  145. clima~  1.84     1 <tibble ~      18
+  id          name                  lat  long type   dist group ts       n_match
+  <chr>       <chr>               <dbl> <dbl> <chr> <dbl> <int> <list>     <int>
+1 405234      SEVEN CREEKS @ D/S~ -36.9  146. river  6.15     5 <tibble>      21
+2 404207      HOLLAND CREEK @ KE~ -36.6  146. river  8.54    10 <tibble>      21
+3 ASN00082042 strathbogie         -36.8  146. clim~  6.15     5 <tibble>      21
+4 ASN00082170 benalla airport     -36.6  146. clim~  8.54    10 <tibble>      21
+5 230200      MARIBYRNONG RIVER ~ -37.7  145. river  6.17     6 <tibble>      19
+6 ASN00086038 essendon airport    -37.7  145. clim~  6.17     6 <tibble>      19
+7 406213      CAMPASPE RIVER @ R~ -37.0  145. river  1.84     1 <tibble>      18
+8 ASN00088051 redesdale           -37.0  145. clim~  1.84     1 <tibble>      18
 \end{CodeOutput}
 \end{CodeChunk}
 
