@@ -180,8 +180,9 @@ level data as examples to demonstrate the use of \pkg{cubble}. An
 example on how \pkg{cubble} handles NetCDF data is also provided.
 Section 5 concludes the paper.
 
-\hypertarget{conceptual-framework}{%
-\section{Conceptual framework}\label{conceptual-framework}}
+\hypertarget{conceptual-framework-spatio-temporal-cube}{%
+\section{Conceptual framework: spatio-temporal
+cube}\label{conceptual-framework-spatio-temporal-cube}}
 
 Multivariate spatio-temporal data can be conceptualised using a cubical
 data model with reference to variables, time and space. This naturally
@@ -189,49 +190,87 @@ motivates the usage of array to represent and store spatio-temporal
 data, as evident by satellite imageries, large climate models, among
 others. The work by \citet{lu_multidimensional_2018} has discussed the
 suitability of this representation through array algebra and practical
-spatio-temporal tasks and software implementation has been seen in many
-R packages: \pkg{raster} \citep{raster}, \pkg{terra} \citep{terra}, and
-\pkg{stars} \citep{stars}.
+spatio-temporal tasks.
 
-While it is efficient to represent spatio-temporal data in an array,
-there are situation where array {[}is not the best solution{]}.
-Sometimes, one may want to create a new
+The cubical conceptual framework provides a generalisation to the
+operation can be done on the data for visualisation. A paper by
+\citet{bach_review_2014} has reviewed the temporal data visualisation
+based on space-time cube operations. Notice that the term space-time
+cube in their article ``does not need to involve spatial data'', but
+referring to ``an abstract 2D substrate that is used to visualize data
+at a specific time''. Despite its main focus is on temporal data, the
+mindset of abstracting out data representation to construct
+visualisation is applicable to our spatio-temporal data manipulation and
+visualisation.
 
-Also, array is not the best solution for a large subset of data,
-specifically, the vector spatio-temporal data. With vector data, spatial
-and temporal variables are commonly collected in separate 2D tables and
-there is usually a location ID to link the spatial and temporal
-information. Sometimes, the geometrical shape of the location may not
-present and an additional linking is needed to incorporate the map data.
-With the multiple pieces in 2D data frame format, there should be a
-solution to organise all these data from multiple sources in a 2D
-structure, without needing to convert it into higher dimensional
-representation.
+\hypertarget{existing-work-and-new-challenges}{%
+\section{Existing work and new
+challenges}\label{existing-work-and-new-challenges}}
 
-Reliable software and data structure has been proposed in the spatial
-and temporal domain, while a direct extension to spatio-temporal data is
-not ideal. The main issue here lays in the format that spatial and
-temporal data is stored. For spatial data, \pkg{sf} \citep{sf} covers a
-wide range of geometrical operations and is the format most map data
-stored. When incorporating the time dimension, a time wide format,
-introduced in \citet{spacetime}, is usually adopted. This treats time as
-variable name rather than value and makes it inconvenient to wrangle
-time, as per the tidy data principle \citep{tidydata}. In the temporal
-domain, \pkg{tsibble} \citep{tsibble} follows the tidy data principle to
-arrange the time in the long format, while when adding spatial
-variables, a long format implies repeating variables at each time and
-this can make a huge difference when the repetition is on large
-geometrical shapes with long time period.
+\textbf{what has been done and the new challenges}
 
-However, with all the benefit of conceptualising the data into a cube,
-the cubical structure is not particular convenient for, using the
-tidyverse word, mutating new variables in the data object. This is
-because an array is a higher dimensional object than the 2D data frame
-and adding a new column doesn't clearly define how a vector should be
-added to an (multidimensional) array.
+The \pkg{spacetime} paper \citep{spacetime} has set the foundation for
+wrangling spatio-temporal data in \proglang{R}. It proposes four layouts
+(STF: full grid layout, STS: sparse grid layout, STI: irregular layout,
+and STT: trajectory) to represent spatio-temporal data. The
+implementation uses class \pkg{sp} to represent spatial data and class
+\pkg{xts} for temporal data. In recent years, new data structures have
+appeared to replace and improve on these two classes to represent
+spatial and temporal data. The package \pkg{sf} has adopted the simple
+feature access \citep{jr_herring_opengis_2011} to represent spatial
+information using POINT, MULTIPOINT, LINESTRING, POLYGON,
+MULTILINESTRING, MULTIPOLYGON, and GEOMETRYCOLLECTION. For temporal
+data, the package \pkg{tsibble} adopts the long form to explicitly
+record the time stamp as a column rather than an attribute of the data.
+These changes in the spatial and temporal community have yet been
+reflected in the spatio-temporal data analysis. The \citet{spacetime}
+paper also summarises three formats spatio-temporal data are usually
+recorded: time-wide, space-wide, and long format. With the concept of
+tidy data \citep{tidydata}, the long form has been increasingly
+considered as the tidy format. The main advantages of it over the wide
+format is that the latter treat either time or location value as
+variable names (Section 3.1 in \citet{tidydata}), making them difficult
+to be wrangled. While temporal data can be benefited from a long format,
+it brings repetition of spatial variables in the combined
+spatio-temporal data and this can be a huge inefficiency for large
+MULTIPOLOYGON over long time period. This suggests the need to look for
+other format for spatio-temporal data.
 
-The cubble package is a collection of tools to work with vector
-spatio-temporal data from multiple sources.
+\textbf{two challenages: multiple data sources + large spatio-temporal
+object} In additional to this, there are more challenges in manipulation
+spatio-temporal data. Different variables are recorded and collected in
+multiple tables, for example, an areal data would map data for a
+collection of areas, geo-scientific data would record locations and
+other meta data, and the temporal variablem indexed by both location and
+time are stored in the long form table. To work with these data,
+analysts need to link the geo-scientific data with the temporal
+variables and work out how they are contained in the area. This would
+require merging all three sources together and can often go wrong
+because of the slightest unmatched of linking variable in different
+sources. Another challenge analysts face when wrangling spatio-temporal
+data is with the simple feature access representation of spatial data.
+While they have become the standard for recording large and complex
+spatial geometry and precise operation on the spatial coordinates, with
+data analysis, the detail is more than enough. A data analysts don't
+necessarily need to have the every nitty gritty detail of the location
+and a map with sufficient information to outline the shape of the
+location would be enough for the propose of visualisation. With a large
+and detailed geometrical object, the map would take longer to render and
+analysts always need to first simplify it into a more manageable size.
+Also, while the simple feature access structure the coordinates into a
+list column, analysts would sometimes like to unpack it into two columns
+of longitude and latitude to work with. They should be provided with the
+option to do so.
+
+\textbf{A newer implementation} The \pkg{stars} has been an
+implementation to represent spatio-temporal data with array. While it is
+efficient to represent spatio-temporal data in an array, there are
+situation where array {[}is not the best solution{]}. mutate in the
+array is not clearly define (how to add a column vector). Also, it
+doesn't solve the problem with multiple data sources as it may take a
+large amount of effort to shape multivariate spatio-temporal data into
+high-dimensional cube before the analysis starts and they should be
+provided with option to work with 2D tables.
 
 \hypertarget{the-cubble-package}{%
 \section{The cubble package}\label{the-cubble-package}}
