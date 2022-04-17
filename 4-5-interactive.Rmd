@@ -2,7 +2,7 @@
 title: "4-5-interactive"
 output: html_document
 ---
-## Interative graphic with cubble
+## Interative graphic
 
 With spatio-temporal data, users may wish to make plots to learn the spatial distribution of a variable, or to find patterns, such as trend or seasonality, in the time series. Combining this two types of plot with interactivity let users to link between points on the map and the corresponding time series to explore the spatial and temporal dimension of the data simultaneously. Below is an example that describes the process of building an interactive graphic with \pkg{cubble} and \pkg{crosstalk} The example explores the variation of monthly temperature range with \code{weatherdata::climate_full} data. 
 

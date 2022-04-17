@@ -68,6 +68,31 @@ This function should generally be used in the last step of the analysis since it
 cubble_mig %>% tamp() %>% stretch()
 ```
 
+## Why not just use \pkg{dplyr::nest_by}
+
+```{r eval = FALSE}
+library(cubble)
+library(tidyverse)
+left_join(cubble::stations, cubble::climate) %>% 
+  dplyr::nest_by(id, lat,  long,  elev, name, wmo_id) %>% 
+  tidyr::unnest() %>% 
+  group_by(........, geometry)
+```
+
+
+```{r eval = FALSE}
+as_cubble(list(spatial = stations, temporal = climate),
+          key = id, index = date, coords = c(long, lat))
+```
+
+
+```{r eval = FALSE}
+usmap::us_map("states")
+```
+
+
+
+
 ## Compatibility with existing packages
 
 The previous four subsections have introduced operations specific to the \code{cubble} class and this section will demonstrate how the \code{cubble} class interacts with existing packages commonly used in spatial and temporal analysis, specifically, \code{dplyr}, \code{tsibble}, \code{sf} (\code{s2}), and \code{netcdf4}.

@@ -33,7 +33,7 @@ p1 <- ggplot() +
              width = 1, height = 0.5) +
   scale_color_brewer(palette = "Dark2") + 
   theme_bw() + 
-  coord_sf(xlim = c(141, 154)) + 
+  coord_sf(xlim = c(141, 154), ylim = c(-36, -29)) + 
   theme(legend.position = "bottom") +
   labs(x = "Longitude", y = "Latitude")
 
