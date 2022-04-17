@@ -14,25 +14,25 @@ load(here::here("data/station_nested.rda"))
 ```
 
 ```{r echo = TRUE, eval = FALSE}
-station_nested <- weatherdata::climate_full %>% 
+station_nested <- weatherdata::climate_full |> 
   mutate(cluster = ...)
 ```
 
 To create a group level cubble, use \code{switch_key()} with the new key variable, \code{cluster}: 
 
 ```{r echo = TRUE}
-cluster_nested <- station_nested %>% switch_key(cluster) 
+cluster_nested <- station_nested |> switch_key(cluster) 
 ```
 
 With the group level cubble, \code{get_centroid()} is useful to compute the centroid of each cluster, which will be used as the major axis for the glyph map later: 
 
 ```{r eval = FALSE, echo = TRUE}
-cluster_nested <- cluster_nested %>% get_centroid()
+cluster_nested <- cluster_nested |> get_centroid()
 ```
 
 Long form cubble at both levels can be accessed through stretching the nested form and with access to both station and cluster level cubbles, various plots can be made to understand the cluster. Figure \ref{fig:basic-agg} shows two example plots that can be made with this data: subplot A is a glyph map made with the cluster level cubble in the long form and subplot B inspects the station membership of each cluster using the station level cubble in the nested form. 
 
 ```{r basic-agg, out.width="100%", fig.cap="Profile of aggregated precipitation from 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number of printed in the middle of y minor axis and can be used as a reference line to read the magnitude. Subplot B shows the station membership of each cluster."}
-knitr::include_graphics("figures/basic-agg.png")
+knitr::include_graphics(here::here("figures/basic-agg.png"))
 ```
 

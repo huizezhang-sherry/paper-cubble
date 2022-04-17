@@ -83,6 +83,47 @@ data, exploratory data analysis}
   
   }
 
+% Pandoc syntax highlighting
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 
 % tightlist command for lists without linebreak
 \providecommand{\tightlist}{%
@@ -346,7 +387,7 @@ and \code{c(long, lat)} as the coordinates:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_nested <- cubble::climate_flat %>%
+R> cubble_nested <- cubble::climate_flat |>
 +   as_cubble(key = id, index = date, coords = c(long, lat))
 R> cubble_nested
 \end{CodeInput}
@@ -383,7 +424,7 @@ switch the nested cubble just created into its long form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_long <- cubble_nested %>% face_temporal()
+R> cubble_long <- cubble_nested |> face_temporal()
 R> cubble_long
 \end{CodeInput}
 \begin{CodeOutput}
@@ -434,7 +475,7 @@ a long cubble to a nested cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_back <- cubble_long %>% face_spatial()
+R> cubble_back <- cubble_long |> face_spatial()
 R> cubble_back
 \end{CodeInput}
 \begin{CodeOutput}
@@ -465,7 +506,7 @@ long cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_mig <- cubble_long %>% unfold(long, lat)
+R> cubble_mig <- cubble_long |> unfold(long, lat)
 R> cubble_mig
 \end{CodeInput}
 \begin{CodeOutput}
@@ -490,7 +531,7 @@ nested form and then switched back:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_mig %>% face_spatial() %>% face_temporal()
+R> cubble_mig |> face_spatial() |> face_temporal()
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
@@ -545,10 +586,10 @@ arrange variables. This makes it easy to cast a \code{tsibble} into a
 \begin{CodeChunk}
 \begin{CodeInput}
 R> # example with a tsibble created from climate_flat
-R> raw <- climate_flat %>%
+R> raw <- climate_flat |>
 +   tsibble::as_tsibble(key = id, index = date)
 R> 
-R> dt <-  raw %>%
+R> dt <-  raw |>
 +   cubble::as_cubble(coords = c(long, lat))
 R> dt
 \end{CodeInput}
@@ -574,7 +615,7 @@ features of the maximum temperature:
 \begin{CodeChunk}
 \begin{CodeInput}
 R> # add station-based features in the nested form.
-R> dt %>%
+R> dt |>
 +   mutate(fabletools::features(ts, tmax, list(tmax_mean = mean, tmax_var = var)))
 \end{CodeInput}
 \begin{CodeOutput}
@@ -613,12 +654,12 @@ coordinate transformation is made.
 \begin{CodeInput}
 R> library(sf)
 R> # create a cubble
-R> cb <- climate_flat %>%
+R> cb <- climate_flat |>
 +   cubble::as_cubble(key = id, index = date, coords = c(long, lat))
 R> 
 R> aus <- ozmaps::abs_ste
 R> 
-R> dt <- cb %>%
+R> dt <- cb |>
 +   mutate(
 +     # create `sfc` column based on long and lat
 +     ll = st_sfc(
@@ -656,11 +697,11 @@ An \pkg{s2} \code{lnglat} vector can similarly be created as an
 \begin{CodeInput}
 R> library(s2)
 R> # Western Australia map
-R> wa <- ozmaps::abs_ste %>% filter(NAME == "Western Australia")
+R> wa <- ozmaps::abs_ste |> filter(NAME == "Western Australia")
 R> 
 R> # mutate a `s2_lnglat` vector on `cb` created in the last chunk
-R> cb %>%
-+   mutate(ll = s2_lnglat(long, lat)) %>%
+R> cb |>
++   mutate(ll = s2_lnglat(long, lat)) |>
 +   filter(s2_within(ll, wa))
 \end{CodeInput}
 \begin{CodeOutput}
@@ -929,7 +970,7 @@ spatial dimension and hence uses the nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- weatherdata::historical_tmax %>%
+R> tmax <- weatherdata::historical_tmax |>
 +   filter(between(stringr::str_sub(id, 7, 8), 46, 90))
 \end{CodeInput}
 \end{CodeChunk}
@@ -941,8 +982,8 @@ nested cubble needs to be switched to the long cubble by
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax %>% 
-+   face_temporal() %>%
+R> tmax <- tmax |> 
++   face_temporal() |>
 +   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) 
 \end{CodeInput}
 \end{CodeChunk}
@@ -952,10 +993,10 @@ temperature and it is again an operation on the time dimension:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax %>%
+R> tmax <- tmax |>
 +   group_by(month = lubridate::month(date), 
 +          group = as.factor(ifelse(lubridate::year(date) > 2015, 
-+                                   "2016 ~ 2020", "1971 ~ 1975"))) %>%
++                                   "2016 ~ 2020", "1971 ~ 1975"))) |>
 +   summarise(tmax = mean(tmax, na.rm = TRUE))
 \end{CodeInput}
 \end{CodeChunk}
@@ -969,7 +1010,7 @@ the nested form for this spatial operation using \code{face_spatial()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax %>% face_spatial() %>% filter(nrow(ts) == 24) 
+R> tmax <- tmax |> face_spatial() |> filter(nrow(ts) == 24) 
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -980,7 +1021,7 @@ with \code{migrate()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax %>% face_temporal() %>% unfold(latitude, longitude)
+R> tmax <- tmax |> face_temporal() |> unfold(latitude, longitude)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -990,7 +1031,7 @@ corner:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> nsw_vic <- ozmaps::abs_ste %>% 
+R> nsw_vic <- ozmaps::abs_ste |> 
 +   filter(NAME %in% c("Victoria", "New South Wales"))
 R> 
 R> ggplot() + 
@@ -1038,7 +1079,7 @@ from each station to a cluster.
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> station_nested <- weatherdata::climate_full %>% 
+R> station_nested <- weatherdata::climate_full |> 
 +   mutate(cluster = ...)
 \end{CodeInput}
 \end{CodeChunk}
@@ -1048,7 +1089,7 @@ variable, \code{cluster}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cluster_nested <- station_nested %>% switch_key(cluster) 
+R> cluster_nested <- station_nested |> switch_key(cluster) 
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1058,7 +1099,7 @@ the glyph map later:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cluster_nested <- cluster_nested %>% get_centroid()
+R> cluster_nested <- cluster_nested |> get_centroid()
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1243,23 +1284,23 @@ safeguarded by the shared \code{id} column embedded in the cubble
 structure. Below is the pseudo code that outlines the process to
 construct an interactive graphic described above:
 
-\begin{CodeChunk}
-\begin{CodeInput}
-R> # data pre-processing
-R> clean <- weatherdata::climate_full %>% ...
-R> 
-R> # created SharedData instance for crosstalk
-R> nested <- clean %>% SharedData$new(~id, group = "cubble")
-R> long <- face_temporal(clean) %>% SharedData$new(~id, group = "cubble")
-R> 
-R> # create the spatial and temporal view each with a ShareData instance
-R> p1 <- nested %>% ...
-R> p2 <- long %>% ...
-R> 
-R> # Combine p1 and p2
-R> crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
-\end{CodeInput}
-\end{CodeChunk}
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# data pre{-}processing}
+\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
+
+\CommentTok{\# created SharedData instance for crosstalk}
+\NormalTok{nested }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{|\textgreater{}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
+\NormalTok{long }\OtherTok{\textless{}{-}} \FunctionTok{face\_temporal}\NormalTok{(clean) }\SpecialCharTok{|\textgreater{}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
+
+\CommentTok{\# create the spatial and temporal view each with a ShareData instance}
+\NormalTok{p1 }\OtherTok{\textless{}{-}}\NormalTok{ nested }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
+\NormalTok{p2 }\OtherTok{\textless{}{-}}\NormalTok{ long }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
+
+\CommentTok{\# Combine p1 and p2}
+\NormalTok{crosstalk}\SpecialCharTok{::}\FunctionTok{bscols}\NormalTok{(plotly}\SpecialCharTok{::}\FunctionTok{ggplotly}\NormalTok{(p1), plotly}\SpecialCharTok{::}\FunctionTok{ggplotly}\NormalTok{(p2), ...)}
+\end{Highlighting}
+\end{Shaded}
 
 In Figure \ref{fig:interactive-linking}, the first row shows the initial
 view of the interactive graphic. On the map, most regions in Australia
@@ -1289,26 +1330,26 @@ on the map. This would require first creating the popup plots from the
 long form cubble as a vector and then add these plots to a leaflet map
 created from the nested cubble, with \code{leafpop::addPopupGraphs()}:
 
-\begin{CodeChunk}
-\begin{CodeInput}
-R> # data pre-processing
-R> clean <- weatherdata::climate_full %>% ...
-R> 
-R> # use the long form to create subplots for each station
-R> df_id <- unique(clean$id)
-R> p <- map(1:length(df_id), function(i){
-+   dt <- clean %>% filter(id == df_id[i])
-+   ggplot(dt) %>% ...
-+ })
-R> 
-R> # create nested form leaflet map with temperature band as subplots 
-R> nested <- face_spatial(clean)
-R> leaflet(nested) %>% 
-+   addTiles() %>% 
-+   addCircleMarkers(group = "a", ...) %>% 
-+   leafpop::addPopupGraphs(graph = p, ...)
-\end{CodeInput}
-\end{CodeChunk}
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# data pre{-}processing}
+\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
+
+\CommentTok{\# use the long form to create subplots for each station}
+\NormalTok{df\_id }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(clean}\SpecialCharTok{$}\NormalTok{id)}
+\NormalTok{p }\OtherTok{\textless{}{-}} \FunctionTok{map}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(df\_id), }\ControlFlowTok{function}\NormalTok{(i)\{}
+\NormalTok{  dt }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{|\textgreater{}} \FunctionTok{filter}\NormalTok{(id }\SpecialCharTok{==}\NormalTok{ df\_id[i])}
+  \FunctionTok{ggplot}\NormalTok{(dt) }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
+\NormalTok{\})}
+
+\CommentTok{\# create nested form leaflet map with temperature band as subplots}
+\NormalTok{nested }\OtherTok{\textless{}{-}} \FunctionTok{face\_spatial}\NormalTok{(clean)}
+\FunctionTok{leaflet}\NormalTok{(nested) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{addTiles}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{addCircleMarkers}\NormalTok{(}\AttributeTok{group =} \StringTok{"a"}\NormalTok{, ...) }\SpecialCharTok{|\textgreater{}}
+\NormalTok{  leafpop}\SpecialCharTok{::}\FunctionTok{addPopupGraphs}\NormalTok{(}\AttributeTok{graph =}\NormalTok{ p, ...)}
+\end{Highlighting}
+\end{Shaded}
 
 Figure \ref{fig:interactive-popup} shows Figure
 \ref{fig:interactive-linking} made made with leaflet and popups

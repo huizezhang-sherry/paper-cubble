@@ -12,30 +12,30 @@ station_long <- prcp_aus |>
   unfold(cluster)
 
 set.seed(123)
-station_nested <- station_long %>% 
+station_nested <- station_long |> 
   face_spatial() |> 
-  strip_rowwise() %>% 
+  strip_rowwise() |> 
   mutate(cluster = kmeans(dist_raw,centers = 20, nstart = 500)$cluster)
 #save(station_nested, file = here::here("data/station_nested.rda"))
 
-cluster_nested <- station_nested %>%
-  switch_key(cluster) %>% 
+cluster_nested <- station_nested |>
+  switch_key(cluster) |> 
   get_centroid()
 
-cluster_long <- cluster_nested %>% 
-  face_temporal(ts) %>% 
-  group_by(wk) %>%
-  summarise(prcp = mean(prcp, na.rm = TRUE)) %>% 
+cluster_long <- cluster_nested |> 
+  face_temporal(ts) |> 
+  group_by(wk) |>
+  summarise(prcp = mean(prcp, na.rm = TRUE)) |> 
   unfold(cent_long, cent_lat)
 
 state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
 
-ggplot_smooth <- cluster_long %>% 
+ggplot_smooth <- cluster_long |> 
   ggplot() +
   geom_smooth(aes(x = wk, y = prcp, group = cluster), span = 0.4) 
 
-smoother <- layer_data(ggplot_smooth) %>% 
-  left_join(cluster_long %>% select(cluster, cent_long, cent_lat), by = c("group" = "cluster"))
+smoother <- layer_data(ggplot_smooth) |> 
+  left_join(cluster_long |> select(cluster, cent_long, cent_lat), by = c("group" = "cluster"))
 
 p1 <- ggplot(data = smoother, 
              aes(x_minor = x, y_minor = y, x_major = cent_long, y_major = cent_lat)) + 
@@ -50,7 +50,7 @@ p3 <- ggplot() +
   geom_sf(data = state_map, inherit.aes = FALSE,
           color = "grey80", alpha = 0.4, linetype = 3) + 
   geom_point(data = station_nested, aes(x = long, y = lat), size = 0.5) +
-  ggforce::geom_mark_hull(data = cluster_nested %>% tidyr::unnest(hull),
+  ggforce::geom_mark_hull(data = cluster_nested |> tidyr::unnest(hull),
                           expand = 0, radius = 0,
                           aes(x = long, y = lat, group = cluster)) + 
   theme_void()

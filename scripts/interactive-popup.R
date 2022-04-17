@@ -3,26 +3,26 @@ library(tidyverse)
 library(leaflet)
 library(leafpop)
 
-clean <-  weatherdata::climate_full %>%
+clean <-  weatherdata::climate_full |>
   filter(!id %in% c("ASN00067033", "ASN00072091", "ASN00059040", 
-                    "ASN00097053", "ASN00040856", "ASN00015548")) %>%
-  face_temporal() %>%
-  mutate(month = lubridate::month(date)) %>% 
-  group_by(month) %>% 
+                    "ASN00097053", "ASN00040856", "ASN00015548")) |>
+  face_temporal() |>
+  mutate(month = lubridate::month(date)) |> 
+  group_by(month) |> 
   summarise(tmax = mean(tmax, na.rm = TRUE),
             tmin = mean(tmin, na.rm = TRUE),
-            diff = mean(tmax - tmin, na.rm = TRUE)) %>% 
-  ungroup(month) %>% 
-  face_spatial() %>%
-  mutate(temp_diff_var = ts %>% pull(diff) %>% var(na.rm = TRUE)) %>% 
-  face_temporal() %>% 
-  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) %>% 
+            diff = mean(tmax - tmin, na.rm = TRUE)) |> 
+  ungroup(month) |> 
+  face_spatial() |>
+  mutate(temp_diff_var = ts |> pull(diff) |> var(na.rm = TRUE)) |> 
+  face_temporal() |> 
+  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) |> 
   unfold(name)
   
-df_id <- clean$id %>% unique()
+df_id <- clean$id |> unique()
 p <- purrr::map(1:length(df_id), function(i){
-  dt <- clean %>% filter(id == df_id[i])
-  dt %>% 
+  dt <- clean |> filter(id == df_id[i])
+  dt |> 
     ggplot(aes(x = dummy_date, ymin = tmin, ymax = tmax, group = id)) + 
     geom_ribbon(color = "grey50", fill = "grey50", alpha = 0.5) + 
     theme_bw() + 
@@ -40,9 +40,9 @@ pal <- colorNumeric(
     c2 = 40, l2= 85, c1 = 20, l1 = 30),
   domain = domain)
 
-out <- leaflet(nested) %>% 
-  addTiles() %>% 
-  addCircleMarkers(color = ~pal(domain), radius = 0.1, fillOpacity = 1, opacity = 1) %>% 
+out <- leaflet(nested) |> 
+  addTiles() |> 
+  addCircleMarkers(color = ~pal(domain), radius = 0.1, fillOpacity = 1, opacity = 1) |> 
   addPopupGraphs(graph = p, group = "a", width = 300, height =200)
 
 htmlwidgets::saveWidget(out, file = "figures/popup.html")

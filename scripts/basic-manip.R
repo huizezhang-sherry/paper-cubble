@@ -1,27 +1,27 @@
 library(tidyverse)
-tmax <- weatherdata::historical_tmax %>%
+tmax <- weatherdata::historical_tmax |>
   # filter out VIC and NSW stations
-  filter(between(stringr::str_sub(id, 7, 8), 46, 90)) %>% 
+  filter(between(stringr::str_sub(id, 7, 8), 46, 90)) |> 
   
   # filter out observations in between 1971-1975 and 2016 - 2020
-  face_temporal() %>%
-  filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) %>%
+  face_temporal() |>
+  filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) |>
   group_by(month = lubridate::month(date), 
          group = as.factor(ifelse(lubridate::year(date) > 2015, 
-                                  "2016 ~ 2020", "1971 ~ 1975"))) %>%
+                                  "2016 ~ 2020", "1971 ~ 1975"))) |>
   # summarise tmax into monthly mean for both periods
-  summarise(tmax = mean(tmax, na.rm = TRUE)) %>% 
+  summarise(tmax = mean(tmax, na.rm = TRUE)) |> 
   
   # filter out stations that have complete records in both periods 
-  face_spatial() %>%
-  filter(nrow(ts) == 24) %>% 
+  face_spatial() |>
+  filter(nrow(ts) == 24) |> 
   
   # unfold longitude and latitude to the long form for making the glyph map
-  face_temporal() %>%
+  face_temporal() |>
   unfold(latitude, longitude)
 
 
-nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria", "New South Wales"))
+nsw_vic <- ozmaps::abs_ste |> filter(NAME %in% c("Victoria", "New South Wales"))
 
 p1 <- ggplot() + 
   geom_sf(data = nsw_vic, fill = "transparent", color = "grey", linetype = "dotted") + 
@@ -39,7 +39,7 @@ p1 <- ggplot() +
 
 #################
 # inset
-tmax %>% filter(id == "ASN00048027") %>%
+tmax |> filter(id == "ASN00048027") |>
   ggplot(aes(x = month,
              y = tmax,
              color = group)) +
@@ -56,7 +56,7 @@ tmax %>% filter(id == "ASN00048027") %>%
 
 #ggsave(filename = here::here("figures/basic-manip-inset.png"), width = 7)
 
-box_df <- tmax %>% face_spatial() %>% filter(id == "ASN00048027")
+box_df <- tmax |> face_spatial() |> filter(id == "ASN00048027")
 single <-
   tibble::tibble(img = here::here("figures/basic-manip-inset.png"))
 p1 +

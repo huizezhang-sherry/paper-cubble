@@ -22,7 +22,7 @@ To use functions in the `cubble` package, an analyst will first need to turn the
 Before the formal examples in Section \ref{examples}, each function introduced in this section will be accompanied by a small example. The data used for the small examples is a subset of a larger climate weather station data used in the formal examples and has been simplified to include only five weather stations. It contains spatial information of each station: station id, latitude, longitude, elevation, station name and World Meteorology Organisation ID and also daily temporal information of date, maximum and minimum temperature and precipitation for 2020. \code{climate_flat} stores this data in format 1) in Figure \ref{fig:illu-input} and the code below creates a cubble out of \code{climate_flat} with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
 
 ```{r echo = TRUE}
-cubble_nested <- cubble::climate_flat %>%
+cubble_nested <- cubble::climate_flat |>
   as_cubble(key = id, index = date, coords = c(long, lat))
 cubble_nested
 ```
@@ -34,7 +34,7 @@ There are a few information in the cubble header: the name of the \code{key} var
 The nested format is convenient for those operations whose output does not contain a time dimension. For those outputs that are cross-identified by the spatial and temporal identifier, a long cubble needs to be used. The function \code{stretch()} is designed to switch the cubble from the nested form to the long form. This code shows how to switch the nested cubble just created into its long form:
 
 ```{r echo = TRUE}
-cubble_long <- cubble_nested %>% face_temporal()
+cubble_long <- cubble_nested |> face_temporal()
 cubble_long
 ```
 
@@ -49,7 +49,7 @@ attr(cubble_long, "spatial")
 Manipulation on the spatial and temporal dimension can be an iterative process and analysts may need to go back and forth between the nested and long cubble. \code{tamp()}, an inverse of \code{stretch()}, switches a long cubble to a nested cubble:
 
 ```{r echo = TRUE}
-cubble_back <- cubble_long %>% face_spatial()
+cubble_back <- cubble_long |> face_spatial()
 cubble_back
 ```
 
@@ -58,14 +58,14 @@ cubble_back
 Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variable. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps (which will be elaborated in section \ref{st_transformation}). Cubble allows this operation through \code{unfold()}, which moves the specified spatial variables into the long cubble:
 
 ```{r echo = TRUE}
-cubble_mig <- cubble_long %>% unfold(long, lat)
+cubble_mig <- cubble_long |> unfold(long, lat)
 cubble_mig
 ```
 
 This function should generally be used in the last step of the analysis since it is a temporary operation, meaning these added spatial variables are not stored in the long form and will disappear if switched to the nested form and then switched back:
 
 ```{r echo = TRUE}
-cubble_mig %>% face_spatial() %>% face_temporal()
+cubble_mig |> face_spatial() |> face_temporal()
 ```
 
 <!-- ## Why not just use dplyrnest_by -->
@@ -73,9 +73,9 @@ cubble_mig %>% face_spatial() %>% face_temporal()
 <!-- ```{r eval = FALSE} -->
 <!-- library(cubble) -->
 <!-- library(tidyverse) -->
-<!-- left_join(cubble::stations, cubble::climate) %>%  -->
-<!--   dplyr::nest_by(id, lat,  long,  elev, name, wmo_id) %>%  -->
-<!--   tidyr::unnest() %>%  -->
+<!-- left_join(cubble::stations, cubble::climate) |>  -->
+<!--   dplyr::nest_by(id, lat,  long,  elev, name, wmo_id) |>  -->
+<!--   tidyr::unnest() |>  -->
 <!--   group_by(........, geometry) -->
 <!-- ``` -->
 
@@ -109,10 +109,10 @@ The \code{dplyr} package has provided many tools for data wrangling tasks and th
 
 ```{r echo = TRUE}
 # example with a tsibble created from climate_flat
-raw <- climate_flat %>%
+raw <- climate_flat |>
   tsibble::as_tsibble(key = id, index = date)
 
-dt <-  raw %>%
+dt <-  raw |>
   cubble::as_cubble(coords = c(long, lat))
 dt
 ```
@@ -121,7 +121,7 @@ In the nested cubble created, each element in the list-column \code{ts} is of \c
 
 ```{r echo = TRUE}
 # add station-based features in the nested form.
-dt %>%
+dt |>
   mutate(fabletools::features(ts, tmax, list(tmax_mean = mean, tmax_var = var)))
 ```
 
@@ -132,12 +132,12 @@ As a spatial data object, \code{sf} creates a simple feature geometry list-colum
 ```{r echo = TRUE}
 library(sf)
 # create a cubble
-cb <- climate_flat %>%
+cb <- climate_flat |>
   cubble::as_cubble(key = id, index = date, coords = c(long, lat))
 
 aus <- ozmaps::abs_ste
 
-dt <- cb %>%
+dt <- cb |>
   mutate(
     # create `sfc` column based on long and lat
     ll = st_sfc(
@@ -159,11 +159,11 @@ An \pkg{s2} \code{lnglat} vector can similarly be created as an \code{sfc} in cu
 ```{r echo = TRUE}
 library(s2)
 # Western Australia map
-wa <- ozmaps::abs_ste %>% filter(NAME == "Western Australia")
+wa <- ozmaps::abs_ste |> filter(NAME == "Western Australia")
 
 # mutate a `s2_lnglat` vector on `cb` created in the last chunk
-cb %>%
-  mutate(ll = s2_lnglat(long, lat)) %>%
+cb |>
+  mutate(ll = s2_lnglat(long, lat)) |>
   filter(s2_within(ll, wa))
 ```
 

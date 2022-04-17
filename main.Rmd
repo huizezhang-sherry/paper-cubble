@@ -57,15 +57,7 @@ options(prompt = "R> ", continue = "+ ",
 
 ```{r echo = FALSE}
 library(cubble)
-library(forcats)
-library(stringr)
 library(dplyr)
-library(lubridate)
-library(ggplot2)
-library(GGally)
-library(plotly)
-library(crosstalk)
-library(patchwork)
 ```
 
 \newpage

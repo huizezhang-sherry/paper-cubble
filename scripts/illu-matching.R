@@ -10,7 +10,7 @@ dt <- tibble(
       4, rnorm(5, sd = 0.5), 6, rnorm(4, sd = 0.5)
     )
   )
-) %>% mutate(val = ifelse(val < 0, 0, val))
+) |> mutate(val = ifelse(val < 0, 0, val))
 
 circle <- tibble(
   x = c(6, 14, 23, 7, 21, 27),
@@ -21,15 +21,15 @@ circle <- tibble(
 ) 
 
 errorbar <- bind_rows(
-  circle %>% filter(id == "A"),
-  circle %>% filter(id == "A") %>% mutate(id = "a")
-) %>%
+  circle |> filter(id == "A"),
+  circle |> filter(id == "A") |> mutate(id = "a")
+) |>
   mutate(id = factor(id, c("A", "a")))
 
 ggplot() +
   geom_rect(data = errorbar, aes(xmin = x, xmax = xend, ymin = 0, ymax = 10), fill = "grey90") +
   geom_line(data = dt, aes(x = date, y = val, group = id), color = "black") +
-  geom_vline(data = circle %>% filter(id == "A"), 
+  geom_vline(data = circle |> filter(id == "A"), 
              aes(xintercept = x), linetype = "longdash", color = "grey10", lwd = 0.2) +
   geom_point(data = circle, aes(x = x, y = y, color = match), size = 3) +
   facet_wrap(vars(id), nrow = 2) +

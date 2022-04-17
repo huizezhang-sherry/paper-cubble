@@ -25,20 +25,20 @@ wf_request(
 raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
 dt <- as_cubble(raw, vars = c("q", "z"))
 
-date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") %>% as.Date()
-res <- dt %>% 
-  face_temporal() %>% 
-  filter(lubridate::date(time) %in% date) %>%
-  unfold(long, lat) %>% 
+date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") |> as.Date()
+res <- dt |> 
+  face_temporal() |> 
+  filter(lubridate::date(time) %in% date) |>
+  unfold(long, lat) |> 
   mutate(q =  q* 10^6)
   
 box = c(xmin = -180, ymin = -90, xmax = 180, ymax = -5)
 sf::sf_use_s2(FALSE)
-country <- rnaturalearth::ne_coastline("small", returnclass = "sf") %>% 
-  sf::st_crop(box) %>% 
+country <- rnaturalearth::ne_coastline("small", returnclass = "sf") |> 
+  sf::st_crop(box) |> 
   sf::st_cast("MULTILINESTRING")
 
-res %>% 
+res |> 
   ggplot() +
   geom_point(aes(x = long, y = lat, color = q)) +
   geom_contour(data = res, aes(x = long, y = lat, z = z),
