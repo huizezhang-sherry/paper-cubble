@@ -1,0 +1,98 @@
+---
+title: cubble An R Package for Structuring Spatio-temporal Data
+authors:
+  - name: H. Sherry Zhang
+    affiliation: Monash University
+    location: 21 Chancellors Walk, Clayton VIC 3800 Australia
+    email: huize.zhang@monash.edu
+  - name: Dianne Cook
+    affiliation: Monash University
+    location: 21 Chancellors Walk, Clayton VIC 3800 Australia
+    email: dicook@monash.edu
+  - name: Ursula Laa
+    affiliation: University of Natural Resources and Life Sciences
+    location: Gregor-Mendel-Straße 33, 1180 Wien, Austria
+    email:  ursula.laa@boku.ac.at
+  - name: Nicolas Langrené
+    affiliation: BNU-HKBU United International College
+    location: 2000 Jintong Road, Tangjiawan, Zhuhai, Guangdong Province, China
+    email: nicolaslangrene@uic.edu.cn
+  - name: Patricia Menéndez
+    affiliation: Monash University
+    location: 21 Chancellors Walk, Clayton VIC 3800 Australia
+    email:  patricia.menendez@monash.edu
+abstract: |
+    Spatio-temporal data refer to measurements taken across space and time. In practice, spatio-temporal data can be decomposed into a spatial and temporal component: at one time, we would select a spatial location and inspect the temporal trend; at other time, we might select one or multiple time value(s) and explore the spatial distribution. Ideally, we could make multiple maps and multiple time series to explore these together, however, doing all of these actions is complicated when data arrive fragmented in multiple objects. To make it easy to do all these tasks, ideally spatial and temporal variables are in a single data object that we can slice and dice in different ways to conduct different visualisations. This work suggests a new data structure, \code{cubble}, that uses a nested form and a long form to organise spatial and temporal variables in a single data object. The new data structure ensures that data in the two forms are synchronised while been flexible to explore the two aspect of spatio-temporal data. It also provides capability for handling data with hierarchical structure, matching data from multiple sources, constructing interactive graphics, and performing spatio-temporal transformation. The paper will demonstrate \pkg{cubble} with examples using Australian climate weather stations, river level data, and climate reanalysis (ERA5) data.
+keywords:
+- spatial, temporal, spatio temporal, R, environmental data, exploratory data analysis
+bibliography: "../references.bib"
+cls: "../jss.cls"
+bst: "../jss.bst"
+output: rticles::arxiv_article
+link-citations: true
+---
+```{r setup, echo = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  cache = TRUE,
+  fig.path = here::here("figures/"),
+  fig.height = 10, 
+  root.dir = here::here()
+)
+options(prompt = "R> ", continue = "+ ",
+        tibble.print_max = 5, tibble.print_min = 5)
+```
+
+```{r}
+library(cubble)
+library(dplyr)
+```
+
+
+\newpage
+
+```{r child = here::here("1-intro.Rmd")}
+
+```
+
+```{r child = here::here("2-0-cube.Rmd")}
+
+```
+
+
+```{r child = here::here("2-the-cubble-pkg.Rmd")}
+
+```
+
+```{r child = here::here("3-advanced.Rmd")}
+
+```
+
+```{r child = here::here("4-1-basic.Rmd")}
+
+```
+
+```{r child = here::here("4-2-agg.Rmd")}
+
+```
+
+
+```{r child = here::here("4-3-water-level.Rmd")}
+
+```
+
+
+```{r child = here::here("4-4-netcdf.Rmd")}
+
+```
+
+```{r child = here::here("4-5-interactive.Rmd")}
+
+```
+
+
+```{r child = here::here("5-conclusion.Rmd")}
+
+```
