@@ -2,19 +2,23 @@ library(tidyverse)
 library(cubble)
 library(patchwork)
 
-climate <- weatherdata::climate_full %>%
+climate <- prcp_aus %>%
   filter(between(stringr::str_sub(id, 7, 8), 76, 90)) %>%
-  stretch() %>%
+  face_temporal() %>%
   filter(lubridate::year(date) == 2020) %>%
-  tamp() %>%
+  face_spatial() %>%
   mutate(type = "climate")
 
-river <- weatherdata::water %>% mutate(type = "river")
+river <- river %>% mutate(type = "river")
 
 vic_map <- rmapshaper::ms_simplify(ozmaps::abs_ste %>% filter(NAME == "Victoria"))  
-plot_map(vic_map) +
+ggplot() + 
+  geom_sf(data = vic_map, fill = "transparent", color = "grey") + 
   geom_point(data = dplyr::bind_rows(river, climate), 
              aes(x = long, y = lat, color = type)) + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(legend.position = "bottom") +
+  ggplot2::labs(x = "Longitude", y = "Latitude") + 
   scale_color_brewer(palette = "Dark2") 
 ggsave(filename = "figures/matching-map.png", width = 10, height = 5)  
 
@@ -24,15 +28,19 @@ res <- match_sites(river, climate,
                    temporal_n_highest = 30,
                    temporal_min_match = 15)
 
-p1 <- plot_map(vic_map) +
+p1 <-ggplot() + 
+  geom_sf(data = vic_map, fill = "transparent", color = "grey") + 
   geom_point(data = res, aes(x = long, y = lat, color = type)) +
   ggrepel::geom_label_repel(
     data = res %>% filter(type == "river"), aes(x = long, y = lat, label = group)) +
-  scale_color_brewer(palette = "Dark2") 
+  scale_color_brewer(palette = "Dark2")  + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(legend.position = "bottom") +
+  ggplot2::labs(x = "Longitude", y = "Latitude")
 
 res_long <- res %>%
-  stretch(ts) %>%
-  migrate(group, type) %>%
+  face_temporal(ts) %>%
+  unfold(group, type) %>%
   rename(prcp = matched_var) %>% 
   mutate(prcp = (prcp - min(prcp, na.rm = TRUE))/ (max(prcp, na.rm = TRUE) - min(prcp, na.rm = TRUE))) 
 

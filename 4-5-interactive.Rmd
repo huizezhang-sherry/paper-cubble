@@ -14,7 +14,7 @@ clean <- weatherdata::climate_full %>% ...
 
 # created SharedData instance for crosstalk
 nested <- clean %>% SharedData$new(~id, group = "cubble")
-long <- stretch(clean) %>% SharedData$new(~id, group = "cubble")
+long <- face_temporal(clean) %>% SharedData$new(~id, group = "cubble")
 
 # create the spatial and temporal view each with a ShareData instance
 p1 <- nested %>% ...
@@ -48,7 +48,7 @@ p <- map(1:length(df_id), function(i){
 })
 
 # create nested form leaflet map with temperature band as subplots 
-nested <- tamp(clean)
+nested <- face_spatial(clean)
 leaflet(nested) %>% 
   addTiles() %>% 
   addCircleMarkers(group = "a", ...) %>% 

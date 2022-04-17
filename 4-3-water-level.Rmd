@@ -10,13 +10,12 @@ Bureau of Meteorology collects [water data](http://www.bom.gov.au/metadata/catal
 ```{r}
 climate <- weatherdata::climate_full %>%
   filter(between(stringr::str_sub(id, 7, 8), 76, 90)) %>%
-  stretch() %>%
+  face_temporal() %>%
   filter(lubridate::year(date) == 2020) %>%
-  tamp() %>%
+  face_spatial() %>%
   mutate(type = "climate")
 
-river <- weatherdata::water %>%
-  mutate(type = "river")
+river <- river %>% mutate(type = "river")
 ```
 
 ```{r matching-map, out.width="100%", fig.cap="Location of weather stations and river gauges in Victoria, Australia."}

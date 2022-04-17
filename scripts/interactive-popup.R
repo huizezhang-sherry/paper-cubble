@@ -6,18 +6,18 @@ library(leafpop)
 clean <-  weatherdata::climate_full %>%
   filter(!id %in% c("ASN00067033", "ASN00072091", "ASN00059040", 
                     "ASN00097053", "ASN00040856", "ASN00015548")) %>%
-  stretch() %>%
+  face_temporal() %>%
   mutate(month = lubridate::month(date)) %>% 
   group_by(month) %>% 
   summarise(tmax = mean(tmax, na.rm = TRUE),
             tmin = mean(tmin, na.rm = TRUE),
             diff = mean(tmax - tmin, na.rm = TRUE)) %>% 
   ungroup(month) %>% 
-  tamp() %>%
+  face_spatial() %>%
   mutate(temp_diff_var = ts %>% pull(diff) %>% var(na.rm = TRUE)) %>% 
-  stretch() %>% 
+  face_temporal() %>% 
   mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) %>% 
-  migrate(name)
+  unfold(name)
   
 df_id <- clean$id %>% unique()
 p <- purrr::map(1:length(df_id), function(i){
@@ -32,7 +32,7 @@ p <- purrr::map(1:length(df_id), function(i){
     ggtitle(paste0(stringr::str_to_title(unique(dt$name))))
 })
 
-nested <- tamp(clean) 
+nested <- face_spatial(clean) 
 domain <- nested$temp_diff_var
 pal <- colorNumeric(
   colorspace::sequential_hcl(

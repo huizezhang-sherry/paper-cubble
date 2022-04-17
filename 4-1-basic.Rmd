@@ -20,7 +20,7 @@ Filtering for the period 1971 ~ 1975 and 2016 ~ 2020 is an operation on the time
 
 ```{r eval=  FALSE, echo = TRUE}
 tmax <- tmax %>% 
-  stretch() %>%
+  face_temporal() %>%
   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) 
 ```
 
@@ -34,16 +34,16 @@ tmax <- tmax %>%
   summarise(tmax = mean(tmax, na.rm = TRUE))
 ```
 
-A few stations don't have records during 1971 - 1975 and further investigation shows that while the first and last year of each series is recorded, the missing years in this period is not reported. These stations are filtered out by examining whether the summarised time series has a total of 24 months. The long cubble needs to be switched to the nested form for this spatial operation using \code{tamp()}: 
+A few stations don't have records during 1971 - 1975 and further investigation shows that while the first and last year of each series is recorded, the missing years in this period is not reported. These stations are filtered out by examining whether the summarised time series has a total of 24 months. The long cubble needs to be switched to the nested form for this spatial operation using \code{face_spatial()}: 
 
 ```{r eval = FALSE, echo = TRUE}
-tmax <- tmax %>% tamp() %>% filter(nrow(ts) == 24) 
+tmax <- tmax %>% face_spatial() %>% filter(nrow(ts) == 24) 
 ```
 
 Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates need to be in the same table. Spatial variables can be moved to the long form with \code{migrate()}: 
 
 ```{r eval = FALSE, echo = TRUE}  
-tmax <- tmax %>% stretch() %>% migrate(latitude, longitude)
+tmax <- tmax %>% face_temporal() %>% unfold(latitude, longitude)
 ```
 
 \code{tmax} can then be supplied to \code{geom_glyph()} for the glyph map in Figure \ref{fig:basic-manip} with a station inset on the top left corner:

@@ -1,34 +1,32 @@
 library(tidyverse)
 library(cubble)
 library(patchwork)
-coords <- cbind(weatherdata::climate_full$long, weatherdata::climate_full$lat)
+coords <- cbind(prcp_aus$long, prcp_aus$lat)
 dist_raw <- geosphere::distm(coords, coords)
 
+station_long <- prcp_aus |> 
+  face_temporal(ts) |> 
+  mutate(wk = lubridate::week(date)) |> 
+  group_by(wk) |> 
+  summarise(prcp = sum(prcp, na.rm = TRUE)) |> 
+  unfold(cluster)
+
 set.seed(123)
-station_nested <- weatherdata::climate_full %>% 
+station_nested <- station_long %>% 
+  face_spatial() |> 
   strip_rowwise() %>% 
   mutate(cluster = kmeans(dist_raw,centers = 20, nstart = 500)$cluster)
-save(station_nested, file = here::here("data/station_nested.rda"))
+#save(station_nested, file = here::here("data/station_nested.rda"))
 
 cluster_nested <- station_nested %>%
   switch_key(cluster) %>% 
   get_centroid()
 
-station_long <- station_nested %>% 
-  stretch(ts) %>% 
-  mutate(wk = lubridate::week(date)) %>% 
-  group_by(wk) %>% 
-  summarise(prcp = sum(prcp, na.rm = TRUE)) %>% 
-  migrate(cluster)
-
 cluster_long <- cluster_nested %>% 
-  stretch(ts) %>% 
-  mutate(wk = lubridate::week(date)) %>% 
-  group_by(id, wk) %>%
-  summarise(prcp = sum(prcp, na.rm = TRUE)) %>%
-  ungroup(id) %>%
+  face_temporal(ts) %>% 
+  group_by(wk) %>%
   summarise(prcp = mean(prcp, na.rm = TRUE)) %>% 
-  migrate(cent_long, cent_lat)
+  unfold(cent_long, cent_lat)
 
 state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
 

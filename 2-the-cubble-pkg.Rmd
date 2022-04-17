@@ -34,7 +34,7 @@ There are a few information in the cubble header: the name of the \code{key} var
 The nested format is convenient for those operations whose output does not contain a time dimension. For those outputs that are cross-identified by the spatial and temporal identifier, a long cubble needs to be used. The function \code{stretch()} is designed to switch the cubble from the nested form to the long form. This code shows how to switch the nested cubble just created into its long form:
 
 ```{r echo = TRUE}
-cubble_long <- cubble_nested %>% stretch()
+cubble_long <- cubble_nested %>% face_temporal()
 cubble_long
 ```
 
@@ -49,46 +49,46 @@ attr(cubble_long, "spatial")
 Manipulation on the spatial and temporal dimension can be an iterative process and analysts may need to go back and forth between the nested and long cubble. \code{tamp()}, an inverse of \code{stretch()}, switches a long cubble to a nested cubble:
 
 ```{r echo = TRUE}
-cubble_back <- cubble_long %>% tamp()
+cubble_back <- cubble_long %>% face_spatial()
 cubble_back
 ```
 
 ## Migrate spatial variables to a long cubble
 
-Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variable. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps (which will be elaborated in section \ref{st_transformation}). Cubble allows this operation through \code{migrate()}, which moves the specified spatial variables into the long cubble:
+Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variable. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps (which will be elaborated in section \ref{st_transformation}). Cubble allows this operation through \code{unfold()}, which moves the specified spatial variables into the long cubble:
 
 ```{r echo = TRUE}
-cubble_mig <- cubble_long %>% migrate(long, lat)
+cubble_mig <- cubble_long %>% unfold(long, lat)
 cubble_mig
 ```
 
 This function should generally be used in the last step of the analysis since it is a temporary operation, meaning these added spatial variables are not stored in the long form and will disappear if switched to the nested form and then switched back:
 
 ```{r echo = TRUE}
-cubble_mig %>% tamp() %>% stretch()
+cubble_mig %>% face_spatial() %>% face_temporal()
 ```
 
-## Why not just use \pkg{dplyr::nest_by}
+<!-- ## Why not just use dplyrnest_by -->
 
-```{r eval = FALSE}
-library(cubble)
-library(tidyverse)
-left_join(cubble::stations, cubble::climate) %>% 
-  dplyr::nest_by(id, lat,  long,  elev, name, wmo_id) %>% 
-  tidyr::unnest() %>% 
-  group_by(........, geometry)
-```
-
-
-```{r eval = FALSE}
-as_cubble(list(spatial = stations, temporal = climate),
-          key = id, index = date, coords = c(long, lat))
-```
+<!-- ```{r eval = FALSE} -->
+<!-- library(cubble) -->
+<!-- library(tidyverse) -->
+<!-- left_join(cubble::stations, cubble::climate) %>%  -->
+<!--   dplyr::nest_by(id, lat,  long,  elev, name, wmo_id) %>%  -->
+<!--   tidyr::unnest() %>%  -->
+<!--   group_by(........, geometry) -->
+<!-- ``` -->
 
 
-```{r eval = FALSE}
-usmap::us_map("states")
-```
+<!-- ```{r eval = FALSE} -->
+<!-- as_cubble(list(spatial = stations, temporal = climate), -->
+<!--           key = id, index = date, coords = c(long, lat)) -->
+<!-- ``` -->
+
+
+<!-- ```{r eval = FALSE} -->
+<!-- usmap::us_map("states") -->
+<!-- ``` -->
 
 
 

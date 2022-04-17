@@ -383,7 +383,7 @@ switch the nested cubble just created into its long form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_long <- cubble_nested %>% stretch()
+R> cubble_long <- cubble_nested %>% face_temporal()
 R> cubble_long
 \end{CodeInput}
 \begin{CodeOutput}
@@ -434,7 +434,7 @@ a long cubble to a nested cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_back <- cubble_long %>% tamp()
+R> cubble_back <- cubble_long %>% face_spatial()
 R> cubble_back
 \end{CodeInput}
 \begin{CodeOutput}
@@ -460,12 +460,12 @@ involves both the spatial and temporal variable. An example of this is
 the transformation of temporal variables into the spatial dimension in
 glyph maps (which will be elaborated in section
 \ref{st_transformation}). Cubble allows this operation through
-\code{migrate()}, which moves the specified spatial variables into the
+\code{unfold()}, which moves the specified spatial variables into the
 long cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_mig <- cubble_long %>% migrate(long, lat)
+R> cubble_mig <- cubble_long %>% unfold(long, lat)
 R> cubble_mig
 \end{CodeInput}
 \begin{CodeOutput}
@@ -490,7 +490,7 @@ nested form and then switched back:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_mig %>% tamp() %>% stretch()
+R> cubble_mig %>% face_spatial() %>% face_temporal()
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
@@ -942,7 +942,7 @@ nested cubble needs to be switched to the long cubble by
 \begin{CodeChunk}
 \begin{CodeInput}
 R> tmax <- tmax %>% 
-+   stretch() %>%
++   face_temporal() %>%
 +   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) 
 \end{CodeInput}
 \end{CodeChunk}
@@ -965,11 +965,11 @@ investigation shows that while the first and last year of each series is
 recorded, the missing years in this period is not reported. These
 stations are filtered out by examining whether the summarised time
 series has a total of 24 months. The long cubble needs to be switched to
-the nested form for this spatial operation using \code{tamp()}:
+the nested form for this spatial operation using \code{face_spatial()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax %>% tamp() %>% filter(nrow(ts) == 24) 
+R> tmax <- tmax %>% face_spatial() %>% filter(nrow(ts) == 24) 
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -980,7 +980,7 @@ with \code{migrate()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax %>% stretch() %>% migrate(latitude, longitude)
+R> tmax <- tmax %>% face_temporal() %>% unfold(latitude, longitude)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -1212,9 +1212,8 @@ refer to \citet{hersbach2020era5}, \citet{simmons2020global} and
 \end{figure}
 \end{CodeChunk}
 
-\hypertarget{interative-graphic-with-cubble}{%
-\subsection{Interative graphic with
-cubble}\label{interative-graphic-with-cubble}}
+\hypertarget{interative-graphic}{%
+\subsection{Interative graphic}\label{interative-graphic}}
 
 With spatio-temporal data, users may wish to make plots to learn the
 spatial distribution of a variable, or to find patterns, such as trend
@@ -1251,7 +1250,7 @@ R> clean <- weatherdata::climate_full %>% ...
 R> 
 R> # created SharedData instance for crosstalk
 R> nested <- clean %>% SharedData$new(~id, group = "cubble")
-R> long <- stretch(clean) %>% SharedData$new(~id, group = "cubble")
+R> long <- face_temporal(clean) %>% SharedData$new(~id, group = "cubble")
 R> 
 R> # create the spatial and temporal view each with a ShareData instance
 R> p1 <- nested %>% ...
@@ -1303,7 +1302,7 @@ R> p <- map(1:length(df_id), function(i){
 + })
 R> 
 R> # create nested form leaflet map with temperature band as subplots 
-R> nested <- tamp(clean)
+R> nested <- face_spatial(clean)
 R> leaflet(nested) %>% 
 +   addTiles() %>% 
 +   addCircleMarkers(group = "a", ...) %>% 

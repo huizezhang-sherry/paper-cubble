@@ -4,7 +4,7 @@ library(ggplot2)
 library(tsibble)
 
 set.seed(123)
-dt <- weatherdata::climate_full %>% slice_sample(n = 50)
+dt <- prcp_aus %>% slice_sample(n = 50)
 
 ###########################
 # from map to ts
@@ -22,7 +22,7 @@ plot_map(state_map) +
 ggsave(filename = "figures/keynotes-figures/illu-default-map.png")
 
 long <- dt %>% 
-  stretch() %>% 
+  face_temporal() %>% 
   mutate(month = lubridate::month(date)) %>% 
   group_by(month) %>% 
   summarise(tmax = mean(tmax, na.rm = TRUE)) %>% 

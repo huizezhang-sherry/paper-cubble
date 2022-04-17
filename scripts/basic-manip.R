@@ -1,11 +1,10 @@
 library(tidyverse)
-library(GGally)
 tmax <- weatherdata::historical_tmax %>%
   # filter out VIC and NSW stations
   filter(between(stringr::str_sub(id, 7, 8), 46, 90)) %>% 
   
   # filter out observations in between 1971-1975 and 2016 - 2020
-  stretch() %>%
+  face_temporal() %>%
   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) %>%
   group_by(month = lubridate::month(date), 
          group = as.factor(ifelse(lubridate::year(date) > 2015, 
@@ -14,12 +13,12 @@ tmax <- weatherdata::historical_tmax %>%
   summarise(tmax = mean(tmax, na.rm = TRUE)) %>% 
   
   # filter out stations that have complete records in both periods 
-  tamp() %>%
+  face_spatial() %>%
   filter(nrow(ts) == 24) %>% 
   
-  # migrate longitude and latitude to the long form for making the glyph map
-  stretch() %>%
-  migrate(latitude, longitude)
+  # unfold longitude and latitude to the long form for making the glyph map
+  face_temporal() %>%
+  unfold(latitude, longitude)
 
 
 nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria", "New South Wales"))
@@ -57,7 +56,7 @@ tmax %>% filter(id == "ASN00048027") %>%
 
 #ggsave(filename = here::here("figures/basic-manip-inset.png"), width = 7)
 
-box_df <- tmax %>% tamp() %>% filter(id == "ASN00048027")
+box_df <- tmax %>% face_spatial() %>% filter(id == "ASN00048027")
 single <-
   tibble::tibble(img = here::here("figures/basic-manip-inset.png"))
 p1 +
@@ -73,6 +72,6 @@ p1 +
     color = "black"
   ) +
   ggimg::geom_point_img(data = single,
-                        aes(x = 143, y = -29, img = img), size = 6)
+                        aes(x = 143.7, y = -30, img = img), size = 6)
 
 ggsave(filename = "figures/basic-manip.png", width = 10, height = 10)

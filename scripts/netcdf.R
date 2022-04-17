@@ -27,9 +27,9 @@ dt <- as_cubble(raw, vars = c("q", "z"))
 
 date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") %>% as.Date()
 res <- dt %>% 
-  stretch() %>% 
+  face_temporal() %>% 
   filter(lubridate::date(time) %in% date) %>%
-  migrate(long, lat) %>% 
+  unfold(long, lat) %>% 
   mutate(q =  q* 10^6)
   
 box = c(xmin = -180, ymin = -90, xmax = 180, ymax = -5)
