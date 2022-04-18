@@ -3,33 +3,20 @@ title: "2-0-cube"
 output: pdf_document
 ---
 
+<!-- and software implementation has been seen in many R packages: \pkg{raster} [@raster], \pkg{terra} [@terra], and \pkg{stars} [@stars]. -->
 
-# Conceptual framework: spatio-temporal cube
+<!-- # Existing work and new challenges -->
+
+<!-- Spatio-temporal software should echo with the advance in spatial and temporal data analysis. This section will start with the \pkg{spacetime} paper [@spacetime] that sets the foundation for wrangling spatio-temporal data in \proglang{R}, and then describe some emerging concepts and software in data analysis since the paper publishes and what remains as challenges. -->
+
+
+<!-- Also, array is not the best solution for a large subset of data, specifically, the vector spatio-temporal data. With vector data, spatial and temporal variables are commonly collected in separate 2D tables and there is usually a location ID to link the spatial and temporal information. Sometimes, the geometrical shape of the location may not present and an additional linking is needed to incorporate the map data. With the multiple pieces in 2D data frame format, there should be a solution to organise all these data from multiple sources in a 2D structure, without needing to convert it into higher dimensional representation. -->
+
+
+# Conceptual framework: spatio-temporal cube {#cube}
 
 Multivariate spatio-temporal data can be conceptualised using a cubical data model with reference to variables, time and space. This naturally motivates the usage of array to represent and store spatio-temporal data, as evident by satellite imageries, large climate models, among others. The work by @lu_multidimensional_2018 has discussed the suitability of this representation through array algebra and practical spatio-temporal tasks.  
 
 The cubical conceptual framework provides a generalisation to the operation can be done on the data for visualisation. A paper by @bach_review_2014 has reviewed the temporal data visualisation based on space-time cube operations. Notice that the term space-time cube in their article "does not need to involve spatial data", but referring to "an abstract 2D substrate that is used to visualize data at a specific time". Despite its main focus is on temporal data, the mindset of abstracting out data representation to construct visualisation is applicable to our spatio-temporal data manipulation and visualisation.
-
-
-<!-- and software implementation has been seen in many R packages: \pkg{raster} [@raster], \pkg{terra} [@terra], and \pkg{stars} [@stars]. -->
-
-# Existing work and new challenges
-
-<!-- Spatio-temporal software should echo with the advance in spatial and temporal data analysis. This section will start with the \pkg{spacetime} paper [@spacetime] that sets the foundation for wrangling spatio-temporal data in \proglang{R}, and then describe some emerging concepts and software in data analysis since the paper publishes and what remains as challenges. -->
-
-To represent spatio-temporal data, @spacetime proposes four layouts: full grid layout (STF),  sparse grid layout (STS), irregular layout (STI), and trajectory (STT). These layouts are implemented in the \pkg{spacetime} package with underlying class \pkg{sp} [@sp] and \pkg{xts} [@xts] for handling spatial and temporal variables. While these layouts and classes are still being used and well-maintained today, they are not compatible with the \pkg{tidyverse} ecosystem [@tidyverse], which has a huge influence on data analysis in \proglang{R}, including in the spatial and temporal communities. The package \pkg{sf} [@sf] uses data frame objects to represent spatial data with an additional \code{geometry} column dedicating to feature geometries [@jr_herring_opengis_2011] (e.g. POINT, MULTIPOINT, POLYGON, MULTIPOLYGON etc). For temporal data, \pkg{tsibble} [@tsibble] builds on top of the \pkg{tibble} [@tibble] object and explicitly includes date and time in columns as variables, rather than data attributes. 
-
-Underlying tidyverse is the concept of tidy data [@tidydata], which considers how variables should be structured for analysis. In the three formats (time-wide, space-wide, and long) summarised in the @spacetime paper, only the long form is considered as tidy. The main advantages of it over the time-wide and space-wide format is that the latter treat either time or location as variable names (Section 3.1 in @tidydata) rather than values of variables, making them difficult to be wrangled. One problem with the long format is that it can be inefficient to store feature geometries, especially for large MULTIPOLYGON over long time period. This motivates a new tidyverse compatible data object to work with spatio-temporal data.  
-
-<!-- For spatial data, \pkg{sf} [@sf] covers a wide range of geometrical operations and is the format most map data stored. When incorporating the time dimension, a time wide format, introduced in @spacetime, is usually adopted. This treats time as variable name rather than value and makes it inconvenient to wrangle time, as per the tidy data principle [@tidydata]. In the temporal domain, \pkg{tsibble} [@tsibble] follows the tidy data principle to arrange the time in the long format, while when adding spatial variables, a long format implies repeating variables at each time and this can make a huge difference when the repetition is on large geometrical shapes with long time period.  -->
-
-**two challenages: multiple data sources + large spatio-temporal object** 
-In additional to the shift into more tidyverse workflow for working with data, spatio-temporal data have some unique challenges. The first one being the split of variables in multiple tables. Often the time, spatio-temporal data is not presented in a single data object, but split into fragmented pieces from different sources. For example, map data recorded the shape of a collection of area of interest is provided by the government website; the geo-scientific data is recorded with longitude and latitude coordinate of locations in the area; and temporal variables indexed by both location and time need to be further queried using location data. For spatio-temporal data analysis, merging all these sources can be challenging and joining these tables can go wrong because of the slightest unmatched of the linking variable from different sources. 
-
-Another challenge when analysing spatio-temporal data is on the simple feature representation of spatial data. While the simple feature is able to handle large and complex spatial geometry and perform precise spatial operations, data analysts usually do not have a large expectation on the map accuracy and would prefer a simplified map with quick rendering for visualisation. Also, the feature geometry column in \pkg{sf} wraps the spatial coordinates in a list column, sometimes, analysts may like to unpack them into longitude and latitude to work with. A smooth transition with the coordinate columns and and simple feature geometry column would satisfy analysts from both ends.
-
-With some of the aforementioned issues recognised, the \pkg{stars} package has been a new implementation to handle spatio-temporal data conceptually as data cubes and implemented as arrays. The package depends on the \pkg{sf} package and has allowed more access to tidyverse verbs in the workflow. However, for vector spatio-temporal data, major difficulties to work with \pkg{stars} is first to cast the variables from multiple tables into a star object and then keep the operations in the high-dimensional cube. Given that most table mentioned before collect variables in a 2D table, analysts could benefit from a structure to allow them work in 2D tables.
-
-<!-- Also, array is not the best solution for a large subset of data, specifically, the vector spatio-temporal data. With vector data, spatial and temporal variables are commonly collected in separate 2D tables and there is usually a location ID to link the spatial and temporal information. Sometimes, the geometrical shape of the location may not present and an additional linking is needed to incorporate the map data. With the multiple pieces in 2D data frame format, there should be a solution to organise all these data from multiple sources in a 2D structure, without needing to convert it into higher dimensional representation. -->
 
 

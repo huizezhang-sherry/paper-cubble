@@ -3,7 +3,7 @@ title: "3-advanced"
 output: pdf_document
 ---
 
-# Other features and considerations
+# Other features and considerations {#others}
 
 ## Hierarchical structure
 

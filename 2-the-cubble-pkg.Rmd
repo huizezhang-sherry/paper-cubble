@@ -3,7 +3,7 @@ title: "2-the-cubble-pkg"
 output: pdf_document
 ---
 
-# The cubble package
+# The cubble package {#cubble}
 
 This section will present two formats that cubble uses to arrange spatio-temporal data. The main cubble functions will then be introduced to illustrate how to work with these two formats in short examples. Lastly, a subsection will be dedicated to how existing packages, in spatial and temporal analysis, fit in with cubble.
 

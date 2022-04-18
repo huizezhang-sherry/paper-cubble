@@ -38,8 +38,10 @@ preamble: >
   \usepackage{amsmath}
   \usepackage{array}
   \usepackage{xcolor}
-output: rticles::jss_article
-bibliography: references.bib
+output: 
+  bookdown::pdf_book:
+    base_format: rticles::jss_article
+bibliography: ../references.bib
 ---
 
 ```{r setup, echo = FALSE}
