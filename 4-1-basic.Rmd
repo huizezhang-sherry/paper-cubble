@@ -5,6 +5,77 @@ output: html_document
 
 # Examples {#examples}
 
+## Victoria covid data
+
+This example illustrate casting different sources into a cubble object. Victoria government of Australia provides daily COVID case number by date, source, and local government area (LGA). This data can be useful for visualising COVID spread when combined with LGA map information, which is available from Australian Bureau of Statistics. Variable \code{covid} and \code{lga} show the first 5 rows of these two data:
+
+```{r eval = FALSE}
+library(tidyverse)
+#https://www.coronavirus.vic.gov.au/victorian-coronavirus-covid-19-data
+raw <- read_csv(here::here("data/NCOV_COVID_Cases_by_LGA_Source_20220324.csv"), 
+                  col_names = c("date", "postcode", "source", "lga"), skip = 1) 
+
+covid <- raw %>%
+  count(date, lga, source, postcode) %>%
+  filter(date >= as.Date("2022-01-01")) %>% 
+  filter(source == "Contact with a confirmed case") %>% 
+  group_by(date, lga, source) %>%
+  count() %>%
+  ungroup(date) %>%
+  mutate(roll_mean = zoo::rollmean(n, k = 14, fill = NA)) %>% 
+  tsibble::as_tsibble(key = lga, index = date) %>% 
+  tsibble::fill_gaps(.full = TRUE)
+save(covid, file = here::here("data/covid.rda"))
+```
+
+```{r}
+load(here::here("data/covid.rda"))
+lga <- absmapsdata::lga2018 %>%
+  rename(lga = lga_name_2018) %>% 
+  filter(state_name_2016 == "Victoria") %>% 
+  rmapshaper::ms_simplify()
+```
+
+```{r echo = TRUE}
+covid |> head(5)
+lga |> head(5)
+```
+
+To cast these two data into a cubble object, supply them as a list with name \code{spatial} and \code{temporal} and other arguments (\code{key}, \code{index}, and \code{coords}). \code{as_cubble()} will automatically check the match of spatial and temporal information in the two datasets and warnings will emit if a location has missing spatial or temporal information.
+
+```{r echo = TRUE, warning = TRUE, message= TRUE}
+cb <- as_cubble(list(spatial = lga, temporal = covid),
+                key = lga, index = date, coords = c(cent_long, cent_lat))
+```
+
+Here, some locations have been detected with this issue and you can use \code{output = "unmatch"} to check on these locations:
+
+```{r echo = TRUE}
+pair <- as_cubble(list(spatial = lga, temporal = covid),
+                key = lga, index = date, coords = c(cent_long, cent_lat),
+                output = "unmatch")
+
+pair
+```
+
+\pkg{cubble} will make an attempt to pair the unmatched sites as well as showing unpaired locations. These can be useful information to help clean up the data.
+
+```{r echo = TRUE}
+lga <- lga %>% 
+  mutate(lga = ifelse(lga == "Kingston (C) (Vic.)", "Kingston (C)", lga),
+         lga = ifelse(lga == "Latrobe (C) (Vic.)", "Latrobe (C)", lga)) %>%
+  filter(!lga %in% pair$others$spatial)
+
+covid <- covid %>% filter(!lga %in% pair$others$temporal)
+```
+
+After cleaning, you can cast the data into cubble with the same syntax without warnings:
+
+```{r echo = TRUE}
+cb <- as_cubble(data = list(spatial = lga, temporal = covid),
+                key = lga, index = date, coords = c(cent_long, cent_lat))
+```
+
 ## Australia historical maximum temperature
 
 Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for `r nrow(weatherdata::historical_tmax)` Australian stations from GHCN with starting from year `r range(weatherdata::historical_tmax$first_year)[2]`. \code{weatherdata::historical_tmax} is already in a cubble, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. This example compares the maximum temperature in two periods: 1971 - 1975 and 2016 - 2020 for stations in Victoria and New South Wales.

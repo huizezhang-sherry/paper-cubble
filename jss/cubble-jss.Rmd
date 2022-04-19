@@ -53,6 +53,7 @@ knitr::opts_chunk$set(
   fig.path = "figures/",
   fig.height = 10
 )
+
 options(prompt = "R> ", continue = "+ ",
         tibble.print_max = 5, tibble.print_min = 5)
 ```
