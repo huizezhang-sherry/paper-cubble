@@ -68,30 +68,38 @@ This function should generally be used in the last step of the analysis since it
 cubble_mig |> face_spatial() |> face_temporal()
 ```
 
-<!-- ## Why not just use dplyrnest_by -->
+<!-- https://www.jstatsoft.org/style#my-latex-paper-does-not-compile-when-there-is-jss-markup-in-section-titles-what-should-i-do -->
+\subsection[Why not just use]{Why not just use \code{dplyr::nest\_by()}}
 
-<!-- ```{r eval = FALSE} -->
+It may naturally raise the question that why bother a new data structure since the nested form can already be created by the \pkg{dplyr} function \code{nest_by()}?  While \code{nest_by()} and \code{unnest()} can mimic the nested form in cubble, cubble can be seen as an attempt to arrange variables from different observational units into a single object, specifically for spatio-temporal data. While `nest_by()` solves this problem on the spatial side, it doesn't solve the temporal side. For temporal data, a combined representation with spatial variables is useful for spatio-temporal operations but its duplication can be a burden to operate on. Also, spatial variables are dropped when summarised and you will need to either specified all of them in the \code{group_by()} before \code{summarise}, or add a joining after \code{summarise()}.
+
+
+<!-- ```{r} -->
+<!-- library(dplyr) -->
+<!-- vars <- c(id, lat, long, elev, name, wmo_id) -->
+<!-- left_join(cubble::stations, cubble::climate) |>  -->
+<!--   group_by(id, lat, long, elev, name, wmo_id) |>  -->
+<!--   summarise(tmax_mean = mean(tmax)) -->
+
+<!-- cubble::climate |>  -->
+<!--   mutate(month = lubridate::month(date)) |>  -->
+<!--   group_by(id, month) |>  -->
+<!--   summarise(tmax_mean = mean(tmax)) |>  -->
+<!--   ungroup() |>  -->
+<!--   left_join(cubble::stations) |>  -->
+<!--   nest_by(id, lat, long, elev, name, wmo_id) -->
+
+
+<!-- ``` --
+
+<!-- ``` r -->
 <!-- library(cubble) -->
 <!-- library(tidyverse) -->
-<!-- left_join(cubble::stations, cubble::climate) |>  -->
-<!--   dplyr::nest_by(id, lat,  long,  elev, name, wmo_id) |>  -->
-<!--   tidyr::unnest() |>  -->
+<!-- left_join(cubble::stations, cubble::climate) |> -->
+<!--   dplyr::nest_by(id, lat,  long,  elev, name, wmo_id) |> -->
+<!--   tidyr::unnest() |> -->
 <!--   group_by(........, geometry) -->
 <!-- ``` -->
-
-
-<!-- ```{r eval = FALSE} -->
-<!-- as_cubble(list(spatial = stations, temporal = climate), -->
-<!--           key = id, index = date, coords = c(long, lat)) -->
-<!-- ``` -->
-
-
-<!-- ```{r eval = FALSE} -->
-<!-- usmap::us_map("states") -->
-<!-- ``` -->
-
-
-
 
 ## Compatibility with existing packages
 

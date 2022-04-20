@@ -310,8 +310,9 @@ R> cubble_mig |> face_spatial() |> face_temporal()
 \end{CodeOutput}
 \end{CodeChunk}
 
-\hypertarget{why-not-just-use-dplyrnestby}{%
-\subsection{Why not just use dplyrnestby}\label{why-not-just-use-dplyrnestby}}
+\subsection[Why not just use]{Why not just use \code{dplyr::nest\_by()}}
+
+It may naturally raise the question that why bother a new data structure since the nested form can already be created by the \pkg{dplyr} function \code{nest_by()}? While \code{nest_by()} and \code{unnest()} can mimic the nested form in cubble, cubble can be seen as an attempt to arrange variables from different observational units into a single object, specifically for spatio-temporal data. While \texttt{nest\_by()} solves this problem on the spatial side, it doesn't solve the temporal side. For temporal data, a combined representation with spatial variables is useful for spatio-temporal operations but its duplication can be a burden to operate on. Also, spatial variables are dropped when summarised and you will need to either specified all of them in the \code{group_by()} before \code{summarise}, or add a joining after \code{summarise()}.
 
 \hypertarget{compatibility-with-existing-packages}{%
 \subsection{Compatibility with existing packages}\label{compatibility-with-existing-packages}}
