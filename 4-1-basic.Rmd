@@ -5,7 +5,7 @@ output: html_document
 
 # Examples {#examples}
 
-## Victoria covid data
+## Victoria covid data {#covid}
 
 This example illustrate casting different sources into a cubble object. Victoria government of Australia provides daily COVID case number by date, source, and local government area (LGA). This data can be useful for visualising COVID spread when combined with LGA map information, which is available from Australian Bureau of Statistics. Variable \code{covid} and \code{lga} show the first 5 rows of these two data:
 

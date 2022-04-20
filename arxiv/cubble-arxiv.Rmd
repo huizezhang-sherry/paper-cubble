@@ -28,7 +28,11 @@ keywords:
 bibliography: "../references.bib"
 cls: "../jss.cls"
 bst: "../jss.bst"
-output: rticles::arxiv_article
+preamble: |
+  \newcommand{\sherry}[1]{\textcolor{magenta}{#1}}
+output: 
+  bookdown::pdf_book:
+    base_format: rticles::arxiv_article
 link-citations: true
 ---
 ```{r setup, echo = FALSE}
