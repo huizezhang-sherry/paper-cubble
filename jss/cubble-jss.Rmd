@@ -38,6 +38,7 @@ preamble: >
   \usepackage{amsmath}
   \usepackage{array}
   \usepackage{xcolor}
+  \newcommand{\sherry}[1]{\textcolor{magenta}{#1}}
 output: 
   bookdown::pdf_book:
     base_format: rticles::jss_article
