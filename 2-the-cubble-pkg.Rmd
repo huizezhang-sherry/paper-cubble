@@ -7,7 +7,7 @@ output: pdf_document
 
 This section will first introduce the core functions in the cubble class: \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()} in subsection \@ref(create) to \@ref(unfold). The next subsection addresses the necessity of creating a new class. Subsection \@ref(compact) will then show the compatibility of cubble with existing packages in spatial and temporal analysis.
 
-Each core function is introduced with a short example accompanied and the data `climate_flat` is used throughout this section. `climate_flat` contains five weather stations in Australia with spatial information of each station: station id, latitude, longitude, elevation, station name and World Meteorology Organisation ID and also daily temporal information of date, maximum and minimum temperature and precipitation for 2020. Below prints out the first five rows of `climate_flat`:
+Each core function is introduced with a short example accompanied and the data `climate_flat` is used throughout this section. `climate_flat` contains five weather stations in Australia with spatial information of each station: station id, latitude, longitude, elevation, station name, and World Meteorology Organisation ID and also daily temporal information of date, maximum and minimum temperature and precipitation for 2020. Below prints out the first five rows of `climate_flat`:
 
 ```{r}
 cubble::climate_flat 
@@ -25,7 +25,7 @@ cubble_nested
 
 The cubble header provides some information about this data. \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]}. In the third row is the the name and type of variable nested in the \code{ts} column and here it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
 
-The created cubble is built from a \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to calculate on the list using the \code{mutate()} syntax, which is simplier than the {\code{map()} when working with list column. For example, calculating the number of raining day can be done by:
+The created cubble is built from a \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to calculate on the list using the \code{mutate()} syntax, which is simpler than the {\code{map()} when working with list column. For example, calculating the number of raining days can be done by:
 
 ```{r echo = TRUE}
 cubble_nested |> 
@@ -35,14 +35,14 @@ cubble_nested |>
 
 ## Change focus to the time-variable face
 
-The nested form can be used for those operations whose output is only indexed by the spatial identifier (\code{key}), while for those outputs cross-identified by the spatial and temporal identifier (\code{key} and \code{index}), the nested form becomes inadequate. \pkg{cubble} also provides a long form, which expands the \code{ts} column and temporarily "hide" the spatial variables. The function \code{face_temporal()} is used to switch a nested cubble into a long one and the first row in Figure \ref{fig:face} illustrate this operation where the focus of the cube now changes from the site-variable face to the time-variable face. This code switches the cubble just created into its long form:
+The nested form can be used for those operations whose output is only indexed by the spatial identifier (\code{key}), while for those outputs cross-identified by the spatial and temporal identifier (\code{key} and \code{index}), the nested form becomes inadequate. \pkg{cubble} also provides a long form, which expands the \code{ts} column and temporarily "hide" the spatial variables. The function \code{face_temporal()} is used to switch a nested cubble into a long one and the first row in Figure \ref{fig:face} illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face. This code switches the cubble just created into its long form:
 
 ```{r echo = TRUE}
 cubble_long <- cubble_nested |> face_temporal()
 cubble_long
 ```
 
-The first line in the header now shows the cubble is in its long form and the third line has been changed to show the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. Unlike the nested form buildin form a \code{rowwise_df}, the long cubble is built form class \code{groupped_df} where all the observations from the same sites forms a group.
+The first line in the header now shows the cubble is in its long form and the third line has been changed to show the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. Unlike the nested form, the long cubble is built form class \code{groupped_df} where all the observations from the same sites form a group.
 
 ```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of function \\code{face\\_temporal} and \\code{face\\_spatial} in cubble. In the first row, \\code{face\\_temporal} switches a cubble from the nested form into the long form and the focus has switched from the spatial aspect (the side face) to the temporal aspect (the front face). In the second row, \\code{face\\_spatial} switches a cubble back to the nested form from te long form and shift focus back to the spatial aspect."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.008.png"))
@@ -50,7 +50,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Change focus back to the site-variable face
 
-Wrangling spatio-temproal data can be an iterative process on the spatial and temporal dimension. Switching the focus back to the site-variable face can be accomplished by the function \code{face_spatial()}, which is the inverse of \code{face_temporal()}. The second row of Figure \ref{fig:face} illustrates  the function and below is an example on the climate data:
+Wrangling spatio-temporal data can be an iterative process in the spatial and temporal dimensions. Switching the focus back to the site-variable face can be accomplished by the function \code{face_spatial()}, which is the inverse of \code{face_temporal()}. The second row of Figure \ref{fig:face} illustrates  the function and below is an example on the climate data:
 
 ```{r echo = TRUE}
 cubble_back <- cubble_long |> face_spatial()
@@ -60,7 +60,7 @@ identical(cubble_nested, cubble_back)
 
 ## Flatten spatial variables into the long cubble {#unfold}
 
-Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variable. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps, which will be elaborated in section \ref{st_transformation}. This type of operations can be seen as flattening, or *unfolding*, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long cubble:
+Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps, which will be elaborated in section \ref{st_transformation}. This type of operation can be seen as flattening, or *unfolding*, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long cubble:
 
 ```{r echo = TRUE}
 cubble_unfold <- cubble_long |> unfold(long, lat)
@@ -76,7 +76,7 @@ cubble_unfold |> face_spatial() |> face_temporal()
 <!-- https://www.jstatsoft.org/style#my-latex-paper-does-not-compile-when-there-is-jss-markup-in-section-titles-what-should-i-do -->
 \subsection[Why not just use]{Why not just use \code{dplyr::nest\_by()}}
 
-Some readers may raise the question why a new data structure rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. While \code{nest_by()} and its pair \code{unnest()} can mimic the nested form in cubble, cubble can be seen as an attempt to arrange variables from different observational units into a single object, specifically for spatio-temporal data. While `nest_by()` can recreate the nested form, it can't create a clean slate for temporal variables as the long form. For temporal variables, carrying the duplicated spatial variables in the combined form is not convenient to work with. This is because these spatial variables will lost after \code{summarise()} and one will need to subset the spatial variables again from the origin data and make a left join, which tends to create unnecessary intermediate products in the workflow. 
+Some readers may raise the question why a new data structure rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. While \code{nest_by()} and its pair \code{unnest()} can mimic the nested form in cubble, cubble can be seen as an attempt to arrange variables from different observational units into a single object, specifically for spatio-temporal data. While `nest_by()` can recreate the nested form, it can't create a clean slate for temporal variables as the long form. For temporal variables, carrying the duplicated spatial variables in the combined form is not convenient to work with. This is because these spatial variables will lose after \code{summarise()} and one will need to subset the spatial variables again from the original data and make a left join, which tends to create unnecessary intermediate products in the workflow. 
 
 ```{r eval = FALSE, echo = TRUE}
 # operation on the long form w/o cubble
@@ -155,7 +155,7 @@ dt |> mutate(fabletools::features(ts, tmax, list(tmax_mean = mean, tmax_var = va
 
 ### sf and s2
 
-As a spatial data object, \code{sf} creates a simple feature geometry list-column (\code{sfc}) in the data frame to provide spatial operations on various geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}, etc). An \code{sf} object can be supplied as the spatial table, as part of the raw data, along with a temporal table, to create a cubble. Once formed in a cubble, methods for the \code{sfc} class can be applied on the nested form.  An example of this is shown in \@ref(covid), which also handles the case when the site in the two tables don't match exactly. A spatial data object with \code{s2} vector can also be the input of the spatial table.
+As a spatial data object, \code{sf} creates a simple feature geometry list-column (\code{sfc}) in the data frame to provide spatial operations on various geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}, etc). An \code{sf} object can be supplied as the spatial table, as part of the raw data, along with a temporal table, to create a cubble. Once formed in a cubble, methods for the \code{sfc} class can be applied in the nested form.  An example of this is shown in \@ref(covid), which also handles the case when the sites in the two tables don't match exactly. A spatial data object with \code{s2} vector can also be the input of the spatial table.
 
 
 <!-- These spatial operations are also valuable for spatio-temporal data analysis, but an \code{sf} object *usually* does not contain temporal variables. This means \code{sf} cannot be directly cast into a \code{cubble}, however, \code{cubble} does support \code{sfc} columns in the nested form and spatial operations applied to the \code{sfc} column in \code{sf} can still be applied to the \code{sfc} column in a cubble. The following example shows how to create an \code{sfc} column of \code{POINT} type from latitude and longitude in cubble. Then \code{sf::st_within} is used to add the state \code{MULTIPOLYGON} of each weather station before a coordinate transformation is made. -->
@@ -201,7 +201,7 @@ As a spatial data object, \code{sf} creates a simple feature geometry list-colum
 
 ### netcdf {#netcdf}
 
-NetCDF data is another format that is commonly used for storing spatio-temporal data. It has two main components: *dimension* for defining the spatio-temporal grid (longitude, latitude, and time) and *variable* that populates the defined grid. Attributes are usually associated with dimension and variable in the NetCDF format data and a [metadata convention for climate and forecast](http://cfconventions.org/) has been designed to standardise the format of the attributes. A few packages in R exists for manipulating NetCDF data and this includes a high-level R interface: \pkg{ncdf4} [@ncdf4], a low-level interface that calls C-interface: \pkg{RNetCDF} [@rnetcdf; @michna2013rnetcdf], and a tidyverse implementation: \pkg{tidync} [@tidync].
+NetCDF data is another format that is commonly used for storing spatio-temporal data. It has two main components: *dimension* for defining the spatio-temporal grid (longitude, latitude, and time) and *variable* that populates the defined grid. Attributes are usually associated with dimensions and variables in the NetCDF format data and a [metadata convention for climate and forecast](http://cfconventions.org/) has been designed to standardise the format of the attributes. A few packages in R exists for manipulating NetCDF data and this includes a high-level R interface: \pkg{ncdf4} [@ncdf4], a low-level interface that calls C-interface: \pkg{RNetCDF} [@rnetcdf; @michna2013rnetcdf], and a tidyverse implementation: \pkg{tidync} [@tidync].
 
 Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble}. It maps each combination of longitude and latitude into an \code{id} as the \code{key}:
 
@@ -213,7 +213,7 @@ raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
 dt <- as_cubble(raw, vars = c("q", "z"))
 ```
 
-The memory limit with NetCDF data in cubble depends on the number of longitude grid points x the number of latitude grid points x the number of time grid points x the number of variables. Cubble can handle slightly more than 300 x 300 (longitude x longitude) grid points for daily 3 variables in one year. A 300 by 300 spatial grid can be a bounding box of [100, -80, 180, 0] at 0.25 degree resolution or a global bounding box [-180, -90, 180, -90] at 1 degree resolution. The spatial grid can also be subsetted for to trade for longer time periods and more variables through \code{long_range} and \code{lat_range} if the NetCDF file has finer resolution than needed:
+The memory limit with NetCDF data in cubble depends on the number of longitude grid points x the number of latitude grid points x the number of time grid points x the number of variables. Cubble can handle slightly more than 300 x 300 (longitude x longitude) grid points for daily 3 variables in one year. A 300 by 300 spatial grid can be a bounding box of [100, -80, 180, 0] at 0.25 degree resolution or a global bounding box [-180, -90, 180, -90] at 1 degree resolution. The spatial grid can also be subsetted to trade for longer time periods and more variables through \code{long_range} and \code{lat_range} if the NetCDF file has finer resolution than needed:
 
 ```{r eval = FALSE, echo = TRUE}
 # Assume my_ncdf has bounding box of [-180, -90, 180, -90]
