@@ -167,9 +167,20 @@ The rest of the paper is divided as follows: Section \ref{cube} discusses the sp
 \hypertarget{cube}{%
 \section{Conceptual framework: spatio-temporal cube}\label{cube}}
 
-Spatio-temporal data can be conceptualised using a cubical data model with three axis: variable, time, and space. This abstraction can be a useful tool to map operations on spatio-temporal data to operations on the cube. Lu, Appel, and Pebesma (\protect\hyperlink{ref-lu_multidimensional_2018}{2018}) has shown an example of how array operations can be mapped onto the cube including select, scale, reduce, rearrange, and compute. The cubical abstract can also be used to generalise visualisation, where Bach et al. (\protect\hyperlink{ref-bach_review_2014}{2014}) has reviewed the temporal data visualisation based on space-time cube operations. Notice that the term space-time cube in their article ``does not need to involve spatial data'', but referring to ``an abstract 2D substrate that is used to visualize data at a specific time''. Despite its main focus is on temporal data, the mindset of abstracting out data representation to construct visualisation is applicable to our spatio-temporal data manipulation and visualisation.
+Spatio-temporal data can be conceptualised using a cubical data model with three axis. This abstraction can be useful to generalise operations or even visualisation: Lu, Appel, and Pebesma (\protect\hyperlink{ref-lu_multidimensional_2018}{2018}) shows an example of how array operations (select, scale, reduce, rearrange, and compute) can be mapped onto the cube; Bach et al. (\protect\hyperlink{ref-bach_review_2014}{2014}) reviews the temporal data visualisation based on space-time cube operations. Notice that the term space-time cube in their article ``does not need to involve spatial data'', but referring to ``an abstract 2D substrate that is used to visualize data at a specific time''. Despite its main focus is on temporal data, the mindset of abstracting out data representation to construct visualisation is applicable to our spatio-temporal data manipulation and visualisation.
 
-While a cubical conceptual data model is neat to conceptually view the spatio-temporal data, data wrangling is not convenient in a cubical representation or arrays. There are a few reasons for this: 1) Some variables only have the spatial dimension and an array representation will need to handle the duplication issue mentioned above. 2) While arrays are efficient for computation on numerical variables, spatio-temporal data contains more than just numerical variables. Wrangling on character strings and specific datetime classes are not easy with arrays. 3) The 2D operation of creating a new variable, i.e.~\texttt{mutate()}, is not clear defined in an array. There are three different ways to add a 1D vector to a cubical array and this doesn't precisely define how the new variable should be added.
+While a cubical conceptual data model is neat to conceptually view the spatio-temporal data, a 3D data representation, or an array, may not be convenient for data wrangling. There are two reasons for this: 1) While arrays are efficient for computation on numerical values, spatio-temporal data contains more than just numerical variables. Wrangling on character strings and specific datetime classes are common tasks for spatio-temporal data but are not easy with arrays. 2) The \texttt{mutate()} syntax for creating new variables is no longer valid since the operation can no longer define how a created 1D vector should be added to the array.
+
+There has been many cubes defined using time, latitude, and longitude, which can be seen as taking snapshots of the space and stack on time. Our spatio-temporal cube is defined slightly different with three axes: time, site, and variable as Figure \ref{fig:cube-def}. The time axis is the same across the two formation, site encompasses latitude and longitude into a single column identifier, while variables are stacked on this defined space-time canvas. This notion is adopted to avoid the use of hypercube when describing multivariate spatio-temporal data.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.5\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/cube-def} 
+
+}
+
+\caption{An ilustration of the conceputalised spatio-temporal cube with three axies: time, site, and variable.}\label{fig:cube-def}
+\end{figure}
 
 \hypertarget{cubble}{%
 \section{The cubble package}\label{cubble}}
