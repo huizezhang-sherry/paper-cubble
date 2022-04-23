@@ -13,7 +13,7 @@ raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
 dt <- as_cubble(raw, vars = c("q", "z"))
 ```
 
-Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in @hersbach2020era5. It shows the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04 in the stratosphere. Readers interested in the analysis of this figure can refer to @hersbach2020era5, @simmons2020global and @simmons2005ecmwf for more details.
+Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in @hersbach2020era5. It shows the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04 in the stratosphere. Readers interested in the analysis of this figure can refer to @hersbach2020era5, @simmons2020global, and @simmons2005ecmwf for more details.
 
 ```{r netcdf, out.width="100%", fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in  Hersbach et al (2020)."}
 knitr::include_graphics(here::here("figures/netcdf.png"))
