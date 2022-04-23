@@ -76,8 +76,27 @@ cubble_unfold |> face_spatial() |> face_temporal()
 <!-- https://www.jstatsoft.org/style#my-latex-paper-does-not-compile-when-there-is-jss-markup-in-section-titles-what-should-i-do -->
 \subsection[Why not just use]{Why not just use \code{dplyr::nest\_by()}}
 
-It may naturally raise the question that why bother a new data structure since the nested form can already be created by \code{dplyr::nest_by()}?  While \code{nest_by()} and \code{unnest()} can mimic the nested form in cubble, cubble can be seen as an attempt to arrange variables from different observational units into a single object, specifically for spatio-temporal data. While `nest_by()` solves this problem on the spatial side, it doesn't solve the temporal side. For temporal data, a combined representation with spatial variables is useful for spatio-temporal operations but its duplication can be a burden to operate on. Also, spatial variables are dropped when summarised and you will need to either specified all of them in the \code{group_by()} before \code{summarise}, or add a joining after \code{summarise()}.
+Some readers may raise the question why a new data structure rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. While \code{nest_by()} and its pair \code{unnest()} can mimic the nested form in cubble, cubble can be seen as an attempt to arrange variables from different observational units into a single object, specifically for spatio-temporal data. While `nest_by()` can recreate the nested form, it can't create a clean slate for temporal variables as the long form. For temporal variables, carrying the duplicated spatial variables in the combined form is not convenient to work with. This is because these spatial variables will lost after \code{summarise()} and one will need to subset the spatial variables again from the origin data and make a left join, which tends to create unnecessary intermediate products in the workflow. 
 
+```{r eval = FALSE, echo = TRUE}
+# operation on the long form w/o cubble
+# cubble workflow
+dt |> 
+  as_cubble(...) |> 
+  face_temporal() |> 
+  group_by() |> 
+  summarise() |> 
+  unfold(...)
+
+# tidyverse workflow
+temporal <- dt |> 
+  group_by(...) |> 
+  summarise(...)
+
+spatial <- dt |> select(....)
+
+spatial |> left_join(temporal)
+```
 
 <!-- ```{r} -->
 <!-- library(dplyr) -->
@@ -136,50 +155,53 @@ dt |> mutate(fabletools::features(ts, tmax, list(tmax_mean = mean, tmax_var = va
 
 ### sf and s2
 
-As a spatial data object, \code{sf} creates a simple feature geometry list-column (\code{sfc}) in the data frame to provide spatial operations on various geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}, etc). These spatial operations are also valuable for spatio-temporal data analysis, but an \code{sf} object *usually* does not contain temporal variables. This means \code{sf} cannot be directly cast into a \code{cubble}, however, \code{cubble} does support \code{sfc} columns in the nested form and spatial operations applied to the \code{sfc} column in \code{sf} can still be applied to the \code{sfc} column in a cubble. The following example shows how to create an \code{sfc} column of \code{POINT} type from latitude and longitude in cubble. Then \code{sf::st_within} is used to add the state \code{MULTIPOLYGON} of each weather station before a coordinate transformation is made.
+As a spatial data object, \code{sf} creates a simple feature geometry list-column (\code{sfc}) in the data frame to provide spatial operations on various geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}, etc). An \code{sf} object can be supplied as the spatial table, as part of the raw data, along with a temporal table, to create a cubble. Once formed in a cubble, methods for the \code{sfc} class can be applied on the nested form.  An example of this is shown in \@ref(covid), which also handles the case when the site in the two tables don't match exactly. A spatial data object with \code{s2} vector can also be the input of the spatial table.
 
-```{r echo = TRUE}
-library(sf)
-# create a cubble
-cb <- climate_flat |>
-  cubble::as_cubble(key = id, index = date, coords = c(long, lat))
 
-aus <- ozmaps::abs_ste
+<!-- These spatial operations are also valuable for spatio-temporal data analysis, but an \code{sf} object *usually* does not contain temporal variables. This means \code{sf} cannot be directly cast into a \code{cubble}, however, \code{cubble} does support \code{sfc} columns in the nested form and spatial operations applied to the \code{sfc} column in \code{sf} can still be applied to the \code{sfc} column in a cubble. The following example shows how to create an \code{sfc} column of \code{POINT} type from latitude and longitude in cubble. Then \code{sf::st_within} is used to add the state \code{MULTIPOLYGON} of each weather station before a coordinate transformation is made. -->
 
-dt <- cb |>
-  mutate(
-    # create `sfc` column based on long and lat
-    ll = st_sfc(
-      purrr::map2(long, lat, ~st_point(c(.x, .y))),
-      crs = st_crs(aus)),
+<!-- ```{r echo = TRUE} -->
+<!-- library(sf) -->
+<!-- # create a cubble -->
+<!-- cb <- climate_flat |> -->
+<!--   cubble::as_cubble(key = id, index = date, coords = c(long, lat)) -->
 
-    # append state multi-polygon based on the `sfc` created
-    state = aus$geometry[st_within(ll, aus, sparse = FALSE)],
+<!-- aus <- ozmaps::abs_ste -->
 
-    # adopt a different projection: lambert conformal conic (EPSG:3112)
-    state = st_transform(state, crs = "EPSG:3112")
-    )
+<!-- dt <- cb |> -->
+<!--   mutate( -->
+<!--     # create `sfc` column based on long and lat -->
+<!--     ll = st_sfc( -->
+<!--       purrr::map2(long, lat, ~st_point(c(.x, .y))), -->
+<!--       crs = st_crs(aus)), -->
 
-dt
-```
+<!--     # append state multi-polygon based on the `sfc` created -->
+<!--     state = aus$geometry[st_within(ll, aus, sparse = FALSE)], -->
 
-An \pkg{s2} \code{lnglat} vector can similarly be created as an \code{sfc} in cubble before using any \code{s2}-prefixed function:
+<!--     # adopt a different projection: lambert conformal conic (EPSG:3112) -->
+<!--     state = st_transform(state, crs = "EPSG:3112") -->
+<!--     ) -->
 
-```{r echo = TRUE}
-library(s2)
-# Western Australia map
-wa <- ozmaps::abs_ste |> filter(NAME == "Western Australia")
+<!-- dt -->
+<!-- ``` -->
 
-# mutate a `s2_lnglat` vector on `cb` created in the last chunk
-cb |>
-  mutate(ll = s2_lnglat(long, lat)) |>
-  filter(s2_within(ll, wa))
-```
+<!-- An \pkg{s2} \code{lnglat} vector can similarly be created as an \code{sfc} in cubble before using any \code{s2}-prefixed function: -->
+
+<!-- ```{r echo = TRUE} -->
+<!-- library(s2) -->
+<!-- # Western Australia map -->
+<!-- wa <- ozmaps::abs_ste |> filter(NAME == "Western Australia") -->
+
+<!-- # mutate a `s2_lnglat` vector on `cb` created in the last chunk -->
+<!-- cb |> -->
+<!--   mutate(ll = s2_lnglat(long, lat)) |> -->
+<!--   filter(s2_within(ll, wa)) -->
+<!-- ``` -->
 
 
 ### netcdf {#netcdf}
 
-NetCDF data has two main components: *dimension* for defining the spatio-temporal grid (longitude, latitude, and time) and *variable* that populates the defined grid. Attributes are usually associated with dimension and variable in the NetCDF format data and a [metadata convention for climate and forecast](http://cfconventions.org/) has been designed to standardise the format of the attributes. A few packages in R exists for manipulating NetCDF data and this includes a high-level R interface: \pkg{ncdf4} [@ncdf4], a low-level interface that calls C-interface: \pkg{RNetCDF} [@rnetcdf; @michna2013rnetcdf], and a tidyverse implementation: \pkg{tidync} [@tidync].
+NetCDF data is another format that is commonly used for storing spatio-temporal data. It has two main components: *dimension* for defining the spatio-temporal grid (longitude, latitude, and time) and *variable* that populates the defined grid. Attributes are usually associated with dimension and variable in the NetCDF format data and a [metadata convention for climate and forecast](http://cfconventions.org/) has been designed to standardise the format of the attributes. A few packages in R exists for manipulating NetCDF data and this includes a high-level R interface: \pkg{ncdf4} [@ncdf4], a low-level interface that calls C-interface: \pkg{RNetCDF} [@rnetcdf; @michna2013rnetcdf], and a tidyverse implementation: \pkg{tidync} [@tidync].
 
 Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble}. It maps each combination of longitude and latitude into an \code{id} as the \code{key}:
 
@@ -191,7 +213,7 @@ raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
 dt <- as_cubble(raw, vars = c("q", "z"))
 ```
 
-The memory limit with NetCDF data in cubble depends on the number of longitude grid points times the number of latitude grid points times the number of time grid points times the number of variables. Cubble can handle slightly more than 300 x 300 (longitude x longitude) grid points for 3 variables in one year. The spatial grid can be reduced to trade for longer time periods and more variables. A 300 by 300 spatial grid can be a bounding box of [100, -80, 180, 0] at 0.25 degree resolution or a global bounding box [-180, -90, 180, -90] at 1 degree resolution. Subsetting longitude and latitude grids is available through \code{long_range} and \code{lat_range} if the NetCDF file has finer resolution than needed.
+The memory limit with NetCDF data in cubble depends on the number of longitude grid points x the number of latitude grid points x the number of time grid points x the number of variables. Cubble can handle slightly more than 300 x 300 (longitude x longitude) grid points for daily 3 variables in one year. A 300 by 300 spatial grid can be a bounding box of [100, -80, 180, 0] at 0.25 degree resolution or a global bounding box [-180, -90, 180, -90] at 1 degree resolution. The spatial grid can also be subsetted for to trade for longer time periods and more variables through \code{long_range} and \code{lat_range} if the NetCDF file has finer resolution than needed:
 
 ```{r eval = FALSE, echo = TRUE}
 # Assume my_ncdf has bounding box of [-180, -90, 180, -90]
