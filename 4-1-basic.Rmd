@@ -41,7 +41,7 @@ covid |> head(5)
 lga |> head(5)
 ```
 
-Cubble can be created with separate spatial and temporal table in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \@ref(create). \code{as_cubble()} will automatically check the match of site in both tables emit a warning if a location has missing spatial or temporal information.
+Cubble can be created with separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \@ref(create). \code{as_cubble()} will automatically check the match of sites in both tables and emit a warning if a location has missing spatial or temporal information.
 
 ```{r echo = TRUE, warning = TRUE, message= TRUE}
 cb <- as_cubble(list(spatial = lga, temporal = covid),
@@ -74,7 +74,7 @@ cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 
 ## Australian historical maximum temperature
 
-Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for `r nrow(weatherdata::historical_tmax)` Australian stations from GHCN with starting from year `r range(weatherdata::historical_tmax$first_year)[2]`. \code{weatherdata::historical_tmax} is already in a cubble, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. This example compares the maximum temperature in two periods: 1971 - 1975 and 2016 - 2020 for stations in Victoria and New South Wales.
+Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for `r nrow(weatherdata::historical_tmax)` Australian stations from GHCN, starting from year `r range(weatherdata::historical_tmax$first_year)[2]`. \code{weatherdata::historical_tmax} is already in a cubble, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. This example compares the maximum temperature in two periods: 1971 - 1975 and 2016 - 2020 for stations in Victoria and New South Wales.
 
 Stations in the two states can be subsetted by the station number: Australia GHCN station number starts with "ASN00" and is followed by the [Bureau of Meteorology (BOM) station number](http://www.bom.gov.au/climate/cdo/about/site-num.shtml). The second and third digits of BOM station number (7th and 8th in the GHCN number) define the state of the station, where 46 - 75 are New South Wales stations and 76 - 90 are Victoria stations. Filtering Victoria and New South Wales stations is an operation in the spatial dimension and hence uses the nested form: 
 
@@ -107,7 +107,7 @@ A few stations do not have records during 1971 - 1975 and further investigation 
 tmax <- tmax |> face_spatial() |> filter(nrow(ts) == 24) 
 ```
 
-Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates need to be in the same table. Spatial variables can be moved to the long form with \code{migrate()}: 
+Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates need to be in the same table. Spatial variables can be moved to the long form with \code{unfold()}: 
 
 ```{r eval = FALSE, echo = TRUE}  
 tmax <- tmax |> face_temporal() |> unfold(latitude, longitude)
