@@ -7,23 +7,23 @@ output: html_document
 
 ## Victoria covid data {#covid}
 
-Victoria government of Australia provides daily COVID case number by date, source, and local government area (LGA). This data can be used to visualise COVID spread when combined with map information on LGA, available from the Australian Bureau of Statistics. The first five rows of both data are printed below:  
+The Victoria State Government in Australia provides daily COVID case numbers by date, source, and local government area (LGA). This data can be used to visualise COVID spread when combined with map information on LGA, available from the Australian Bureau of Statistics. The first five rows of both data are printed below:  
 
 ```{r eval = FALSE}
 library(tidyverse)
 #https://www.coronavirus.vic.gov.au/victorian-coronavirus-covid-19-data
-raw <- read_csv(here::here("data/NCOV_COVID_Cases_by_LGA_Source_20220324.csv"), 
-                  col_names = c("date", "postcode", "source", "lga"), skip = 1) 
+raw <- read_csv(here::here("data/NCOV_COVID_Cases_by_LGA_Source_20220324.csv"),
+                  col_names = c("date", "postcode", "source", "lga"), skip = 1)
 
 covid <- raw %>%
   count(date, lga, source, postcode) %>%
-  filter(date >= as.Date("2022-01-01")) %>% 
-  filter(source == "Contact with a confirmed case") %>% 
+  filter(date >= as.Date("2022-01-01")) %>%
+  filter(source == "Contact with a confirmed case") %>%
   group_by(date, lga, source) %>%
   count() %>%
   ungroup(date) %>%
-  mutate(roll_mean = zoo::rollmean(n, k = 14, fill = NA)) %>% 
-  tsibble::as_tsibble(key = lga, index = date) %>% 
+  mutate(roll_mean = zoo::rollmean(n, k = 14, fill = NA)) %>%
+  tsibble::as_tsibble(key = lga, index = date) %>%
   tsibble::fill_gaps(.full = TRUE)
 save(covid, file = here::here("data/covid.rda"))
 ```
@@ -31,8 +31,8 @@ save(covid, file = here::here("data/covid.rda"))
 ```{r}
 load(here::here("data/covid.rda"))
 lga <- absmapsdata::lga2018 %>%
-  rename(lga = lga_name_2018) %>% 
-  filter(state_name_2016 == "Victoria") %>% 
+  rename(lga = lga_name_2018) %>%
+  filter(state_name_2016 == "Victoria") %>%
   rmapshaper::ms_simplify()
 ```
 
@@ -41,7 +41,11 @@ covid |> head(5)
 lga |> head(5)
 ```
 
+<<<<<<< Updated upstream
 Cubble can be created with separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \@ref(create). \code{as_cubble()} will automatically check the match of sites in both tables and emit a warning if a location has missing spatial or temporal information.
+=======
+Cubble can be created with separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \@ref(create). \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
+>>>>>>> Stashed changes
 
 ```{r echo = TRUE, warning = TRUE, message= TRUE}
 cb <- as_cubble(list(spatial = lga, temporal = covid),
@@ -61,7 +65,7 @@ pair
 \pkg{cubble} will attempt to pair the unmatched sites as well as those that cannot be paired. These can be helpful to clean up the data before creating the cubble again:
 
 ```{r echo = TRUE}
-lga <- lga %>% 
+lga <- lga %>%
   mutate(lga = ifelse(lga == "Kingston (C) (Vic.)", "Kingston (C)", lga),
          lga = ifelse(lga == "Latrobe (C) (Vic.)", "Latrobe (C)", lga)) %>%
   filter(!lga %in% pair$others$spatial)
@@ -74,40 +78,48 @@ cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 
 ## Australian historical maximum temperature
 
+<<<<<<< Updated upstream
 Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for `r nrow(weatherdata::historical_tmax)` Australian stations from GHCN, starting from year `r range(weatherdata::historical_tmax$first_year)[2]`. \code{weatherdata::historical_tmax} is already in a cubble, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. This example compares the maximum temperature in two periods: 1971 - 1975 and 2016 - 2020 for stations in Victoria and New South Wales.
+=======
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for `r nrow(weatherdata::historical_tmax)` Australian stations from the GHCN starting from year `r range(weatherdata::historical_tmax$first_year)[2]`. \code{weatherdata::historical_tmax} is already in a cubble, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. This example compares the maximum temperature in two periods: 1971-1975 and 2016-2020 for stations in Victoria and New South Wales.
+>>>>>>> Stashed changes
 
-Stations in the two states can be subsetted by the station number: Australia GHCN station number starts with "ASN00" and is followed by the [Bureau of Meteorology (BOM) station number](http://www.bom.gov.au/climate/cdo/about/site-num.shtml). The second and third digits of BOM station number (7th and 8th in the GHCN number) define the state of the station, where 46 - 75 are New South Wales stations and 76 - 90 are Victoria stations. Filtering Victoria and New South Wales stations is an operation in the spatial dimension and hence uses the nested form: 
+Stations in the two states can be subsetted by the station number: the Australian GHCN station numbers start with "ASN00" and are followed by the [Bureau of Meteorology (BOM) station number](http://www.bom.gov.au/climate/cdo/about/site-num.shtml). The second and third digits of the BOM station number (7th and 8th in the GHCN number) define the state of the station; the range 46-75 corresponds to New South Wales stations and the range 76-90 corresponds to Victorian stations. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the nested form:
 
 ```{r eval = FALSE, echo = TRUE}
 tmax <- weatherdata::historical_tmax |>
   filter(between(stringr::str_sub(id, 7, 8), 46, 90))
 ```
 
-Filtering for the period 1971 ~ 1975 and 2016 ~ 2020 is an operation on the time dimension and the nested cubble needs to be switched to the long cubble by \code{stretch()}: 
-
-```{r eval=  FALSE, echo = TRUE}
-tmax <- tmax |> 
-  face_temporal() |>
-  filter(lubridate::year(date) %in% c(1971:1975, 2016:2020)) 
-```
-
-A monthly average is used for both periods to smooth the maximum temperature and it is again an operation on the time dimension:
+Filtering for the time periods 1971-1975 and 2016-2020 is a time operation and the nested cubble needs to be switched to the long cubble form by \code{stretch()}:
 
 ```{r eval=  FALSE, echo = TRUE}
 tmax <- tmax |>
-  group_by(month = lubridate::month(date), 
-         group = as.factor(ifelse(lubridate::year(date) > 2015, 
+  face_temporal() |>
+  filter(lubridate::year(date) %in% c(1971:1975, 2016:2020))
+```
+
+A monthly average is used for both periods to smooth the maximum temperature, which is another time operation:
+
+```{r eval=  FALSE, echo = TRUE}
+tmax <- tmax |>
+  group_by(month = lubridate::month(date),
+         group = as.factor(ifelse(lubridate::year(date) > 2015,
                                   "2016 ~ 2020", "1971 ~ 1975"))) |>
   summarise(tmax = mean(tmax, na.rm = TRUE))
 ```
 
-A few stations do not have records during 1971 - 1975 and further investigation shows that while the first and last year of each series is recorded, the missing years in this period are not reported. These stations are filtered out by examining whether the summarised time series has 24 months. The long cubble needs to be switched to the nested form for this spatial operation using \code{face_spatial()}: 
+A few stations do not have records during the time period 1971-1975 and further investigation shows that while the first and last year of each series is recorded, the missing years in this period are not reported. These stations are filtered out by examining whether the summarised time series has 24 months. The long cubble needs to be switched to the nested form for this spatial operation using \code{face_spatial()}:
 
 ```{r eval = FALSE, echo = TRUE}
-tmax <- tmax |> face_spatial() |> filter(nrow(ts) == 24) 
+tmax <- tmax |> face_spatial() |> filter(nrow(ts) == 24)
 ```
 
+<<<<<<< Updated upstream
 Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates need to be in the same table. Spatial variables can be moved to the long form with \code{unfold()}: 
+=======
+Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates need to be in the same table. Spatial variables can be moved to the long form with \code{migrate()}:
+>>>>>>> Stashed changes
 
 ```{r eval = FALSE, echo = TRUE}  
 tmax <- tmax |> face_temporal() |> unfold(latitude, longitude)
@@ -116,14 +128,14 @@ tmax <- tmax |> face_temporal() |> unfold(latitude, longitude)
 \code{tmax} can then be supplied to \code{geom_glyph()} for the glyph map in Figure \ref{fig:basic-manip} with a station inset on the top left corner:
 
 ```{r eval = FALSE, echo = TRUE}
-nsw_vic <- ozmaps::abs_ste |> 
+nsw_vic <- ozmaps::abs_ste |>
   filter(NAME %in% c("Victoria", "New South Wales"))
 
-ggplot() + 
-  geom_sf(data = nsw_vic, 
-          fill = "transparent", color = "grey", linetype = "dotted") + 
-  geom_glyph(data = tmax, 
-             aes(x_major = longitude, x_minor = month, 
+ggplot() +
+  geom_sf(data = nsw_vic,
+          fill = "transparent", color = "grey", linetype = "dotted") +
+  geom_glyph(data = tmax,
+             aes(x_major = longitude, x_minor = month,
                  y_major = latitude, y_minor = tmax,
                  group = interaction(id, group), color = group),
              width = 1, height = 0.5) +
@@ -133,6 +145,3 @@ ggplot() +
 ```{r basic-manip, out.width="100%", out.height="70%", fig.cap="A glyph map of the average maximum temperature by month of Victoria and New South Wales weather stations in Australia. On the top left corner is an insetted plot of station Cobar highlighted in the black box."}
 knitr::include_graphics(here::here("figures/basic-manip.png"))
 ```
-
-
-
