@@ -6,7 +6,7 @@ output: pdf_document
 
 ## ERA5: climate reanalysis data
 
-ERA5 data [@hersbach2020era5] is the latest reanalysis of global atmosphere, land surface, and ocean waves from 1950 onwards and is available in the NetCDF format from European Centre for Medium-Range Weather Forecasts (ECMWF). The data can be directly downloaded from [Copernicus Climate Data Store (CDS)](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=overview) website or programmatically via an R package \pkg{ecmwfr} [@ecwmfr]. The \code{era5-pressure} data contains variable *specific humidity* and *geopotential* on the 10 hPa pressure level on four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Once downloaded, the data can be read into a cubble as:
+The ERA5 dataset [@hersbach2020era5] is the latest reanalysis of global atmosphere, land surface, and ocean waves from 1950 onwards and is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF). The data can be directly downloaded from [Copernicus Climate Data Store (CDS)](https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=overview) website or programmatically via the R package \pkg{ecmwfr} [@ecwmfr]. The \code{era5-pressure} data contains the *specific humidity* and *geopotential* variables on the 10 hPa pressure level on four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Once downloaded, the data can be read into a cubble as:
 
 ```{r eval = FALSE, echo = TRUE}
 raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
@@ -15,7 +15,6 @@ dt <- as_cubble(raw, vars = c("q", "z"))
 
 Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in @hersbach2020era5. It shows the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04 in the stratosphere. Readers interested in the analysis of this figure can refer to @hersbach2020era5, @simmons2020global, and @simmons2005ecmwf for more details.
 
-```{r netcdf, out.width="100%", fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in  Hersbach et al (2020)."}
+```{r netcdf, out.width="100%", fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020)."}
 knitr::include_graphics(here::here("figures/netcdf.png"))
 ```
-
