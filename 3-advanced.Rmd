@@ -45,7 +45,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 Different types of transformations can be useful to extract new information from spatio-temporal data. Glyph maps [@Wickham2012-yr] transform the time coordinates into space coordinates to plot the time series of different locations on the map. Calendar plots [@wang2020calendar] reconstruct time into a calendar-based grid to discover weekday and weekend pattern. Projection, or linear combination, of variables summarises multivariate information into lower dimension to further digest. This section elaborates on the glyph map.
 
-In \proglang{R}, \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}. \code{gid}) of each point on the time series using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into \code{ggplot} to create the glyph map as:
+In \proglang{R}, \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into \code{ggplot} to create the glyph map as:
 
 ```{r eval = FALSE, echo = TRUE}
 library(ggplot2)

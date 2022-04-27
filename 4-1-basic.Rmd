@@ -30,10 +30,10 @@ save(covid, file = here::here("data/covid.rda"))
 
 ```{r}
 load(here::here("data/covid.rda"))
-lga <- absmapsdata::lga2018 %>%
+
+lga <- strayr::read_absmap("lga2018") %>%
   rename(lga = lga_name_2018) %>%
-  filter(state_name_2016 == "Victoria") %>%
-  rmapshaper::ms_simplify()
+  filter(state_name_2016 == "Victoria") 
 ```
 
 ```{r echo = TRUE}
@@ -52,8 +52,8 @@ Here, some locations have been detected with this issue and you can use \code{ou
 
 ```{r echo = TRUE}
 pair <- as_cubble(list(spatial = lga, temporal = covid),
-                key = lga, index = date, coords = c(cent_long, cent_lat),
-                output = "unmatch")
+                  key = lga, index = date, coords = c(cent_long, cent_lat),
+                  output = "unmatch")
 
 pair
 ```

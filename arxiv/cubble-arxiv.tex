@@ -13,7 +13,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
 
-\title{cubble: An R Package for Structuring Spatio-temporal Data}
+\title{Wrangling multivariate spatio-temporal data with the R package cubble}
 
 \author{
     H. Sherry Zhang
@@ -140,7 +140,7 @@
 
 
 \begin{abstract}
-Multivariate spatio-temporal data refers to multiple measurements taken across space and time. For many analyses, spatial and time components can be separately studied: for example, to explore the temporal trend of one variable for a single spatial location, or to model the spatial distribution of one variable at a given time. However for some studies, it is important to analyse different aspects of the spatio-temporal data simultaneouly, like for instance instance, temporal trends of multiple variables across locations. In order to facilitate the study of different sections or combinations of spatio-temporal data, we introduce a new data structure, \code{cubble}, with a suite of functions enabling easy slicing and dicing on the different components spatio-temporal components, for visual and numerical explorations while facilitating data wrangling for modelling. The propose \code{cubble} structure ensures that all the components of the data are easy to access and manipulate while providing flexibility for data analysis. The \code{cubble} structure and the tools provided in the \code{cubble} R package equip users with the capability to handle hierarchical spatial and temporal structures. \color{green}{The tools are illustrated with examples of Australian climate data, merging climate and river level data sources, reproducing a climate reanalysis (ERA5), and creating interactive graphics.}
+Multivariate spatio-temporal data refers to multiple measurements taken across space and time. For many analyses, spatial and time components can be separately studied: for example, to explore the temporal trend of one variable for a single spatial location, or to model the spatial distribution of one variable at a given time. However for some studies, it is important to analyse different aspects of the spatio-temporal data simultaneouly, like for instance, temporal trends of multiple variables across locations. In order to facilitate the study of different sections or combinations of spatio-temporal data, we introduce a new data structure, \code{cubble}, with a suite of functions enabling easy slicing and dicing on the different components spatio-temporal components, for visual and numerical explorations while facilitating data wrangling for modelling. The proposed \code{cubble} structure ensures that all the components of the data are easy to access and manipulate while providing flexibility for data analysis. The \code{cubble} structure and the tools provided in the \code{cubble} R package equip users with the capability to handle hierarchical spatial and temporal structures. The tools are illustrated with examples of Australian climate data, merging climate and river level data sources, reproducing a climate reanalysis (ERA5), and creating interactive graphics.
 \end{abstract}
 
 \keywords{
@@ -153,9 +153,9 @@ Multivariate spatio-temporal data refers to multiple measurements taken across s
 \section{Introduction}\label{introduction}}
 
 Spatio-temporal data has a spatial component referring to the location of each observation and a temporal component that is recorded at regular or irregular time intervals. It may also include multiple variables measured at each spatial and temporal values. With spatio-temporal data, one can fix the time to explore the spatial features of the data, fix the spatial location/s to explore temporal aspects, or dynamically explore the space and time simultaneously.
-In order to computationally explore the spatial, temporal and spatio-temporal faces of such data, the data needs to be stored and represented under a specific data object that allows the user to query, group and dissect all the data faces.**
+In order to computationally explore the spatial, temporal and spatio-temporal faces of such data, the data needs to be stored and represented under a specific data object that allows the user to query, group and dissect all the data faces.
 
-The SpatioTemporal CRAN task view (\protect\hyperlink{ref-ctvspatiotemporal}{Edzer Pebesma 2022}) gathers information about R packages designed for spatio-temporal data and it has a section on \emph{Representing data} that lists existing spatio-temporal data representations used in \proglang{R}. Among them, \protect\hyperlink{ref-spacetime}{E. Pebesma} (\protect\hyperlink{ref-spacetime}{2012}) proposes four spatio-temporal layouts: full grid layout, sparse grid layout, irregular layout, and trajectory. These layouts are implemented in the \pkg{spacetime} (\protect\hyperlink{ref-spacetime}{E. Pebesma 2012}) package via the underlying spatial and temporal classes \pkg{sp} (\protect\hyperlink{ref-sp}{E. Pebesma and Bivand 2005}) and \pkg{xts} (\protect\hyperlink{ref-xts}{Ryan and Ulrich 2020}). The \pkg{stars} (\protect\hyperlink{ref-stars}{E. Pebesma 2021}) package has been a recent implementation to handle both raster and vector data using spatio-temporal arrays. It interfaces with \pkg{sf} (\protect\hyperlink{ref-sf}{E. J. Pebesma 2018}), which adopts the simple features representation of spatial data, and \pkg{tidyverse} (\protect\hyperlink{ref-tidyverse}{Wickham et al. 2019}), a suite of tools to wrangle and visualise data in \proglang{R}.
+The SpatioTemporal CRAN task view (\protect\hyperlink{ref-ctvspatiotemporal}{Edzer Pebesma 2022}) gathers information about R packages designed for spatio-temporal data and it has a section on \emph{Representing data} that lists existing spatio-temporal data representations used in \proglang{R}. Among them, E. Pebesma (\protect\hyperlink{ref-spacetime}{2012}) proposes four spatio-temporal layouts: full grid layout, sparse grid layout, irregular layout, and trajectory. These layouts are implemented in the \pkg{spacetime} (\protect\hyperlink{ref-spacetime}{E. Pebesma 2012}) package via the underlying spatial and temporal classes \pkg{sp} (\protect\hyperlink{ref-sp}{E. Pebesma and Bivand 2005}) and \pkg{xts} (\protect\hyperlink{ref-xts}{Ryan and Ulrich 2020}). The \pkg{stars} (\protect\hyperlink{ref-stars}{E. Pebesma 2021}) package has been a recent implementation to handle both raster and vector data using spatio-temporal arrays. It interfaces with \pkg{sf} (\protect\hyperlink{ref-sf}{E. J. Pebesma 2018}), which adopts the simple features representation of spatial data, and \pkg{tidyverse} (\protect\hyperlink{ref-tidyverse}{Wickham et al. 2019}), a suite of tools to wrangle and visualise data in \proglang{R}.
 
 \textbf{The paragraph above needs a bit more flesh}
 
@@ -165,26 +165,22 @@ Still, the data representation for spatio-temporal data can be further improved 
 
 The other reason is about tidy data concepts (\protect\hyperlink{ref-tidydata}{Wickham 2014}) and how they should be applied to spatio-temporal data. Tidy data should be structured into 1) one row per observation, 2) one column per variable, and 3) one type of data per table. The long form data is preferred over wide data given the downstream software i.e.~\pkg{dplyr} (\protect\hyperlink{ref-dplyr}{Wickham et al. 2022}) and \pkg{ggplot2} (\protect\hyperlink{ref-ggplot2}{Wickham 2016}) for data wrangling and visualisation. However, the long form can be inefficient to store feature geometries, especially for large multipolygons for hourly, daily or sub-daily periods over years, which are extensively collected and handled in time series analysis. This poses the question of how to arrange spatial and temporal variables in a way that would make data wrangling, visualizing and analysing spatio-temporal data easier.
 
-This paper presents a new \proglang{R} package, \pkg{cubble} which addresses the two issues mentioned above. In the package, a new data structure, also called \code{cubble}, is proposed to organise spatial and temporal variables as two forms of a single data object so that they can be wrangled separately or combined while being kept synchronised. Among the four spacetime layouts in \protect\hyperlink{ref-spacetime}{E. Pebesma} (\protect\hyperlink{ref-spacetime}{2012}), \pkg{cubble} can be applied to full di layout, sparse grid layout, or irregular layout, but not trajectory, which is outside the scope of this work. The software is available from the Comprehensive R Archive Network (CRAN) at {[}CRAN link{]}. \textbf{At this point what is cubble is adding with respect the other packages it is not clear to me}
+This paper presents a new \proglang{R} package, \pkg{cubble} which addresses the two issues mentioned above. In the package, a new data structure, also called \code{cubble}, is proposed to organise spatial and temporal variables as two forms of a single data object so that they can be wrangled separately or combined while being kept synchronised. Among the four spacetime layouts in E. Pebesma (\protect\hyperlink{ref-spacetime}{2012}), \pkg{cubble} can be applied to full di layout, sparse grid layout, or irregular layout, but not trajectory, which is outside the scope of this work. The software is available from the Comprehensive R Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=cubble}. \textbf{At this point what is cubble is adding with respect the other packages it is not clear to me}
 
 The rest of the paper is organized as follows: Section \ref{cube} introduces the proposed cube structure as a way to conceptualise multivariate spatio-temporal data. Section \ref{cubble} presents the main design and functionality of \pkg{cubble}. Section \ref{others} explains how cubble deals with more advanced considerations, including data with hierarchical structure, data matching, how cubble fits with existing static and interactive visualisation tools, and spatio-temporal data transformation. Section \ref{examples} uses Australian weather station data and river level data as examples to demonstrate the use of \pkg{cubble}. An example of how \pkg{cubble} handles NetCDF data is also provided. Section \ref{conclude} concludes the paper.
 
 \hypertarget{cube}{%
 \section{Conceptual framework: spatio-temporal cube}\label{cube}}
 
-\textcolor{blue}{Ursula: I have rearranged this section somewhat, please check!}
+Spatio-temporal data can be conceptualised using a cubical data model with three axes, typically time, latitude and longitude. This abstraction can be useful for generalising operations and visualisation purposes: Lu, Appel, and Pebesma (\protect\hyperlink{ref-lu_multidimensional_2018}{2018}) shows how array operations (select, scale, reduce, rearrange, and compute) can be mapped onto the cube; Bach et al. (\protect\hyperlink{ref-bach_review_2014}{2014}) reviews the temporal data visualisation based on space-time cube operations. Notice that the term space-time cube in their article ``does not need to involve spatial data'', but refers to ``an abstract 2D substrate that is used to visualize data at a specific time''. Despite its main focus being on temporal data, the mindset of abstracting out data representation to construct visualisation still applies to our spatio-temporal data manipulation and visualisation.
 
-Spatio-temporal data can be conceptualised using a cubical data model with three axes, typically time, latitude and longitude. This abstraction can be useful for generalising operations and visualisation purposes: \protect\hyperlink{ref-lu_multidimensional_2018}{Lu, Appel, and Pebesma} (\protect\hyperlink{ref-lu_multidimensional_2018}{2018}) shows how array operations (select, scale, reduce, rearrange, and compute) can be mapped onto the cube; \protect\hyperlink{ref-bach_review_2014}{Bach et al.} (\protect\hyperlink{ref-bach_review_2014}{2014}) reviews the temporal data visualisation based on space-time cube operations. Notice that the term space-time cube in their article ``does not need to involve spatial data,'' but refers to ``an abstract 2D substrate that is used to visualize data at a specific time.'' Despite its main focus being on temporal data, the mindset of abstracting out data representation to construct visualisation still applies to our spatio-temporal data manipulation and visualisation.
+The most common data cube using the three axes (time, latitude, longitude) could be considered as taking snapshots of the space and stacking on time. Here we will define the spatio-temporal cube slightly differently with the three axes (time, site, variable), as illustrated in Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hypercubes when describing multivariate spatio-temporal data and is the conceptual framework behind \pkg{cubble}.
 
-The most common data cube using the three axes (time, latitude, longitude) could be considered as taking snapshots of the space and stacking on time. Here we will define the spatio-temporal cube slightly differently with the three axes (time, site, variable), as illustrated in Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hypercubes when describing multivariate spatio-temporal data and is the workhorse behind \pkg{cubble}.
-
-While a cubical data model is neat to view the spatio-temporal data conceptually, a 3D data representation, or an array, may not be convenient for data wrangling. There are two reasons for this: 1) While arrays are efficient for the computation on numerical values, spatio-temporal data contains more than just numerical variables. For example, wrangling on character strings and specific datetime classes is common for spatio-temporal data but may not be easily done with array objects. 2) The \texttt{mutate()} syntax for creating new variables is no longer valid since the operation can no longer define how a created 1D vector should be added to the array.
-\textcolor{blue}{Ursula: this seems too specific, you should be able to make the same argument without referencing the mutate function?}
-\textcolor{green}{How about the other functions from dplyr?, the same principle would apply right?}
+While a cubical data model is neat to view the spatio-temporal data conceptually, a 3D data representation, or an array, may not be convenient for data wrangling. There are two reasons for this: 1) While arrays are efficient for the computation on numerical values, spatio-temporal data contains more than just numerical variables. For example, wrangling on character strings and specific datetime classes is common for spatio-temporal data but may not be easily done with array objects. 2) Creating new variables in an array is more complex than in a data frame since it now needs to be defined in a 2D space, rather than a 1D vector, to be added into the array.
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/cube-def} 
+{\centering \includegraphics[width=0.5\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/cube-def} 
 
 }
 
@@ -196,7 +192,7 @@ While a cubical data model is neat to view the spatio-temporal data conceptually
 
 This section will first introduce the core functions in the cubble class: \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()} in subsection \ref{create} - \ref{unfold}. The next subsection addresses the necessity of creating a new class. Subsection \ref{compact} will then show the compatibility of cubble with existing packages in spatial and temporal analysis.
 
-Each core \pkg{cubble} function is introduced and accompanied with a short example using the data \texttt{climate\_flat} throughout this section. \texttt{climate\_flat} contains five weather stations in Australia with spatial information of each station: station id, latitude, longitude, elevation, station name, \textcolor{green}{World Meteorology Organisation ID and also information on the record's date (recorded daily) together with the maximum and minimum temperature and precipitation for 2020}. The first five rows of \texttt{climate\_flat} are shown below:
+Each core \pkg{cubble} function is introduced and accompanied with a short example using the data \texttt{climate\_flat} throughout this section. \texttt{climate\_flat} contains five weather stations in Australia with spatial information of each station: station id, latitude, longitude, elevation, station name, World Meteorology Organisation ID and also daily temporal information of date, maximum and minimum temperature and precipitation for 2020. The first five rows of \texttt{climate\_flat} are shown below:
 
 \begin{verbatim}
 ## # A tibble: 1,830 x 10
@@ -217,7 +213,7 @@ Spatio-temporal data can come in various formats and shapes and a cubble can be 
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cubble\_nested }\OtherTok{\textless{}{-}}\NormalTok{ climate\_flat }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\NormalTok{cubble\_nested }\OtherTok{\textless{}{-}}\NormalTok{ climate\_flat }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{as\_cubble}\NormalTok{(}\AttributeTok{key =}\NormalTok{ id, }\AttributeTok{index =}\NormalTok{ date, }\AttributeTok{coords =} \FunctionTok{c}\NormalTok{(long, lat))}
 \NormalTok{cubble\_nested}
 \end{Highlighting}
@@ -242,7 +238,7 @@ The resulting cubble is built from a \code{rowwise_df} class where each row form
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cubble\_nested }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\NormalTok{cubble\_nested }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{mutate}\NormalTok{(}\AttributeTok{rain\_day =} \FunctionTok{sum}\NormalTok{(ts}\SpecialCharTok{$}\NormalTok{prcp }\SpecialCharTok{!=} \DecValTok{0}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -267,7 +263,7 @@ The nested form can be used for those operations where the output is only indexe
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cubble\_long }\OtherTok{\textless{}{-}}\NormalTok{ cubble\_nested }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{face\_temporal}\NormalTok{()}
+\NormalTok{cubble\_long }\OtherTok{\textless{}{-}}\NormalTok{ cubble\_nested }\SpecialCharTok{|\textgreater{}} \FunctionTok{face\_temporal}\NormalTok{()}
 \NormalTok{cubble\_long}
 \end{Highlighting}
 \end{Shaded}
@@ -290,7 +286,7 @@ The first line in the header now shows the cubble is in its long form and the th
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/diagram-keynotes/diagram-keynotes.008} 
+{\centering \includegraphics[width=1\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.008} 
 
 }
 
@@ -304,7 +300,7 @@ Wrangling spatio-temporal data can be an iterative process in the spatial and te
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cubble\_back }\OtherTok{\textless{}{-}}\NormalTok{ cubble\_long }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{face\_spatial}\NormalTok{()}
+\NormalTok{cubble\_back }\OtherTok{\textless{}{-}}\NormalTok{ cubble\_long }\SpecialCharTok{|\textgreater{}} \FunctionTok{face\_spatial}\NormalTok{()}
 \NormalTok{cubble\_back}
 \end{Highlighting}
 \end{Shaded}
@@ -329,7 +325,7 @@ Wrangling spatio-temporal data can be an iterative process in the spatial and te
 \end{Shaded}
 
 \begin{verbatim}
-## [1] FALSE
+## [1] TRUE
 \end{verbatim}
 
 \hypertarget{unfold}{%
@@ -339,7 +335,7 @@ Sometimes, analysts may need to apply some variable transformation that involves
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cubble\_unfold }\OtherTok{\textless{}{-}}\NormalTok{ cubble\_long }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{unfold}\NormalTok{(long, lat)}
+\NormalTok{cubble\_unfold }\OtherTok{\textless{}{-}}\NormalTok{ cubble\_long }\SpecialCharTok{|\textgreater{}} \FunctionTok{unfold}\NormalTok{(long, lat)}
 \NormalTok{cubble\_unfold}
 \end{Highlighting}
 \end{Shaded}
@@ -362,7 +358,7 @@ This function should generally be used in the last step of the analysis since it
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cubble\_unfold }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{face\_spatial}\NormalTok{() }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{face\_temporal}\NormalTok{()}
+\NormalTok{cubble\_unfold }\SpecialCharTok{|\textgreater{}} \FunctionTok{face\_spatial}\NormalTok{() }\SpecialCharTok{|\textgreater{}} \FunctionTok{face\_temporal}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
@@ -390,21 +386,21 @@ Some readers may raise the question why a new data structure rather than using \
 \begin{Highlighting}[]
 \CommentTok{\# operation on the long form w/o cubble}
 \CommentTok{\# cubble workflow}
-\NormalTok{dt }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{as\_cubble}\NormalTok{(...) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{face\_temporal}\NormalTok{() }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{group\_by}\NormalTok{() }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{summarise}\NormalTok{() }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\NormalTok{dt }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{as\_cubble}\NormalTok{(...) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{face\_temporal}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{group\_by}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{summarise}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{unfold}\NormalTok{(...)}
 
 \CommentTok{\# tidyverse workflow}
-\NormalTok{temporal }\OtherTok{\textless{}{-}}\NormalTok{ dt }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{group\_by}\NormalTok{(...) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\NormalTok{temporal }\OtherTok{\textless{}{-}}\NormalTok{ dt }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{group\_by}\NormalTok{(...) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{summarise}\NormalTok{(...)}
 
-\NormalTok{spatial }\OtherTok{\textless{}{-}}\NormalTok{ dt }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{select}\NormalTok{(....)}
+\NormalTok{spatial }\OtherTok{\textless{}{-}}\NormalTok{ dt }\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{(....)}
 
-\NormalTok{spatial }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{left\_join}\NormalTok{(temporal)}
+\NormalTok{spatial }\SpecialCharTok{|\textgreater{}} \FunctionTok{left\_join}\NormalTok{(temporal)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -430,8 +426,8 @@ The \code{dplyr} package has provided many tools for data wrangling tasks and th
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# example with a tsibble created from climate\_flat}
-\NormalTok{raw }\OtherTok{\textless{}{-}}\NormalTok{ climate\_flat }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ tsibble}\SpecialCharTok{::}\FunctionTok{as\_tsibble}\NormalTok{(}\AttributeTok{key =}\NormalTok{ id, }\AttributeTok{index =}\NormalTok{ date)}
-\NormalTok{dt }\OtherTok{\textless{}{-}}\NormalTok{  raw }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ cubble}\SpecialCharTok{::}\FunctionTok{as\_cubble}\NormalTok{(}\AttributeTok{coords =} \FunctionTok{c}\NormalTok{(long, lat))}
+\NormalTok{raw }\OtherTok{\textless{}{-}}\NormalTok{ climate\_flat }\SpecialCharTok{|\textgreater{}}\NormalTok{ tsibble}\SpecialCharTok{::}\FunctionTok{as\_tsibble}\NormalTok{(}\AttributeTok{key =}\NormalTok{ id, }\AttributeTok{index =}\NormalTok{ date)}
+\NormalTok{dt }\OtherTok{\textless{}{-}}\NormalTok{  raw }\SpecialCharTok{|\textgreater{}}\NormalTok{ cubble}\SpecialCharTok{::}\FunctionTok{as\_cubble}\NormalTok{(}\AttributeTok{coords =} \FunctionTok{c}\NormalTok{(long, lat))}
 \NormalTok{dt}
 \end{Highlighting}
 \end{Shaded}
@@ -454,7 +450,7 @@ In the nested cubble created, each element in the list-column \code{ts} is of \c
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# add station{-}based features in the nested form.}
-\NormalTok{dt }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{mutate}\NormalTok{(fabletools}\SpecialCharTok{::}\FunctionTok{features}\NormalTok{(ts, tmax, }\FunctionTok{list}\NormalTok{(}\AttributeTok{tmax\_mean =}\NormalTok{ mean, }\AttributeTok{tmax\_var =}\NormalTok{ var)))}
+\NormalTok{dt }\SpecialCharTok{|\textgreater{}} \FunctionTok{mutate}\NormalTok{(fabletools}\SpecialCharTok{::}\FunctionTok{features}\NormalTok{(ts, tmax, }\FunctionTok{list}\NormalTok{(}\AttributeTok{tmax\_mean =}\NormalTok{ mean, }\AttributeTok{tmax\_var =}\NormalTok{ var)))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -516,7 +512,7 @@ Spatial locations can have grouping structures either inherent in the data or ob
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
 
 }
 
@@ -529,7 +525,7 @@ Spatial locations can have grouping structures either inherent in the data or ob
 One task that may interest analysts in spatio-temporal data is to find how similar the time series from nearby sites are. This problem can be seen as a matching problem (\protect\hyperlink{ref-stuart2010matching}{Stuart 2010}; \protect\hyperlink{ref-mcintosh2018using}{McIntosh et al. 2018}) that pairs up similar time series in nearby locations or a data fusing exercise that merges data collected from different sources (\protect\hyperlink{ref-cocchi2019data}{Cocchi 2019}). \code{match_sites()} in \pkg{cubble} provides a simple algorithm for this task. The algorithm first matches the two data sources spatially by computing the pairwise distance on latitude and longitude. Pairs that pass the spatial matching are then matched temporally through computing the number of matched peaks within a fixed length window. Figure \ref{fig:illu-matching} illustrates this temporal matching in more details. Given two series \code{A} and \code{a}, three peaks have been picked in each series. An interval, with default length of five, is constructed for each peak in series \code{A} and the peaks in series \code{a} are tested against whether they fall into any of the intervals. In this illustration, there are two matches for these two series. Several arguments are available in \code{match_sites()} to fine-tune the matching:
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/illu-matching} \caption{An illustration of temporal matching in cubble. Three highest peaks are identified in each series and intervals are constructed on series \code{A}. Two peaks in series \code{a} fall into the intervals and hence the two series are considered to have two matches.}\label{fig:illu-matching}
+\includegraphics[width=1\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/illu-matching} \caption{An illustration of temporal matching in cubble. Three highest peaks are identified in each series and intervals are constructed on series \code{A}. Two peaks in series \code{a} fall into the intervals and hence the two series are considered to have two matches.}\label{fig:illu-matching}
 \end{figure}
 
 \begin{itemize}
@@ -555,7 +551,7 @@ The linking is also available from the time series plot to the map. The selectio
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/diagram-keynotes/diagram-keynotes.004} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.004} 
 
 }
 
@@ -567,7 +563,7 @@ The linking is also available from the time series plot to the map. The selectio
 
 Different types of transformations can be useful to extract new information from spatio-temporal data. Glyph maps (\protect\hyperlink{ref-Wickham2012-yr}{Wickham et al. 2012}) transform the time coordinates into space coordinates to plot the time series of different locations on the map. Calendar plots (\protect\hyperlink{ref-wang2020calendar}{Wang, Cook, and Hyndman 2020}) reconstruct time into a calendar-based grid to discover weekday and weekend pattern. Projection, or linear combination, of variables summarises multivariate information into lower dimension to further digest. This section elaborates on the glyph map.
 
-In \proglang{R}, \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}. \code{gid}) of each point on the time series using linear algebra (Equation 1 and 2 in \protect\hyperlink{ref-Wickham2012-yr}{Wickham et al.} (\protect\hyperlink{ref-Wickham2012-yr}{2012})). The data can then be piped into \code{ggplot} to create the glyph map as:
+In \proglang{R}, \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equation 1 and 2 in Wickham et al. (\protect\hyperlink{ref-Wickham2012-yr}{2012})). The data can then be piped into \code{ggplot} to create the glyph map as:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -603,7 +599,7 @@ The Victoria State Government in Australia provides daily COVID case numbers by 
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{covid }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{head}\NormalTok{(}\DecValTok{5}\NormalTok{)}
+\NormalTok{covid }\SpecialCharTok{|\textgreater{}} \FunctionTok{head}\NormalTok{(}\DecValTok{5}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -622,7 +618,7 @@ The Victoria State Government in Australia provides daily COVID case numbers by 
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{lga }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{head}\NormalTok{(}\DecValTok{5}\NormalTok{)}
+\NormalTok{lga }\SpecialCharTok{|\textgreater{}} \FunctionTok{head}\NormalTok{(}\DecValTok{5}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -672,8 +668,8 @@ Here, some locations have been detected with this issue and you can use \code{ou
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{pair }\OtherTok{\textless{}{-}} \FunctionTok{as\_cubble}\NormalTok{(}\FunctionTok{list}\NormalTok{(}\AttributeTok{spatial =}\NormalTok{ lga, }\AttributeTok{temporal =}\NormalTok{ covid),}
-                \AttributeTok{key =}\NormalTok{ lga, }\AttributeTok{index =}\NormalTok{ date, }\AttributeTok{coords =} \FunctionTok{c}\NormalTok{(cent\_long, cent\_lat),}
-                \AttributeTok{output =} \StringTok{"unmatch"}\NormalTok{)}
+                  \AttributeTok{key =}\NormalTok{ lga, }\AttributeTok{index =}\NormalTok{ date, }\AttributeTok{coords =} \FunctionTok{c}\NormalTok{(cent\_long, cent\_lat),}
+                  \AttributeTok{output =} \StringTok{"unmatch"}\NormalTok{)}
 
 \NormalTok{pair}
 \end{Highlighting}
@@ -689,10 +685,11 @@ Here, some locations have been detected with this issue and you can use \code{ou
 ## 
 ## $others
 ## $others$temporal
-## [1] "Interstate"       "Overseas"         "Queenscliffe (B)" "Unknown"         
+## [1] "Interstate" "Overseas"   "Unknown"   
 ## 
 ## $others$spatial
-## character(0)
+## [1] "No usual address (Vic.)"               
+## [2] "Migratory - Offshore - Shipping (Vic.)"
 \end{verbatim}
 
 \pkg{cubble} will attempt to pair the unmatched sites as well as those that cannot be paired. These can be helpful to clean up the data before creating the cubble again:
@@ -720,7 +717,7 @@ Stations in the two states can be subsetted by the station number: the Australia
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{tmax }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{historical\_tmax }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\NormalTok{tmax }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{historical\_tmax }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{filter}\NormalTok{(}\FunctionTok{between}\NormalTok{(stringr}\SpecialCharTok{::}\FunctionTok{str\_sub}\NormalTok{(id, }\DecValTok{7}\NormalTok{, }\DecValTok{8}\NormalTok{), }\DecValTok{46}\NormalTok{, }\DecValTok{90}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -729,8 +726,8 @@ Filtering for the time periods 1971-1975 and 2016-2020 is a time operation and t
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{tmax }\OtherTok{\textless{}{-}}\NormalTok{ tmax }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{face\_temporal}\NormalTok{() }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\NormalTok{tmax }\OtherTok{\textless{}{-}}\NormalTok{ tmax }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{face\_temporal}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{filter}\NormalTok{(lubridate}\SpecialCharTok{::}\FunctionTok{year}\NormalTok{(date) }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\DecValTok{1971}\SpecialCharTok{:}\DecValTok{1975}\NormalTok{, }\DecValTok{2016}\SpecialCharTok{:}\DecValTok{2020}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -739,10 +736,10 @@ A monthly average is used for both periods to smooth the maximum temperature, wh
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{tmax }\OtherTok{\textless{}{-}}\NormalTok{ tmax }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\NormalTok{tmax }\OtherTok{\textless{}{-}}\NormalTok{ tmax }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{group\_by}\NormalTok{(}\AttributeTok{month =}\NormalTok{ lubridate}\SpecialCharTok{::}\FunctionTok{month}\NormalTok{(date),}
          \AttributeTok{group =} \FunctionTok{as.factor}\NormalTok{(}\FunctionTok{ifelse}\NormalTok{(lubridate}\SpecialCharTok{::}\FunctionTok{year}\NormalTok{(date) }\SpecialCharTok{\textgreater{}} \DecValTok{2015}\NormalTok{,}
-                                  \StringTok{"2016 \textasciitilde{} 2020"}\NormalTok{, }\StringTok{"1971 \textasciitilde{} 1975"}\NormalTok{))) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+                                  \StringTok{"2016 \textasciitilde{} 2020"}\NormalTok{, }\StringTok{"1971 \textasciitilde{} 1975"}\NormalTok{))) }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{summarise}\NormalTok{(}\AttributeTok{tmax =} \FunctionTok{mean}\NormalTok{(tmax, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -751,7 +748,7 @@ A few stations do not have records during the time period 1971-1975 and further 
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{tmax }\OtherTok{\textless{}{-}}\NormalTok{ tmax }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{face\_spatial}\NormalTok{() }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{filter}\NormalTok{(}\FunctionTok{nrow}\NormalTok{(ts) }\SpecialCharTok{==} \DecValTok{24}\NormalTok{)}
+\NormalTok{tmax }\OtherTok{\textless{}{-}}\NormalTok{ tmax }\SpecialCharTok{|\textgreater{}} \FunctionTok{face\_spatial}\NormalTok{() }\SpecialCharTok{|\textgreater{}} \FunctionTok{filter}\NormalTok{(}\FunctionTok{nrow}\NormalTok{(ts) }\SpecialCharTok{==} \DecValTok{24}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -759,7 +756,7 @@ Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{tmax }\OtherTok{\textless{}{-}}\NormalTok{ tmax }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{face\_temporal}\NormalTok{() }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{unfold}\NormalTok{(latitude, longitude)}
+\NormalTok{tmax }\OtherTok{\textless{}{-}}\NormalTok{ tmax }\SpecialCharTok{|\textgreater{}} \FunctionTok{face\_temporal}\NormalTok{() }\SpecialCharTok{|\textgreater{}} \FunctionTok{unfold}\NormalTok{(latitude, longitude)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -767,7 +764,7 @@ Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{nsw\_vic }\OtherTok{\textless{}{-}}\NormalTok{ ozmaps}\SpecialCharTok{::}\NormalTok{abs\_ste }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\NormalTok{nsw\_vic }\OtherTok{\textless{}{-}}\NormalTok{ ozmaps}\SpecialCharTok{::}\NormalTok{abs\_ste }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{filter}\NormalTok{(NAME }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"Victoria"}\NormalTok{, }\StringTok{"New South Wales"}\NormalTok{))}
 
 \FunctionTok{ggplot}\NormalTok{() }\SpecialCharTok{+}
@@ -783,7 +780,7 @@ Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}
 \end{Shaded}
 
 \begin{figure}
-\includegraphics[width=1\linewidth,height=0.7\textheight]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/basic-manip} \caption{A glyph map of the average maximum temperature by month of Victoria and New South Wales weather stations in Australia. On the top left corner is an insetted plot of station Cobar highlighted in the black box.}\label{fig:basic-manip}
+\includegraphics[width=1\linewidth,height=0.7\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/basic-manip} \caption{A glyph map of the average maximum temperature by month of Victoria and New South Wales weather stations in Australia. On the top left corner is an insetted plot of station Cobar highlighted in the black box.}\label{fig:basic-manip}
 \end{figure}
 
 \hypertarget{australia-precipitation-pattern-in-2020}{%
@@ -795,7 +792,7 @@ In the previous example, there has already been some overlapping of the glyphs f
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{station\_nested }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\NormalTok{station\_nested }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{|\textgreater{}}
   \FunctionTok{mutate}\NormalTok{(}\AttributeTok{cluster =}\NormalTok{ ...)}
 \end{Highlighting}
 \end{Shaded}
@@ -804,7 +801,7 @@ To create a group-level cubble, use \code{switch_key()} with the new key variabl
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cluster\_nested }\OtherTok{\textless{}{-}}\NormalTok{ station\_nested }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{switch\_key}\NormalTok{(cluster)}
+\NormalTok{cluster\_nested }\OtherTok{\textless{}{-}}\NormalTok{ station\_nested }\SpecialCharTok{|\textgreater{}} \FunctionTok{switch\_key}\NormalTok{(cluster)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -812,14 +809,14 @@ With the group-level cubble, \code{get_centroid()} is useful to compute the cent
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{cluster\_nested }\OtherTok{\textless{}{-}}\NormalTok{ cluster\_nested }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{get\_centroid}\NormalTok{()}
+\NormalTok{cluster\_nested }\OtherTok{\textless{}{-}}\NormalTok{ cluster\_nested }\SpecialCharTok{|\textgreater{}} \FunctionTok{get\_centroid}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
 
 Long form cubble at both levels can be accessed through stretching the nested form and with access to both station and cluster-level cubbles, various plots can be made to understand the cluster. Figure \ref{fig:basic-agg} shows two example plots that can be made with this data. Subplot A is a glyph map made with the cluster level cubble in the long form and subplot B inspects the station membership of each cluster using the station level cubble in the nested form.
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/basic-agg} \caption{Profile of aggregated precipitation from 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number is printed in the middle of the y minor axis and can be used as a reference line to read the magnitude. Subplot B shows the station membership of each cluster.}\label{fig:basic-agg}
+\includegraphics[width=1\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/basic-agg} \caption{Profile of aggregated precipitation from 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number is printed in the middle of the y minor axis and can be used as a reference line to read the magnitude. Subplot B shows the station membership of each cluster.}\label{fig:basic-agg}
 \end{figure}
 
 \hypertarget{river-level-data-in-victoria-water-gauges}{%
@@ -828,7 +825,7 @@ Long form cubble at both levels can be accessed through stretching the nested fo
 The Bureau of Meteorology collects \href{http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full}{water data} from river gauges. The collected variables include: electrical conductivity, turbidity, watercourse discharge, watercourse level, and water temperature. In particular, water level will interact with precipitation from the climate data since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} gives the location of available weather stations and water gauges in Victoria.
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/matching-map} \caption{Location of weather stations and river gauges in Victoria, Australia.}\label{fig:matching-map}
+\includegraphics[width=1\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/matching-map} \caption{Location of weather stations and river gauges in Victoria, Australia.}\label{fig:matching-map}
 \end{figure}
 
 From the map, one can see that a few water gauges and weather stations are close to each other and the fluctuation of the water level could be matched up with the precipitation measured by the nearby climate station. As introduced in Section \ref{matching}, \code{match_sites()} can be used to match one source of data with another source in a cubble. Here \code{Water_course_level} in \code{river} will be matched to \code{prcp} in \code{climate} in 2020. The two datasets need to be specified as the first two arguments and the variable to match can be specified in \code{temporal_by} using the \code{by} syntax in \code{join}. \code{temporal_independent} controls the variable used to construct the interval and the goal here is to see if the water level in the river will reflect precipitation. This puts precipitation \code{prcp}, as the independent variable. Given there is one year's worth of data, the number of peaks (\code{temporal_n_highest}) to consider is slightly raised from a default of 20 to 30 and \code{temporal_min_match} is raised accordingly. To return all the pairs of the match, \code{temporal_min_match} can be set to 0.
@@ -866,7 +863,7 @@ The output from matching is also a cubble, with additional column \code{dist} an
 Figure \ref{fig:matching} plots the matched pairs on the map. There are four pairs of matches, all located in the middle of Victoria and the expected concurrent increase in precipitation and water level can be observed.
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/matching} \caption{Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation.}\label{fig:matching}
+\includegraphics[width=1\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/matching} \caption{Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation.}\label{fig:matching}
 \end{figure}
 
 \hypertarget{era5-climate-reanalysis-data}{%
@@ -881,10 +878,10 @@ The ERA5 dataset (\protect\hyperlink{ref-hersbach2020era5}{Hersbach et al. 2020}
 \end{Highlighting}
 \end{Shaded}
 
-Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \protect\hyperlink{ref-hersbach2020era5}{Hersbach et al.} (\protect\hyperlink{ref-hersbach2020era5}{2020}). It shows the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04 in the stratosphere. Readers interested in the analysis of this figure can refer to \protect\hyperlink{ref-hersbach2020era5}{Hersbach et al.} (\protect\hyperlink{ref-hersbach2020era5}{2020}), \protect\hyperlink{ref-simmons2020global}{Simmons et al.} (\protect\hyperlink{ref-simmons2020global}{2020}), and \protect\hyperlink{ref-simmons2005ecmwf}{Simmons et al.} (\protect\hyperlink{ref-simmons2005ecmwf}{2005}) for more details.
+Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in Hersbach et al. (\protect\hyperlink{ref-hersbach2020era5}{2020}). It shows the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04 in the stratosphere. Readers interested in the analysis of this figure can refer to Hersbach et al. (\protect\hyperlink{ref-hersbach2020era5}{2020}), Simmons et al. (\protect\hyperlink{ref-simmons2020global}{2020}), and Simmons et al. (\protect\hyperlink{ref-simmons2005ecmwf}{2005}) for more details.
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/netcdf} \caption{A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020).}\label{fig:netcdf}
+\includegraphics[width=1\linewidth]{/Users/sherryzhang/Documents/research/paper-cubble/figures/netcdf} \caption{A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020).}\label{fig:netcdf}
 \end{figure}
 
 \hypertarget{interactive-graphic}{%
@@ -897,15 +894,15 @@ The temperature range is calculated as the difference between \code{tmax} and \c
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# data pre{-}processing}
-\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ ...}
+\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
 
 \CommentTok{\# created SharedData instance for crosstalk}
-\NormalTok{nested }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
-\NormalTok{long }\OtherTok{\textless{}{-}} \FunctionTok{face\_temporal}\NormalTok{(clean) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
+\NormalTok{nested }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{|\textgreater{}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
+\NormalTok{long }\OtherTok{\textless{}{-}} \FunctionTok{face\_temporal}\NormalTok{(clean) }\SpecialCharTok{|\textgreater{}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
 
 \CommentTok{\# create the spatial and temporal view each with a ShareData instance}
-\NormalTok{p1 }\OtherTok{\textless{}{-}}\NormalTok{ nested }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ ...}
-\NormalTok{p2 }\OtherTok{\textless{}{-}}\NormalTok{ long }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ ...}
+\NormalTok{p1 }\OtherTok{\textless{}{-}}\NormalTok{ nested }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
+\NormalTok{p2 }\OtherTok{\textless{}{-}}\NormalTok{ long }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
 
 \CommentTok{\# Combine p1 and p2}
 \NormalTok{crosstalk}\SpecialCharTok{::}\FunctionTok{bscols}\NormalTok{(plotly}\SpecialCharTok{::}\FunctionTok{ggplotly}\NormalTok{(p1), plotly}\SpecialCharTok{::}\FunctionTok{ggplotly}\NormalTok{(p2), ...)}
@@ -915,7 +912,7 @@ The temperature range is calculated as the difference between \code{tmax} and \c
 In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Most regions in Australia have low variance of temperature range, while the north-west coastline, bottom of South Australia, and Victoria stand out with larger monthly changes. In the second row, Mount Elizabeth is selected on the map given its high variance colour on the initial map and this links to the ribbon on the right. The third row selects the lowest temperature in August and this corresponds to Thredbo AWS on the Victoria and New South Wales border. Another station in the Tasmania island is selected on the map to cross compare with Thredbo AWS.
 
 \begin{figure}
-\includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/linking-lower} \caption{Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum and minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display. A location in the Tasmania Island is then selected to compare the temperature variation with Thredbo AWS.}\label{fig:interactive-linking}
+\includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/linking-lower} \caption{Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum and minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display. A location in the Tasmania Island is then selected to compare the temperature variation with Thredbo AWS.}\label{fig:interactive-linking}
 \end{figure}
 
 This plot can also be made using \pkg{cubble} and \pkg{leaflet} where the temperature range is displayed as a small subplot upon clicking on the map. The procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with \code{leafpop::addPopupGraphs()}:
@@ -923,20 +920,20 @@ This plot can also be made using \pkg{cubble} and \pkg{leaflet} where the temper
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# data pre{-}processing}
-\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ ...}
+\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
 
 \CommentTok{\# use the long form to create subplots for each station}
 \NormalTok{df\_id }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(clean}\SpecialCharTok{$}\NormalTok{id)}
 \NormalTok{p }\OtherTok{\textless{}{-}} \FunctionTok{map}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(df\_id), }\ControlFlowTok{function}\NormalTok{(i)\{}
-\NormalTok{  dt }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{filter}\NormalTok{(id }\SpecialCharTok{==}\NormalTok{ df\_id[i])}
-  \FunctionTok{ggplot}\NormalTok{(dt) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ ...}
+\NormalTok{  dt }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{|\textgreater{}} \FunctionTok{filter}\NormalTok{(id }\SpecialCharTok{==}\NormalTok{ df\_id[i])}
+  \FunctionTok{ggplot}\NormalTok{(dt) }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
 \NormalTok{\})}
 
 \CommentTok{\# create nested form leaflet map with temperature band as subplots}
 \NormalTok{nested }\OtherTok{\textless{}{-}} \FunctionTok{face\_spatial}\NormalTok{(clean)}
-\FunctionTok{leaflet}\NormalTok{(nested) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{addTiles}\NormalTok{() }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{addCircleMarkers}\NormalTok{(}\AttributeTok{group =} \StringTok{"a"}\NormalTok{, ...) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\FunctionTok{leaflet}\NormalTok{(nested) }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{addTiles}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
+  \FunctionTok{addCircleMarkers}\NormalTok{(}\AttributeTok{group =} \StringTok{"a"}\NormalTok{, ...) }\SpecialCharTok{|\textgreater{}}
 \NormalTok{  leafpop}\SpecialCharTok{::}\FunctionTok{addPopupGraphs}\NormalTok{(}\AttributeTok{graph =}\NormalTok{ p, ...)}
 \end{Highlighting}
 \end{Shaded}
@@ -945,7 +942,7 @@ Figure \ref{fig:interactive-popup} shows Figure \ref{fig:interactive-linking} ma
 
 \begin{figure}
 
-{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/popup-mid} 
+{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/popup-mid} 
 
 }
 
@@ -955,9 +952,9 @@ Figure \ref{fig:interactive-popup} shows Figure \ref{fig:interactive-linking} ma
 \hypertarget{conclude}{%
 \section{Conclusion}\label{conclude}}
 
-This paper describes an \proglang{R} package \pkg{cubble} for manipulating and visualising spatio-temporal data. A new data structure, \code{cubble} that builds from the \code{rowwise_df} and \code{grouped_df} class in the tidyverse ecosystem, is proposed to connect the time invariant and varying variables in the spatio-temporal data. This design frees the data analysts from spending time on organising variables of different observational units. The data structure is also flexible to the techniques and packages analysts use to analyse the data, for example, in the matching example in section 4.3, users are free to use algorithms from another package to cluster stations.
+This paper describes an \proglang{R} package \pkg{cubble} for organising, manipulating and visualising spatio-temporal data. A new data structure, \code{cubble}, with the nested and long form, is proposed to connect the time invariant and varying variables in the spatio-temporal data. This design frees the data analysts from spending time on organising variables of different observational units. The data structure is also flexible to the techniques and packages analysts use to analyse the data, for example, in the matching example in section 4.3, users are free to use algorithms from another package to cluster stations.
 
-Further development and maintenance of the package involves responding to changes in the tidyverse packages that \pkg{cubble} imports, in particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. In the spatial aspect, the simple feature representation wraps spatial coordinates in a list column, for some complex spatial operations, while sometimes, analysts may want to unpack them into longitude and latitude columns to work from. Another extension to \pkg{cubble} is to build a smooth transition between the coordinate columns and simple feature geometry column.
+Future directions of the package involves responding to changes in the tidyverse packages that \pkg{cubble} imports, in particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. In the spatial aspect, the simple feature representation wraps spatial coordinates in a list column, for some complex spatial operations, while sometimes, analysts may want to unpack them into longitude and latitude columns to work from. Another extension to \pkg{cubble} is to build a smooth transition between the coordinate columns and simple feature geometry column.
 
 \newpage
 
@@ -971,7 +968,7 @@ This work is funded by a Commonwealth Scientific and Industrial Research Organis
 
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/Projects/paper-cubble/figures/diagram-keynotes/diagram-keynotes.005} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/sherryzhang/Documents/research/paper-cubble/figures/diagram-keynotes/diagram-keynotes.005} 
 
 }
 
@@ -982,103 +979,103 @@ This work is funded by a Commonwealth Scientific and Industrial Research Organis
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{1}{0}
-\leavevmode\hypertarget{ref-leafpop}{}%
-Appelhans, Tim, and Florian Detsch. 2021. \emph{{leafpop}: Include Tables, Images and Graphs in Leaflet Pop-Ups}. \url{https://CRAN.R-project.org/package=leafpop}.
+\leavevmode\vadjust pre{\hypertarget{ref-leafpop}{}}%
+Appelhans, Tim, and Florian Detsch. 2021. \emph{\pkg{leafpop}: Include Tables, Images and Graphs in Leaflet Pop-Ups}. \url{https://CRAN.R-project.org/package=leafpop}.
 
-\leavevmode\hypertarget{ref-bach_review_2014}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-bach_review_2014}{}}%
 Bach, Benjamin, Pierre Dragicevic, Dragicevic Archambault, Christophe Hurter, and Sheelagh Carpendale. 2014. {``A {Review} of {Temporal} {Data} {Visualizations} {Based} on {Space}-{Time} {Cube} {Operations}.''} \emph{Eurographics Conference on Visualization}, 19. \url{https://hal.inria.fr/hal-01006140/}.
 
-\leavevmode\hypertarget{ref-buja1988elements}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-buja1988elements}{}}%
 Buja, Andreas, Daniel Asimov, and Catherine Hurley. 1988. {``Elements of a Viewing Pipeline.''} \emph{Dynamic Graphics Statistics}, 277.
 
-\leavevmode\hypertarget{ref-buja1996interactive}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-buja1996interactive}{}}%
 Buja, Andreas, Dianne Cook, and Deborah F Swayne. 1996. {``Interactive High-Dimensional Data Visualization.''} \emph{Journal of Computational and Graphical Statistics} 5 (1): 78--99. \url{https://doi.org/10.2307/1390754}.
 
-\leavevmode\hypertarget{ref-cheng2016enabling}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-cheng2016enabling}{}}%
 Cheng, Xiaoyue, Dianne Cook, and Heike Hofmann. 2016. {``Enabling Interactivity on Displays of Multivariate Time Series and Longitudinal Data.''} \emph{Journal of Computational and Graphical Statistics} 25 (4): 1057--76. \url{https://doi.org/10.1080/10618600.2015.1105749}.
 
-\leavevmode\hypertarget{ref-cocchi2019data}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-cocchi2019data}{}}%
 Cocchi, Marina. 2019. \emph{Data Fusion Methodology and Applications}. Elsevier.
 
-\leavevmode\hypertarget{ref-ctvspatiotemporal}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-ctvspatiotemporal}{}}%
 Edzer Pebesma, Roger Bivand. 2022. {``{CRAN} Task View: Handling and Analyzing Spatio-Temporal Data.''} \url{https://CRAN.R-project.org/view=SpatioTemporal}.
 
-\leavevmode\hypertarget{ref-hersbach2020era5}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-hersbach2020era5}{}}%
 Hersbach, Hans, Bill Bell, Paul Berrisford, Shoji Hirahara, András Horányi, Joaquín Muñoz-Sabater, Julien Nicolas, et al. 2020. {``The Era5 Global Reanalysis.''} \emph{Quarterly Journal of the Royal Meteorological Society} 146 (730): 1999--2049.
 
-\leavevmode\hypertarget{ref-ecwmfr}{}%
-Hufkens, Koen, Reto Stauffer, and Elio Campitelli. 2019. {``The {ecwmfr} Package: An Interface to ECMWF API Endpoints.''} \url{https://doi.org/10.5281/zenodo.2647541}.
+\leavevmode\vadjust pre{\hypertarget{ref-ecwmfr}{}}%
+Hufkens, Koen, Reto Stauffer, and Elio Campitelli. 2019. {``The \pkg{ecwmfr} Package: An Interface to ECMWF API Endpoints.''} \url{https://doi.org/10.5281/zenodo.2647541}.
 
-\leavevmode\hypertarget{ref-lu_multidimensional_2018}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-lu_multidimensional_2018}{}}%
 Lu, Meng, Marius Appel, and Edzer Pebesma. 2018. {``Multidimensional {Arrays} for {Analysing} {Geoscientific} {Data}.''} \emph{ISPRS International Journal of Geo-Information} 7 (8): 313. \url{https://doi.org/10.3390/ijgi7080313}.
 
-\leavevmode\hypertarget{ref-mcintosh2018using}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-mcintosh2018using}{}}%
 McIntosh, Avery I, Helen E Jenkins, Laura F White, Marinus Barnard, Dana R Thomson, Tania Dolby, John Simpson, et al. 2018. {``Using Routinely Collected Laboratory Data to Identify High Rifampicin-Resistant Tuberculosis Burden Communities in the Western Cape Province, South Africa: A Retrospective Spatiotemporal Analysis.''} \emph{PLoS Medicine} 15 (8): e1002638.
 
-\leavevmode\hypertarget{ref-michna2013rnetcdf}{}%
-Michna, Pavel, and Milton Woods. 2013. {``{RNetCDF}: A Package for Reading and Writing NetCDF Datasets.''} \emph{The R Journal} 5 (2): 29--36.
+\leavevmode\vadjust pre{\hypertarget{ref-michna2013rnetcdf}{}}%
+Michna, Pavel, and Milton Woods. 2013. {``\pkg{RNetCDF}: A Package for Reading and Writing NetCDF Datasets.''} \emph{The R Journal} 5 (2): 29--36.
 
-\leavevmode\hypertarget{ref-rnetcdf}{}%
----------. 2021. \emph{{RNetCDF}: Interface to 'NetCDF' Datasets}. \url{https://CRAN.R-project.org/package=RNetCDF}.
+\leavevmode\vadjust pre{\hypertarget{ref-rnetcdf}{}}%
+---------. 2021. \emph{\pkg{RNetCDF}: Interface to 'NetCDF' Datasets}. \url{https://CRAN.R-project.org/package=RNetCDF}.
 
-\leavevmode\hypertarget{ref-spacetime}{}%
-Pebesma, Edzer. 2012. {``{spacetime}: Spatio-Temporal Data in r.''} \emph{Journal of Statistical Software} 51 (7): 1--30. \url{https://doi.org/10.18637/jss.v051.i07}.
+\leavevmode\vadjust pre{\hypertarget{ref-spacetime}{}}%
+Pebesma, Edzer. 2012. {``\pkg{spacetime}: Spatio-Temporal Data in r.''} \emph{Journal of Statistical Software} 51 (7): 1--30. \url{https://doi.org/10.18637/jss.v051.i07}.
 
-\leavevmode\hypertarget{ref-stars}{}%
----------. 2021. \emph{{stars}: Spatiotemporal Arrays, Raster and Vector Data Cubes}. \url{https://CRAN.R-project.org/package=stars}.
+\leavevmode\vadjust pre{\hypertarget{ref-stars}{}}%
+---------. 2021. \emph{\pkg{stars}: Spatiotemporal Arrays, Raster and Vector Data Cubes}. \url{https://CRAN.R-project.org/package=stars}.
 
-\leavevmode\hypertarget{ref-sf}{}%
-Pebesma, Edzer J. 2018. {``Simple Features for {R}: Standardized Support for Spatial Vector Data.''} \emph{R Journal} 10 (1): 439.
+\leavevmode\vadjust pre{\hypertarget{ref-sf}{}}%
+Pebesma, Edzer J. 2018. {``Simple Features for \proglang{R}: Standardized Support for Spatial Vector Data.''} \emph{R Journal} 10 (1): 439.
 
-\leavevmode\hypertarget{ref-sp}{}%
-Pebesma, Edzer, and Roger S Bivand. 2005. {``S Classes and Methods for Spatial Data: The {sp} Package.''} \emph{R News} 5 (2): 9--13.
+\leavevmode\vadjust pre{\hypertarget{ref-sp}{}}%
+Pebesma, Edzer, and Roger S Bivand. 2005. {``S Classes and Methods for Spatial Data: The \pkg{sp} Package.''} \emph{R News} 5 (2): 9--13.
 
-\leavevmode\hypertarget{ref-ncdf4}{}%
-Pierce, David. 2019. \emph{{ncdf4}: Interface to Unidata netCDF (Version 4 or Earlier) Format Data Files}. \url{https://CRAN.R-project.org/package=ncdf4}.
+\leavevmode\vadjust pre{\hypertarget{ref-ncdf4}{}}%
+Pierce, David. 2019. \emph{\pkg{ncdf4}: Interface to Unidata netCDF (Version 4 or Earlier) Format Data Files}. \url{https://CRAN.R-project.org/package=ncdf4}.
 
-\leavevmode\hypertarget{ref-xts}{}%
-Ryan, Jeffrey A., and Joshua M. Ulrich. 2020. \emph{{xts}: eXtensible Time Series}. \url{https://CRAN.R-project.org/package=xts}.
+\leavevmode\vadjust pre{\hypertarget{ref-xts}{}}%
+Ryan, Jeffrey A., and Joshua M. Ulrich. 2020. \emph{\pkg{xts}: eXtensible Time Series}. \url{https://CRAN.R-project.org/package=xts}.
 
-\leavevmode\hypertarget{ref-simmons2005ecmwf}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-simmons2005ecmwf}{}}%
 Simmons, Adrian, Mariano Hortal, Graeme Kelly, Anthony McNally, Agathe Untch, and Sakari Uppala. 2005. {``ECMWF Analyses and Forecasts of Stratospheric Winter Polar Vortex Breakup: September 2002 in the Southern Hemisphere and Related Events.''} \emph{Journal of the Atmospheric Sciences} 62 (3): 668--89. \url{https://doi.org/10.1175/JAS-3322.1}.
 
-\leavevmode\hypertarget{ref-simmons2020global}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-simmons2020global}{}}%
 Simmons, Adrian, Cornel Soci, Julien Nicolas, Bill Bell, P. Berrisford, Rossana Dragani, Johannes Flemming, et al. 2020. {``Global Stratospheric Temperature Bias and Other Stratospheric Aspects of Era5 and Era5.1,''} no. 859 (January). \url{https://doi.org/10.21957/rcxqfmg0}.
 
-\leavevmode\hypertarget{ref-stuart2010matching}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-stuart2010matching}{}}%
 Stuart, Elizabeth A. 2010. {``Matching Methods for Causal Inference: A Review and a Look Forward.''} \emph{Statistical Science} 25 (1): 1.
 
-\leavevmode\hypertarget{ref-tidync}{}%
-Sumner, Michael. 2020. \emph{{tidync}: A Tidy Approach to 'NetCDF' Data Exploration and Extraction}. \url{https://CRAN.R-project.org/package=tidync}.
+\leavevmode\vadjust pre{\hypertarget{ref-tidync}{}}%
+Sumner, Michael. 2020. \emph{\pkg{tidync}: A Tidy Approach to 'NetCDF' Data Exploration and Extraction}. \url{https://CRAN.R-project.org/package=tidync}.
 
-\leavevmode\hypertarget{ref-sutherland2000orca}{}%
-Sutherland, Peter, Anthony Rossini, Thomas Lumley, Nicholas Lewin-Koh, Julie Dickerson, Zach Cox, and Dianne Cook. 2000. {``{Orca}: A Visualization Toolkit for High-Dimensional Data.''} \emph{Journal of Computational and Graphical Statistics} 9 (3): 509--29. \url{https://www.tandfonline.com/doi/abs/10.1080/10618600.2000.10474896}.
+\leavevmode\vadjust pre{\hypertarget{ref-sutherland2000orca}{}}%
+Sutherland, Peter, Anthony Rossini, Thomas Lumley, Nicholas Lewin-Koh, Julie Dickerson, Zach Cox, and Dianne Cook. 2000. {``\pkg{Orca}: A Visualization Toolkit for High-Dimensional Data.''} \emph{Journal of Computational and Graphical Statistics} 9 (3): 509--29. \url{https://www.tandfonline.com/doi/abs/10.1080/10618600.2000.10474896}.
 
-\leavevmode\hypertarget{ref-wang2020calendar}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-wang2020calendar}{}}%
 Wang, Earo, Dianne Cook, and Rob J Hyndman. 2020. {``Calendar-Based Graphics for Visualizing People's Daily Schedules.''} \emph{Journal of Computational and Graphical Statistics} 29 (3): 490--502.
 
-\leavevmode\hypertarget{ref-tidydata}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-tidydata}{}}%
 Wickham, Hadley. 2014. {``Tidy Data.''} \emph{Journal of Statistical Software} 59 (10): 1--23. \url{https://doi.org/10.18637/jss.v059.i10}.
 
-\leavevmode\hypertarget{ref-ggplot2}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-ggplot2}{}}%
 ---------. 2016. \emph{Ggplot2: Elegant Graphics for Data Analysis}. Springer-Verlag New York. \url{https://ggplot2.tidyverse.org}.
 
-\leavevmode\hypertarget{ref-tidyverse}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-tidyverse}{}}%
 Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D'Agostino McGowan, Romain François, Garrett Grolemund, et al. 2019. {``Welcome to the {tidyverse}.''} \emph{Journal of Open Source Software} 4 (43): 1686. \url{https://doi.org/10.21105/joss.01686}.
 
-\leavevmode\hypertarget{ref-dplyr}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-dplyr}{}}%
 Wickham, Hadley, Romain François, Lionel Henry, and Kirill Müller. 2022. \emph{Dplyr: A Grammar of Data Manipulation}. \url{https://CRAN.R-project.org/package=dplyr}.
 
-\leavevmode\hypertarget{ref-Wickham2012-yr}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-Wickham2012-yr}{}}%
 Wickham, Hadley, Heike Hofmann, Charlotte Wickham, and Dianne Cook. 2012. {``Glyph-Maps for Visually Exploring Temporal Patterns in Climate Data and Models.''} \emph{Environmetrics} 23 (5): 382--93.
 
-\leavevmode\hypertarget{ref-knitr}{}%
-Xie, Yihui. 2015. \emph{Dynamic Documents with {R} and {knitr}}. 2nd ed. Boca Raton, Florida: Chapman; Hall/CRC. \url{https://yihui.name/knitr/}.
+\leavevmode\vadjust pre{\hypertarget{ref-knitr}{}}%
+Xie, Yihui. 2015. \emph{Dynamic Documents with \proglang{R} and \pkg{knitr}}. 2nd ed. Boca Raton, Florida: Chapman; Hall/CRC. \url{https://yihui.name/knitr/}.
 
-\leavevmode\hypertarget{ref-rmarkdown}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-rmarkdown}{}}%
 Xie, Yihui, J. J. Allaire, and Garrett Grolemund. 2018. \emph{R Markdown: The Definitive Guide}. Boca Raton, Florida: Chapman; Hall/CRC. \url{https://bookdown.org/yihui/rmarkdown}.
 
-\leavevmode\hypertarget{ref-xie2014reactive}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-xie2014reactive}{}}%
 Xie, Yihui, Heike Hofmann, and Xiaoyue Cheng. 2014. {``{Reactive Programming for Interactive Graphics}.''} \emph{Statistical Science} 29 (2): 201--13. \url{https://doi.org/10.1214/14-STS477}.
 
 \end{CSLReferences}
