@@ -196,7 +196,7 @@ While a cubical data model is neat to view the spatio-temporal data conceptually
 
 This section will first introduce the core functions in the cubble class: \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()} in subsection \ref{create} - \ref{unfold}. The next subsection addresses the necessity of creating a new class. Subsection \ref{compact} will then show the compatibility of cubble with existing packages in spatial and temporal analysis.
 
-Each core function is introduced accompanied with a short example and the data \texttt{climate\_flat} is used throughout this section. \texttt{climate\_flat} contains five weather stations in Australia with spatial information of each station: station id, latitude, longitude, elevation, station name, World Meteorology Organisation ID and also daily temporal information of date, maximum and minimum temperature and precipitation for 2020. The first five rows of \texttt{climate\_flat} are shown below:
+Each core \pkg{cubble} function is introduced and accompanied with a short example using the data \texttt{climate\_flat} throughout this section. \texttt{climate\_flat} contains five weather stations in Australia with spatial information of each station: station id, latitude, longitude, elevation, station name, \textcolor{green}{World Meteorology Organisation ID and also information on the record's date (recorded daily) together with the maximum and minimum temperature and precipitation for 2020}. The first five rows of \texttt{climate\_flat} are shown below:
 
 \begin{verbatim}
 ## # A tibble: 1,830 x 10
