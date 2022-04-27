@@ -57,15 +57,8 @@ leaflet(nested) |>
 
 ```
 
-<<<<<<< Updated upstream
-Figure \ref{fig:interactive-popup} shows a reproduction of Figure \ref{fig:interactive-linking} made  with leaflet and popups [@leafpop]. 
-
-```{r interactive-popup, fig.align='center', echo = FALSE, out.width="45%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Same as Figure 11 with the temperature variation shown as a popup in the leaflet map.", fig.show='hold'}
-knitr::include_graphics(here::here("figures/popup-mid.png")) 
-=======
 Figure \ref{fig:interactive-popup} shows Figure \ref{fig:interactive-linking} made with leaflet and popups [@leafpop].
 
 ```{r interactive-popup, fig.align='center', echo = FALSE, out.width="45%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Same as Figure 11 with the temperature variation shown as a popup in the leaflet map.", fig.show='hold'}
 knitr::include_graphics(here::here("figures/popup-mid.png"))
->>>>>>> Stashed changes
 ```

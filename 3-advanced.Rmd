@@ -13,7 +13,7 @@ Spatial locations can have grouping structures either inherent in the data or ob
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
 ```
 
-## Data fusion and matching
+## Data fusion and matching {#matching}
 
 One task that may interest analysts in spatio-temporal data is to find how similar the time series from nearby sites are. This problem can be seen as a matching problem [@stuart2010matching; @mcintosh2018using] that pairs up similar time series in nearby locations or a data fusing exercise that merges data collected from different sources [@cocchi2019data]. \code{match_sites()} in \pkg{cubble} provides a simple algorithm for this task. The algorithm first matches the two data sources spatially by computing the pairwise distance on latitude and longitude. Pairs that pass the spatial matching are then matched temporally through computing the number of matched peaks within a fixed length window. Figure \ref{fig:illu-matching} illustrates this temporal matching in more details. Given two series \code{A} and \code{a}, three peaks have been picked in each series. An interval, with default length of five, is constructed for each peak in series \code{A} and the peaks in series \code{a} are tested against whether they fall into any of the intervals. In this illustration, there are two matches for these two series. Several arguments are available in \code{match_sites()} to fine-tune the matching:
 
