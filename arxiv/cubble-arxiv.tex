@@ -374,31 +374,7 @@ This function should generally be used in the last step of the analysis since it
 
 \subsection[Why not just use]{Why not just use \code{dplyr::nest\_by()}?}
 
-\textcolor{blue}{Ursula: I feel like this doesn't get the message accross, the main point seems to be that with cubble we can switch and never have to add information back in "by-hand" (with some join function), maybe make the point without refering to specific functions first and then explain the example?}
-
-Some readers may raise the question why a new data structure rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. While \code{nest_by()} and its inverse \code{unnest()} can mimic the nested form in cubble, cubble can be seen as an attempt to arrange variables from different observational units into a single object, specifically for spatio-temporal data. While \texttt{nest\_by()} can recreate the nested form, it cannot create a clean slate for temporal variables as used in the long form. For temporal variables, carrying the duplicated spatial variables in the combined form is not convenient to work with. This is because these spatial variables will be lost after \code{summarise()} and one will need to subset the spatial variables again from the original data and make a left join, which tends to create unnecessary intermediate products in the workflow.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# operation on the long form w/o cubble}
-\CommentTok{\# cubble workflow}
-\NormalTok{dt }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{as\_cubble}\NormalTok{(...) }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{face\_temporal}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{group\_by}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{summarise}\NormalTok{() }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{unfold}\NormalTok{(...)}
-
-\CommentTok{\# tidyverse workflow}
-\NormalTok{temporal }\OtherTok{\textless{}{-}}\NormalTok{ dt }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{group\_by}\NormalTok{(...) }\SpecialCharTok{|\textgreater{}}
-  \FunctionTok{summarise}\NormalTok{(...)}
-
-\NormalTok{spatial }\OtherTok{\textless{}{-}}\NormalTok{ dt }\SpecialCharTok{|\textgreater{}} \FunctionTok{select}\NormalTok{(....)}
-
-\NormalTok{spatial }\SpecialCharTok{|\textgreater{}} \FunctionTok{left\_join}\NormalTok{(temporal)}
-\end{Highlighting}
-\end{Shaded}
+Some readers may question why a new data structure is needed rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. The reason is that cubble is specifically designed to utilize the spatio-temporal structure when arranging variables from different observational units into a single object. And it enables easy pivoting between purely spatial, purely temporal, or unfolded into a combined form.
 
 \hypertarget{compact}{%
 \subsection{Compatibility with existing packages}\label{compact}}
@@ -622,20 +598,20 @@ The Victoria State Government in Australia provides daily COVID case numbers by 
 ## Simple feature collection with 5 features and 7 fields
 ## Geometry type: MULTIPOLYGON
 ## Dimension:     XY
-## Bounding box:  xmin: 142.3643 ymin: -38.67876 xmax: 147.386 ymax: -36.39269
+## Bounding box:  xmin: 142.3535 ymin: -38.67876 xmax: 147.3909 ymax: -36.39269
 ## Geodetic CRS:  WGS 84
-##   lga_code_2018            lga state_code_2016 state_name_2016 areasqkm_2018
-## 1         20110     Alpine (S)               2        Victoria     4788.1568
-## 2         20260    Ararat (RC)               2        Victoria     4211.1171
-## 3         20570   Ballarat (C)               2        Victoria      739.0321
-## 4         20660    Banyule (C)               2        Victoria       62.5402
-## 5         20740 Bass Coast (S)               2        Victoria      865.8095
-##   cent_long  cent_lat                       geometry
-## 1  146.9742 -36.85357 MULTIPOLYGON (((146.7258 -3...
-## 2  142.8432 -37.47271 MULTIPOLYGON (((143.1807 -3...
-## 3  143.7815 -37.49286 MULTIPOLYGON (((143.6622 -3...
-## 4  145.0851 -37.73043 MULTIPOLYGON (((145.1357 -3...
-## 5  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
+##     lga_code_2018            lga state_code_2016 state_name_2016 areasqkm_2018
+## 132         20110     Alpine (S)               2        Victoria     4788.1568
+## 133         20260    Ararat (RC)               2        Victoria     4211.1171
+## 134         20570   Ballarat (C)               2        Victoria      739.0321
+## 135         20660    Banyule (C)               2        Victoria       62.5402
+## 136         20740 Bass Coast (S)               2        Victoria      865.8095
+##     cent_long  cent_lat                       geometry
+## 132  146.9742 -36.85357 MULTIPOLYGON (((146.7258 -3...
+## 133  142.8432 -37.47271 MULTIPOLYGON (((143.1807 -3...
+## 134  143.7815 -37.49286 MULTIPOLYGON (((143.6622 -3...
+## 135  145.0851 -37.73043 MULTIPOLYGON (((145.1357 -3...
+## 136  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
 \end{verbatim}
 
 Cubble can be created with separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \ref{create}. \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
@@ -950,7 +926,7 @@ Figure \ref{fig:interactive-popup} shows Figure \ref{fig:interactive-linking} ma
 
 This paper describes an \proglang{R} package \pkg{cubble} for organising, manipulating and visualising spatio-temporal data. A new data structure, \code{cubble}, with the nested and long form, is proposed to connect the time invariant and varying variables in the spatio-temporal data. This design frees the data analysts from spending time on organising variables of different observational units. The data structure is also flexible to the techniques and packages analysts use to analyse the data, for example, in the matching example in section 4.3, users are free to use algorithms from another package to cluster stations.
 
-Future directions of the package involves responding to changes in the tidyverse packages that \pkg{cubble} imports, in particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. In the spatial aspect, the simple feature representation wraps spatial coordinates in a list column, for some complex spatial operations, while sometimes, analysts may want to unpack them into longitude and latitude columns to work from. Another extension to \pkg{cubble} is to build a smooth transition between the coordinate columns and simple feature geometry column.
+Future directions of the package involves responding to changes in the tidyverse packages that \pkg{cubble} imports, in particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. In the spatial aspect, the simple feature representation wraps spatial coordinates in a list column, for some complex spatial operations, while sometimes, analysts may want to unpack them into longitude and latitude columns to work from. A smooth transition between the coordinate and simple feature representation can be added to \pkg{cubble}. \pkg{cubble} can also be extended to handle sites with moving coordinates and this would involve constructing a \code{sp} column for locations, similar to \code{ts} for time, and a form locations can be pivoted into, like the long form for temporal variables. In the multivariate aspect, \pkg{cubble} can also be extended with interface to more high dimensional visualisation methods, i.e., the tour method, to understand variable importance or comparing location similarities.
 
 \newpage
 
