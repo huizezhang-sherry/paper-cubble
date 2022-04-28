@@ -76,57 +76,9 @@ cubble_unfold |> face_spatial() |> face_temporal()
 <!-- https://www.jstatsoft.org/style#my-latex-paper-does-not-compile-when-there-is-jss-markup-in-section-titles-what-should-i-do -->
 \subsection[Why not just use]{Why not just use \code{dplyr::nest\_by()}?}
 
-\textcolor{blue}{Ursula: I feel like this doesn't get the message accross, the main point seems to be that with cubble we can switch and never have to add information back in "by-hand" (with some join function), maybe make the point without refering to specific functions first and then explain the example?}
+Some readers may question why a new data structure is needed rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. The reason is that cubble is specifically designed to utilize the spatio-temporal structure when arranging variables from different observational units into a single object. And it enables easy pivoting between purely spatial, purely temporal, or unfolded into a combined form.
 
-
-Some readers may raise the question why a new data structure rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. While \code{nest_by()} and its inverse \code{unnest()} can mimic the nested form in cubble, cubble can be seen as an attempt to arrange variables from different observational units into a single object, specifically for spatio-temporal data. While `nest_by()` can recreate the nested form, it cannot create a clean slate for temporal variables as used in the long form. For temporal variables, carrying the duplicated spatial variables in the combined form is not convenient to work with. This is because these spatial variables will be lost after \code{summarise()} and one will need to subset the spatial variables again from the original data and make a left join, which tends to create unnecessary intermediate products in the workflow.
-
-```{r eval = FALSE, echo = TRUE}
-# operation on the long form w/o cubble
-# cubble workflow
-dt |>
-  as_cubble(...) |>
-  face_temporal() |>
-  group_by() |>
-  summarise() |>
-  unfold(...)
-
-# tidyverse workflow
-temporal <- dt |>
-  group_by(...) |>
-  summarise(...)
-
-spatial <- dt |> select(....)
-
-spatial |> left_join(temporal)
-```
-
-<!-- ```{r} -->
-<!-- library(dplyr) -->
-<!-- vars <- c(id, lat, long, elev, name, wmo_id) -->
-<!-- left_join(cubble::stations, cubble::climate) |>  -->
-<!--   group_by(id, lat, long, elev, name, wmo_id) |>  -->
-<!--   summarise(tmax_mean = mean(tmax)) -->
-
-<!-- cubble::climate |>  -->
-<!--   mutate(month = lubridate::month(date)) |>  -->
-<!--   group_by(id, month) |>  -->
-<!--   summarise(tmax_mean = mean(tmax)) |>  -->
-<!--   ungroup() |>  -->
-<!--   left_join(cubble::stations) |>  -->
-<!--   nest_by(id, lat, long, elev, name, wmo_id) -->
-
-
-<!-- ``` --
-
-<!-- ``` r -->
-<!-- library(cubble) -->
-<!-- library(tidyverse) -->
-<!-- left_join(cubble::stations, cubble::climate) |> -->
-<!--   dplyr::nest_by(id, lat,  long,  elev, name, wmo_id) |> -->
-<!--   tidyr::unnest() |> -->
-<!--   group_by(........, geometry) -->
-<!-- ``` -->
+<!-- Some readers may raise the question why a new data structure rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. While \code{nest_by()} and its inverse \code{unnest()} can mimic the nested form in cubble, cubble can be seen as an attempt to arrange variables from different observational units into a single object, specifically for spatio-temporal data. The benefit of arranging everything in a single object is that there is no need to manually split and join variables in the data. For various spatial, temporal, or spatio-temporal tasks, the data format required can alternate among a pure spatial, pure temporal, or a combined format. Analysts will need to manually split the combined data into a spatial or temporal one, or join them into a combined one. \pkg{Cubble} simplifies this switch of format with a nested and long form and allowing spatial variables to be unfolded into the long form for a combined data all in a single data object. -->
 
 ## Compatibility with existing packages {#compact}
 
