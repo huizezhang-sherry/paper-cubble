@@ -7,7 +7,7 @@ output: html_document
 
 ## Victoria covid data {#covid}
 
-The Victoria State Government in Australia provides daily COVID case numbers by date, source, and local government area (LGA). This data can be used to visualise COVID spread when combined with map information on LGA, available from the Australian Bureau of Statistics. The first five rows of both data are printed below:  
+The Australian Victoria State Governmentprovides daily COVID case numbers providing information about the source, and local government area (LGA) of the recorded cases. This data can be used to visualise COVID spread when combined with map information on LGA, available from the Australian Bureau of Statistics. The first five rows these data sets are printed below:  
 
 ```{r eval = FALSE}
 library(tidyverse)
@@ -41,7 +41,7 @@ covid |> head(5)
 lga |> head(5)
 ```
 
-Cubble can be created with separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \@ref(create). \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
+A \code{cubble} object can be created from separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \@ref(create). \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
 
 ```{r echo = TRUE, warning = TRUE, message= TRUE}
 cb <- as_cubble(list(spatial = lga, temporal = covid),

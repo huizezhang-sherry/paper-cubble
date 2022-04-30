@@ -567,7 +567,7 @@ Some useful controls over the glyph map are also available in the \code{geom_gly
 \hypertarget{covid}{%
 \subsection{Victoria covid data}\label{covid}}
 
-The Victoria State Government in Australia provides daily COVID case numbers by date, source, and local government area (LGA). This data can be used to visualise COVID spread when combined with map information on LGA, available from the Australian Bureau of Statistics. The first five rows of both data are printed below:
+The Australian Victoria State Governmentprovides daily COVID case numbers providing information about the source, and local government area (LGA) of the recorded cases. This data can be used to visualise COVID spread when combined with map information on LGA, available from the Australian Bureau of Statistics. The first five rows these data sets are printed below:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -614,7 +614,7 @@ The Victoria State Government in Australia provides daily COVID case numbers by 
 ## 136  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
 \end{verbatim}
 
-Cubble can be created with separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \ref{create}. \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
+A \code{cubble} object can be created from separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \ref{create}. \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -924,11 +924,13 @@ Figure \ref{fig:interactive-popup} shows Figure \ref{fig:interactive-linking} ma
 \hypertarget{conclude}{%
 \section{Conclusion}\label{conclude}}
 
-This paper describes an \proglang{R} package \pkg{cubble} for organising, manipulating and visualising spatio-temporal data. A new data structure, \code{cubble}, with the nested and long form, is proposed to connect the time invariant and varying variables in the spatio-temporal data. This design frees the data analysts from spending time on organising variables of different observational units. The data structure is also flexible to the techniques and packages analysts use to analyse the data, for example, in the matching example in section 4.3, users are free to use algorithms from another package to cluster stations.
+This paper presents an \proglang{R} package \pkg{cubble} for organising, manipulating and visualising spatio-temporal data. The package introduces a new data structure for spatio-temporal data, \code{cubble}, that connects the time invariant and varying variables and that allows the user to work with a nested and long form of the data. This design frees the data analysts from spending time on organising variables of different observational units. The data structure and the capabilities introduced in this package can be used and combined with existing spatio-temporal R packages such as \pkg{sf}, data wrangling packages such as \pkg{dplyr}, and visualization packages such as \pkg{ggplot2}, \pkg{plotly} and \pkg{leaflet}.
 
-The data structure and software are demonstrated with extensive examples. These include creating and coercing wild-caught data with potential mismatch on sites, handling hierarchical data, matching series spatially and temporally, reproducing ERA5 results from NetCDF data, and, lastly fitting into the interactive graphic pipeline of \pkg{plotly} and \pkg{leaflet}.
+The data structure and functions are demonstrated with extensive examples. These include creating and coercing wild-caught data with potential mismatch on sites, handling hierarchical data, matching time series spatially and temporally, as well as reproducing ERA5 results from NetCDF data. Visualization of the \code{cubble} objects and derivatives is presented via interactive graphic pipelines using \pkg{plotly} and \pkg{leaflet}.
 
-Future directions of the package involves responding to changes in the tidyverse packages that \pkg{cubble} imports, in particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. In the spatial aspect, the simple feature representation wraps spatial coordinates in a list column, for some complex spatial operations, while sometimes, analysts may want to unpack them into longitude and latitude columns to work from. A smooth transition between the coordinate and simple feature representation can be added to \pkg{cubble}. \pkg{cubble} can also be extended to handle sites with moving coordinates and this would involve constructing a \code{sp} column for locations, similar to \code{ts} for time, and a form locations can be pivoted into, like the long form for temporal variables. In the multivariate aspect, \pkg{cubble} can also be extended with interface to more high dimensional visualisation methods, i.e., the tour method, to understand variable importance or comparing location similarities.
+Future directions of the package involves responding to changes in the tidyverse packages that \pkg{cubble} imports, in particular, \pkg{tibble}, \pkg{tidyr}, and \pkg{dplyr}. In the spatial aspect, the simple feature representation wraps spatial coordinates in a list column, for some complex spatial operations, while sometimes, analysts may want to unpack them into longitude and latitude columns to work from. A smooth transition between the coordinate and simple feature representation can be added to \pkg{cubble}. \pkg{cubble} can also be extended to handle sites with moving coordinates.
+
+The goal of this work is to add capabilities into the spatio-temporal practitioners toolbox that facilitates their work within the tidy data framework.
 
 \newpage
 
