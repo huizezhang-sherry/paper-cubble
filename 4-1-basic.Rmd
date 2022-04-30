@@ -7,7 +7,7 @@ output: html_document
 
 ## Victoria covid data {#covid}
 
-The Australian Victoria State Governmentprovides daily COVID case numbers providing information about the source, and local government area (LGA) of the recorded cases. This data can be used to visualise COVID spread when combined with map information on LGA, available from the Australian Bureau of Statistics. The first five rows these data sets are printed below:  
+The Victoria State Government in Australia provides daily COVID information about the source, and local government area (LGA) of the recorded cases. This data can be used to visualise COVID spread when combined with map information on LGA, available from the Australian Bureau of Statistics. The first five rows these data sets are printed below:  
 
 ```{r eval = FALSE}
 library(tidyverse)
