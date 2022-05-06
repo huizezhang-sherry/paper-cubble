@@ -186,9 +186,9 @@ While a cubical data model is neat to view spatio-temporal data conceptually, a 
 \hypertarget{cubble}{%
 \section{The cubble package}\label{cubble}}
 
-This section will first introduce the core functions in the cubble class: \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()} in subsection \ref{create} - \ref{unfold}. The next subsection addresses the necessity of creating a new class. Subsection \ref{compact} will then show the compatibility of cubble with existing packages in spatial and temporal analysis.
+Here we introduce the core functionalities of cubble. The main functions, \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()} are described in Section \ref{create} - \ref{unfold}. Section \ref{tidyverse} explains the need to create a new class. Section \ref{compact} will then discusses how cubble relates to existing packages for spatial and temporal data analysis.
 
-Each core \pkg{cubble} function is introduced and accompanied with a short example using the data \texttt{climate\_flat} throughout this section. \texttt{climate\_flat} contains data on five weather stations in Australia with spatial information of each station: station id, latitude, longitude, elevation, station name, World Meteorology Organisation ID and also daily temporal information, maximum and minimum temperature values and precipitation records for 2020. The first five rows of \texttt{climate\_flat} are shown below:
+The dataset \texttt{climate\_flat} is used to illustrate \pkg{cubble} functionality. This is a subset from the ORIGIN and contains the spatial variables, station id, latitude, longitude, elevation, station name, World Meteorology Organisation ID, in additional to daily temporal information, maximum and minimum temperature values and precipitation records for 2020. The first five rows of \texttt{climate\_flat} are shown below:
 
 \begin{verbatim}
 ## # A tibble: 1,830 x 10
@@ -205,7 +205,9 @@ Each core \pkg{cubble} function is introduced and accompanied with a short examp
 \hypertarget{create}{%
 \subsection{Create a cubble}\label{create}}
 
-Spatio-temporal data can come in various formats and shapes and a cubble can be created from various types of raw data. This includes tibble and its variates in multiple tables (an example is provided in section \ref{covid}), and netCDF (detailed in section \ref{netcdf}). The function \code{as_cubble()} is used to create a cubble with three additional inputs: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order (longitude, latitude). The arguments \code{key} and \code{index} follow the wording in \pkg{tsibble} to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a cubble out of \code{climate_flat} data with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
+A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble, sf. Section \ref{covid} describes converting multiple tables into a cubble object and Section \ref{netcdf} illustrate how to convert a netCDF object.
+
+The function \code{as_cubble()} is used to create a cubble with three arguments: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order (longitude, latitude). The arguments \code{key} and \code{index} follow the wording in \pkg{tsibble} to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a cubble out of \code{climate_flat} (a single tibble) with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -228,9 +230,9 @@ Spatio-temporal data can come in various formats and shapes and a cubble can be 
 ## 5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble [366 x 4]>
 \end{verbatim}
 
-The cubble header provides some information about the data. \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data set. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
+Printing a cubble provides some information about the data. \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data set. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
 
-The resulting cubble is built from a \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{map()} when working with a list column. For example, calculating the number of raining days can be done by:
+A cubble object is an extension of a \code{rowwise_df} object where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -255,7 +257,7 @@ The resulting cubble is built from a \code{rowwise_df} class where each row form
 \hypertarget{change-focus-by-facing-the-time-variables}{%
 \subsection{Change focus by facing the time-variables}\label{change-focus-by-facing-the-time-variables}}
 
-The nested form can be used for those operations where the output is only indexed by the spatial identifier (\code{key}), but becomes inadequate when outputs need both a spatial and a temporal identifier (\code{key} and \code{index}). \pkg{cubble} also provides a long form, which expands the \code{ts} column and temporarily ``hides'' the spatial variables. The function \code{face_temporal()} is used to switch from a nested cubble into a long one. The first row in Figure \ref{fig:face} illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face. This code switches the cubble just created into its long form:
+The nested form can be used for those operations where the output is only indexed by the spatial identifier (\code{key}), but becomes inadequate when outputs need both a spatial and a temporal identifier (\code{key} and \code{index}). The \pkg{cubble} class also provides a long form, which expands the \code{ts} column and temporarily ``hides'' the spatial variables. The function \code{face_temporal()} is used to switch from the nested cubble into the long one. The first row in Figure \ref{fig:face} illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face. This code switches the cubble just created into its long form:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -278,7 +280,7 @@ The nested form can be used for those operations where the output is only indexe
 ## # ... with 1,825 more rows
 \end{verbatim}
 
-The first line in the header now shows the cubble is in its long form and the third line has been changed to display the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. Unlike the nested form, the long cubble is built from class \code{groupped_df} where all the observations from the same sites form a group.
+The first line in printed cubble now shows the cubble in its long form and the third line has been changed to display the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. Unlike the nested form, the long cubble is built from a \code{grouped_df} object where all the observations from the same sites form a group.
 
 \begin{figure}
 
@@ -292,7 +294,7 @@ The first line in the header now shows the cubble is in its long form and the th
 \hypertarget{change-focus-back-to-the-site-variable-face}{%
 \subsection{Change focus back to the site-variable face}\label{change-focus-back-to-the-site-variable-face}}
 
-Wrangling spatio-temporal data can be seen as an iterative process in the spatial and temporal dimensions. Switching the focus back to the site-variable face can be accomplished by the function \code{face_spatial()}, which is the inverse of \code{face_temporal()}. The second row of Figure \ref{fig:face} illustrates the function and below is an example using the climate data introduced earlier:
+Wrangling spatio-temporal data can be seen as an iterative process in the spatial and temporal dimensions. Switching the focus back to the site-variable face can be accomplished by the function \code{face_spatial()}, which is the inverse of \code{face_temporal()}. The second row of Figure \ref{fig:face} illustrates the function, which is used as follows:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -327,7 +329,7 @@ Wrangling spatio-temporal data can be seen as an iterative process in the spatia
 \hypertarget{unfold}{%
 \subsection{Unfold spatial variables into the long cubble}\label{unfold}}
 
-Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps, which will be elaborated in section \ref{st_transformation}. This type of operation can be seen as flattening, or \emph{unfolding}, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long cubble:
+Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps {[}ref{]}. (Glyph maps will be explained in Section \ref{st_transformation}.) This type of operation can be seen as flattening, or \emph{unfolding}, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long cubble:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -372,7 +374,8 @@ This function should generally be used in the last step of the analysis since it
 ## # ... with 1,825 more rows
 \end{verbatim}
 
-\subsection[Why not just use]{Why not just use \code{dplyr::nest\_by()}?}
+\hypertarget{tidyverse}{%
+\subsection{Why not just use the existing tidyverse functions}\label{tidyverse}}
 
 Some readers may question why a new data structure is needed rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. The reason is that cubble is specifically designed to utilize the spatio-temporal structure when arranging variables from different observational units into a single object. Moreover, it enables easy pivoting between purely spatial, purely temporal, or unfolded into a combined form.
 
@@ -614,7 +617,7 @@ The Victoria State Government in Australia provides daily COVID information abou
 ## 136  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
 \end{verbatim}
 
-A \code{cubble} object can be created from separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \ref{create}. \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
+A \code{cubble} object can be created from separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in Section \ref{create}. \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
 
 \begin{Shaded}
 \begin{Highlighting}[]
