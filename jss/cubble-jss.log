@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.5.10)  25 MAY 2022 15:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.5.10)  25 MAY 2022 16:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -790,16 +790,9 @@ File: ../figures/diagram-keynotes/diagram-keynotes.007.png Graphic file (type pn
 Package pdftex.def Info: ../figures/diagram-keynotes/diagram-keynotes.007.png  used on input line 157.
 (pdftex.def)             Requested size: 442.65375pt x 248.97888pt.
 
-Package xcolor Warning: Incompatible color definition on input line 168.
-
-
-Package xcolor Warning: Incompatible color definition on input line 168.
-
-
-Package xcolor Warning: Incompatible color definition on input line 168.
-
-
-Package xcolor Warning: Incompatible color definition on input line 168.
+Overfull \hbox (15.08519pt too wide) in paragraph at lines 168--169
+[]\T1/lmr/m/n/10.95 The main func-tions in the cub-ble pack-age are \T1/lmtt/m/n/10.95 as_cubble()\T1/lmr/m/n/10.95 , \T1/lmtt/m/n/10.95 face_spatial()\T1/lmr/m/n/10.95 , \T1/lmtt/m/n/10.95 face_temporal()\T1/lmr/m/n/10.95 ,
+ []
 
 
 Overfull \hbox (5.47499pt too wide) has occurred while \output is active
@@ -827,7 +820,7 @@ Overfull \hbox (5.47499pt too wide) has occurred while \output is active
 
 Package xcolor Warning: Incompatible color definition on input line 239.
 
-<../figures/diagram-keynotes/diagram-keynotes.008.png, id=229, 1927.2pt x 1084.05pt>
+<../figures/diagram-keynotes/diagram-keynotes.008.png, id=222, 1927.2pt x 1084.05pt>
 File: ../figures/diagram-keynotes/diagram-keynotes.008.png Graphic file (type png)
 <use ../figures/diagram-keynotes/diagram-keynotes.008.png>
 Package pdftex.def Info: ../figures/diagram-keynotes/diagram-keynotes.008.png  used on input line 266.
@@ -901,7 +894,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 Package xcolor Warning: Incompatible color definition on input line 457.
 
-<../figures/diagram-keynotes/diagram-keynotes.003.png, id=287, 1927.2pt x 1084.05pt>
+<../figures/diagram-keynotes/diagram-keynotes.003.png, id=283, 1927.2pt x 1084.05pt>
 File: ../figures/diagram-keynotes/diagram-keynotes.003.png Graphic file (type png)
 <use ../figures/diagram-keynotes/diagram-keynotes.003.png>
 Package pdftex.def Info: ../figures/diagram-keynotes/diagram-keynotes.003.png  used on input line 462.
@@ -927,7 +920,7 @@ Package xcolor Warning: Incompatible color definition on input line 473.
 
 Package xcolor Warning: Incompatible color definition on input line 473.
 
-<../figures/illu-matching.png, id=295, 722.7pt x 361.35pt>
+<../figures/illu-matching.png, id=291, 722.7pt x 361.35pt>
 File: ../figures/illu-matching.png Graphic file (type png)
 <use ../figures/illu-matching.png>
 Package pdftex.def Info: ../figures/illu-matching.png  used on input line 478.
@@ -982,7 +975,7 @@ Package xcolor Warning: Incompatible color definition on input line 503.
 
 Package xcolor Warning: Incompatible color definition on input line 505.
 
-<../figures/diagram-keynotes/diagram-keynotes.004.png, id=330, 1927.2pt x 1084.05pt>
+<../figures/diagram-keynotes/diagram-keynotes.004.png, id=326, 1927.2pt x 1084.05pt>
 File: ../figures/diagram-keynotes/diagram-keynotes.004.png Graphic file (type png)
 <use ../figures/diagram-keynotes/diagram-keynotes.004.png>
 Package pdftex.def Info: ../figures/diagram-keynotes/diagram-keynotes.004.png  used on input line 510.
@@ -1045,7 +1038,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 Package xcolor Warning: Incompatible color definition on input line 711.
 
-<../figures/basic-manip.png, id=381, 722.7pt x 722.7pt>
+<../figures/basic-manip.png, id=377, 722.7pt x 722.7pt>
 File: ../figures/basic-manip.png Graphic file (type png)
 <use ../figures/basic-manip.png>
 Package pdftex.def Info: ../figures/basic-manip.png  used on input line 733.
@@ -1064,7 +1057,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 Package xcolor Warning: Incompatible color definition on input line 771.
 
-<../figures/basic-agg.png, id=396, 1084.05pt x 505.89pt>
+<../figures/basic-agg.png, id=392, 1084.05pt x 505.89pt>
 File: ../figures/basic-agg.png Graphic file (type png)
 <use ../figures/basic-agg.png>
 Package pdftex.def Info: ../figures/basic-agg.png  used on input line 776.
@@ -1075,7 +1068,7 @@ Package xcolor Warning: Incompatible color definition on input line 787.
 
 Package xcolor Warning: Incompatible color definition on input line 787.
 
-<../figures/matching-map.png, id=399, 722.7pt x 361.35pt>
+<../figures/matching-map.png, id=395, 722.7pt x 361.35pt>
 File: ../figures/matching-map.png Graphic file (type png)
 <use ../figures/matching-map.png>
 Package pdftex.def Info: ../figures/matching-map.png  used on input line 792.
@@ -1097,7 +1090,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 Package xcolor Warning: Incompatible color definition on input line 834.
 
-<../figures/matching.png, id=415, 722.7pt x 361.35pt>
+<../figures/matching.png, id=411, 722.7pt x 361.35pt>
 File: ../figures/matching.png Graphic file (type png)
 <use ../figures/matching.png>
 Package pdftex.def Info: ../figures/matching.png  used on input line 839.
@@ -1150,7 +1143,7 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
  []
 
 [23 <../figures/matching.png>]
-<../figures/netcdf.png, id=441, 1084.05pt x 361.35pt>
+<../figures/netcdf.png, id=437, 1084.05pt x 361.35pt>
 File: ../figures/netcdf.png Graphic file (type png)
 <use ../figures/netcdf.png>
 Package pdftex.def Info: ../figures/netcdf.png  used on input line 864.
@@ -1166,17 +1159,17 @@ Overfull \hbox (10.94998pt too wide) has occurred while \output is active
 
 Package xcolor Warning: Incompatible color definition on input line 897.
 
-<../figures/linking.png, id=456, 1706.375pt x 577.15625pt>
+<../figures/linking.png, id=452, 1706.375pt x 577.15625pt>
 File: ../figures/linking.png Graphic file (type png)
 <use ../figures/linking.png>
 Package pdftex.def Info: ../figures/linking.png  used on input line 902.
 (pdftex.def)             Requested size: 442.65762pt x 146.41112pt.
-<../figures/linking-north.png, id=457, 1706.375pt x 572.1375pt>
+<../figures/linking-north.png, id=453, 1706.375pt x 572.1375pt>
 File: ../figures/linking-north.png Graphic file (type png)
 <use ../figures/linking-north.png>
 Package pdftex.def Info: ../figures/linking-north.png  used on input line 902.
 (pdftex.def)             Requested size: 442.65762pt x 146.41257pt.
-<../figures/linking-lower.png, id=458, 1706.375pt x 572.1375pt>
+<../figures/linking-lower.png, id=454, 1706.375pt x 572.1375pt>
 File: ../figures/linking-lower.png Graphic file (type png)
 <use ../figures/linking-lower.png>
 Package pdftex.def Info: ../figures/linking-lower.png  used on input line 902.
@@ -1193,7 +1186,7 @@ Package xcolor Warning: Incompatible color definition on input line 933.
 
 Package xcolor Warning: Incompatible color definition on input line 933.
 
-<../figures/popup-mid.png, id=463, 904.37875pt x 737.75626pt>
+<../figures/popup-mid.png, id=459, 904.37875pt x 737.75626pt>
 File: ../figures/popup-mid.png Graphic file (type png)
 <use ../figures/popup-mid.png>
 Package pdftex.def Info: ../figures/popup-mid.png  used on input line 938.
@@ -1229,7 +1222,7 @@ Package xcolor Warning: Incompatible color definition on input line 960.
 
 Package xcolor Warning: Incompatible color definition on input line 960.
 
-<../figures/diagram-keynotes/diagram-keynotes.005.png, id=490, 1927.2pt x 1084.05pt>
+<../figures/diagram-keynotes/diagram-keynotes.005.png, id=486, 1927.2pt x 1084.05pt>
 File: ../figures/diagram-keynotes/diagram-keynotes.005.png Graphic file (type png)
 <use ../figures/diagram-keynotes/diagram-keynotes.005.png>
 Package pdftex.def Info: ../figures/diagram-keynotes/diagram-keynotes.005.png  used on input line 968.
@@ -1408,16 +1401,16 @@ Package rerunfilecheck Info: File `cubble-jss.out' has not changed.
 Here is how much of TeX's memory you used:
  22363 strings out of 480260
  427603 string characters out of 5893668
- 679010 words of memory out of 5000000
+ 680010 words of memory out of 5000000
  39666 multiletter control sequences out of 15000+600000
  549726 words of font info for 71 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  99i,9n,103p,1390b,510s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/Users/cookd/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/Users/cookd/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/Users/cookd/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/Users/cookd/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/Users/cookd/Library/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}</Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmb10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbo10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri12.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmro10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmss10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsso10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtto10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/urw/zapfchan/uzcmi8a.pfb>
-Output written on cubble-jss.pdf (31 pages, 10268354 bytes).
+Output written on cubble-jss.pdf (31 pages, 10268134 bytes).
 PDF statistics:
- 679 PDF objects out of 1000 (max. 8388607)
- 578 compressed objects within 6 object streams
+ 675 PDF objects out of 1000 (max. 8388607)
+ 574 compressed objects within 6 object streams
  160 named destinations out of 1000 (max. 500000)
  317 words of extra memory for PDF output out of 10000 (max. 10000000)
 
