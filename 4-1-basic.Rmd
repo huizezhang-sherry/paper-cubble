@@ -44,16 +44,20 @@ lga |> head(5)
 A \code{cubble} object can be created from separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \@ref(create). \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
 
 ```{r echo = TRUE, warning = TRUE, message= TRUE}
-cb <- as_cubble(list(spatial = lga, temporal = covid),
-                key = lga, index = date, coords = c(cent_long, cent_lat))
+cb <- as_cubble(
+  list(spatial = lga, temporal = covid),
+  key = lga, index = date, coords = c(cent_long, cent_lat)
+  )
 ```
 
 Here, some locations have been detected with this issue and you can use \code{output = "unmatch"} to check on these locations:
 
 ```{r echo = TRUE}
-pair <- as_cubble(list(spatial = lga, temporal = covid),
-                  key = lga, index = date, coords = c(cent_long, cent_lat),
-                  output = "unmatch")
+pair <- as_cubble(
+  list(spatial = lga, temporal = covid),
+  key = lga, index = date, coords = c(cent_long, cent_lat),
+  output = "unmatch"
+  )
 
 pair
 ```

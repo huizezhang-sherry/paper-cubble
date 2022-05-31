@@ -81,7 +81,7 @@ cubble_unfold |> face_spatial() |> face_temporal()
 
 <!-- \subsection[Why not just use]{Why not just use \code{dplyr::nest\_by()}?} -->
 
-Some readers may question why a new data structure is needed rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. The reason is that cubble is specifically designed to utilize the spatio-temporal structure when arranging variables from different observational units into a single object. Moreover, it enables easy pivoting between purely spatial, purely temporal, or unfolded into a combined form.
+Some readers may question why a new data structure is needed rather than directly creating a list-column  on the combined data using \code{dplyr::nest_by()}. The reason is that cubble is specifically designed to utilize the spatio-temporal structure when arranging variables from different observational units into a single object. Moreover, it enables easy pivoting between purely spatial, purely temporal, or unfolded into a combined form.
 
 <!-- Some readers may raise the question why a new data structure rather than using \code{dplyr::nest_by()} on the combined data to directly create a list-column. While \code{nest_by()} and its inverse \code{unnest()} can mimic the nested form in cubble, cubble can be seen as an attempt to arrange variables from different observational units into a single object, specifically for spatio-temporal data. The benefit of arranging everything in a single object is that there is no need to manually split and join variables in the data. For various spatial, temporal, or spatio-temporal tasks, the data format required can alternate among a pure spatial, pure temporal, or a combined format. Analysts will need to manually split the combined data into a spatial or temporal one, or join them into a combined one. \pkg{Cubble} simplifies this switch of format with a nested and long form and allowing spatial variables to be unfolded into the long form for a combined data all in a single data object. -->
 
@@ -110,7 +110,12 @@ When a nested cubble is created, each element in the list-column \code{ts} is of
 
 ```{r echo = TRUE}
 # add station-based features in the nested form.
-dt |> mutate(fabletools::features(ts, tmax, list(tmax_mean = mean, tmax_var = var)))
+dt |> 
+  mutate(
+    fabletools::features(
+      ts, tmax, list(tmax_mean = mean, tmax_var = var)
+      )
+  )
 ```
 
 ### sf and s2
