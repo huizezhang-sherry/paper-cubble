@@ -165,9 +165,7 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 \hypertarget{cubble}{%
 \section{The cubble package}\label{cubble}}
 
-The main functions in the cubble package are \code{as_cubble(), face_spatial(), face_temporal(), and, unfold()}.
-
-The main functions in the cubble package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and, \code{unfold()}. The following sections explain their role, why the new cubble structure is needed and how the package relates to existing packages for spatial and temporal data analysis.
+The main functions in the cubble package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()}. The following sections explain their role, why the new cubble structure is needed and how the package relates to existing packages for spatial and temporal data analysis.
 
 The dataset \texttt{climate\_flat} is used to illustrate \pkg{cubble} functionality. This is a subset from the ORIGIN and contains the spatial variables, station id, latitude, longitude, elevation, station name, World Meteorology Organisation ID, in additional to daily temporal information, maximum and minimum temperature values and precipitation records for 2020. The first five rows of \texttt{climate\_flat} are shown below:
 
@@ -307,7 +305,7 @@ R> identical(cubble_nested, cubble_back)
 \hypertarget{unfold}{%
 \subsection{Unfold spatial variables into the long cubble}\label{unfold}}
 
-Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps {[}ref{]}. (Glyph maps will be explained in Section \ref{st_transformation}.) This type of operation can be seen as flattening, or \emph{unfolding}, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long cubble:
+Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps \citep{Wickham2012-yr}. (Glyph maps will be explained in Section \ref{st_transformation}.) This type of operation can be seen as flattening, or \emph{unfolding}, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -528,7 +526,7 @@ The linking is also available from the time series plot to the map. The selectio
 \hypertarget{st_transformation}{%
 \subsection{Spatio-temporal transformations}\label{st_transformation}}
 
-Different types of transformations can be useful to extract new information from spatio-temporal data. Glyph maps \citep{Wickham2012-yr} transform the time coordinates into space coordinates to plot the time series of different locations on the map. Calendar plots \citep{wang2020calendar} reconstruct time into a calendar-based grid to discover weekday and weekend pattern. Projection, or linear combination, of variables summarises multivariate information into lower dimension to further digest. This section elaborates on the glyph map.
+Different types of transformations can be useful to extract new information from spatio-temporal data. Glyph maps, first introduced in Section \ref{unfold}, transform the time coordinates into space coordinates to plot the time series of different locations on the map. Calendar plots \citep{wang2020calendar} reconstruct time into a calendar-based grid to discover weekday and weekend pattern. Projection, or linear combination, of variables summarises multivariate information into lower dimension to further digest. This section elaborates on the glyph map.
 
 In \proglang{R}, \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equation 1 and 2 in \citet{Wickham2012-yr}). The data can then be piped into \code{ggplot} to create the glyph map as:
 
