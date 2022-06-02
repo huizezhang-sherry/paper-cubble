@@ -7,7 +7,7 @@
 \usepackage[utf8]{inputenc}
 
 \author{
-H. Sherry Zhang\\Monash University \And Dianne Cook\\Monash University \AND Ursula Laa\\University of Natural Resources and Life Sciences \AND Nicolas Langrené\\BNU-HKBU United International College \AND Patricia Menéndez\\Monash University \AND
+H. Sherry Zhang\\Monash University \And Dianne Cook\\Monash University \AND Ursula Laa\\University of Natural Resources and Life Sciences \AND Nicolas Langrené\\BNU-HKBU United International College \And Patricia Menéndez\\Monash University
 }
 \title{\pkg{cubble}: An R Package for Structuring Spatio-temporal Data}
 
@@ -147,7 +147,7 @@ The rest of the paper is organized as follows: Section \ref{cube} introduces the
 
 Spatio-temporal data can be conceptualised using a cubical data model with three axes which typically are, time, latitude and longitude. This abstraction can be useful for generalising operations and visualisation purposes: \citet{lu_multidimensional_2018} shows how array operations (select, scale, reduce, rearrange, and compute) can be mapped onto the cube; \citet{bach_review_2014} reviews the temporal data visualisation based on space-time cube operations. Notice that the term space-time cube in their article ``does not need to involve spatial data'', but refers to ``an abstract 2D substrate that is used to visualize data at a specific time''. Despite its main focus being on temporal data, the mindset of abstracting out data representation to construct visualisations, still applies to our spatio-temporal data manipulation and visualisation approaches.
 
-The most common data cube using the three axes (time, latitude, longitude) could be considered as taking snapshots of the space and stacking them across time. Here we define the spatio-temporal cube slightly differently by considering the three axes to be, time, site and variable/s. That is illustrated in the leftmost cube in Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hypercubes when describing multivariate spatio-temporal data and is the conceptual framework behind \pkg{cubble}. With this conceptual model, operations on spatio-temporal data can be mapped to operations on the cube and the rest of Figure \ref{fig:cube-def} show examples of slicing on site, time, and variable.
+The most common data cube using the three axes (time, latitude, longitude) could be considered as taking snapshots of the space and stacking them across time. Here we define the spatio-temporal cube slightly differently by considering the three axes to be, time, site and variable/s. That is illustrated in the leftmost cube in Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hypercubes when describing multivariate spatio-temporal data and is the conceptual framework behind the \pkg{cubble} objects. With this conceptual model, operations on spatio-temporal data can be mapped to operations on the cube and the rest of Figure \ref{fig:cube-def} show examples of slicing on site, time, and variable.
 
 While the data cube model is conceptually convenient for spatio-temporal data, a 3D data array is not sufficiently rich for data wrangling, for several reasons. Although arrays can be efficient for the computation on numerical values, spatio-temporal data typically includes various types of variables. For example, character strings and specific datetime classes are common. In addition, it will be generally useful to be able to create new variables which is trickier to manage in an array. Thus for convenient wrangling, we have opted for a list object as the \texttt{cubble} structure.
 
@@ -164,6 +164,8 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 
 \hypertarget{cubble}{%
 \section{The cubble package}\label{cubble}}
+
+A cubble is a data object that arranges spatio-temporal information in a spatial and temporal tidy way. It uses two forms to achieve this: the nested form presents the spatial variables, including the feature geometry, and nests the temporal information for spatial wrangling. The long form expands the temporal information and stashes the spatial variables for temporal wrangling. A benefit of cubble is that it interfaces directly with existing spatial and temporal data wrangling packages. For example, operations on feature geometry from the \code{sf} package and temporal operations, i.e., temporal ordering, duplication check. and gap filling, from the \code{tsibble} package.
 
 The main functions in the cubble package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()}. The following sections explain their role, why the new cubble structure is needed and how the package relates to existing packages for spatial and temporal data analysis.
 

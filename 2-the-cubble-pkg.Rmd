@@ -5,6 +5,8 @@ output: pdf_document
 
 # The cubble package {#cubble}
 
+A cubble is a data object that arranges spatio-temporal information in a spatial and temporal tidy way. It uses two forms to achieve this: the nested form presents the spatial variables, including the feature geometry, and nests the temporal information for spatial wrangling. The long form expands the temporal information and stashes the spatial variables for temporal wrangling. A benefit of cubble is that it interfaces directly with existing spatial and temporal data wrangling packages. For example, operations on feature geometry from the \code{sf} package and temporal operations, i.e., temporal ordering, duplication check. and gap filling, from the \code{tsibble} package. 
+
 The main functions in the cubble package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()}. The following sections explain their role, why the new cubble structure is needed and how the package relates to existing packages for spatial and temporal data analysis.
 
 The dataset `climate_flat` is used to illustrate \pkg{cubble} functionality. This is a subset from the ORIGIN and contains the spatial variables, station id, latitude, longitude, elevation, station name, World Meteorology Organisation ID, in additional to daily temporal information,  maximum and minimum temperature values and precipitation records for 2020. The first five rows of `climate_flat` are shown below:
