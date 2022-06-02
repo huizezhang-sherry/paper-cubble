@@ -8,18 +8,17 @@ author:
   - name: Dianne Cook
     affiliation: 'Monash University \AND'
     address: 21 Chancellors Walk, Clayton VIC 3800 Australia
-    # location: Melbourne, Australia
     email: dicook@monash.edu
   - name: Ursula Laa
     affiliation: 'University of Natural Resources and Life Sciences \AND'
     address: Gregor-Mendel-Straße 33, 1180 Wien, Austria
     email:  ursula.laa@boku.ac.at
   - name: Nicolas Langrené
-    affiliation: 'BNU-HKBU United International College \AND'
+    affiliation: 'BNU-HKBU United International College'
     address: 2000 Jintong Road, Tangjiawan, Zhuhai, Guangdong Province, China
     email: nicolaslangrene@uic.edu.cn
   - name: Patricia Menéndez
-    affiliation: 'Monash University \AND'
+    affiliation: 'Monash University'
     address: 21 Chancellors Walk, Clayton VIC 3800 Australia
     email:  patricia.menendez@monash.edu
 title:
@@ -44,6 +43,9 @@ output:
     base_format: rticles::jss_article
 bibliography: ../references.bib
 ---
+
+
+
 
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(
