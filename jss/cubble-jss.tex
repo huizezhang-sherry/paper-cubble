@@ -140,7 +140,7 @@ The other reason is about tidy data concepts \citep{tidydata} and how they shoul
 
 This paper presents a new \proglang{R} package, \pkg{cubble} which addresses the two issues mentioned above. In the package, a new data structure, also called \code{cubble}, is proposed to organise spatial and temporal variables as two forms of a single data object so that they can be wrangled separately or combined while being kept synchronised. Among the four spacetime layouts in \citet{spacetime}, \pkg{cubble} can be applied to full grid, sparse grid, or irregular, but not trajectory, which is outside the scope of this work. The software is available from the Comprehensive R Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=cubble}.
 
-The rest of the paper is organized as follows: Section \ref{cube} introduces the proposed cube structure as a way to conceptualise multivariate spatio-temporal data. Section \ref{cubble} presents the main design and functionality of \pkg{cubble}. Section \ref{others} explains how cubble deals with more advanced considerations, including data with hierarchical structure, data matching and how cubble fits with existing static and interactive visualisation tools. Moreover we also illustrate how \pkg{cubble} deals with spatio-temporal data transformations. Section \ref{examples} uses Australian weather station data and river level data as examples to demonstrate the use of \pkg{cubble}. An example of how \pkg{cubble} handles NetCDF data is also provided. Section \ref{conclude} discuss the paper contributions and future directions.
+The rest of the paper is organized as follows: Section @ref(cube) introduces the proposed cube structure as a way to conceptualise multivariate spatio-temporal data. Section @ref(cubble) presents the main design and functionality of \pkg{cubble}. Section @ref(others) explains how cubble deals with more advanced considerations, including data with hierarchical structure, data matching and how cubble fits with existing static and interactive visualisation tools. Moreover we also illustrate how \pkg{cubble} deals with spatio-temporal data transformations. Section @ref(examples) uses Australian weather station data and river level data as examples to demonstrate the use of \pkg{cubble}. An example of how \pkg{cubble} handles NetCDF data is also provided. Section @ref(conclude) discuss the paper contributions and future directions.
 
 \hypertarget{cube}{%
 \section{Conceptual framework: spatio-temporal cube}\label{cube}}
@@ -158,7 +158,7 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 
 }
 
-\caption[An illustration of the conceptual spatio-temporal cube with different slicing on time, site, and variable]{An illustration of the conceptual spatio-temporal cube with different slicing on time, site, and variable. For each axis, the slicing can be on a single value or a set of values.}\label{fig:cube-def}
+\caption[An illustration of the conceptual spatio-temporal cube with different slicing on time, site, and variable]{An illustration of the conceptual spatio-temporal cube with different slicing on time, site, and variable. For each axis, the slicing can be on a single value or a set of values.}(\#fig:cube-def)
 \end{figure}
 \end{CodeChunk}
 
@@ -188,7 +188,7 @@ The dataset \texttt{climate\_flat} is used to illustrate \pkg{cubble} functional
 \hypertarget{create}{%
 \subsection{Create a cubble}\label{create}}
 
-A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble, sf. Section \ref{covid} describes converting multiple tables into a cubble object and Section \ref{netcdf} illustrate how to convert a netCDF object.
+A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble, sf. Section @ref(covid) describes converting multiple tables into a cubble object and Section @ref(netcdf) illustrate how to convert a netCDF object.
 
 The function \code{as_cubble()} is used to create a cubble with three arguments: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order (longitude, latitude). The arguments \code{key} and \code{index} follow the wording in \pkg{tsibble} to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a cubble out of \code{climate_flat} (a single tibble) with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
 
@@ -269,7 +269,7 @@ The first line in printed cubble now shows the cubble in its long form and the t
 
 }
 
-\caption{An illustration of function \code{face\_temporal} and \code{face\_spatial} in cubble. In the first row, \code{face\_temporal} switches a cubble from the nested form into the long form and the focus has switched from the spatial aspect (the side face) to the temporal aspect (the front face). In the second row, \code{face\_spatial} switches a cubble back to the nested form from the long form and shifts focus back to the spatial aspect.}\label{fig:face}
+\caption{An illustration of function \code{face\_temporal} and \code{face\_spatial} in cubble. In the first row, \code{face\_temporal} switches a cubble from the nested form into the long form and the focus has switched from the spatial aspect (the side face) to the temporal aspect (the front face). In the second row, \code{face\_spatial} switches a cubble back to the nested form from the long form and shifts focus back to the spatial aspect.}(\#fig:face)
 \end{figure}
 \end{CodeChunk}
 
@@ -352,54 +352,51 @@ R> cubble_unfold |> face_spatial() |> face_temporal()
 \hypertarget{tidyverse}{%
 \subsection{Why not just use the existing tidyverse functions}\label{tidyverse}}
 
-Some readers may question why a new data structure is needed rather than directly creating a list-column on the combined data using \code{dplyr::nest_by()}. The reason is that cubble is specifically designed to utilize the spatio-temporal structure when arranging variables from different observational units into a single object. Moreover, it enables easy pivoting between purely spatial, purely temporal, or unfolded into a combined form.
+Some readers may question why a new data structure is needed rather than directly creating a list-column on the combined data using \code{dplyr::nest_by()}. The reason is that cubble is specifically designed to utilize the spatio-temporal structure when arranging observations in a single object. Moreover, it enables easy pivoting between purely spatial, purely temporal, or unfolded into a combined form.
 
 \hypertarget{compact}{%
 \subsection{Compatibility with existing packages}\label{compact}}
 
-This section will demonstrate how the \code{cubble} class interacts with existing packages commonly used in spatial and temporal analysis, specifically, \code{dplyr}, \code{tsibble}, \code{sf} (\code{s2}), and \code{netcdf4}.
+The \code{cubble} package leverages tools available in existing packages used for spatial and temporal analysis, specifically, \code{dplyr}, \code{tsibble}, \code{sf} (\code{s2}), and \code{netcdf4}, as explained here.
 
 \hypertarget{dplyr}{%
 \subsubsection{dplyr}\label{dplyr}}
 
-The \code{dplyr} package has introduced many tools for data wrangling tasks and these operations are useful in the spatio-temporal context. \code{cubble} provides methods that support the following \code{dplyr} verbs in both the nested and long form:
-
-\begin{quote}
-\texttt{mutate}, \texttt{filter}, \texttt{summarise}, \texttt{select}, \texttt{arrange}, \texttt{rename}, \texttt{left\_join}, and the slice family (\texttt{slice\_head}, \texttt{slice\_tail}, \texttt{slice\_sample}, \texttt{slice\_min}, \texttt{slice\_max})
-\end{quote}
+The \code{dplyr} package has many tools for wrangling tidy data, many of which are useful in the spatio-temporal analysis. The \code{cubble} package provides \code{methods} that support the use of the following \code{dplyr} operations on both the nested and long forms: \texttt{mutate}, \texttt{filter}, \texttt{summarise}, \texttt{select}, \texttt{arrange}, \texttt{rename}, \texttt{left\_join}, and the slice family (\texttt{slice\_head}, \texttt{slice\_tail}, \texttt{slice\_sample}, \texttt{slice\_min}, \texttt{slice\_max})
 
 \hypertarget{tsibble}{%
 \subsubsection{tsibble}\label{tsibble}}
 
-\code{tsibble} is a temporal data structure that uses \code{index} and \code{key} to identify the time and different series. \code{cubble} can be seen as following the same vein as \code{tsibble} for spatio-temporal data. This makes it easy to cast a \code{tsibble} into a \code{cubble} as only the \code{coords} argument needs to be supplied:
+A \code{tsibble} is a \code{tibble} where the \code{index} and \code{key} components are used to store temporal and strata information, that makes working with temporal data cognitively efficient. A \code{cubble} can use a \code{tsibble} for storing the temporal information, and effectively utilize the specialist time series operations in the \code{tsibble} package. It is easy to cast an existing \code{tsibble} into a \code{cubble} simply by supplying the \code{coords}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> # example with a tsibble created from climate_flat
-R> raw <- climate_flat |> tsibble::as_tsibble(key = id, index = date)
-R> dt <-  raw |> cubble::as_cubble(coords = c(long, lat))
-R> dt
+R> climate_flat_ts <- climate_flat |> 
++   tsibble::as_tsibble(key = id, index = date)
+R> climate_flat_cb <-  climate_flat_ts |> 
++   cubble::as_cubble(coords = c(long, lat))
+R> climate_flat_cb
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts                
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tbl_ts [366 x 4]>
-2 ASN00010311 -31.9  117. 179   york            94623 <tbl_ts [366 x 4]>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tbl_ts [366 x 4]>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tbl_ts [366 x 4]>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tbl_ts [366 x 4]>
+  id            lat  long  elev name           wmo_id ts      
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tbl_ts>
+2 ASN00010311 -31.9  117. 179   york            94623 <tbl_ts>
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tbl_ts>
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tbl_ts>
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tbl_ts>
 \end{CodeOutput}
 \end{CodeChunk}
 
-When a nested cubble is created, each element in the list-column \code{ts} is of \code{tbl_ts} class and operations available to the tsibble class are still valid within the cubble. For example, the code below calculates two time series features (mean and variance) of the maximum temperature variable:
+When a nested cubble is created, each element in the list-column \code{ts} is a \code{tsibble} class (labelled \code{tbl_ts}) and operations available to the \code{tsibble} class are still valid on this element. For example, the code below calculates two time series features (mean and variance) of maximum temperature, utilizing the tsibble structure in the cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> # add station-based features in the nested form.
-R> dt |> 
+R> climate_flat_cb |> 
 +   mutate(
 +     fabletools::features(
 +       ts, tmax, list(tmax_mean = mean, tmax_var = var)
@@ -423,12 +420,12 @@ R> dt |>
 \hypertarget{sf-and-s2}{%
 \subsubsection{sf and s2}\label{sf-and-s2}}
 
-As a spatial data object, \code{sf} creates a feature geometry list-column (\code{sfc}) in the data frame to provide spatial operations on various geometry types such as (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}, etc). When creating a cubble a \code{sf} object can be supplied as the spatial table. Once that is included in a cubble, methods for the \code{sfc} class can be applied in the nested form inside the cubble object. An example of this is shown in \ref{covid}, which also handles the case when the site identifiers in the two tables do not match exactly. A spatial data object with an \code{s2} vector can also be the input for the spatial table in \pkg{cubble}.
+The \code{sf} is a spatial data object, containing a feature geometry list-column (\code{sfc}) in the form of various geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}). The \code{sf} package provides functions that operate efficiently on this spatial information. A cubble can store the spatial information as an \code{sf} object. Methods for the \code{sfc} class can be applied in the nested form of the cubble object. An illustration is in Section @ref(covid). A spatial data object with an \code{s2} vector can also be used to store the spatial information in a \code{cubble}.
 
 \hypertarget{netcdf}{%
 \subsubsection{netcdf}\label{netcdf}}
 
-NetCDF data is another format that is commonly used for storing spatio-temporal data. It has two main components: \emph{dimension} for defining the spatio-temporal grid (longitude, latitude, and time) and \emph{variable} that populates the defined grid. Attributes are usually associated with dimensions and variables in the NetCDF format data and a \href{http://cfconventions.org/}{metadata convention for climate and forecast} has been designed to standardise the format of the attributes. A few packages in R exist for manipulating NetCDF data and these include a high-level R interface: \pkg{ncdf4} \citep{ncdf4}, a low-level interface that calls a C-interface: \pkg{RNetCDF} \citep{rnetcdf}, and a tidyverse implementation: \pkg{tidync} \citep{tidync}.
+NetCDF data is another format commonly used for storing spatio-temporal data. It has two main components: \emph{dimension} for defining the spatio-temporal grid (longitude, latitude, and time) and \emph{variable} that populates the defined grid. Attributes can be associated with dimensions or variables. Because there can be many different styles of representing this information there is a metadata convention to standardise the format of the attributes \citep[\url{http://cfconventions.org/})]{REF}. A few packages in R exist for manipulating NetCDF data and these include a high-level R interface: \pkg{ncdf4} \citep{ncdf4}, a low-level interface that calls a C-interface: \pkg{RNetCDF} \citep{rnetcdf}, and a tidyverse implementation: \pkg{tidync} \citep{tidync}.
 
 Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble}. It maps each combination of longitude and latitude into an \code{id} as the \code{key}:
 
@@ -442,7 +439,8 @@ R> dt <- as_cubble(raw, vars = c("q", "z"))
 \end{CodeInput}
 \end{CodeChunk}
 
-The memory limit with NetCDF data in cubble depends on the number of longitude grid points \(\times\) the number of latitude grid points \(\times\) the number of time grid points \(\times\) the number of variables. Cubble can handle slightly more than 300 \(\times\) 300 (longitude \(\times\) longitude) grid points for three daily variables in one year. A 300 by 300 spatial grid can be a bounding box of {[}100, -80, 180, 0{]} at 0.25 degree resolution or a global bounding box {[}-180, -90, 180, -90{]} at 1 degree resolution. The spatial grid can also be subsetted to trade for longer time periods and more variables through \code{long_range} and \code{lat_range} if the NetCDF file has finer resolution than needed:
+NetCDF data can be quite large, and it is sometimes best to subset the data when converting to a cubble. We would recommend reducing to about 300 \(\times\) 300 grid points for three daily variables in one year. A 300 by 300 spatial grid can be a bounding box of {[}100, -80, 180, 0{]} at 0.25 degree resolution or a global bounding box {[}-180, -90, 180, -90{]} at 1 degree resolution.
+The size of spatial grid can be reduced if longer time periods or more variables are needed, through \code{long_range} and \code{lat_range}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -470,7 +468,7 @@ Spatial locations can have grouping structures either inherent to the data or ob
 
 }
 
-\caption[An illustration of the original and cluster level cubble in the nested form long form for hierarchical structure data]{An illustration of the original and cluster level cubble in the nested form long form for hierarchical structure data. \code{switch\_key()} changes the station level cubble into a cluster level cubble and both can be stretched into the long form.}\label{fig:illu-hier}
+\caption[An illustration of the original and cluster level cubble in the nested form long form for hierarchical structure data]{An illustration of the original and cluster level cubble in the nested form long form for hierarchical structure data. \code{switch\_key()} changes the station level cubble into a cluster level cubble and both can be stretched into the long form.}(\#fig:illu-hier)
 \end{figure}
 \end{CodeChunk}
 
@@ -486,7 +484,7 @@ One task that may interest analysts in spatio-temporal data is to find how simil
 
 }
 
-\caption{An illustration of temporal matching in cubble. Three highest peaks are identified in each series and intervals are constructed on series \code{A}. Two peaks in series \code{a} fall into the intervals and hence the two series are considered to have two matches.}\label{fig:illu-matching}
+\caption{An illustration of temporal matching in cubble. Three highest peaks are identified in each series and intervals are constructed on series \code{A}. Two peaks in series \code{a} fall into the intervals and hence the two series are considered to have two matches.}(\#fig:illu-matching)
 \end{figure}
 \end{CodeChunk}
 
@@ -518,7 +516,7 @@ The linking is also available from the time series plot to the map. The selectio
 
 }
 
-\caption[An illustration of the data model under interactive graphics with cubble]{An illustration of the data model under interactive graphics with cubble. The line plot and the map is made separately with the long and nested cubble. When a station is selected on the map (left), the corresponding row in the nested cubble will be activated. This will link to all the rows with the same id in the long cubble (middle) and update the line plot (right).}\label{fig:illu-interactive}
+\caption[An illustration of the data model under interactive graphics with cubble]{An illustration of the data model under interactive graphics with cubble. The line plot and the map is made separately with the long and nested cubble. When a station is selected on the map (left), the corresponding row in the nested cubble will be activated. This will link to all the rows with the same id in the long cubble (middle) and update the line plot (right).}(\#fig:illu-interactive)
 \end{figure}
 \end{CodeChunk}
 
@@ -601,7 +599,7 @@ Geodetic CRS:  WGS 84
 \end{CodeOutput}
 \end{CodeChunk}
 
-A \code{cubble} object can be created from separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \ref{create}. \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
+A \code{cubble} object can be created from separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section @ref(create). \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -745,7 +743,7 @@ R> ggplot() +
 
 }
 
-\caption[A glyph map of the average maximum temperature by month of Victoria and New South Wales weather stations in Australia]{A glyph map of the average maximum temperature by month of Victoria and New South Wales weather stations in Australia. On the top left corner is an insetted plot of station Cobar highlighted in the black box.}\label{fig:basic-manip}
+\caption[A glyph map of the average maximum temperature by month of Victoria and New South Wales weather stations in Australia]{A glyph map of the average maximum temperature by month of Victoria and New South Wales weather stations in Australia. On the top left corner is an insetted plot of station Cobar highlighted in the black box.}(\#fig:basic-manip)
 \end{figure}
 \end{CodeChunk}
 
@@ -788,7 +786,7 @@ Long form cubble at both levels can be accessed through stretching the nested fo
 
 }
 
-\caption[Profile of aggregated precipitation from 639 weather stations in Australia]{Profile of aggregated precipitation from 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number is printed in the middle of the y minor axis and can be used as a reference line to read the magnitude. Subplot B shows the station membership of each cluster.}\label{fig:basic-agg}
+\caption[Profile of aggregated precipitation from 639 weather stations in Australia]{Profile of aggregated precipitation from 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number is printed in the middle of the y minor axis and can be used as a reference line to read the magnitude. Subplot B shows the station membership of each cluster.}(\#fig:basic-agg)
 \end{figure}
 \end{CodeChunk}
 
@@ -804,11 +802,11 @@ The Bureau of Meteorology collects \href{http://www.bom.gov.au/metadata/catalogu
 
 }
 
-\caption[Location of weather stations and river gauges in Victoria, Australia]{Location of weather stations and river gauges in Victoria, Australia.}\label{fig:matching-map}
+\caption[Location of weather stations and river gauges in Victoria, Australia]{Location of weather stations and river gauges in Victoria, Australia.}(\#fig:matching-map)
 \end{figure}
 \end{CodeChunk}
 
-From the map, one can see that a few water gauges and weather stations are close to each other and the fluctuation of the water level could be matched up with the precipitation measured by the nearby climate station. As introduced in Section \ref{matching}, \code{match_sites()} can be used to match one source of data with another source in a cubble. Here \code{Water_course_level} in \code{river} will be matched to \code{prcp} in \code{climate} in 2020. The two datasets need to be specified as the first two arguments and the variable to match can be specified in \code{temporal_by} using the \code{by} syntax in \code{join}. \code{temporal_independent} controls the variable used to construct the interval and the goal here is to see if the water level in the river will reflect precipitation. This puts precipitation \code{prcp}, as the independent variable. Given there is one year's worth of data, the number of peaks (\code{temporal_n_highest}) to consider is slightly raised from a default of 20 to 30 and \code{temporal_min_match} is raised accordingly. To return all the pairs of the match, \code{temporal_min_match} can be set to 0.
+From the map, one can see that a few water gauges and weather stations are close to each other and the fluctuation of the water level could be matched up with the precipitation measured by the nearby climate station. As introduced in Section @ref(matching), \code{match_sites()} can be used to match one source of data with another source in a cubble. Here \code{Water_course_level} in \code{river} will be matched to \code{prcp} in \code{climate} in 2020. The two datasets need to be specified as the first two arguments and the variable to match can be specified in \code{temporal_by} using the \code{by} syntax in \code{join}. \code{temporal_independent} controls the variable used to construct the interval and the goal here is to see if the water level in the river will reflect precipitation. This puts precipitation \code{prcp}, as the independent variable. Given there is one year's worth of data, the number of peaks (\code{temporal_n_highest}) to consider is slightly raised from a default of 20 to 30 and \code{temporal_min_match} is raised accordingly. To return all the pairs of the match, \code{temporal_min_match} can be set to 0.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -851,7 +849,7 @@ Figure \ref{fig:matching} plots the matched pairs on the map. There are four pai
 
 }
 
-\caption[Matched weather stations and river gauges on the map (A) and across time (B)]{Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation.}\label{fig:matching}
+\caption[Matched weather stations and river gauges on the map (A) and across time (B)]{Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation.}(\#fig:matching)
 \end{figure}
 \end{CodeChunk}
 
@@ -876,7 +874,7 @@ Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \citet{hers
 
 }
 
-\caption[A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020)]{A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020).}\label{fig:netcdf}
+\caption[A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020)]{A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020).}(\#fig:netcdf)
 \end{figure}
 \end{CodeChunk}
 
@@ -914,7 +912,7 @@ In Figure \ref{fig:interactive-linking}, the first row shows the initial view of
 
 }
 
-\caption[Exploring temperature variation using linking of a map and seasonal display]{Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum and minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display. A location in the Tasmania Island is then selected to compare the temperature variation with Thredbo AWS.}\label{fig:interactive-linking}
+\caption[Exploring temperature variation using linking of a map and seasonal display]{Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum and minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display. A location in the Tasmania Island is then selected to compare the temperature variation with Thredbo AWS.}(\#fig:interactive-linking)
 \end{figure}
 \end{CodeChunk}
 
@@ -950,7 +948,7 @@ Figure \ref{fig:interactive-popup} shows Figure \ref{fig:interactive-linking} ma
 
 }
 
-\caption[Same as Figure 11 with the temperature variation shown as a popup in the leaflet map]{Same as Figure 11 with the temperature variation shown as a popup in the leaflet map.}\label{fig:interactive-popup}
+\caption[Same as Figure 11 with the temperature variation shown as a popup in the leaflet map]{Same as Figure 11 with the temperature variation shown as a popup in the leaflet map.}(\#fig:interactive-popup)
 \end{figure}
 \end{CodeChunk}
 
@@ -980,7 +978,7 @@ This work is funded by a Commonwealth Scientific and Industrial Research Organis
 
 }
 
-\caption[An illustration of the data model under interactive graphics with cubble]{An illustration of the data model under interactive graphics with cubble. When a point on the time series is selected, the corresponding row in the long cubble will be activated. This will link to all the rows with the same id in the long cubble and the row in the nested cubble with the same id (middle). Both plots will be updated with the full line selected and the point highlighted on the map (right).}\label{fig:illu-interactive-2}
+\caption[An illustration of the data model under interactive graphics with cubble]{An illustration of the data model under interactive graphics with cubble. When a point on the time series is selected, the corresponding row in the long cubble will be activated. This will link to all the rows with the same id in the long cubble and the row in the nested cubble with the same id (middle). Both plots will be updated with the full line selected and the point highlighted on the map (right).}(\#fig:illu-interactive-2)
 \end{figure}
 \end{CodeChunk}
 
