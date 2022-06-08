@@ -147,9 +147,9 @@ The rest of the paper is organized as follows: Section \ref{cube} introduces the
 
 Spatio-temporal data can be conceptualised using a cubical data model with three axes which typically are, time, latitude and longitude. This abstraction can be useful for generalising operations and visualisation purposes: \citet{lu_multidimensional_2018} shows how array operations (select, scale, reduce, rearrange, and compute) can be mapped onto the cube; \citet{bach_review_2014} reviews the temporal data visualisation based on space-time cube operations. Notice that the term space-time cube in their article ``does not need to involve spatial data'', but refers to ``an abstract 2D substrate that is used to visualize data at a specific time''. Despite its main focus being on temporal data, the mindset of abstracting out data representation to construct visualisations, still applies to our spatio-temporal data manipulation and visualisation approaches.
 
-The most common data cube using the three axes (time, latitude, longitude) could be considered as taking snapshots of the space and stacking them across time. Here we define the spatio-temporal cube slightly differently by considering the three axes to be, time, site and variable/s. That is illustrated in the leftmost cube in Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hypercubes when describing multivariate spatio-temporal data and is the conceptual framework behind the \pkg{cubble} objects. With this conceptual model, operations on spatio-temporal data can be mapped to operations on the cube and the rest of Figure \ref{fig:cube-def} show examples of slicing on site, time, and variable.
+The most common space-time cube uses the three axes, time, latitude, longitude, and can be considered stacking space across time. Ours is a multivariate spatio-temporal cube with the three axes defined to be time, site and variables, as illustrated in the leftmost column of Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hypercubes when describing multivariate spatio-temporal data and is the conceptual framework behind the \pkg{cubble} objects. With this conceptual model, operations on spatio-temporal data can be mapped to operations on the cube and the rest of Figure \ref{fig:cube-def} show examples of slicing on site, time, and variable.
 
-While the data cube model is conceptually convenient for spatio-temporal data, a 3D data array is not sufficiently rich for data wrangling, for several reasons. Although arrays can be efficient for the computation on numerical values, spatio-temporal data typically includes various types of variables. For example, character strings and specific datetime classes are common. In addition, it will be generally useful to be able to create new variables which is trickier to manage in an array. Thus for convenient wrangling, we have opted for a list object as the \texttt{cubble} structure.
+While the data cube model is conceptually convenient for spatio-temporal data, a 3D data array is not sufficiently rich for data wrangling, for several reasons. Although arrays can be efficient for the computation on numerical values, spatio-temporal data typically includes various types of variables. For example, character strings and specific datetime classes are common. In addition, it will be generally useful to be able to create new variables which is trickier to manage in an array. Thus for convenient wrangling, we have opted to create a special \texttt{cubble} class.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -165,22 +165,22 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 \hypertarget{cubble}{%
 \section{The cubble package}\label{cubble}}
 
-A cubble object is an S3 object \citep{advr} built on top of the \code{tibble} class to organise spatio-temporal data. Since spatial and temporal variables are usually recorded in different observational units, the \code{cubble} class uses an attribute, \textbf{form}, to arrange the data into a spatial or temporal tidy way. The \textbf{form} attributes can take a value of either ``nested'' or ``long''. The nested cubble is a subclass of \code{rowwise_df}. It arranges each spatial site in a row and uses list columns to store feature geometry and temporal information. The long cubble, instead, is a subclass of \code{grouped_df}, which expands the temporal information into the long form and stores the spatial information in a unique attribute to the long cubble, \textbf{spatial}.
+A \code{cubble} object is an S3 class \citep{advr} built on the \code{tibble} class, specifically to organise spatio-temporal data. The \code{cubble} class uses an attribute ``form'', to arrange the spatial or temporal data components tidily. The form attribute can take a value of either ``nested'' or ``long''. The nested cubble is a subclass of \code{rowwise_df}. It arranges each spatial site in a row, and uses list columns to store the feature geometry and the temporal information. The long cubble is a subclass of \code{grouped_df}, which expands the temporal information into the long form and stores the spatial information in a ``spatial'' attribute.
 
-The main functions in the cubble package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()}. The following sections explain their role, why the new cubble structure is needed and how the package relates to existing packages for spatial and temporal data analysis.
+The main functions in the package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()}. The following sections explain their role, why the new cubble structure is needed and how the package relates to existing packages for spatial and temporal data analysis.
 
 The dataset \texttt{climate\_flat} is used to illustrate \pkg{cubble} functionality. This is a subset from the ORIGIN and contains the spatial variables, station id, latitude, longitude, elevation, station name, World Meteorology Organisation ID, in additional to daily temporal information, maximum and minimum temperature values and precipitation records for 2020. The first five rows of \texttt{climate\_flat} are shown below:
 
 \begin{CodeChunk}
 \begin{CodeOutput}
 # A tibble: 1,830 x 10
-  id         lat  long  elev name  wmo_id date        prcp  tmax  tmin
-  <chr>    <dbl> <dbl> <dbl> <chr>  <dbl> <date>     <dbl> <dbl> <dbl>
-1 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-01     0  31.9  15.3
-2 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-02     0  24.9  16.4
-3 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-03     6  23.2  13  
-4 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-04     0  28.4  12.4
-5 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-05     0  35.3  11.6
+  id            lat  long  elev name         wmo_id date        prcp  tmax  tmin
+  <chr>       <dbl> <dbl> <dbl> <chr>         <dbl> <date>     <dbl> <dbl> <dbl>
+1 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-01     0  31.9  15.3
+2 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-02     0  24.9  16.4
+3 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-03     6  23.2  13  
+4 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-04     0  28.4  12.4
+5 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-05     0  35.3  11.6
 # ... with 1,825 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -202,13 +202,13 @@ R> cubble_nested
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>
-2 ASN00010311 -31.9  117. 179   york            94623 <tibble>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>
+  id            lat  long  elev name           wmo_id ts                
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble [366 x 4]>
+2 ASN00010311 -31.9  117. 179   york            94623 <tibble [366 x 4]>
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble [366 x 4]>
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble [366 x 4]>
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble [366 x 4]>
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -225,13 +225,13 @@ R> cubble_nested |>
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name          wmo_id ts       rain_day
-  <chr>       <dbl> <dbl> <dbl> <chr>          <dbl> <list>      <int>
-1 ASN00009021 -31.9  116.  15.4 perth airport  94610 <tibble>      104
-2 ASN00010311 -31.9  117. 179   york           94623 <tibble>       89
-3 ASN00010614 -32.9  117. 338   narrogin       94627 <tibble>       90
-4 ASN00014015 -12.4  131.  30.4 darwin airpo~  94120 <tibble>      106
-5 ASN00015131 -17.6  134. 220   elliott        94236 <tibble>       63
+  id            lat  long  elev name           wmo_id ts       rain_day
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>      <int>
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>      104
+2 ASN00010311 -31.9  117. 179   york            94623 <tibble>       89
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>       90
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>      106
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>       63
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -248,8 +248,7 @@ R> cubble_long
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
 1 ASN00009021 2020-01-01     0  31.9  15.3
@@ -288,13 +287,13 @@ R> cubble_back
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>
-2 ASN00010311 -31.9  117. 179   york            94623 <tibble>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>
+  id            lat  long  elev name           wmo_id ts                
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble [366 x 4]>
+2 ASN00010311 -31.9  117. 179   york            94623 <tibble [366 x 4]>
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble [366 x 4]>
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble [366 x 4]>
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble [366 x 4]>
 \end{CodeOutput}
 \begin{CodeInput}
 R> identical(cubble_nested, cubble_back)
@@ -317,8 +316,7 @@ R> cubble_unfold
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin  long   lat
   <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
 1 ASN00009021 2020-01-01     0  31.9  15.3  116. -31.9
@@ -339,8 +337,7 @@ R> cubble_unfold |> face_spatial() |> face_temporal()
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
 1 ASN00009021 2020-01-01     0  31.9  15.3
@@ -387,13 +384,13 @@ R> dt
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tbl_ts>
-2 ASN00010311 -31.9  117. 179   york            94623 <tbl_ts>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tbl_ts>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tbl_ts>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tbl_ts>
+  id            lat  long  elev name           wmo_id ts                
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tbl_ts [366 x 4]>
+2 ASN00010311 -31.9  117. 179   york            94623 <tbl_ts [366 x 4]>
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tbl_ts [366 x 4]>
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tbl_ts [366 x 4]>
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tbl_ts [366 x 4]>
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -589,18 +586,18 @@ Geometry type: MULTIPOLYGON
 Dimension:     XY
 Bounding box:  xmin: 142.3535 ymin: -38.67876 xmax: 147.3909 ymax: -36.39269
 Geodetic CRS:  WGS 84
-    lga_code_2018            lga state_code_2016 state_name_2016
-132         20110     Alpine (S)               2        Victoria
-133         20260    Ararat (RC)               2        Victoria
-134         20570   Ballarat (C)               2        Victoria
-135         20660    Banyule (C)               2        Victoria
-136         20740 Bass Coast (S)               2        Victoria
-    areasqkm_2018 cent_long  cent_lat                       geometry
-132     4788.1568  146.9742 -36.85357 MULTIPOLYGON (((146.7258 -3...
-133     4211.1171  142.8432 -37.47271 MULTIPOLYGON (((143.1807 -3...
-134      739.0321  143.7815 -37.49286 MULTIPOLYGON (((143.6622 -3...
-135       62.5402  145.0851 -37.73043 MULTIPOLYGON (((145.1357 -3...
-136      865.8095  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
+    lga_code_2018            lga state_code_2016 state_name_2016 areasqkm_2018
+132         20110     Alpine (S)               2        Victoria     4788.1568
+133         20260    Ararat (RC)               2        Victoria     4211.1171
+134         20570   Ballarat (C)               2        Victoria      739.0321
+135         20660    Banyule (C)               2        Victoria       62.5402
+136         20740 Bass Coast (S)               2        Victoria      865.8095
+    cent_long  cent_lat                       geometry
+132  146.9742 -36.85357 MULTIPOLYGON (((146.7258 -3...
+133  142.8432 -37.47271 MULTIPOLYGON (((143.1807 -3...
+134  143.7815 -37.49286 MULTIPOLYGON (((143.6622 -3...
+135  145.0851 -37.73043 MULTIPOLYGON (((145.1357 -3...
+136  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -614,10 +611,10 @@ R> cb <- as_cubble(
 +   )
 \end{CodeInput}
 \begin{CodeOutput}
-! Some sites in the temporal table don't have spatial information
+! Some sites in the temporal table don't have corresponding spatial information
 \end{CodeOutput}
 \begin{CodeOutput}
-! Some sites in the spatial table don't have temporal information
+! Some sites in the spatial table don't have corresponding temporal information
 \end{CodeOutput}
 \begin{CodeOutput}
 ! Use argument `output = "unmatch"` to check on the unmatched key
@@ -832,16 +829,16 @@ The output from matching is also a cubble, with additional column \code{dist} an
 # cubble:   id [8]: nested form
 # bbox:     [144.52, -37.73, 146.06, -36.55]
 # temporal: date [date], matched_var [dbl]
-  id          name        lat  long type   dist group ts       n_match
-  <chr>       <chr>     <dbl> <dbl> <chr> <dbl> <int> <list>     <int>
-1 405234      SEVEN CR~ -36.9  146. river  6.15     5 <tibble>      21
-2 404207      HOLLAND ~ -36.6  146. river  8.54    10 <tibble>      21
-3 ASN00082042 strathbo~ -36.8  146. clim~  6.15     5 <tibble>      21
-4 ASN00082170 benalla ~ -36.6  146. clim~  8.54    10 <tibble>      21
-5 230200      MARIBYRN~ -37.7  145. river  6.17     6 <tibble>      19
-6 ASN00086038 essendon~ -37.7  145. clim~  6.17     6 <tibble>      19
-7 406213      CAMPASPE~ -37.0  145. river  1.84     1 <tibble>      18
-8 ASN00088051 redesdale -37.0  145. clim~  1.84     1 <tibble>      18
+  id          name                  lat  long type   dist group ts       n_match
+  <chr>       <chr>               <dbl> <dbl> <chr> <dbl> <int> <list>     <int>
+1 405234      SEVEN CREEKS @ D/S~ -36.9  146. river  6.15     5 <tibble>      21
+2 404207      HOLLAND CREEK @ KE~ -36.6  146. river  8.54    10 <tibble>      21
+3 ASN00082042 strathbogie         -36.8  146. clim~  6.15     5 <tibble>      21
+4 ASN00082170 benalla airport     -36.6  146. clim~  8.54    10 <tibble>      21
+5 230200      MARIBYRNONG RIVER ~ -37.7  145. river  6.17     6 <tibble>      19
+6 ASN00086038 essendon airport    -37.7  145. clim~  6.17     6 <tibble>      19
+7 406213      CAMPASPE RIVER @ R~ -37.0  145. river  1.84     1 <tibble>      18
+8 ASN00088051 redesdale           -37.0  145. clim~  1.84     1 <tibble>      18
 \end{CodeOutput}
 \end{CodeChunk}
 
