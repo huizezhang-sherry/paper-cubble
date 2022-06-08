@@ -44,9 +44,6 @@ output:
 bibliography: ../references.bib
 ---
 
-
-
-
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(
   echo = FALSE,
