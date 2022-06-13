@@ -1,9 +1,6 @@
 \documentclass[
 ]{jss}
 
-%% recommended packages
-\usepackage{orcidlink,thumbpdf,lmodern}
-
 \usepackage[utf8]{inputenc}
 
 \author{
@@ -155,7 +152,7 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.007} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.007} 
 
 }
 
@@ -267,7 +264,7 @@ The first line in the printed cubble now shows it in the long form and the third
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.008} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.008} 
 
 }
 
@@ -468,7 +465,7 @@ Spatial locations can have grouping structures either inherent to the data or ob
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.003} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
 
 }
 
@@ -484,7 +481,7 @@ One task that may interest analysts in spatio-temporal data is to find how simil
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/illu-matching} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/illu-matching} 
 
 }
 
@@ -516,7 +513,7 @@ The linking is also available from the time series plot to the map. The selectio
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.004} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.004} 
 
 }
 
@@ -613,10 +610,10 @@ R> cb <- as_cubble(
 +   )
 \end{CodeInput}
 \begin{CodeOutput}
-! Some sites in the temporal table don't have spatial information
+! Some sites in the temporal table don't have corresponding spatial information
 \end{CodeOutput}
 \begin{CodeOutput}
-! Some sites in the spatial table don't have temporal information
+! Some sites in the spatial table don't have corresponding temporal information
 \end{CodeOutput}
 \begin{CodeOutput}
 ! Use argument `output = "unmatch"` to check on the unmatched key
@@ -672,9 +669,9 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 \hypertarget{australian-historical-maximum-temperature}{%
 \subsection{Australian historical maximum temperature}\label{australian-historical-maximum-temperature}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 236 Australian stations from the GHCN starting from year 1969. \code{weatherdata::historical_tmax} is already in a cubble, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. This example compares the maximum temperature in two periods: 1971-1975 and 2016-2020 for stations in Victoria and New South Wales.
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The \textbf{cubble} dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 236 Australian stations from the GHCN starting from year 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This \textbf{cubble} data is already cast into a \code{cubble} data object, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
 
-Stations in the two states can be subsetted by the station number: the Australian GHCN station numbers start with ``ASN00'' and are followed by the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Bureau of Meteorology (BOM) station number}. The second and third digits of the BOM station number (7th and 8th in the GHCN number) define the state of the station; the range 46-75 corresponds to New South Wales stations and the range 76-90 corresponds to Victorian stations. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the nested form:
+First of all, the stations across the two states need to be subsetted from the original \code{weatherdata::historical_tmax} data set. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by ``ASN00'') while the next 6 digits encode the station information following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -683,7 +680,7 @@ R> tmax <- weatherdata::historical_tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-Filtering for the time periods 1971-1975 and 2016-2020 is a time operation and the nested cubble needs to be switched to the long cubble form by \code{stretch()}:
+and extracting the time periods 1971-1975 and 2016-2020 is a time operation and therefore the nested cubble needs to be switched to the long cubble form by \code{stretch()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -693,7 +690,7 @@ R> tmax <- tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-A monthly average is used for both periods to smooth the maximum temperature, which is another time operation:
+A monthly maximum average temperature is then calculated for both periods where \code{cubble} easily allows to compute this time operation across all the stations:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -705,7 +702,7 @@ R> tmax <- tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-A few stations do not have records during the time period 1971-1975 and further investigation shows that while the first and last year of each series is recorded, the missing years in this period are not reported. These stations are filtered out by examining whether the summarised time series has 24 months. The long cubble needs to be switched to the nested form for this spatial operation using \code{face_spatial()}:
+Observing the results of the operation above show that a few stations do not have records during the time period 1971-1975. Further investigation shows that while the first and last year of each series for those stations are recorded, the years in between are not. Hence, these stations are located and filtered out by examining whether the summarised time series has 24 months. Here, the long cubble needs to be switched to the nested form to carry out this spatial operation using \code{face_spatial()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -713,7 +710,7 @@ R> tmax <- tmax |> face_spatial() |> filter(nrow(ts) == 24)
 \end{CodeInput}
 \end{CodeChunk}
 
-Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates need to be in the same table. Spatial variables can be moved to the long form with \code{unfold()}:
+Lastly, to create a glyph map where the series of each station are overlayed on a map of Australia, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates defining the bounding box for the plot need to be on the same table. For that, spatial variables can be moved to the long form with \code{unfold()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -721,7 +718,7 @@ R> tmax <- tmax |> face_temporal() |> unfold(latitude, longitude)
 \end{CodeInput}
 \end{CodeChunk}
 
-\code{tmax} can then be supplied to \code{geom_glyph()} for the glyph map in Figure \ref{fig:basic-manip} with a station inset on the top left corner:
+the variable storing the maximum monthly average temperatures \code{tmax} can then be supplied to \code{geom_glyph()} for the glyph map in Figure \ref{fig:basic-manip} with a station inset on the top left corner:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -743,7 +740,7 @@ R> ggplot() +
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.7\textheight]{../figures/basic-manip} 
+{\centering \includegraphics[width=1\linewidth,height=0.7\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/basic-manip} 
 
 }
 
@@ -786,7 +783,7 @@ Long form cubble at both levels can be accessed through stretching the nested fo
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/basic-agg} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/basic-agg} 
 
 }
 
@@ -802,7 +799,7 @@ The Bureau of Meteorology collects \href{http://www.bom.gov.au/metadata/catalogu
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/matching-map} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/matching-map} 
 
 }
 
@@ -849,7 +846,7 @@ Figure \ref{fig:matching} plots the matched pairs on the map. There are four pai
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/matching} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/matching} 
 
 }
 
@@ -860,7 +857,7 @@ Figure \ref{fig:matching} plots the matched pairs on the map. There are four pai
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis data}\label{era5-climate-reanalysis-data}}
 
-The ERA5 dataset \citep{hersbach2020era5} is the latest reanalysis of global atmosphere, land surface, and ocean waves from 1950 onwards and is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF). The data can be directly downloaded from \href{https://cds.climate.copernicus.eu/cdsapp\#!/dataset/reanalysis-era5-pressure-levels?tab=overview}{Copernicus Climate Data Store (CDS)} website or programmatically via the R package \pkg{ecmwfr} \citep{ecwmfr}. The \code{era5-pressure} data contains the \emph{specific humidity} and \emph{geopotential} variables on the 10 hPa pressure level on four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Once downloaded, the data can be read into a cubble as:
+The ERA5 dataset \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF) and it can be directly downloaded from \href{https://cds.climate.copernicus.eu/cdsapp\#!/dataset/reanalysis-era5-pressure-levels?tab=overview}{Copernicus Climate Data Store (CDS)} website or programmatically via the R package \pkg{ecmwfr} \citep{ecwmfr}. In this example we focus on the \code{era5-pressure} data which provides hourly data on pressure levels from 1970 to present. Here we specifically look at the information contained on the variables \emph{specific humidity} measuring the mass of water vapor per kilogram of moist air and the \emph{geopotential} variable recording the gravitational potential energy of a unit mass, at a particular location, relative to mean sea level. The goal of this example is to reproduce the break-up of the southern polar vortex that happened in late September and early October in 2022 in the stratosphere in the Southern Hemisphere. Therefore, we filter data corresponding to the Southern Hemisphere and restrict our analysis to four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Once downloaded, the data can be read into a \code{cubble} as:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -874,7 +871,7 @@ Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \citet{hers
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/netcdf} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/netcdf} 
 
 }
 
@@ -912,7 +909,7 @@ In Figure \ref{fig:interactive-linking}, the first row shows the initial view of
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-lower} 
+{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking-lower} 
 
 }
 
@@ -948,7 +945,7 @@ Figure \ref{fig:interactive-popup} shows Figure \ref{fig:interactive-linking} ma
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{../figures/popup-mid} 
+{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/popup-mid} 
 
 }
 
@@ -978,7 +975,7 @@ This work is funded by a Commonwealth Scientific and Industrial Research Organis
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.005} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.005} 
 
 }
 
