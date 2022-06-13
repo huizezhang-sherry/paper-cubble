@@ -1,6 +1,9 @@
 \documentclass[
 ]{jss}
 
+%% recommended packages
+\usepackage{orcidlink,thumbpdf,lmodern}
+
 \usepackage[utf8]{inputenc}
 
 \author{
@@ -152,7 +155,7 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.007} 
+{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.007} 
 
 }
 
@@ -172,13 +175,13 @@ The dataset \texttt{climate\_flat} is used to illustrate \pkg{cubble} functional
 \begin{CodeChunk}
 \begin{CodeOutput}
 # A tibble: 1,830 x 10
-  id         lat  long  elev name  wmo_id date        prcp  tmax  tmin
-  <chr>    <dbl> <dbl> <dbl> <chr>  <dbl> <date>     <dbl> <dbl> <dbl>
-1 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-01     0  31.9  15.3
-2 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-02     0  24.9  16.4
-3 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-03     6  23.2  13  
-4 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-04     0  28.4  12.4
-5 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-05     0  35.3  11.6
+  id            lat  long  elev name         wmo_id date        prcp  tmax  tmin
+  <chr>       <dbl> <dbl> <dbl> <chr>         <dbl> <date>     <dbl> <dbl> <dbl>
+1 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-01     0  31.9  15.3
+2 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-02     0  24.9  16.4
+3 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-03     6  23.2  13  
+4 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-04     0  28.4  12.4
+5 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-05     0  35.3  11.6
 # ... with 1,825 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -200,13 +203,13 @@ R> cubble_nested
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>
-2 ASN00010311 -31.9  117. 179   york            94623 <tibble>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>
+  id            lat  long  elev name           wmo_id ts                
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble [366 x 4]>
+2 ASN00010311 -31.9  117. 179   york            94623 <tibble [366 x 4]>
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble [366 x 4]>
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble [366 x 4]>
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble [366 x 4]>
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -223,13 +226,13 @@ R> cubble_nested |>
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name          wmo_id ts       rain_day
-  <chr>       <dbl> <dbl> <dbl> <chr>          <dbl> <list>      <int>
-1 ASN00009021 -31.9  116.  15.4 perth airport  94610 <tibble>      104
-2 ASN00010311 -31.9  117. 179   york           94623 <tibble>       89
-3 ASN00010614 -32.9  117. 338   narrogin       94627 <tibble>       90
-4 ASN00014015 -12.4  131.  30.4 darwin airpo~  94120 <tibble>      106
-5 ASN00015131 -17.6  134. 220   elliott        94236 <tibble>       63
+  id            lat  long  elev name           wmo_id ts       rain_day
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>      <int>
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>      104
+2 ASN00010311 -31.9  117. 179   york            94623 <tibble>       89
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>       90
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>      106
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>       63
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -246,8 +249,7 @@ R> cubble_long
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
 1 ASN00009021 2020-01-01     0  31.9  15.3
@@ -264,7 +266,7 @@ The first line in the printed cubble now shows it in the long form and the third
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.008} 
+{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.008} 
 
 }
 
@@ -286,13 +288,13 @@ R> cubble_back
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>
-2 ASN00010311 -31.9  117. 179   york            94623 <tibble>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>
+  id            lat  long  elev name           wmo_id ts                
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble [366 x 4]>
+2 ASN00010311 -31.9  117. 179   york            94623 <tibble [366 x 4]>
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble [366 x 4]>
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble [366 x 4]>
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble [366 x 4]>
 \end{CodeOutput}
 \begin{CodeInput}
 R> identical(cubble_nested, cubble_back)
@@ -315,8 +317,7 @@ R> cubble_unfold
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin  long   lat
   <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
 1 ASN00009021 2020-01-01     0  31.9  15.3  116. -31.9
@@ -337,8 +338,7 @@ R> cubble_unfold |> face_spatial() |> face_temporal()
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
 1 ASN00009021 2020-01-01     0  31.9  15.3
@@ -460,16 +460,20 @@ R> dt <- as_cubble(my_ncdf, vars = c("q", "z"),
 \hypertarget{hierarchical-structure}{%
 \subsection{Hierarchical structure}\label{hierarchical-structure}}
 
-Spatial locations can have grouping structures either inherent to the data or obtained by clustering. In those cases, rather than analysing variables at the site level, it might be of interest to summarised variables at a cluster or group level, as that can give a crisper picture of local areas. In cubble, \code{switch_key()} can be used to create a new grouping level of spatial locations by specifying a clustering variable. Figure \ref{fig:illu-hier} illustrates the relationship of cubbles at station and cluster level, in both the long and nested forms. By specifying \code{cluster_nested <- station_nested \%>\% switch_key(key = cluster)}, the cubble redefines the cubble key from the \code{id} column in \code{station_nested} to the \code{cluster} column in \code{cluster_nested}. All the spatial variables variant to the \code{cluster} column are now nested into a \code{.val} column and cluster level variables can be computed in the same fashion as station level variables in \code{station_nested}.
+Spatial locations can have grouping structures either inherent to the data (e.g.~state within country) or obtained during the analysis (e.g.~cluster id). In this case, it can be useful to summarise variables at various levels of the hierarchy. The function \code{switch_key()} can be used to change the grouping level of spatial locations. The diagram in Figure \ref{fig:illu-hier} shows how this function can be used to switch the grouping from station ids to cluster ids. The result can also be stretched into long form. By specifying
+
+\code{cluster_nested <- station_nested \%>\% switch_key(key = cluster)},
+
+the cubble redefines the cubble key from the \code{id} column in \code{station_nested} to the \code{cluster} column in \code{cluster_nested}. All the spatial variables belonging to the \code{cluster} column are now nested into a \code{.val} column which allows for summarizing based on cluster.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.003} 
 
 }
 
-\caption[An illustration of the original and cluster level cubble in the nested form long form for hierarchical structure data]{An illustration of the original and cluster level cubble in the nested form long form for hierarchical structure data. \code{switch\_key()} changes the station level cubble into a cluster level cubble and both can be stretched into the long form.}\label{fig:illu-hier}
+\caption[Hierarchical spatial structure can be handled using \code{switch\_key()}, to create summaries based on any level]{Hierarchical spatial structure can be handled using \code{switch\_key()}, to create summaries based on any level. Here the switch is between the station id and a cluster id. Once the change is made the data can be stretched into the long form.}\label{fig:illu-hier}
 \end{figure}
 \end{CodeChunk}
 
@@ -481,7 +485,7 @@ One task that may interest analysts in spatio-temporal data is to find how simil
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/illu-matching} 
+{\centering \includegraphics[width=1\linewidth]{../figures/illu-matching} 
 
 }
 
@@ -513,7 +517,7 @@ The linking is also available from the time series plot to the map. The selectio
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.004} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.004} 
 
 }
 
@@ -585,18 +589,18 @@ Geometry type: MULTIPOLYGON
 Dimension:     XY
 Bounding box:  xmin: 142.3535 ymin: -38.67876 xmax: 147.3909 ymax: -36.39269
 Geodetic CRS:  WGS 84
-    lga_code_2018            lga state_code_2016 state_name_2016
-132         20110     Alpine (S)               2        Victoria
-133         20260    Ararat (RC)               2        Victoria
-134         20570   Ballarat (C)               2        Victoria
-135         20660    Banyule (C)               2        Victoria
-136         20740 Bass Coast (S)               2        Victoria
-    areasqkm_2018 cent_long  cent_lat                       geometry
-132     4788.1568  146.9742 -36.85357 MULTIPOLYGON (((146.7258 -3...
-133     4211.1171  142.8432 -37.47271 MULTIPOLYGON (((143.1807 -3...
-134      739.0321  143.7815 -37.49286 MULTIPOLYGON (((143.6622 -3...
-135       62.5402  145.0851 -37.73043 MULTIPOLYGON (((145.1357 -3...
-136      865.8095  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
+    lga_code_2018            lga state_code_2016 state_name_2016 areasqkm_2018
+132         20110     Alpine (S)               2        Victoria     4788.1568
+133         20260    Ararat (RC)               2        Victoria     4211.1171
+134         20570   Ballarat (C)               2        Victoria      739.0321
+135         20660    Banyule (C)               2        Victoria       62.5402
+136         20740 Bass Coast (S)               2        Victoria      865.8095
+    cent_long  cent_lat                       geometry
+132  146.9742 -36.85357 MULTIPOLYGON (((146.7258 -3...
+133  142.8432 -37.47271 MULTIPOLYGON (((143.1807 -3...
+134  143.7815 -37.49286 MULTIPOLYGON (((143.6622 -3...
+135  145.0851 -37.73043 MULTIPOLYGON (((145.1357 -3...
+136  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -740,7 +744,7 @@ R> ggplot() +
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.7\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/basic-manip} 
+{\centering \includegraphics[width=1\linewidth,height=0.7\textheight]{../figures/basic-manip} 
 
 }
 
@@ -783,7 +787,7 @@ Long form cubble at both levels can be accessed through stretching the nested fo
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/basic-agg} 
+{\centering \includegraphics[width=1\linewidth]{../figures/basic-agg} 
 
 }
 
@@ -799,7 +803,7 @@ The Bureau of Meteorology collects \href{http://www.bom.gov.au/metadata/catalogu
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/matching-map} 
+{\centering \includegraphics[width=1\linewidth]{../figures/matching-map} 
 
 }
 
@@ -828,16 +832,16 @@ The output from matching is also a cubble, with additional column \code{dist} an
 # cubble:   id [8]: nested form
 # bbox:     [144.52, -37.73, 146.06, -36.55]
 # temporal: date [date], matched_var [dbl]
-  id          name        lat  long type   dist group ts       n_match
-  <chr>       <chr>     <dbl> <dbl> <chr> <dbl> <int> <list>     <int>
-1 405234      SEVEN CR~ -36.9  146. river  6.15     5 <tibble>      21
-2 404207      HOLLAND ~ -36.6  146. river  8.54    10 <tibble>      21
-3 ASN00082042 strathbo~ -36.8  146. clim~  6.15     5 <tibble>      21
-4 ASN00082170 benalla ~ -36.6  146. clim~  8.54    10 <tibble>      21
-5 230200      MARIBYRN~ -37.7  145. river  6.17     6 <tibble>      19
-6 ASN00086038 essendon~ -37.7  145. clim~  6.17     6 <tibble>      19
-7 406213      CAMPASPE~ -37.0  145. river  1.84     1 <tibble>      18
-8 ASN00088051 redesdale -37.0  145. clim~  1.84     1 <tibble>      18
+  id          name                  lat  long type   dist group ts       n_match
+  <chr>       <chr>               <dbl> <dbl> <chr> <dbl> <int> <list>     <int>
+1 405234      SEVEN CREEKS @ D/S~ -36.9  146. river  6.15     5 <tibble>      21
+2 404207      HOLLAND CREEK @ KE~ -36.6  146. river  8.54    10 <tibble>      21
+3 ASN00082042 strathbogie         -36.8  146. clim~  6.15     5 <tibble>      21
+4 ASN00082170 benalla airport     -36.6  146. clim~  8.54    10 <tibble>      21
+5 230200      MARIBYRNONG RIVER ~ -37.7  145. river  6.17     6 <tibble>      19
+6 ASN00086038 essendon airport    -37.7  145. clim~  6.17     6 <tibble>      19
+7 406213      CAMPASPE RIVER @ R~ -37.0  145. river  1.84     1 <tibble>      18
+8 ASN00088051 redesdale           -37.0  145. clim~  1.84     1 <tibble>      18
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -846,7 +850,7 @@ Figure \ref{fig:matching} plots the matched pairs on the map. There are four pai
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/matching} 
+{\centering \includegraphics[width=1\linewidth]{../figures/matching} 
 
 }
 
@@ -871,7 +875,7 @@ Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \citet{hers
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/netcdf} 
+{\centering \includegraphics[width=1\linewidth]{../figures/netcdf} 
 
 }
 
@@ -909,7 +913,7 @@ In Figure \ref{fig:interactive-linking}, the first row shows the initial view of
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking-lower} 
+{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-lower} 
 
 }
 
@@ -945,7 +949,7 @@ Figure \ref{fig:interactive-popup} shows Figure \ref{fig:interactive-linking} ma
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/popup-mid} 
+{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{../figures/popup-mid} 
 
 }
 
@@ -975,7 +979,7 @@ This work is funded by a Commonwealth Scientific and Industrial Research Organis
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.005} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.005} 
 
 }
 

@@ -7,9 +7,13 @@ output: pdf_document
 
 ## Hierarchical structure
 
-Spatial locations can have grouping structures either inherent to the data or obtained by clustering. In those cases, rather than analysing variables at the site level, it might be of interest to summarised variables at a cluster or group level, as that can give a crisper picture of local areas. In cubble, \code{switch_key()} can be used to create a new grouping level of spatial locations by specifying a clustering variable. Figure \ref{fig:illu-hier} illustrates the relationship of cubbles at station and cluster level, in both the long and nested forms. By specifying \code{cluster_nested <- station_nested \%>\% switch_key(key = cluster)}, the cubble redefines the cubble key from the \code{id} column in \code{station_nested} to the \code{cluster} column in \code{cluster_nested}. All the spatial variables variant to the \code{cluster} column are now nested into a \code{.val} column and cluster level variables can be computed in the same fashion as station level variables in \code{station_nested}.
+Spatial locations can have grouping structures either inherent to the data (e.g. state within country) or obtained during the analysis (e.g. cluster id). In this case, it can be useful to summarise variables at various levels of the hierarchy. The function \code{switch_key()} can be used to change the grouping level of spatial locations. The diagram in Figure \ref{fig:illu-hier} shows how this function can be used to switch the grouping from station ids to cluster ids. The result can also be stretched into long form. By specifying 
 
-```{r illu-hier, echo = FALSE, fig.align="center",out.height="40%", out.width = "100%", fig.cap = "An illustration of the original and cluster level cubble in the nested form long form for hierarchical structure data. \\code{switch\\_key()} changes the station level cubble into a cluster level cubble and both can be stretched into the long form."}
+\code{cluster_nested <- station_nested \%>\% switch_key(key = cluster)}, 
+
+the cubble redefines the cubble key from the \code{id} column in \code{station_nested} to the \code{cluster} column in \code{cluster_nested}. All the spatial variables belonging to the \code{cluster} column are now nested into a \code{.val} column which allows for summarizing based on cluster.
+
+```{r illu-hier, echo = FALSE, fig.align="center",out.height="40%", out.width = "100%", fig.cap = "Hierarchical spatial structure can be handled using \\code{switch\\_key()}, to create summaries based on any level. Here the switch is between the station id and a cluster id. Once the change is made the data can be stretched into the long form."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
 ```
 
