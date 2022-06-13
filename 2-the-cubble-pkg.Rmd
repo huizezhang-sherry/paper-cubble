@@ -68,7 +68,7 @@ identical(cubble_nested, cubble_back)
 
 ## Unfold spatial variables into the long cubble {#unfold}
 
-Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps [@Wickham2012-yr]. (Glyph maps will be explained in Section \ref{st_transformation}.) This type of operation can be seen as flattening, or *unfolding*, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long cubble:
+Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps [@Wickham2012-yr]. (How to make glyph maps will be explained in Section \ref{st_transformation}, and are illustrated in the second example.) This type of operation can be seen as flattening, or *unfolding*, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long cubble:
 
 ```{r echo = TRUE}
 cubble_unfold <- cubble_long |> unfold(long, lat)

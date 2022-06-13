@@ -307,7 +307,7 @@ R> identical(cubble_nested, cubble_back)
 \hypertarget{unfold}{%
 \subsection{Unfold spatial variables into the long cubble}\label{unfold}}
 
-Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps \citep{Wickham2012-yr}. (Glyph maps will be explained in Section \ref{st_transformation}.) This type of operation can be seen as flattening, or \emph{unfolding}, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long cubble:
+Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps \citep{Wickham2012-yr}. (How to make glyph maps will be explained in Section \ref{st_transformation}, and are illustrated in the second example.) This type of operation can be seen as flattening, or \emph{unfolding}, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -528,9 +528,9 @@ Linking is also available starting from the time series plot, by selecting point
 \hypertarget{st_transformation}{%
 \subsection{Spatio-temporal transformations}\label{st_transformation}}
 
-Different types of transformations can be useful to extract new information from spatio-temporal data. Glyph maps, first introduced in Section \ref{unfold}, transform the time coordinates into space coordinates to plot the time series of different locations on the map. Calendar plots \citep{wang2020calendar} reconstruct time into a calendar-based grid to discover weekday and weekend pattern. Projection, or linear combination, of variables summarises multivariate information into lower dimension to further digest. This section elaborates on the glyph map.
+Spatio-temporal data lends itself to a range of transformations. Glyph maps (Section \ref{unfold}) transform the measured variable and time coordinates into microplots at the spatial locations. Calendar plots \citep{wang2020calendar} deconstruct time to produce plots of variables in a calendar format. Summarising multiple variables is commonly done using projections, or linear combinations. Here we elaborate on the transformations made to produce a glyph map.
 
-In \proglang{R}, \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equation 1 and 2 in \citet{Wickham2012-yr}). The data can then be piped into \code{ggplot} to create the glyph map as:
+The \proglang{R} package \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equations 1 and 2 in \citet{Wickham2012-yr}). The data can then be piped into \code{ggplot} to create the glyph map as:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -544,7 +544,7 @@ R> ggplot(gly, aes(gx, gy, group = gid)) +
 \end{CodeInput}
 \end{CodeChunk}
 
-A reimplementation of the glyph map as a ggproto, \code{GeomGlyph}, has been made in the \pkg{cubble} package and now the glyph map can be created with \code{geom_glyph()}:
+A new implementation of the glyph map as a ggproto, \code{GeomGlyph}, has been made in the \pkg{cubble} package so that a glyph map can be created with \code{geom_glyph()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -554,7 +554,9 @@ R> ggplot(data = data) +
 \end{CodeInput}
 \end{CodeChunk}
 
-Some useful controls over the glyph map are also available in the \code{geom_glyph()} implementation. Polar glyph map can be specified as a parameter \code{polar = TRUE} in the \code{geom_glyph()}, along with \code{width} and \code{height} in either absolute or relative value. Global and local scale can be controlled by the parameter \code{global_rescale} which default to \code{TRUE} for global scaling. Reference box and line can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()}.
+An example using a glyph map is shown in Section \ref{precip}.
+
+Some useful controls over the glyph map are also available in the \code{geom_glyph()} implementation. Polar coordinate glyph maps are specified using \code{polar = TRUE}, and parameters \code{width} and \code{height} can be specified in either absolute or relative value. Global and local scale is specified with \code{global_rescale}, which defaults to \code{TRUE}. Reference boxes and lines can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()} lines.
 
 \hypertarget{examples}{%
 \section{Examples}\label{examples}}
@@ -752,8 +754,8 @@ R> ggplot() +
 \end{figure}
 \end{CodeChunk}
 
-\hypertarget{australia-precipitation-pattern-in-2020}{%
-\subsection{Australia precipitation pattern in 2020}\label{australia-precipitation-pattern-in-2020}}
+\hypertarget{precip}{%
+\subsection{Australia precipitation pattern in 2020}\label{precip}}
 
 In the previous example, there has already been some overlapping of the glyphs for a few stations near (151E, 34S) and (152E, 33S), which is a problem when mapping more stations at the national level. Aggregation can be helpful in grouping series into clusters before visualising the clusters with a glyph map. This example shows how to organise data at both levels with \code{switch_key()}.
 

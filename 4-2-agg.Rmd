@@ -3,7 +3,7 @@ title: "4-2-aggre"
 output: pdf_document
 ---
 
-## Australia precipitation pattern in 2020
+## Australia precipitation pattern in 2020 {#precip}
 
 In the previous example, there has already been some overlapping of the glyphs for a few stations near (151E, 34S) and (152E, 33S), which is a problem when mapping more stations at the national level. Aggregation can be helpful in grouping series into clusters before visualising the clusters with a glyph map. This example shows how to organise data at both levels with \code{switch_key()}.
 

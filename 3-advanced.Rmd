@@ -47,9 +47,9 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Spatio-temporal transformations {#st_transformation}
 
-Different types of transformations can be useful to extract new information from spatio-temporal data. Glyph maps, first introduced in Section \ref{unfold}, transform the time coordinates into space coordinates to plot the time series of different locations on the map. Calendar plots [@wang2020calendar] reconstruct time into a calendar-based grid to discover weekday and weekend pattern. Projection, or linear combination, of variables summarises multivariate information into lower dimension to further digest. This section elaborates on the glyph map.
+Spatio-temporal data lends itself to a range of transformations. Glyph maps (Section \ref{unfold}) transform the measured variable and time coordinates into microplots at the spatial locations. Calendar plots [@wang2020calendar] deconstruct time to produce plots of variables in a calendar format. Summarising multiple variables is commonly done using projections, or linear combinations. Here we elaborate on the transformations made to produce a glyph map.
 
-In \proglang{R}, \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equation 1 and 2 in @Wickham2012-yr). The data can then be piped into \code{ggplot} to create the glyph map as:
+The \proglang{R} package \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equations 1 and 2 in @Wickham2012-yr). The data can then be piped into \code{ggplot} to create the glyph map as:
 
 ```{r eval = FALSE, echo = TRUE}
 library(ggplot2)
@@ -61,7 +61,7 @@ ggplot(gly, aes(gx, gy, group = gid)) +
   geom_path()
 ```
 
-A reimplementation of the glyph map as a ggproto, \code{GeomGlyph}, has been made in the \pkg{cubble} package and now the glyph map can be created with \code{geom_glyph()}:
+A new implementation of the glyph map as a ggproto, \code{GeomGlyph}, has been made in the \pkg{cubble} package so that a glyph map can be created with \code{geom_glyph()}:
 
 ```{r eval = FALSE, echo = TRUE}
 ggplot(data = data) +
@@ -69,4 +69,6 @@ ggplot(data = data) +
                  y_major = ..., y_minor = ...))
 ```
 
-Some useful controls over the glyph map are also available in the \code{geom_glyph()} implementation. Polar glyph map can be specified as a parameter \code{polar = TRUE} in the \code{geom_glyph()}, along with \code{width} and \code{height} in either absolute or relative value. Global and local scale can be controlled by the parameter \code{global_rescale} which default to \code{TRUE} for global scaling. Reference box and line can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()}.
+An example using a glyph map is shown in Section \ref{precip}. 
+
+Some useful controls over the glyph map are also available in the \code{geom_glyph()} implementation. Polar coordinate glyph maps are specified using \code{polar = TRUE}, and parameters \code{width} and \code{height} can be specified in either absolute or relative value. Global and local scale is specified with \code{global_rescale}, which defaults to \code{TRUE}. Reference boxes and lines can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()} lines.
