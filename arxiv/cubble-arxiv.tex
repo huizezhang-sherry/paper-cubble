@@ -696,9 +696,9 @@ Here, some locations have been detected with this issue and you can use \code{ou
 \hypertarget{australian-historical-maximum-temperature}{%
 \subsection{Australian historical maximum temperature}\label{australian-historical-maximum-temperature}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 236 Australian stations from the GHCN starting from year 1969. \code{weatherdata::historical_tmax} is already in a cubble, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. This example compares the maximum temperature in two periods: 1971-1975 and 2016-2020 for stations in Victoria and New South Wales.
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The \textbf{cubble} dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 236 Australian stations from the GHCN starting from year 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This \textbf{cubble} data is already cast into a \code{cubble} data object, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
 
-Stations in the two states can be subsetted by the station number: the Australian GHCN station numbers start with ``ASN00'' and are followed by the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Bureau of Meteorology (BOM) station number}. The second and third digits of the BOM station number (7th and 8th in the GHCN number) define the state of the station; the range 46-75 corresponds to New South Wales stations and the range 76-90 corresponds to Victorian stations. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the nested form:
+First of all, the stations across the two states need to be subsetted from the original \code{weatherdata::historical_tmax} data set. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by ``ASN00'') while the next 6 digits encode the station information following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -707,7 +707,7 @@ Stations in the two states can be subsetted by the station number: the Australia
 \end{Highlighting}
 \end{Shaded}
 
-Filtering for the time periods 1971-1975 and 2016-2020 is a time operation and the nested cubble needs to be switched to the long cubble form by \code{stretch()}:
+and extracting the time periods 1971-1975 and 2016-2020 is a time operation and therefore the nested cubble needs to be switched to the long cubble form by \code{stretch()}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -717,7 +717,7 @@ Filtering for the time periods 1971-1975 and 2016-2020 is a time operation and t
 \end{Highlighting}
 \end{Shaded}
 
-A monthly average is used for both periods to smooth the maximum temperature, which is another time operation:
+A monthly maximum average temperature is then calculated for both periods where \code{cubble} easily allows to compute this time operation across all the stations:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -729,7 +729,7 @@ A monthly average is used for both periods to smooth the maximum temperature, wh
 \end{Highlighting}
 \end{Shaded}
 
-A few stations do not have records during the time period 1971-1975 and further investigation shows that while the first and last year of each series is recorded, the missing years in this period are not reported. These stations are filtered out by examining whether the summarised time series has 24 months. The long cubble needs to be switched to the nested form for this spatial operation using \code{face_spatial()}:
+Observing the results of the operation above show that a few stations do not have records during the time period 1971-1975. Further investigation shows that while the first and last year of each series for those stations are recorded, the years in between are not. Hence, these stations are located and filtered out by examining whether the summarised time series has 24 months. Here, the long cubble needs to be switched to the nested form to carry out this spatial operation using \code{face_spatial()}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -737,7 +737,7 @@ A few stations do not have records during the time period 1971-1975 and further 
 \end{Highlighting}
 \end{Shaded}
 
-Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates need to be in the same table. Spatial variables can be moved to the long form with \code{unfold()}:
+Lastly, to create a glyph map where the series of each station are overlayed on a map of Australia, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates defining the bounding box for the plot need to be on the same table. For that, spatial variables can be moved to the long form with \code{unfold()}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -745,7 +745,7 @@ Lastly, to create a glyph map, both the major (\code{longitude}, \code{latitude}
 \end{Highlighting}
 \end{Shaded}
 
-\code{tmax} can then be supplied to \code{geom_glyph()} for the glyph map in Figure \ref{fig:basic-manip} with a station inset on the top left corner:
+the variable storing the maximum monthly average temperatures \code{tmax} can then be supplied to \code{geom_glyph()} for the glyph map in Figure \ref{fig:basic-manip} with a station inset on the top left corner:
 
 \begin{Shaded}
 \begin{Highlighting}[]
