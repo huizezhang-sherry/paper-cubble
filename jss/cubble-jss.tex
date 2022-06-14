@@ -175,13 +175,13 @@ The dataset \texttt{climate\_flat} is used to illustrate \pkg{cubble} functional
 \begin{CodeChunk}
 \begin{CodeOutput}
 # A tibble: 1,830 x 10
-  id         lat  long  elev name  wmo_id date        prcp  tmax  tmin
-  <chr>    <dbl> <dbl> <dbl> <chr>  <dbl> <date>     <dbl> <dbl> <dbl>
-1 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-01     0  31.9  15.3
-2 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-02     0  24.9  16.4
-3 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-03     6  23.2  13  
-4 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-04     0  28.4  12.4
-5 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-05     0  35.3  11.6
+  id            lat  long  elev name         wmo_id date        prcp  tmax  tmin
+  <chr>       <dbl> <dbl> <dbl> <chr>         <dbl> <date>     <dbl> <dbl> <dbl>
+1 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-01     0  31.9  15.3
+2 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-02     0  24.9  16.4
+3 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-03     6  23.2  13  
+4 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-04     0  28.4  12.4
+5 ASN00009021 -31.9  116.  15.4 perth airpo~  94610 2020-01-05     0  35.3  11.6
 # ... with 1,825 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -203,13 +203,13 @@ R> cubble_nested
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>
-2 ASN00010311 -31.9  117. 179   york            94623 <tibble>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>
+  id            lat  long  elev name           wmo_id ts                
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble [366 x 4]>
+2 ASN00010311 -31.9  117. 179   york            94623 <tibble [366 x 4]>
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble [366 x 4]>
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble [366 x 4]>
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble [366 x 4]>
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -226,13 +226,13 @@ R> cubble_nested |>
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name          wmo_id ts       rain_day
-  <chr>       <dbl> <dbl> <dbl> <chr>          <dbl> <list>      <int>
-1 ASN00009021 -31.9  116.  15.4 perth airport  94610 <tibble>      104
-2 ASN00010311 -31.9  117. 179   york           94623 <tibble>       89
-3 ASN00010614 -32.9  117. 338   narrogin       94627 <tibble>       90
-4 ASN00014015 -12.4  131.  30.4 darwin airpo~  94120 <tibble>      106
-5 ASN00015131 -17.6  134. 220   elliott        94236 <tibble>       63
+  id            lat  long  elev name           wmo_id ts       rain_day
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>      <int>
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>      104
+2 ASN00010311 -31.9  117. 179   york            94623 <tibble>       89
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>       90
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>      106
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>       63
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -249,8 +249,7 @@ R> cubble_long
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
 1 ASN00009021 2020-01-01     0  31.9  15.3
@@ -289,13 +288,13 @@ R> cubble_back
 # cubble:   id [5]: nested form
 # bbox:     [115.97, -32.94, 133.55, -12.42]
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>
-2 ASN00010311 -31.9  117. 179   york            94623 <tibble>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>
+  id            lat  long  elev name           wmo_id ts                
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>            
+1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble [366 x 4]>
+2 ASN00010311 -31.9  117. 179   york            94623 <tibble [366 x 4]>
+3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble [366 x 4]>
+4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble [366 x 4]>
+5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble [366 x 4]>
 \end{CodeOutput}
 \begin{CodeInput}
 R> identical(cubble_nested, cubble_back)
@@ -318,8 +317,7 @@ R> cubble_unfold
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin  long   lat
   <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
 1 ASN00009021 2020-01-01     0  31.9  15.3  116. -31.9
@@ -340,8 +338,7 @@ R> cubble_unfold |> face_spatial() |> face_temporal()
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
 # bbox:    [115.97, -32.94, 133.55, -12.42]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
 1 ASN00009021 2020-01-01     0  31.9  15.3
@@ -594,18 +591,18 @@ Geometry type: MULTIPOLYGON
 Dimension:     XY
 Bounding box:  xmin: 142.3535 ymin: -38.67876 xmax: 147.3909 ymax: -36.39269
 Geodetic CRS:  WGS 84
-    lga_code_2018            lga state_code_2016 state_name_2016
-132         20110     Alpine (S)               2        Victoria
-133         20260    Ararat (RC)               2        Victoria
-134         20570   Ballarat (C)               2        Victoria
-135         20660    Banyule (C)               2        Victoria
-136         20740 Bass Coast (S)               2        Victoria
-    areasqkm_2018 cent_long  cent_lat                       geometry
-132     4788.1568  146.9742 -36.85357 MULTIPOLYGON (((146.7258 -3...
-133     4211.1171  142.8432 -37.47271 MULTIPOLYGON (((143.1807 -3...
-134      739.0321  143.7815 -37.49286 MULTIPOLYGON (((143.6622 -3...
-135       62.5402  145.0851 -37.73043 MULTIPOLYGON (((145.1357 -3...
-136      865.8095  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
+    lga_code_2018            lga state_code_2016 state_name_2016 areasqkm_2018
+132         20110     Alpine (S)               2        Victoria     4788.1568
+133         20260    Ararat (RC)               2        Victoria     4211.1171
+134         20570   Ballarat (C)               2        Victoria      739.0321
+135         20660    Banyule (C)               2        Victoria       62.5402
+136         20740 Bass Coast (S)               2        Victoria      865.8095
+    cent_long  cent_lat                       geometry
+132  146.9742 -36.85357 MULTIPOLYGON (((146.7258 -3...
+133  142.8432 -37.47271 MULTIPOLYGON (((143.1807 -3...
+134  143.7815 -37.49286 MULTIPOLYGON (((143.6622 -3...
+135  145.0851 -37.73043 MULTIPOLYGON (((145.1357 -3...
+136  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -619,10 +616,10 @@ R> cb <- as_cubble(
 +   )
 \end{CodeInput}
 \begin{CodeOutput}
-! Some sites in the temporal table don't have spatial information
+! Some sites in the temporal table don't have corresponding spatial information
 \end{CodeOutput}
 \begin{CodeOutput}
-! Some sites in the spatial table don't have temporal information
+! Some sites in the spatial table don't have corresponding temporal information
 \end{CodeOutput}
 \begin{CodeOutput}
 ! Use argument `output = "unmatch"` to check on the unmatched key
@@ -678,7 +675,7 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 \hypertarget{australian-historical-maximum-temperature}{%
 \subsection{Australian historical maximum temperature}\label{australian-historical-maximum-temperature}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The \textbf{cubble} dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 204 Australian stations from the GHCN starting from year 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This \textbf{cubble} data is already cast into a \code{cubble} data object, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The \textbf{cubble} dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 236 Australian stations from the GHCN starting from year 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This \textbf{cubble} data is already cast into a \code{cubble} data object, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
 
 First of all, the stations across the two states need to be subsetted from the original data set \code{weatherdata::historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by ``ASN00'') while the next 6 digits encode the station information following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
 
@@ -762,7 +759,7 @@ R> ggplot() +
 
 In the previous example, there has already been some overlapping of the glyphs for a few stations near (151E, 34S) and (152E, 33S), which is a problem when mapping more stations at the national level. Aggregation can be helpful in grouping series into clusters before visualising the clusters with a glyph map. This example shows how to organise data at both levels with \code{switch_key()}.
 
-\code{weatherdata::climate_full}, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for 640 stations in Australia from 2016 to 2020. A simple \(k\)-means algorithm based on the distance matrix is used to create 20 clusters. The dataset \code{station_nested} is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used for other applications, as long as there is a mapping from each station to a cluster.
+\code{weatherdata::climate_full}, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for 639 stations in Australia from 2016 to 2020. A simple \(k\)-means algorithm based on the distance matrix is used to create 20 clusters. The dataset \code{station_nested} is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used for other applications, as long as there is a mapping from each station to a cluster.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -837,16 +834,16 @@ The output from matching is also a cubble, with additional column \code{dist} an
 # cubble:   id [8]: nested form
 # bbox:     [144.52, -37.73, 146.06, -36.55]
 # temporal: date [date], matched_var [dbl]
-  id          name        lat  long type   dist group ts       n_match
-  <chr>       <chr>     <dbl> <dbl> <chr> <dbl> <int> <list>     <int>
-1 405234      SEVEN CR~ -36.9  146. river  6.15     5 <tibble>      21
-2 404207      HOLLAND ~ -36.6  146. river  8.54    10 <tibble>      21
-3 ASN00082042 strathbo~ -36.8  146. clim~  6.15     5 <tibble>      21
-4 ASN00082170 benalla ~ -36.6  146. clim~  8.54    10 <tibble>      21
-5 230200      MARIBYRN~ -37.7  145. river  6.17     6 <tibble>      19
-6 ASN00086038 essendon~ -37.7  145. clim~  6.17     6 <tibble>      19
-7 406213      CAMPASPE~ -37.0  145. river  1.84     1 <tibble>      18
-8 ASN00088051 redesdale -37.0  145. clim~  1.84     1 <tibble>      18
+  id          name                  lat  long type   dist group ts       n_match
+  <chr>       <chr>               <dbl> <dbl> <chr> <dbl> <int> <list>     <int>
+1 405234      SEVEN CREEKS @ D/S~ -36.9  146. river  6.15     5 <tibble>      21
+2 404207      HOLLAND CREEK @ KE~ -36.6  146. river  8.54    10 <tibble>      21
+3 ASN00082042 strathbogie         -36.8  146. clim~  6.15     5 <tibble>      21
+4 ASN00082170 benalla airport     -36.6  146. clim~  8.54    10 <tibble>      21
+5 230200      MARIBYRNONG RIVER ~ -37.7  145. river  6.17     6 <tibble>      19
+6 ASN00086038 essendon airport    -37.7  145. clim~  6.17     6 <tibble>      19
+7 406213      CAMPASPE RIVER @ R~ -37.0  145. river  1.84     1 <tibble>      18
+8 ASN00088051 redesdale           -37.0  145. clim~  1.84     1 <tibble>      18
 \end{CodeOutput}
 \end{CodeChunk}
 
