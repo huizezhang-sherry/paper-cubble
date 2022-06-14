@@ -16,6 +16,10 @@ my_request <- list(
   target = "era5-pressure.nc"
 )
 
+# here you need to create an account on Climate Data Store 
+# at https://cds.climate.copernicus.eu/cdsapp#!/home) to obtain the user ID and API key
+# then set up the with ecmwfr::wf_set_key(user, key, service = "cds")
+# the user below is the same `user` in the setup line
 wf_request(
   user = "113339",
   request = my_request,
