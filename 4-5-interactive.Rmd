@@ -3,11 +3,11 @@ title: "4-5-interactive"
 output: html_document
 ---
 
-## Interactive graphic
+## Interactive graphics
 
-With spatio-temporal data, users may wish to make plots to learn the spatial distribution of a variable or to find patterns, such as trend or seasonality, in the time series. Combining these two types of plots with interactivity lets users link between points on the map and the corresponding time series to explore the spatial and temporal dimensions of the data simultaneously. Below is an example that describes the process of building an interactive graphic with \pkg{cubble} and \pkg{crosstalk}. The example explores the variation of monthly temperature range with \code{weatherdata::climate_full} data.
+When dealing with spatio-temporal data, users may wish to make plots to learn the spatial distribution of a variable or to find patterns, such as trend or seasonality, in the time series. Combining these two types of plots with interactivity lets users link between points on the map and the corresponding time series to explore the spatial and temporal dimensions of the data simultaneously. Below is an example that describes the process of building an interactive graphic with \pkg{cubble} and \pkg{crosstalk}. This example explores the variation of monthly temperature range within the \code{weatherdata::climate_full} data.
 
-The temperature range is calculated as the difference between \code{tmax} and \code{tmin} and its monthly average over 2016-2020 is taken before calculating the variance. A \code{SharedData} object is constructed for each form of the cubble and the same \code{group} argument ensures the cross-linking of the two forms via the common \code{id} column. The spatial map and time series plot are then made with each \code{SharedData} object separately. In this example, stations on the Australia map, made from the nested form, are coloured by the calculated variance. A ribbon band is constructed using the long form cubble to show each station's maximum and minimum temperature across month. With a different dataset, users can calculate other per station measure in the nested form or make other time-wise summary of the data in the long form to customise the spatial or temporal view. The cross-linking between the two plots is always safeguarded by the shared \code{id} column embedded in the cubble structure. Below is the pseudo-code that outlines the process to construct an interactive graphic described above:
+The temperature range is calculated as the difference between \code{tmax} and \code{tmin} and its monthly average over 2016-2020 is taken before calculating the variance. A \code{SharedData} object is constructed for each form of the cubble and the same \code{group} argument ensures the cross-linking of the two forms via the common \code{id} column. The spatial map and time series plot are then made with each \code{SharedData} object separately. In this example, stations on the Australia map, made from the nested form, are coloured by the calculated variance. A ribbon band is constructed using the long form cubble to show each station's maximum and minimum temperature over time. In the case of a different dataset, users could calculate other station-dependent measures in the nested form or make other time-wise summary of the data in the long form to customise the spatial or temporal view. The cross-linking between the two plots is always safeguarded by the shared \code{id} column embedded in the cubble structure. Below is the pseudo-code that outlines the process to construct the interactive graphic described above:
 
 ``` r
 # data pre-processing
@@ -26,16 +26,16 @@ crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 
 ```
 
-In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Most regions in Australia have low variance of temperature range, while the north-west coastline, bottom of South Australia, and Victoria stand out with larger monthly changes. In the second row, Mount Elizabeth is selected on the map given its high variance colour on the initial map and this links to the ribbon on the right. The third row selects the lowest temperature in August and this corresponds to Thredbo AWS on the Victoria and New South Wales border. Another station in the Tasmania island is selected on the map to cross compare with Thredbo AWS.
+In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Most regions in Australia have a low variance of temperature range, while the North-West coastline, the bottom of South Australia, and Victoria stand out with larger monthly changes. In the second row, the Mount Elizabeth station, which shows a high variance colour on the initial map, is selected on the map and this produces the ribbon on the right. In the third row, the lowest temperature in August is selected, which highlights the corresponding Thredbo AWS station on the left map. Another station in the Tasmania island is selected on the map to cross compare with Thredbo AWS.
 
-```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum and minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display. A location in the Tasmania Island is then selected to compare the temperature variation with Thredbo AWS.", fig.show='hold'}
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a particular location on the map (here Mount Elizabeth) produces the plot in the second row. The maximum and minimum temperatures are shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display, which highlights the corresponding station on the map (Thredbo AWS). Another  station, located in the Tasmania Island, is then selected to compare its temperature variation with Thredbo AWS.", fig.show='hold'}
 knitr::include_graphics(here::here("figures/linking.png"))
 knitr::include_graphics(here::here("figures/linking-north.png"))
 knitr::include_graphics(here::here("figures/linking-lower.png"))
 #knitr::include_graphics(here::here("figures/linking-south.png"))
 ```
 
-This plot can also be made using \pkg{cubble} and \pkg{leaflet} where the temperature range is displayed as a small subplot upon clicking on the map. The procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with \code{leafpop::addPopupGraphs()}:
+This plot can also be made using \pkg{cubble} and \pkg{leaflet}, in which case the temperature range is displayed as a small subplot upon clicking on the map. This procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with \code{leafpop::addPopupGraphs()}:
 
 ``` r
 # data pre-processing
@@ -57,8 +57,8 @@ leaflet(nested) |>
 
 ```
 
-Figure \ref{fig:interactive-popup} shows Figure \ref{fig:interactive-linking} made with leaflet and popups [@leafpop].
+Figure \ref{fig:interactive-popup} shows the same information as Figure \ref{fig:interactive-linking} but using leaflet and popups [@leafpop].
 
-```{r interactive-popup, fig.align='center', echo = FALSE, out.width="45%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Same as Figure 11 with the temperature variation shown as a popup in the leaflet map.", fig.show='hold'}
+```{r interactive-popup, fig.align='center', echo = FALSE, out.width="45%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Same as Figure 11 except the temperature variation is now shown as a popup in the leaflet map.", fig.show='hold'}
 knitr::include_graphics(here::here("figures/popup-mid.png"))
 ```
