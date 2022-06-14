@@ -342,13 +342,13 @@ R> cubble_unfold |> face_spatial() |> face_temporal()
 # bbox:    [115.97, -32.94, 133.55, -12.42]
 # spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
 #   [dbl]
-  id          date        prcp  tmax  tmin
-  <chr>       <date>     <dbl> <dbl> <dbl>
-1 ASN00009021 2020-01-01     0  31.9  15.3
-2 ASN00009021 2020-01-02     0  24.9  16.4
-3 ASN00009021 2020-01-03     6  23.2  13  
-4 ASN00009021 2020-01-04     0  28.4  12.4
-5 ASN00009021 2020-01-05     0  35.3  11.6
+  id          date        prcp  tmax  tmin  long   lat
+  <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
+1 ASN00009021 2020-01-01     0  31.9  15.3  116. -31.9
+2 ASN00009021 2020-01-02     0  24.9  16.4  116. -31.9
+3 ASN00009021 2020-01-03     6  23.2  13    116. -31.9
+4 ASN00009021 2020-01-04     0  28.4  12.4  116. -31.9
+5 ASN00009021 2020-01-05     0  35.3  11.6  116. -31.9
 # ... with 1,825 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -627,6 +627,9 @@ R> cb <- as_cubble(
 \begin{CodeOutput}
 ! Use argument `output = "unmatch"` to check on the unmatched key
 \end{CodeOutput}
+\begin{CodeOutput}
+Joining, by = "lga"
+\end{CodeOutput}
 \end{CodeChunk}
 
 In the output above we see that this is an issue here, and we proceed to use \code{output = "unmatch"} to check which locations are concerned. Note that \pkg{cubble} will attempt to pair the unmatched sites, these are shown separately from the ones that cannot be paired.
@@ -802,7 +805,7 @@ Long form cubble at both levels can be accessed through stretching the nested fo
 \hypertarget{river-level-data-in-victoria-water-gauges}{%
 \subsection{River level data in Victoria water gauges}\label{river-level-data-in-victoria-water-gauges}}
 
-The Bureau of Meteorology collects \href{http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full}{water data} from river gauges. The collected variables include: electrical conductivity, turbidity, watercourse discharge, watercourse level, and water temperature. In particular, water level will interact with precipitation from the climate data since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} gives the location of available weather stations and water gauges in Victoria.
+The Bureau of Meteorology collects \href{http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full}{water data} from river gauges. The collected variables include: electrical conductivity, turbidity, watercourse discharge, watercourse level, and water temperature. We expect that the water level should be related to the precipitation available from climate data, since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria, and we will try to match water gauges with nearby weather stations, taking into account both spatial and temporal information from 2020.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -815,7 +818,7 @@ The Bureau of Meteorology collects \href{http://www.bom.gov.au/metadata/catalogu
 \end{figure}
 \end{CodeChunk}
 
-From the map, one can see that a few water gauges and weather stations are close to each other and the fluctuation of the water level could be matched up with the precipitation measured by the nearby climate station. As introduced in Section \ref{matching}, \code{match_sites()} can be used to match one source of data with another source in a cubble. Here \code{Water_course_level} in \code{river} will be matched to \code{prcp} in \code{climate} in 2020. The two datasets need to be specified as the first two arguments and the variable to match can be specified in \code{temporal_by} using the \code{by} syntax in \code{join}. \code{temporal_independent} controls the variable used to construct the interval and the goal here is to see if the water level in the river will reflect precipitation. This puts precipitation \code{prcp}, as the independent variable. Given there is one year's worth of data, the number of peaks (\code{temporal_n_highest}) to consider is slightly raised from a default of 20 to 30 and \code{temporal_min_match} is raised accordingly. To return all the pairs of the match, \code{temporal_min_match} can be set to 0.
+As introduced in Section \ref{matching}, \code{match_sites()} can be used for this task, and we choose \code{Water_course_level} in \code{river} and \code{prcp} in \code{climate} for the temporal matching. We first pass in the two datasets, followed by the variables used for the temporal matching, specified in \code{temporal_by} (using the \code{by} syntax from \code{dplyr::join}). With \code{temporal_independent} we select precipitation (\code{prcp}) as the independent variable, and the goal is to see if the water level in the river reflects what is observed in precipitation (for nearby stations). Since we consider a full year of data, we set the number of peaks considered (\code{temporal_n_highest}) to 30 (slightly above the default value of 20), and \code{temporal_min_match} is raised accordingly.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -829,9 +832,9 @@ R> res <- match_sites(
 \end{CodeInput}
 \end{CodeChunk}
 
-The output from matching is also a cubble, with additional column \code{dist} and \code{group} produced from spatial matching and \code{n_match} from temporal matching.
+The output from this function is also a cubble, with additional columns \code{dist} and \code{group} produced from spatial matching, and \code{n_match} from temporal matching.
 
-Figure \ref{fig:matching} plots the matched pairs on the map. There are four pairs of matches, all located in the middle of Victoria and the expected concurrent increase in precipitation and water level can be observed.
+Figure \ref{fig:matching} (A) shows the four matched pairs on the map. For these the expected concurrent increase in precipitation and water level can be seen clearly when comparing these variables on a standardised scale, see Figure \ref{fig:matching} (B).
 
 \begin{CodeChunk}
 \begin{figure}
@@ -840,7 +843,7 @@ Figure \ref{fig:matching} plots the matched pairs on the map. There are four pai
 
 }
 
-\caption[Matched weather stations and river gauges on the map (A) and across time (B)]{Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation.}\label{fig:matching}
+\caption[Matched weather stations and river gauges on the map (A) and across time (B)]{Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here.}\label{fig:matching}
 \end{figure}
 \end{CodeChunk}
 
