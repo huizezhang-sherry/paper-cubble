@@ -155,7 +155,7 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.007} 
+{\centering \includegraphics[width=1\linewidth]{/Users/ursulalaa/papers/paper-cubble/figures/diagram-keynotes/diagram-keynotes.007} 
 
 }
 
@@ -267,7 +267,7 @@ The first line in the printed cubble now shows it in the long form and the third
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.008} 
+{\centering \includegraphics[width=1\linewidth]{/Users/ursulalaa/papers/paper-cubble/figures/diagram-keynotes/diagram-keynotes.008} 
 
 }
 
@@ -472,7 +472,7 @@ the cubble redefines the cubble key from the \code{id} column in \code{station_n
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.003} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/ursulalaa/papers/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
 
 }
 
@@ -488,7 +488,7 @@ One task that may interest spatio-temporal analysts is combining data collected 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/illu-matching} 
+{\centering \includegraphics[width=1\linewidth]{/Users/ursulalaa/papers/paper-cubble/figures/illu-matching} 
 
 }
 
@@ -520,7 +520,7 @@ Linking is also available starting from the time series plot, by selecting point
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.004} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/ursulalaa/papers/paper-cubble/figures/diagram-keynotes/diagram-keynotes.004} 
 
 }
 
@@ -567,7 +567,7 @@ Some useful controls over the glyph map are also available in the \code{geom_gly
 \hypertarget{covid}{%
 \subsection{Victoria covid data}\label{covid}}
 
-The Victoria State Government in Australia provides daily COVID information about the source, and local government area (LGA) of the recorded cases. This data can be used to visualise COVID spread when combined with map information on LGA, available from the Australian Bureau of Statistics. The first five rows these data sets are printed below:
+The Victoria State Government in Australia provides daily COVID information about the source and local government area (LGA) of recorded cases. This data can be used to visualise COVID spread when combined with map information available from the Australian Bureau of Statistics. The first five rows these data sets are printed below:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -609,7 +609,7 @@ Geodetic CRS:  WGS 84
 \end{CodeOutput}
 \end{CodeChunk}
 
-A \code{cubble} object can be created from separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \ref{create}. \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
+A \code{cubble} object can be created from separate spatial and temporal tables in a list, the other arguments (\code{key}, \code{index}, and \code{coords}) are described in section \ref{create}. The function \code{as_cubble()} will automatically try to match the sites in both tables and show a warning message in case of missing information (mismatch between the sites in the two tables).
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -629,7 +629,7 @@ R> cb <- as_cubble(
 \end{CodeOutput}
 \end{CodeChunk}
 
-Here, some locations have been detected with this issue and you can use \code{output = "unmatch"} to check on these locations:
+In the output above we see that this is an issue here, and we proceed to use \code{output = "unmatch"} to check which locations are concerned. Note that \pkg{cubble} will attempt to pair the unmatched sites, these are shown separately from the ones that cannot be paired.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -659,7 +659,7 @@ $others$spatial
 \end{CodeOutput}
 \end{CodeChunk}
 
-\pkg{cubble} will attempt to pair the unmatched sites as well as those that cannot be paired. These can be helpful to clean up the data before creating the cubble again:
+This information is helpful when cleaning up the data before creating the cubble again:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -749,7 +749,7 @@ R> ggplot() +
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth]{../figures/basic-manip} 
+{\centering \includegraphics[width=0.9\linewidth]{/Users/ursulalaa/papers/paper-cubble/figures/basic-manip} 
 
 }
 
@@ -792,7 +792,7 @@ Long form cubble at both levels can be accessed through stretching the nested fo
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/basic-agg} 
+{\centering \includegraphics[width=1\linewidth]{/Users/ursulalaa/papers/paper-cubble/figures/basic-agg} 
 
 }
 
@@ -808,7 +808,7 @@ The Bureau of Meteorology collects \href{http://www.bom.gov.au/metadata/catalogu
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/matching-map} 
+{\centering \includegraphics[width=1\linewidth]{/Users/ursulalaa/papers/paper-cubble/figures/matching-map} 
 
 }
 
@@ -855,7 +855,7 @@ Figure \ref{fig:matching} plots the matched pairs on the map. There are four pai
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/matching} 
+{\centering \includegraphics[width=1\linewidth]{/Users/ursulalaa/papers/paper-cubble/figures/matching} 
 
 }
 
@@ -880,7 +880,7 @@ Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \citet{hers
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/netcdf} 
+{\centering \includegraphics[width=1\linewidth]{/Users/ursulalaa/papers/paper-cubble/figures/netcdf} 
 
 }
 
@@ -888,12 +888,12 @@ Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \citet{hers
 \end{figure}
 \end{CodeChunk}
 
-\hypertarget{interactive-graphic}{%
-\subsection{Interactive graphic}\label{interactive-graphic}}
+\hypertarget{interactive-graphics-1}{%
+\subsection{Interactive graphics}\label{interactive-graphics-1}}
 
-With spatio-temporal data, users may wish to make plots to learn the spatial distribution of a variable or to find patterns, such as trend or seasonality, in the time series. Combining these two types of plots with interactivity lets users link between points on the map and the corresponding time series to explore the spatial and temporal dimensions of the data simultaneously. Below is an example that describes the process of building an interactive graphic with \pkg{cubble} and \pkg{crosstalk}. The example explores the variation of monthly temperature range with \code{weatherdata::climate_full} data.
+When dealing with spatio-temporal data, users may wish to make plots to learn the spatial distribution of a variable or to find patterns, such as trend or seasonality, in the time series. Combining these two types of plots with interactivity lets users link between points on the map and the corresponding time series to explore the spatial and temporal dimensions of the data simultaneously. Below is an example that describes the process of building an interactive graphic with \pkg{cubble} and \pkg{crosstalk}. This example explores the variation of monthly temperature range within the \code{weatherdata::climate_full} data.
 
-The temperature range is calculated as the difference between \code{tmax} and \code{tmin} and its monthly average over 2016-2020 is taken before calculating the variance. A \code{SharedData} object is constructed for each form of the cubble and the same \code{group} argument ensures the cross-linking of the two forms via the common \code{id} column. The spatial map and time series plot are then made with each \code{SharedData} object separately. In this example, stations on the Australia map, made from the nested form, are coloured by the calculated variance. A ribbon band is constructed using the long form cubble to show each station's maximum and minimum temperature across month. With a different dataset, users can calculate other per station measure in the nested form or make other time-wise summary of the data in the long form to customise the spatial or temporal view. The cross-linking between the two plots is always safeguarded by the shared \code{id} column embedded in the cubble structure. Below is the pseudo-code that outlines the process to construct an interactive graphic described above:
+The temperature range is calculated as the difference between \code{tmax} and \code{tmin} and its monthly average over 2016-2020 is taken before calculating the variance. A \code{SharedData} object is constructed for each form of the cubble and the same \code{group} argument ensures the cross-linking of the two forms via the common \code{id} column. The spatial map and time series plot are then made with each \code{SharedData} object separately. In this example, stations on the Australia map, made from the nested form, are coloured by the calculated variance. A ribbon band is constructed using the long form cubble to show each station's maximum and minimum temperature over time. In the case of a different dataset, users could calculate other station-dependent measures in the nested form or make other time-wise summary of the data in the long form to customise the spatial or temporal view. The cross-linking between the two plots is always safeguarded by the shared \code{id} column embedded in the cubble structure. Below is the pseudo-code that outlines the process to construct the interactive graphic described above:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -913,20 +913,20 @@ The temperature range is calculated as the difference between \code{tmax} and \c
 \end{Highlighting}
 \end{Shaded}
 
-In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Most regions in Australia have low variance of temperature range, while the north-west coastline, bottom of South Australia, and Victoria stand out with larger monthly changes. In the second row, Mount Elizabeth is selected on the map given its high variance colour on the initial map and this links to the ribbon on the right. The third row selects the lowest temperature in August and this corresponds to Thredbo AWS on the Victoria and New South Wales border. Another station in the Tasmania island is selected on the map to cross compare with Thredbo AWS.
+In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Most regions in Australia have a low variance of temperature range, while the North-West coastline, the bottom of South Australia, and Victoria stand out with larger monthly changes. In the second row, the Mount Elizabeth station, which shows a high variance colour on the initial map, is selected on the map and this produces the ribbon on the right. In the third row, the lowest temperature in August is selected, which highlights the corresponding Thredbo AWS station on the left map. Another station in the Tasmania island is selected on the map to cross compare with Thredbo AWS.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-lower} 
+{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/ursulalaa/papers/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/ursulalaa/papers/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/ursulalaa/papers/paper-cubble/figures/linking-lower} 
 
 }
 
-\caption[Exploring temperature variation using linking of a map and seasonal display]{Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a location with high variance on the map produces the plot in the second row. The maximum and minimum temperature is shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display. A location in the Tasmania Island is then selected to compare the temperature variation with Thredbo AWS.}\label{fig:interactive-linking}
+\caption[Exploring temperature variation using linking of a map and seasonal display]{Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a particular location on the map (here Mount Elizabeth) produces the plot in the second row. The maximum and minimum temperatures are shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display, which highlights the corresponding station on the map (Thredbo AWS). Another  station, located in the Tasmania Island, is then selected to compare its temperature variation with Thredbo AWS.}\label{fig:interactive-linking}
 \end{figure}
 \end{CodeChunk}
 
-This plot can also be made using \pkg{cubble} and \pkg{leaflet} where the temperature range is displayed as a small subplot upon clicking on the map. The procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with \code{leafpop::addPopupGraphs()}:
+This plot can also be made using \pkg{cubble} and \pkg{leaflet}, in which case the temperature range is displayed as a small subplot upon clicking on the map. This procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with \code{leafpop::addPopupGraphs()}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -949,16 +949,16 @@ This plot can also be made using \pkg{cubble} and \pkg{leaflet} where the temper
 \end{Highlighting}
 \end{Shaded}
 
-Figure \ref{fig:interactive-popup} shows Figure \ref{fig:interactive-linking} made with leaflet and popups \citep{leafpop}.
+Figure \ref{fig:interactive-popup} shows the same information as Figure \ref{fig:interactive-linking} but using leaflet and popups \citep{leafpop}.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{../figures/popup-mid} 
+{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/ursulalaa/papers/paper-cubble/figures/popup-mid} 
 
 }
 
-\caption[Same as Figure 11 with the temperature variation shown as a popup in the leaflet map]{Same as Figure 11 with the temperature variation shown as a popup in the leaflet map.}\label{fig:interactive-popup}
+\caption[Same as Figure 11 except the temperature variation is now shown as a popup in the leaflet map]{Same as Figure 11 except the temperature variation is now shown as a popup in the leaflet map.}\label{fig:interactive-popup}
 \end{figure}
 \end{CodeChunk}
 

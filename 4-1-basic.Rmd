@@ -7,7 +7,7 @@ output: html_document
 
 ## Victoria covid data {#covid}
 
-The Victoria State Government in Australia provides daily COVID information about the source, and local government area (LGA) of the recorded cases. This data can be used to visualise COVID spread when combined with map information on LGA, available from the Australian Bureau of Statistics. The first five rows these data sets are printed below:  
+The Victoria State Government in Australia provides daily COVID information about the source and local government area (LGA) of recorded cases. This data can be used to visualise COVID spread when combined with map information available from the Australian Bureau of Statistics. Here we will use the data to demonstrate how to match sites between these two tables with \pkg{cubble} in the case of a few mismatches. The first five rows these data sets are printed below:  
 
 ```{r eval = FALSE}
 library(tidyverse)
@@ -41,7 +41,7 @@ covid |> head(5)
 lga |> head(5)
 ```
 
-A \code{cubble} object can be created from separate spatial and temporal tables in a list, with other arguments (\code{key}, \code{index}, and \code{coords}) introduced in section \@ref(create). \code{as_cubble()} will automatically check the matching of sites in both tables and emit a warning if a location has missing spatial or temporal information.
+A \code{cubble} object can be created from separate spatial and temporal tables in a list, the other arguments (\code{key}, \code{index}, and \code{coords}) are described in section \@ref(create). The function \code{as_cubble()} will automatically try to match the sites in both tables and show a warning message in case of missing information (mismatch between the sites in the two tables).
 
 ```{r echo = TRUE, warning = TRUE, message= TRUE}
 cb <- as_cubble(
@@ -50,7 +50,7 @@ cb <- as_cubble(
   )
 ```
 
-Here, some locations have been detected with this issue and you can use \code{output = "unmatch"} to check on these locations:
+In the output above we see that this is an issue here, and we proceed to use \code{output = "unmatch"} to check which locations are concerned. Note that \pkg{cubble} will attempt to pair the unmatched sites, these are shown separately from the ones that cannot be paired.
 
 ```{r echo = TRUE}
 pair <- as_cubble(
@@ -62,7 +62,7 @@ pair <- as_cubble(
 pair
 ```
 
-\pkg{cubble} will attempt to pair the unmatched sites as well as those that cannot be paired. These can be helpful to clean up the data before creating the cubble again:
+This information is helpful when cleaning up the data before creating the cubble again:
 
 ```{r echo = TRUE}
 lga <- lga %>%
