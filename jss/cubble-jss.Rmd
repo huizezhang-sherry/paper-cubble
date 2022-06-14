@@ -61,7 +61,8 @@ options(prompt = "R> ", continue = "+ ",
 
 ```{r echo = FALSE}
 library(cubble)
-library(dplyr)
+library(tidyverse)
+library(patchwork)
 ```
 
 \newpage
