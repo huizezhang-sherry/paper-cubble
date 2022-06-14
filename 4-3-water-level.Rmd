@@ -8,7 +8,7 @@ output: html_document
 
 The Bureau of Meteorology collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges. The collected variables include: electrical conductivity, turbidity, watercourse discharge, watercourse level, and water temperature. We expect that the water level should be related to the precipitation available from climate data, since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria, and we will try to match water gauges with nearby weather stations, taking into account both spatial and temporal information from 2020.
 
-```{r eval = FALSE}
+```{r}
 climate <- weatherdata::climate_full |>
   filter(between(stringr::str_sub(id, 7, 8), 76, 90)) |>
   face_temporal() |>
@@ -19,13 +19,21 @@ climate <- weatherdata::climate_full |>
 river <- river |> mutate(type = "river")
 ```
 
-```{r matching-map, out.width="100%", fig.cap="Location of weather stations and river gauges in Victoria, Australia."}
-knitr::include_graphics(here::here("figures/matching-map.png"))
+```{r matching-map, fig.height = 7, fig.width=10, fig.cap="Location of weather stations and river gauges in Victoria, Australia."}
+vic_map <- rmapshaper::ms_simplify(ozmaps::abs_ste |> filter(NAME == "Victoria"))  
+ggplot() + 
+  geom_sf(data = vic_map, fill = "transparent", color = "grey") + 
+  geom_point(data = dplyr::bind_rows(river, climate), 
+             aes(x = long, y = lat, color = type)) + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(legend.position = "bottom") +
+  ggplot2::labs(x = "Longitude", y = "Latitude") + 
+  scale_color_brewer(palette = "Dark2") 
 ```
 
 As introduced in Section \@ref(matching), \code{match_sites()} can be used for this task, and we choose \code{Water_course_level} in \code{river} and \code{prcp} in \code{climate} for the temporal matching. We first pass in the two datasets, followed by the variables used for the temporal matching, specified in \code{temporal_by} (using the \code{by} syntax from \code{dplyr::join}). With \code{temporal_independent} we select precipitation (\code{prcp}) as the independent variable, and the goal is to see if the water level in the river reflects what is observed in precipitation (for nearby stations). Since we consider a full year of data, we set the number of peaks considered (\code{temporal_n_highest}) to 30 (slightly above the default value of 20), and \code{temporal_min_match} is raised accordingly.
 
-```{r echo = TRUE,  eval = FALSE}
+```{r echo = TRUE}
 res <- match_sites(
   river, climate,
   temporal_by = c("Water_course_level" = "prcp"),
@@ -37,12 +45,40 @@ res <- match_sites(
 
 The output from this function is also a cubble, with additional columns \code{dist} and \code{group} produced from spatial matching, and \code{n_match} from temporal matching.
 
-```{r,  eval = FALSE}
-res |> print(n = 8)
+```{r}
+res |> print()
 ```
 
 Figure \ref{fig:matching} (A) shows the four matched pairs on the map. For these the expected concurrent increase in precipitation and water level can be seen clearly when comparing these variables on a standardised scale, see Figure \ref{fig:matching} (B).
 
-```{r matching, out.width="100%", fig.cap="Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here."}
-knitr::include_graphics(here::here("figures/matching.png"))
+```{r matching, fig.height = 5, fig.width = 10, fig.cap="Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here."}
+p1 <-ggplot() + 
+  geom_sf(data = vic_map, fill = "transparent", color = "grey") + 
+  geom_point(data = res, aes(x = long, y = lat, color = type)) +
+  ggrepel::geom_label_repel(
+    data = res |> filter(type == "river"), aes(x = long, y = lat, label = group)) +
+  scale_color_brewer(palette = "Dark2")  + 
+  ggplot2::theme_bw() +
+  ggplot2::theme(legend.position = "bottom") +
+  ggplot2::labs(x = "Longitude", y = "Latitude")
+
+res_long <- res |>
+  face_temporal(ts) |>
+  unfold(group, type) |>
+  rename(prcp = matched_var) |> 
+  mutate(prcp = (prcp - min(prcp, na.rm = TRUE))/ (max(prcp, na.rm = TRUE) - min(prcp, na.rm = TRUE))) 
+
+p2 <- res_long |> 
+  ggplot(aes(x = date, y = prcp, color = type, group = id)) +
+  geom_line(alpha = 0.8) +
+  facet_wrap(vars(group)) +
+  scale_color_brewer(palette = "Dark2", guide = "none") +
+  theme_bw() +
+  scale_x_date(date_labels = "%b") + 
+  labs(x = "Date", y = "Precipitation/ water level")
+
+(p1 | p2) + 
+  patchwork::plot_layout(guides = "collect") + 
+  plot_annotation(tag_levels = 'A')&
+  theme(legend.position = "bottom")
 ```

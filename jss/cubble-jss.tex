@@ -810,7 +810,7 @@ The Bureau of Meteorology collects \href{http://www.bom.gov.au/metadata/catalogu
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/matching-map} 
+{\centering \includegraphics{figures/matching-map-1} 
 
 }
 
@@ -834,12 +834,28 @@ R> res <- match_sites(
 
 The output from this function is also a cubble, with additional columns \code{dist} and \code{group} produced from spatial matching, and \code{n_match} from temporal matching.
 
+\begin{CodeChunk}
+\begin{CodeOutput}
+# cubble:   id [8]: nested form
+# bbox:     [144.52, -37.73, 146.06, -36.55]
+# temporal: date [date], matched_var [dbl]
+  id          name        lat  long type   dist group ts       n_match
+  <chr>       <chr>     <dbl> <dbl> <chr> <dbl> <int> <list>     <int>
+1 405234      SEVEN CR~ -36.9  146. river  6.15     5 <tibble>      21
+2 404207      HOLLAND ~ -36.6  146. river  8.54    10 <tibble>      21
+3 ASN00082042 strathbo~ -36.8  146. clim~  6.15     5 <tibble>      21
+4 ASN00082170 benalla ~ -36.6  146. clim~  8.54    10 <tibble>      21
+5 230200      MARIBYRN~ -37.7  145. river  6.17     6 <tibble>      19
+# ... with 3 more rows
+\end{CodeOutput}
+\end{CodeChunk}
+
 Figure \ref{fig:matching} (A) shows the four matched pairs on the map. For these the expected concurrent increase in precipitation and water level can be seen clearly when comparing these variables on a standardised scale, see Figure \ref{fig:matching} (B).
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/matching} 
+{\centering \includegraphics{figures/matching-1} 
 
 }
 

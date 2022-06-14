@@ -50,8 +50,7 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
   cache = TRUE,
-  fig.path = "figures/",
-  fig.height = 10
+  fig.path = "figures/"
 )
 
 options(prompt = "R> ", continue = "+ ",
