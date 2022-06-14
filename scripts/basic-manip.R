@@ -1,4 +1,5 @@
 library(tidyverse)
+library(ggthemes)
 tmax <- weatherdata::historical_tmax |>
   # filter out VIC and NSW stations
   filter(between(stringr::str_sub(id, 7, 8), 46, 90)) |> 
@@ -24,15 +25,17 @@ tmax <- weatherdata::historical_tmax |>
 nsw_vic <- ozmaps::abs_ste |> filter(NAME %in% c("Victoria", "New South Wales"))
 
 p1 <- ggplot() + 
-  geom_sf(data = nsw_vic, fill = "transparent", color = "grey", linetype = "dotted") + 
+  geom_sf(data = nsw_vic, fill = "grey95", color = "white") + 
   geom_glyph(data = tmax, 
              aes(x_major = longitude, x_minor = month, 
                  y_major = latitude, y_minor = tmax,
-                 group = interaction(id, group), color = group),
+                 group = interaction(id, group), 
+                 color = group),
              width = 1, height = 0.5) +
-  scale_color_brewer(palette = "Dark2") + 
+  scale_color_brewer("", palette = "Dark2") + 
   theme_bw() + 
   coord_sf(xlim = c(141, 154), ylim = c(-36, -29)) + 
+  theme_map() +
   theme(legend.position = "bottom") +
   labs(x = "Longitude", y = "Latitude")
 
@@ -45,8 +48,10 @@ tmax |> filter(id == "ASN00048027") |>
              color = group)) +
   geom_line(size = 1.5) +
   scale_color_brewer(palette = "Dark2", guide = "none") +
-  scale_x_continuous(breaks = seq(1, 12, 1)) +
-  labs(x = "Month", y  = "Temperature", title = "ASN00048027: Cobar") +
+  scale_x_continuous(breaks = seq(1, 12, 1), 
+                     labels = c("J", "F", "M", "A", "M", "J", 
+                                "J", "A", "S", "O", "N", "D")) +
+  labs(x = "", y  = "Temp (C)", title = "ASN00048027: Cobar") +
   theme_bw() +
   theme(
     aspect.ratio = 0.3,
@@ -74,4 +79,5 @@ p1 +
   ggimg::geom_point_img(data = single,
                         aes(x = 143.7, y = -30, img = img), size = 6)
 
-ggsave(filename = "figures/basic-manip.png", width = 10, height = 10)
+ggsave(filename = "figures/basic-manip.png", width = 6, 
+       height = 5)

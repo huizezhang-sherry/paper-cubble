@@ -134,6 +134,6 @@ ggplot() +
   ...
 ```
 
-```{r basic-manip, out.width="100%", out.height="70%", fig.cap="A glyph map of the average maximum temperature by month of Victoria and New South Wales weather stations in Australia. On the top left corner is an insetted plot of station Cobar highlighted in the black box."}
+```{r basic-manip, out.width="70%", fig.cap="A glyph map of the average maximum temperature by month for parts of Victoria and New South Wales weather stations in Australia for two five year periods (1971-1975, 2016-2020). An inset (top left) showing detail is the station Cobar. The mothly trend is similar at all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations."}
 knitr::include_graphics(here::here("figures/basic-manip.png"))
 ```
