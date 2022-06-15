@@ -170,7 +170,7 @@ A \code{cubble} object is an S3 class \citep{advr} built on the \code{tibble} cl
 
 The main functions in the package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()}. The following sections explain their roles, why the new cubble structure is needed and how the package relates to existing packages for spatial and temporal data analysis.
 
-The dataset \texttt{climate\_flat} is used to illustrate \pkg{cubble} functionality. This is a subset from National Oceanic and Atmospheric Administration (NOAA) Global Historical Climatology Network Daily (GHCND) data. It contains spatial variables, station ID, latitude, longitude, elevation, station name, World Meteorology Organisation ID, in additional to daily temporal information, maximum and minimum temperature values and precipitation records for year 2020. The first five rows of \texttt{climate\_flat} are shown below:
+The data \code{climate_flat} is used to illustrate \pkg{cubble} functionality. This is a subset from National Oceanic and Atmospheric Administration (NOAA) Global Historical Climatology Network Daily (GHCND) data. It contains spatial variables, station ID, latitude, longitude, elevation, station name, World Meteorology Organisation ID, in additional to daily temporal information, maximum and minimum temperature values and precipitation records for year 2020. The first five rows of \code{climate_flat} are shown below:
 
 \begin{CodeChunk}
 \begin{CodeOutput}
@@ -213,7 +213,7 @@ R> cubble_nested
 \end{CodeOutput}
 \end{CodeChunk}
 
-Printing a cubble provides some information about the data. \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data set. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
+Printing a cubble provides some information about the data. \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
 
 A cubble object is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
 
@@ -342,13 +342,13 @@ R> cubble_unfold |> face_spatial() |> face_temporal()
 # bbox:    [115.97, -32.94, 133.55, -12.42]
 # spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
 #   [dbl]
-  id          date        prcp  tmax  tmin
-  <chr>       <date>     <dbl> <dbl> <dbl>
-1 ASN00009021 2020-01-01     0  31.9  15.3
-2 ASN00009021 2020-01-02     0  24.9  16.4
-3 ASN00009021 2020-01-03     6  23.2  13  
-4 ASN00009021 2020-01-04     0  28.4  12.4
-5 ASN00009021 2020-01-05     0  35.3  11.6
+  id          date        prcp  tmax  tmin  long   lat
+  <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
+1 ASN00009021 2020-01-01     0  31.9  15.3  116. -31.9
+2 ASN00009021 2020-01-02     0  24.9  16.4  116. -31.9
+3 ASN00009021 2020-01-03     6  23.2  13    116. -31.9
+4 ASN00009021 2020-01-04     0  28.4  12.4  116. -31.9
+5 ASN00009021 2020-01-05     0  35.3  11.6  116. -31.9
 # ... with 1,825 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -567,9 +567,15 @@ Some useful controls over the glyph map are also available in the \code{geom_gly
 The six examples here are chosen to illustrate creating a cubble for exploring COVID data where id's need to be matched, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots.
 
 \hypertarget{covid}{%
+<<<<<<< HEAD
 \subsection{Victoria COVID spatiotemporal incidence and spread}\label{covid}}
 
 Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualise COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Here is how to do this with \pkg{cubble}, including how to handle mismatches arising from different names of same LGAs in the two tables. The COVID data is a \texttt{csv} and looks like:
+=======
+\subsection{Victoria COVID data}\label{covid}}
+
+The Victoria State Government in Australia provides daily COVID information about the source and local government area (LGA) of recorded cases. This data can be used to visualise COVID spread when combined with map information available from the Australian Bureau of Statistics. Here we will use the data to demonstrate how to match sites between these two tables with \pkg{cubble} in the case of a few mismatches. The first five rows the data are printed below:
+>>>>>>> 1e8c161ef80050befcd9eb0f0deb1663a1c5585a
 
 \begin{CodeChunk}
 \begin{CodeOutput}
@@ -620,13 +626,16 @@ R> cb <- as_cubble(
 +   )
 \end{CodeInput}
 \begin{CodeOutput}
-! Some sites in the temporal table don't have corresponding spatial information
+! Some sites in the temporal table don't have spatial information
 \end{CodeOutput}
 \begin{CodeOutput}
-! Some sites in the spatial table don't have corresponding temporal information
+! Some sites in the spatial table don't have temporal information
 \end{CodeOutput}
 \begin{CodeOutput}
 ! Use argument `output = "unmatch"` to check on the unmatched key
+\end{CodeOutput}
+\begin{CodeOutput}
+Joining, by = "lga"
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -679,9 +688,9 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 \hypertarget{australian-historical-maximum-temperature}{%
 \subsection{Australian historical maximum temperature}\label{australian-historical-maximum-temperature}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The \textbf{cubble} dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 236 Australian stations from the GHCN starting from year 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This \textbf{cubble} data is already cast into a \code{cubble} data object, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The \textbf{cubble} dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 204 Australian stations from the GHCN starting from year 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This \textbf{cubble} data is already cast into a \code{cubble} data object, with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
 
-First of all, the stations across the two states need to be subsetted from the original data set \code{weatherdata::historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by ``ASN00'') while the next 6 digits encode the station information following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
+First of all, the stations across the two states need to be subsetted from the original data \code{weatherdata::historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by ``ASN00'') while the next 6 digits encode the station information following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -690,7 +699,7 @@ R> tmax <- weatherdata::historical_tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-and extracting the time periods 1971-1975 and 2016-2020 is a time operation and therefore the nested cubble needs to be switched to the long cubble form by \code{stretch()}:
+and extracting the time periods 1971-1975 and 2016-2020 is a time operation and therefore the nested cubble needs to be switched to the long cubble form by \code{face_temporal()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -720,11 +729,11 @@ R> tmax <- tmax |> face_spatial() |> filter(nrow(ts) == 24)
 \end{CodeInput}
 \end{CodeChunk}
 
-Lastly, to create a glyph map where the series of each station are overlayed on a map of Australia, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates defining the bounding box for the plot need to be on the same table. For that, spatial variables can be moved to the long form with \code{unfold()}:
+Lastly, to create a glyph map where the series of each station are overlayed on a map of Australia, both the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates defining the bounding box for the plot need to be on the same table. For that, spatial variables can be moved to the long form with \code{unfold()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax |> face_temporal() |> unfold(latitude, longitude)
+R> tmax <- tmax |> face_temporal() |> unfold(long, lat)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -750,7 +759,7 @@ R> ggplot() +
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth]{../figures/basic-manip} 
+{\centering \includegraphics{figures/basic-manip-1} 
 
 }
 
@@ -763,7 +772,7 @@ R> ggplot() +
 
 In the previous example, some overlapping of the glyphs occurred for a few nearby stations such as the pairs (151E, 34S) and (152E, 33S). This is a problem when mapping more stations at the national level. Aggregation can be helpful in grouping series into clusters before visualising the clusters with a glyph map. This new example shows how to organise data at both levels with \code{switch_key()}.
 
-\code{weatherdata::climate_full}, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for 639 stations in Australia from 2016 to 2020. A simple \(k\)-means algorithm based on the distance matrix between stations is used to create 20 clusters. The dataset \code{station_nested} is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used as well, as long as they provide a mapping from each station to a cluster.
+\code{weatherdata::climate_full}, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for 640 stations in Australia from 2016 to 2020. A simple \(k\)-means algorithm based on the distance matrix between stations is used to create 20 clusters. The data \code{station_nested} is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used as well, as long as they provide a mapping from each station to a cluster.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -864,7 +873,7 @@ Figure \ref{fig:matching} (A) shows the four matched pairs on the map. For these
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis data}\label{era5-climate-reanalysis-data}}
 
-The ERA5 dataset \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF) and it can be directly downloaded from \href{https://cds.climate.copernicus.eu/cdsapp\#!/dataset/reanalysis-era5-pressure-levels?tab=overview}{Copernicus Climate Data Store (CDS)} website or programmatically via the R package \pkg{ecmwfr} \citep{ecwmfr}. In this example we focus on the \code{era5-pressure} data which provides hourly data on pressure levels from 1970 to present. Here we specifically look at the information contained on the variables \emph{specific humidity} measuring the mass of water vapor per kilogram of moist air and the \emph{geopotential} variable recording the gravitational potential energy of a unit mass, at a particular location, relative to mean sea level. The goal of this example is to reproduce the break-up of the southern polar vortex that happened in late September and early October in 2022 in the stratosphere in the Southern Hemisphere. Therefore, we filter data corresponding to the Southern Hemisphere and restrict our analysis to four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Once downloaded, the data can be read into a \code{cubble} as:
+The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF) and it can be directly downloaded from \href{https://cds.climate.copernicus.eu/cdsapp\#!/dataset/reanalysis-era5-pressure-levels?tab=overview}{Copernicus Climate Data Store (CDS)} website or programmatically via the R package \pkg{ecmwfr} \citep{ecwmfr}. In this example we focus on the \code{era5-pressure} data which provides hourly data on pressure levels from 1970 to present. Here we specifically look at the information contained on the variables \emph{specific humidity} measuring the mass of water vapor per kilogram of moist air and the \emph{geopotential} variable recording the gravitational potential energy of a unit mass, at a particular location, relative to mean sea level. The goal of this example is to reproduce the break-up of the southern polar vortex that happened in late September and early October in 2022 in the stratosphere in the Southern Hemisphere. Therefore, we filter data corresponding to the Southern Hemisphere and restrict our analysis to four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Once downloaded, the data can be read into a \code{cubble} as:
 
 \begin{CodeChunk}
 \begin{CodeInput}

@@ -13,7 +13,7 @@ A \code{cubble} object is an S3 class [@advr] built on the \code{tibble} class, 
 
 The main functions in the package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()}. The following sections explain their roles, why the new cubble structure is needed and how the package relates to existing packages for spatial and temporal data analysis.
 
-The dataset `climate_flat` is used to illustrate \pkg{cubble} functionality. This is a subset from National Oceanic and Atmospheric Administration (NOAA) Global Historical Climatology Network Daily (GHCND) data. It contains spatial variables, station ID, latitude, longitude, elevation, station name, World Meteorology Organisation ID, in additional to daily temporal information,  maximum and minimum temperature values and precipitation records for year 2020. The first five rows of `climate_flat` are shown below:
+The data \code{climate_flat} is used to illustrate \pkg{cubble} functionality. This is a subset from National Oceanic and Atmospheric Administration (NOAA) Global Historical Climatology Network Daily (GHCND) data. It contains spatial variables, station ID, latitude, longitude, elevation, station name, World Meteorology Organisation ID, in additional to daily temporal information,  maximum and minimum temperature values and precipitation records for year 2020. The first five rows of \code{climate_flat} are shown below:
 
 ```{r}
 cubble::climate_flat
@@ -31,7 +31,7 @@ cubble_nested <- climate_flat |>
 cubble_nested
 ```
 
-Printing a cubble provides some information about the data. \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data set. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
+Printing a cubble provides some information about the data. \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
 
 A cubble object is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
 
