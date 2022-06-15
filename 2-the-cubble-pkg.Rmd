@@ -75,7 +75,7 @@ cubble_unfold <- cubble_long |> unfold(long, lat)
 cubble_unfold
 ```
 
-This function should generally be used in the last step of the analysis since it is a temporary operation, meaning that these added spatial variables will disappear, if switched to the nested form and then switched back:
+This function should generally be used in the last step of the analysis since it is a temporary operation, meaning that these added spatial variables will disappear if switched to the nested form and then switched back:
 
 ```{r echo = TRUE}
 cubble_unfold |> face_spatial() |> face_temporal()

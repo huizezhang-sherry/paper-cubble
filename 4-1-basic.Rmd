@@ -5,6 +5,8 @@ output: html_document
 
 # Examples {#examples}
 
+The six examples here are chosen to illustrate creating a cubble for exploring COVID data where id's need to be matched, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. 
+
 ## Victoria covid data {#covid}
 
 The Victoria State Government in Australia provides daily COVID information about the source and local government area (LGA) of recorded cases. This data can be used to visualise COVID spread when combined with map information available from the Australian Bureau of Statistics. Here we will use the data to demonstrate how to match sites between these two tables with \pkg{cubble} in the case of a few mismatches. The first five rows these data sets are printed below:  
