@@ -43,7 +43,7 @@ covid |> head(5)
 lga |> head(5)
 ```
 
-A \code{cubble} object can be created from separate spatial and temporal tables in a list, the other arguments (\code{key}, \code{index}, and \code{coords}) are described in section \@ref(create). The function \code{as_cubble()} will automatically try to match the sites in both tables and show a warning message in case of missing information (mismatch between the sites in the two tables).
+A \code{cubble} object can be created from separate spatial and temporal tables in a list, the other arguments (\code{key}, \code{index}, and \code{coords}) are described in Section \@ref(create). The function \code{as_cubble()} will automatically try to match the sites in both tables and show a warning message in case of missing information (mismatch between the sites in the two tables).
 
 ```{r echo = TRUE, warning = TRUE, message= TRUE}
 cb <- as_cubble(
