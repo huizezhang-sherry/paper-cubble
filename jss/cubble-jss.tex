@@ -342,13 +342,13 @@ R> cubble_unfold |> face_spatial() |> face_temporal()
 # bbox:    [115.97, -32.94, 133.55, -12.42]
 # spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
 #   [dbl]
-  id          date        prcp  tmax  tmin
-  <chr>       <date>     <dbl> <dbl> <dbl>
-1 ASN00009021 2020-01-01     0  31.9  15.3
-2 ASN00009021 2020-01-02     0  24.9  16.4
-3 ASN00009021 2020-01-03     6  23.2  13  
-4 ASN00009021 2020-01-04     0  28.4  12.4
-5 ASN00009021 2020-01-05     0  35.3  11.6
+  id          date        prcp  tmax  tmin  long   lat
+  <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
+1 ASN00009021 2020-01-01     0  31.9  15.3  116. -31.9
+2 ASN00009021 2020-01-02     0  24.9  16.4  116. -31.9
+3 ASN00009021 2020-01-03     6  23.2  13    116. -31.9
+4 ASN00009021 2020-01-04     0  28.4  12.4  116. -31.9
+5 ASN00009021 2020-01-05     0  35.3  11.6  116. -31.9
 # ... with 1,825 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -621,13 +621,16 @@ R> cb <- as_cubble(
 +   )
 \end{CodeInput}
 \begin{CodeOutput}
-! Some sites in the temporal table don't have corresponding spatial information
+! Some sites in the temporal table don't have spatial information
 \end{CodeOutput}
 \begin{CodeOutput}
-! Some sites in the spatial table don't have corresponding temporal information
+! Some sites in the spatial table don't have temporal information
 \end{CodeOutput}
 \begin{CodeOutput}
 ! Use argument `output = "unmatch"` to check on the unmatched key
+\end{CodeOutput}
+\begin{CodeOutput}
+Joining, by = "lga"
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -680,7 +683,7 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 \hypertarget{australian-historical-maximum-temperature}{%
 \subsection{Australian historical maximum temperature}\label{australian-historical-maximum-temperature}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The \textbf{cubble} dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 236 Australian stations from the GHCN starting from year 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This \textbf{cubble} data is already cast into a \code{cubble} data object, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The \textbf{cubble} dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 204 Australian stations from the GHCN starting from year 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This \textbf{cubble} data is already cast into a \code{cubble} data object, with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
 
 First of all, the stations across the two states need to be subsetted from the original data set \code{weatherdata::historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by ``ASN00'') while the next 6 digits encode the station information following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
 
@@ -691,7 +694,7 @@ R> tmax <- weatherdata::historical_tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-and extracting the time periods 1971-1975 and 2016-2020 is a time operation and therefore the nested cubble needs to be switched to the long cubble form by \code{stretch()}:
+and extracting the time periods 1971-1975 and 2016-2020 is a time operation and therefore the nested cubble needs to be switched to the long cubble form by \code{face_temporal()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -721,11 +724,11 @@ R> tmax <- tmax |> face_spatial() |> filter(nrow(ts) == 24)
 \end{CodeInput}
 \end{CodeChunk}
 
-Lastly, to create a glyph map where the series of each station are overlayed on a map of Australia, both the major (\code{longitude}, \code{latitude}) and minor (\code{month}, \code{tmax}) coordinates defining the bounding box for the plot need to be on the same table. For that, spatial variables can be moved to the long form with \code{unfold()}:
+Lastly, to create a glyph map where the series of each station are overlayed on a map of Australia, both the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates defining the bounding box for the plot need to be on the same table. For that, spatial variables can be moved to the long form with \code{unfold()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax |> face_temporal() |> unfold(latitude, longitude)
+R> tmax <- tmax |> face_temporal() |> unfold(long, lat)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -751,7 +754,7 @@ R> ggplot() +
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth]{../figures/basic-manip} 
+{\centering \includegraphics{figures/basic-manip-1} 
 
 }
 
@@ -764,7 +767,7 @@ R> ggplot() +
 
 In the previous example, some overlapping of the glyphs occurred for a few nearby stations such as the pairs (151E, 34S) and (152E, 33S). This is a problem when mapping more stations at the national level. Aggregation can be helpful in grouping series into clusters before visualising the clusters with a glyph map. This new example shows how to organise data at both levels with \code{switch_key()}.
 
-\code{weatherdata::climate_full}, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for 639 stations in Australia from 2016 to 2020. A simple \(k\)-means algorithm based on the distance matrix between stations is used to create 20 clusters. The dataset \code{station_nested} is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used as well, as long as they provide a mapping from each station to a cluster.
+\code{weatherdata::climate_full}, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for 640 stations in Australia from 2016 to 2020. A simple \(k\)-means algorithm based on the distance matrix between stations is used to create 20 clusters. The dataset \code{station_nested} is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used as well, as long as they provide a mapping from each station to a cluster.
 
 \begin{CodeChunk}
 \begin{CodeInput}
