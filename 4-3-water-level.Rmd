@@ -22,12 +22,12 @@ river <- river |> mutate(type = "river")
 ```{r matching-map, fig.height = 7, fig.width=10, fig.cap="Location of weather stations and river gauges in Victoria, Australia."}
 vic_map <- rmapshaper::ms_simplify(ozmaps::abs_ste |> filter(NAME == "Victoria"))  
 ggplot() + 
-  geom_sf(data = vic_map, fill = "transparent", color = "grey") + 
+  geom_sf(data = vic_map, fill = "grey95", color = "white") + 
   geom_point(data = dplyr::bind_rows(river, climate), 
              aes(x = long, y = lat, color = type)) + 
-  ggplot2::theme_bw() +
-  ggplot2::theme(legend.position = "bottom") +
-  ggplot2::labs(x = "Longitude", y = "Latitude") + 
+  ggthemes::theme_map() +
+  theme(legend.position = "bottom") +
+  labs(x = "Longitude", y = "Latitude") + 
   scale_color_brewer(palette = "Dark2") 
 ```
 
@@ -53,12 +53,12 @@ Figure \ref{fig:matching} (A) shows the four matched pairs on the map. For these
 
 ```{r matching, fig.height = 5, fig.width = 10, fig.cap="Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here."}
 p1 <-ggplot() + 
-  geom_sf(data = vic_map, fill = "transparent", color = "grey") + 
+  geom_sf(data = vic_map, fill = "grey95", color = "white") + 
   geom_point(data = res, aes(x = long, y = lat, color = type)) +
   ggrepel::geom_label_repel(
     data = res |> filter(type == "river"), aes(x = long, y = lat, label = group)) +
   scale_color_brewer(palette = "Dark2")  + 
-  ggplot2::theme_bw() +
+  ggthemes::theme_map() +
   ggplot2::theme(legend.position = "bottom") +
   ggplot2::labs(x = "Longitude", y = "Latitude")
 

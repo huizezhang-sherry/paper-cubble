@@ -189,8 +189,6 @@ The data \code{climate_flat} is used to illustrate \pkg{cubble} functionality. T
 \hypertarget{create}{%
 \subsection{Create a cubble}\label{create}}
 
-\textcolor{magenta}{A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble, sf}. Section \ref{covid} describes converting multiple tables into a cubble object and Section \ref{netcdf} illustrates how to convert a netCDF object.
-
 The function \code{as_cubble()} is used to create a cubble with three arguments: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order (longitude, latitude). The arguments \code{key} and \code{index} follow the wording in \pkg{tsibble} to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a cubble out of \code{climate_flat} (a single tibble) with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
 
 \begin{CodeChunk}
@@ -235,6 +233,8 @@ R> cubble_nested |>
 5 ASN00015131 -17.6  134. 220   elliott        94236 <tibble>       63
 \end{CodeOutput}
 \end{CodeChunk}
+
+A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble, sf. Section \ref{covid} describes converting multiple tables into a cubble object and Section \ref{netcdf} illustrates how to convert a netCDF object.
 
 \hypertarget{change-focus-by-facing-the-time-variables}{%
 \subsection{Change focus by facing the time-variables}\label{change-focus-by-facing-the-time-variables}}
@@ -567,17 +567,14 @@ Some useful controls over the glyph map are also available in the \code{geom_gly
 The six examples here are chosen to illustrate creating a cubble for exploring COVID data where id's need to be matched, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots.
 
 \hypertarget{covid}{%
-<<<<<<< HEAD
-\subsection{Victoria COVID spatiotemporal incidence and spread}\label{covid}}
+\subsection{Victoria COVID spatio-temporal incidence and spread}\label{covid}}
 
-Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualise COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Here is how to do this with \pkg{cubble}, including how to handle mismatches arising from different names of same LGAs in the two tables. The COVID data is a \texttt{csv} and looks like:
-=======
-\subsection{Victoria COVID data}\label{covid}}
-
-The Victoria State Government in Australia provides daily COVID information about the source and local government area (LGA) of recorded cases. This data can be used to visualise COVID spread when combined with map information available from the Australian Bureau of Statistics. Here we will use the data to demonstrate how to match sites between these two tables with \pkg{cubble} in the case of a few mismatches. The first five rows the data are printed below:
->>>>>>> 1e8c161ef80050befcd9eb0f0deb1663a1c5585a
+Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualise COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Here is how to do this with \pkg{cubble}, including how to handle mismatches arising from different names of the same LGAs in the two tables. The COVID data is a \texttt{csv} and looks like:
 
 \begin{CodeChunk}
+\begin{CodeInput}
+R> covid |> head(5)
+\end{CodeInput}
 \begin{CodeOutput}
 # A tsibble: 5 x 5 [1D]
 # Key:       lga [1]
@@ -595,6 +592,9 @@ The Victoria State Government in Australia provides daily COVID information abou
 and the spatial polygons are an ESRI shapefile that looks like:
 
 \begin{CodeChunk}
+\begin{CodeInput}
+R> lga |> head(5)
+\end{CodeInput}
 \begin{CodeOutput}
 Simple feature collection with 5 features and 7 fields
 Geometry type: MULTIPOLYGON
@@ -688,7 +688,7 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 \hypertarget{australian-historical-maximum-temperature}{%
 \subsection{Australian historical maximum temperature}\label{australian-historical-maximum-temperature}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The \textbf{cubble} dataset \code{weatherdata::historical_tmax} extracts the maximum temperature for 204 Australian stations from the GHCN starting from year 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This \textbf{cubble} data is already cast into a \code{cubble} data object, with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data \code{weatherdata::historical_tmax} is a subset containing the records of maximum temperature for 204 Australian stations 1969 through 1969. and provides information also on the latitude, longitude and elevation of each of the stations. This \textbf{cubble} data is already cast into a \code{cubble} data object, with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
 
 First of all, the stations across the two states need to be subsetted from the original data \code{weatherdata::historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by ``ASN00'') while the next 6 digits encode the station information following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
 
