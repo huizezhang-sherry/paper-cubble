@@ -567,14 +567,11 @@ Some useful controls over the glyph map are also available in the \code{geom_gly
 The six examples here are chosen to illustrate creating a cubble for exploring COVID data where id's need to be matched, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots.
 
 \hypertarget{covid}{%
-\subsection{Victoria covid data}\label{covid}}
+\subsection{Victoria COVID spatiotemporal incidence and spread}\label{covid}}
 
-The Victoria State Government in Australia provides daily COVID information about the source and local government area (LGA) of recorded cases. This data can be used to visualise COVID spread when combined with map information available from the Australian Bureau of Statistics. Here we will use the data to demonstrate how to match sites between these two tables with \pkg{cubble} in the case of a few mismatches. The first five rows these data sets are printed below:
+Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualise COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Here is how to do this with \pkg{cubble}, including how to handle mismatches arising from different names of same LGAs in the two tables. The COVID data is a \texttt{csv} and looks like:
 
 \begin{CodeChunk}
-\begin{CodeInput}
-R> covid |> head(5)
-\end{CodeInput}
 \begin{CodeOutput}
 # A tsibble: 5 x 5 [1D]
 # Key:       lga [1]
@@ -587,9 +584,11 @@ R> covid |> head(5)
 4 2022-01-04 Alpine (S) Contact with a confirmed case     4        NA
 5 2022-01-05 Alpine (S) Contact with a confirmed case     2        NA
 \end{CodeOutput}
-\begin{CodeInput}
-R> lga |> head(5)
-\end{CodeInput}
+\end{CodeChunk}
+
+and the spatial polygons are an ESRI shapefile that looks like:
+
+\begin{CodeChunk}
 \begin{CodeOutput}
 Simple feature collection with 5 features and 7 fields
 Geometry type: MULTIPOLYGON
@@ -611,7 +610,7 @@ Geodetic CRS:  WGS 84
 \end{CodeOutput}
 \end{CodeChunk}
 
-A \code{cubble} object can be created from separate spatial and temporal tables in a list, the other arguments (\code{key}, \code{index}, and \code{coords}) are described in section \ref{create}. The function \code{as_cubble()} will automatically try to match the sites in both tables and show a warning message in case of missing information (mismatch between the sites in the two tables).
+The function \code{as_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments (\code{key}, \code{index}, and \code{coords}) (as described in Section \ref{create}). It will automatically try to match the sites in both tables and will show a warning message when there are mismatches, as shown below:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -631,7 +630,7 @@ R> cb <- as_cubble(
 \end{CodeOutput}
 \end{CodeChunk}
 
-In the output above we see that this is an issue here, and we proceed to use \code{output = "unmatch"} to check which locations are concerned. Note that \pkg{cubble} will attempt to pair the unmatched sites, these are shown separately from the ones that cannot be paired.
+It can be seen that there are two-way mismatches -- LGAs in the COVID data that don't match with LGAs in the spatial polygon data, and vice versa. The mismatches can be identified by using the \code{output = "unmatch"} argument.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -661,7 +660,7 @@ $others$spatial
 \end{CodeOutput}
 \end{CodeChunk}
 
-This information is helpful when cleaning up the data before creating the cubble again:
+With this information both tables can be fixed, to create the desired cubble, as follows:
 
 \begin{CodeChunk}
 \begin{CodeInput}
