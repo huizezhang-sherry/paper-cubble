@@ -21,8 +21,6 @@ cubble::climate_flat
 
 ## Create a cubble {#create}
 
-\sherry{A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble, sf}. Section \@ref(covid) describes converting multiple tables into a cubble object and Section \@ref(netcdf) illustrates how to convert a netCDF object.
-
 The function \code{as_cubble()} is used to create a cubble with three arguments: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order  (longitude, latitude). The arguments \code{key} and \code{index} follow the wording in \pkg{tsibble} to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a cubble out of \code{climate_flat} (a single tibble) with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
 
 ```{r echo = TRUE}
@@ -39,6 +37,9 @@ A cubble object is a subclass of the \code{rowwise_df} class where each row form
 cubble_nested |>
   mutate(rain_day = sum(ts$prcp != 0))
 ```
+
+A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble, sf. Section \@ref(covid) describes converting multiple tables into a cubble object and Section \@ref(netcdf) illustrates how to convert a netCDF object.
+
 
 
 ## Change focus by facing the time-variables
