@@ -1,8 +1,10 @@
 ---
-title: "appendix to cubble: An R Package for Organizing and Wrangling Multivariate Spatio-temporal Data"
+title: "Appendix to cubble: An R Package for Organizing and Wrangling Multivariate Spatio-temporal Data"
 author: "Sherry Zhang"
 date: '2022-06-14'
-output: pdf_document
+output: 
+  pdf_document:
+    number_section: true
 ---
 
 ```{r setup, include=FALSE}
@@ -10,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-# Appendix
+# Linking pipeline
 
 Figure \ref{fig:illu-interactive-2} illustrates the linking pipeline from a point selection on the time series to the map.
 
@@ -18,4 +20,44 @@ Figure \ref{fig:illu-interactive-2} illustrates the linking pipeline from a poin
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.005.png"))
 ```
 
-\newpage
+
+# Script to obtain example data
+
+The script below presents the codes required to obtain the data, `historical_tmax`, used in the example of Section 5.2 *Australian historical maximum temperature*. The function `rnoaa::meteo_pull_monitors()` may take a while to query a large number of stations in the first time. A copy of the data is provided in the data folder of the paper repository at: https://github.com/huizezhang-sherry/paper-cubble.
+
+
+```{r eval = FALSE}
+library(tidyverse)
+library(cubble)
+all_stations <- rnoaa::ghcnd_stations() |>
+  filter(str_starts(id, "ASN")) |> # Australian stations start wiht "ASN"
+  filter(last_year >= 2020) |>
+  mutate(wmo_id = as.numeric(wmo_id), name = str_to_lower(name)) |>
+  select(-state, -gsn_flag) |>
+  select(id, longitude, latitude, elevation, name,
+         wmo_id, element, first_year, last_year) |>
+  rename(long = longitude, lat = latitude, elev = elevation) |> 
+  filter(element == "TMAX", first_year < 1970, !is.na(wmo_id))
+
+raw_tmax <- all_stations |>
+  rowwise() |>
+  mutate(ts = list(rnoaa::meteo_pull_monitors(
+    monitors = id, var = "TMAX",
+    date_min = glue::glue("{first_year}-01-01"),
+    date_max = glue::glue("{last_year}-12-31")
+    ) |>
+      select(-id)
+    )
+  )
+
+historical_tmax <- raw_tmax |>
+  select(-element) |>
+  unnest(ts) |>
+  mutate(tmax = tmax/10) |>
+  filter(lubridate::year(date) %in% c(1971: 1975, 2016:2020)) |> 
+  as_cubble(index = date, key = id, coords = c(long, lat))
+
+save(historical_tmax, file = here::here("data/historical_tmax.rda"))
+```
+
+
