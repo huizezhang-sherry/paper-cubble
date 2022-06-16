@@ -14,19 +14,19 @@ load(here::here("data/station_nested.rda"))
 ```
 
 ```{r eval = FALSE, echo = TRUE}
-station_nested <- weatherdata::climate_full |> mutate(cluster = ...)
+station_nested <- weatherdata::climate_full %>% mutate(cluster = ...)
 ```
 
 To create a group-level cubble, use \code{switch_key()} with the new key variable, \code{cluster}:
 
 ```{r echo = TRUE}
-cluster_nested <- station_nested |> switch_key(cluster)
+cluster_nested <- station_nested %>% switch_key(cluster)
 ```
 
 With the group-level cubble, \code{get_centroid()} is useful to compute the centroid of each cluster, which will be used as the major axis for the glyph map later:
 
 ```{r eval = FALSE, echo = TRUE}
-cluster_nested <- cluster_nested |> get_centroid()
+cluster_nested <- cluster_nested %>% get_centroid()
 ```
 
 Long form cubble at both levels can be accessed through stretching the nested form. With access to both station and cluster-level cubbles, various plots can be made to understand the cluster. Figure \ref{fig:basic-agg} shows two example plots that can be made with this data. Subplot A is a glyph map made with the cluster level cubble in the long form and subplot B inspects the station membership of each cluster using the station level cubble in the nested form.
@@ -35,17 +35,17 @@ Long form cubble at both levels can be accessed through stretching the nested fo
 coords <- cbind(prcp_aus$long, prcp_aus$lat)
 dist_raw <- geosphere::distm(coords, coords)
 
-station_long <- cubble::prcp_aus |>
-  face_temporal(ts) |>
-  mutate(wk = lubridate::week(date)) |>
-  group_by(wk) |>
-  summarise(prcp = sum(prcp, na.rm = TRUE)) |>
+station_long <- cubble::prcp_aus %>%
+  face_temporal(ts) %>%
+  mutate(wk = lubridate::week(date)) %>%
+  group_by(wk) %>%
+  summarise(prcp = sum(prcp, na.rm = TRUE)) %>%
   unfold(cluster)
 
 set.seed(123)
-station_nested <- station_long |>
-  face_spatial() |>
-  strip_rowwise() |>
+station_nested <- station_long %>%
+  face_spatial() %>%
+  strip_rowwise() %>%
   mutate(cluster = kmeans(dist_raw,centers = 20, nstart = 500)$cluster)
 save(station_nested, file = here::here("data/station_nested.rda"))
 ```
@@ -53,24 +53,24 @@ save(station_nested, file = here::here("data/station_nested.rda"))
 
 ```{r basic-agg, fig.height = 7, fig.width = 15, fig.cap="Profile of aggregated precipitation at 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number is printed in the middle of the y minor axis and can be used as a reference line to read the magnitude. Subplot B shows the station membership of each cluster."}
 load(here::here("data/station_nested.rda"))
-cluster_nested <- station_nested |>
-  switch_key(cluster) |> 
+cluster_nested <- station_nested %>%
+  switch_key(cluster) %>% 
   get_centroid()
 
-cluster_long <- cluster_nested |> 
-  face_temporal() |> 
-  group_by(wk) |>
-  summarise(prcp = mean(prcp, na.rm = TRUE)) |> 
+cluster_long <- cluster_nested %>% 
+  face_temporal() %>% 
+  group_by(wk) %>%
+  summarise(prcp = mean(prcp, na.rm = TRUE)) %>% 
   unfold(cent_long, cent_lat)
 
 state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
 
-ggplot_smooth <- cluster_long |> 
+ggplot_smooth <- cluster_long %>% 
   ggplot() +
   geom_smooth(aes(x = wk, y = prcp, group = cluster), span = 0.4) 
 
-smoother <- layer_data(ggplot_smooth) |> 
-  left_join(cluster_long |> select(cluster, cent_long, cent_lat), by = c("group" = "cluster"))
+smoother <- layer_data(ggplot_smooth) %>% 
+  left_join(cluster_long %>% select(cluster, cent_long, cent_lat), by = c("group" = "cluster"))
 
 p1 <- ggplot(data = smoother, 
              aes(x_minor = x, y_minor = y, x_major = cent_long, y_major = cent_lat)) + 
@@ -85,7 +85,7 @@ p2 <- ggplot() +
   geom_sf(data = state_map, inherit.aes = FALSE,
           color = "grey80", alpha = 0.4, linetype = 3) + 
   geom_point(data = station_nested, aes(x = long, y = lat), size = 0.5) +
-  ggforce::geom_mark_hull(data = cluster_nested |> tidyr::unnest(hull),
+  ggforce::geom_mark_hull(data = cluster_nested %>% tidyr::unnest(hull),
                           expand = 0, radius = 0,
                           aes(x = long, y = lat, group = cluster)) + 
   theme_void()

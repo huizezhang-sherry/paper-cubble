@@ -29,32 +29,32 @@ The script below presents the codes required to obtain the data, `historical_tma
 ```{r eval = FALSE}
 library(tidyverse)
 library(cubble)
-all_stations <- rnoaa::ghcnd_stations() |>
-  filter(str_starts(id, "ASN")) |> # Australian stations start wiht "ASN"
-  filter(last_year >= 2020) |>
-  mutate(wmo_id = as.numeric(wmo_id), name = str_to_lower(name)) |>
-  select(-state, -gsn_flag) |>
+all_stations <- rnoaa::ghcnd_stations() %>%
+  filter(str_starts(id, "ASN")) %>% # Australian stations start wiht "ASN"
+  filter(last_year >= 2020) %>%
+  mutate(wmo_id = as.numeric(wmo_id), name = str_to_lower(name)) %>%
+  select(-state, -gsn_flag) %>%
   select(id, longitude, latitude, elevation, name,
-         wmo_id, element, first_year, last_year) |>
-  rename(long = longitude, lat = latitude, elev = elevation) |> 
+         wmo_id, element, first_year, last_year) %>%
+  rename(long = longitude, lat = latitude, elev = elevation) %>% 
   filter(element == "TMAX", first_year < 1970, !is.na(wmo_id))
 
-raw_tmax <- all_stations |>
-  rowwise() |>
+raw_tmax <- all_stations %>%
+  rowwise() %>%
   mutate(ts = list(rnoaa::meteo_pull_monitors(
     monitors = id, var = "TMAX",
     date_min = glue::glue("{first_year}-01-01"),
     date_max = glue::glue("{last_year}-12-31")
-    ) |>
+    ) %>%
       select(-id)
     )
   )
 
-historical_tmax <- raw_tmax |>
-  select(-element) |>
-  unnest(ts) |>
-  mutate(tmax = tmax/10) |>
-  filter(lubridate::year(date) %in% c(1971: 1975, 2016:2020)) |> 
+historical_tmax <- raw_tmax %>%
+  select(-element) %>%
+  unnest(ts) %>%
+  mutate(tmax = tmax/10) %>%
+  filter(lubridate::year(date) %in% c(1971: 1975, 2016:2020)) %>% 
   as_cubble(index = date, key = id, coords = c(long, lat))
 
 save(historical_tmax, file = here::here("data/historical_tmax.rda"))

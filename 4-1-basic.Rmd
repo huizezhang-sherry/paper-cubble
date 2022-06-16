@@ -39,13 +39,13 @@ lga <- strayr::read_absmap("lga2018") %>%
 ```
 
 ```{r echo = TRUE}
-covid |> head(5)
+covid %>% head(5)
 ```
 
 and the spatial polygons are an ESRI shapefile that looks like:
 
 ```{r echo = TRUE}
-lga |> head(5)
+lga %>% head(5)
 ```
 
 The function \code{as_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments (\code{key}, \code{index}, and \code{coords}) (as described in Section \@ref(create)). It will automatically try to match the sites in both tables and will show a warning message when there are mismatches, as shown below:
@@ -89,44 +89,44 @@ The Global Historical Climatology Network (GHCN) provides daily climate measures
 First of all, the stations across the two states need to be subsetted from the original data  \code{weatherdata::historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by "ASN00") while the next 6 digits encode the station information following the [Australian Bureau of Meteorology (BOM)](http://www.bom.gov.au/climate/cdo/about/site-num.shtml) coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
 
 ```{r echo = TRUE}
-tmax <- weatherdata::historical_tmax |>
+tmax <- weatherdata::historical_tmax %>%
   filter(between(stringr::str_sub(id, 7, 8), 46, 90))
 ```
 
 and extracting the time periods 1971-1975 and 2016-2020 is a time operation and therefore the nested cubble needs to be switched to the long cubble form by \code{face_temporal()}:
 
 ```{r echo = TRUE}
-tmax <- tmax |>
-  face_temporal() |>
+tmax <- tmax %>%
+  face_temporal() %>%
   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020))
 ```
 
 A monthly maximum average temperature is then calculated for both periods where \code{cubble} easily allows to compute this time operation across all the stations:
 
 ```{r echo = TRUE}
-tmax <- tmax |>
+tmax <- tmax %>%
   group_by(month = lubridate::month(date),
          group = as.factor(ifelse(lubridate::year(date) > 2015,
-                                  "2016 ~ 2020", "1971 ~ 1975"))) |>
+                                  "2016 ~ 2020", "1971 ~ 1975"))) %>%
   summarise(tmax = mean(tmax, na.rm = TRUE))
 ```
 
 Observing the results of the operation above show that a few stations do not have records during the time period 1971-1975. Further investigation shows that while the first and last year of each series for those stations are recorded, the years in between are not. Hence,  these stations are  located and filtered out by examining whether the summarised time series has 24 months. Here, the long cubble needs to be switched to the nested form to carry out this spatial operation using \code{face_spatial()}:
 
 ```{r echo = TRUE}
-tmax <- tmax |> face_spatial() |> filter(nrow(ts) == 24)
+tmax <- tmax %>% face_spatial() %>% filter(nrow(ts) == 24)
 ```
 
 Lastly, to create a glyph map where the series of each station are overlayed on a map of Australia, both the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates defining the bounding box for the plot need to be on the same table. For that, spatial variables can be moved to the long form with \code{unfold()}:
 
 ```{r echo = TRUE}  
-tmax <- tmax |> face_temporal() |> unfold(long, lat)
+tmax <- tmax %>% face_temporal() %>% unfold(long, lat)
 ```
 
 the variable storing the maximum monthly average temperatures \code{tmax} can then be supplied to \code{geom_glyph()} for the glyph map in Figure \ref{fig:basic-manip} with a station inset on the top left corner:
 
 ```{r eval = FALSE, echo = TRUE}
-nsw_vic <- ozmaps::abs_ste |>
+nsw_vic <- ozmaps::abs_ste %>%
   filter(NAME %in% c("Victoria", "New South Wales"))
 
 ggplot() +
@@ -142,7 +142,7 @@ ggplot() +
 
 ```{r create-inset, eval = FALSE}
 
-tmax |> filter(id == "ASN00048027") |>
+tmax %>% filter(id == "ASN00048027") %>%
   ggplot(aes(x = month,
              y = tmax,
              color = group)) +
@@ -164,7 +164,7 @@ tmax |> filter(id == "ASN00048027") |>
 
 
 ```{r basic-manip, fig.height = 10, fig.width = 10, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations."}
-nsw_vic <- ozmaps::abs_ste |> filter(NAME %in% c("Victoria", "New South Wales"))
+nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria", "New South Wales"))
 
 p1 <- ggplot() + 
   geom_sf(data = nsw_vic, fill = "grey95", color = "white") + 
@@ -181,7 +181,7 @@ p1 <- ggplot() +
   theme(legend.position = "bottom") +
   labs(x = "Longitude", y = "Latitude")
 
-box_df <- tmax |> face_spatial() |> filter(id == "ASN00048027")
+box_df <- tmax %>% face_spatial() %>% filter(id == "ASN00048027")
 single <- tibble::tibble(img = here::here("figures/basic-manip-inset.png"))
 
 p1 +

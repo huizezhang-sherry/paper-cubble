@@ -9,18 +9,18 @@ output: html_document
 The Bureau of Meteorology collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges. The collected variables include: electrical conductivity, turbidity, watercourse discharge, watercourse level, and water temperature. We expect that the water level should be related to the precipitation available from climate data, since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria, and we will try to match water gauges with nearby weather stations, taking into account both spatial and temporal information from 2020.
 
 ```{r}
-climate <- weatherdata::climate_full |>
-  filter(between(stringr::str_sub(id, 7, 8), 76, 90)) |>
-  face_temporal() |>
-  filter(lubridate::year(date) == 2020) |>
-  face_spatial() |>
+climate <- weatherdata::climate_full %>%
+  filter(between(stringr::str_sub(id, 7, 8), 76, 90)) %>%
+  face_temporal() %>%
+  filter(lubridate::year(date) == 2020) %>%
+  face_spatial() %>%
   mutate(type = "climate")
 
-river <- river |> mutate(type = "river")
+river <- river %>% mutate(type = "river")
 ```
 
 ```{r matching-map, fig.height = 7, fig.width=10, fig.cap="Location of weather stations and river gauges in Victoria, Australia."}
-vic_map <- rmapshaper::ms_simplify(ozmaps::abs_ste |> filter(NAME == "Victoria"))  
+vic_map <- rmapshaper::ms_simplify(ozmaps::abs_ste %>% filter(NAME == "Victoria"))  
 ggplot() + 
   geom_sf(data = vic_map, fill = "grey95", color = "white") + 
   geom_point(data = dplyr::bind_rows(river, climate), 
@@ -46,7 +46,7 @@ res <- match_sites(
 The output from this function is also a cubble, with additional columns \code{dist} and \code{group} produced from spatial matching, and \code{n_match} from temporal matching.
 
 ```{r}
-res |> print()
+res %>% print()
 ```
 
 Figure \ref{fig:matching} (A) shows the four matched pairs on the map. For these the expected concurrent increase in precipitation and water level can be seen clearly when comparing these variables on a standardised scale, see Figure \ref{fig:matching} (B).
@@ -56,19 +56,19 @@ p1 <-ggplot() +
   geom_sf(data = vic_map, fill = "grey95", color = "white") + 
   geom_point(data = res, aes(x = long, y = lat, color = type)) +
   ggrepel::geom_label_repel(
-    data = res |> filter(type == "river"), aes(x = long, y = lat, label = group)) +
+    data = res %>% filter(type == "river"), aes(x = long, y = lat, label = group)) +
   scale_color_brewer(palette = "Dark2")  + 
   ggthemes::theme_map() +
   ggplot2::theme(legend.position = "bottom") +
   ggplot2::labs(x = "Longitude", y = "Latitude")
 
-res_long <- res |>
-  face_temporal(ts) |>
-  unfold(group, type) |>
-  rename(prcp = matched_var) |> 
+res_long <- res %>%
+  face_temporal(ts) %>%
+  unfold(group, type) %>%
+  rename(prcp = matched_var) %>% 
   mutate(prcp = (prcp - min(prcp, na.rm = TRUE))/ (max(prcp, na.rm = TRUE) - min(prcp, na.rm = TRUE))) 
 
-p2 <- res_long |> 
+p2 <- res_long %>% 
   ggplot(aes(x = date, y = prcp, color = type, group = id)) +
   geom_line(alpha = 0.8) +
   facet_wrap(vars(group)) +

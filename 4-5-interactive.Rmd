@@ -11,15 +11,15 @@ The temperature range is calculated as the difference between \code{tmax} and \c
 
 ``` r
 # data pre-processing
-clean <- weatherdata::climate_full |> ...
+clean <- weatherdata::climate_full %>% ...
 
 # created SharedData instance for crosstalk
-nested <- clean |> SharedData$new(~id, group = "cubble")
-long <- face_temporal(clean) |> SharedData$new(~id, group = "cubble")
+nested <- clean %>% SharedData$new(~id, group = "cubble")
+long <- face_temporal(clean) %>% SharedData$new(~id, group = "cubble")
 
 # create the spatial and temporal view each with a ShareData instance
-p1 <- nested |> ...
-p2 <- long |> ...
+p1 <- nested %>% ...
+p2 <- long %>% ...
 
 # Combine p1 and p2
 crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
@@ -39,13 +39,13 @@ This plot can also be made using \pkg{cubble} and \pkg{leaflet}, in which case t
 
 ``` r
 # data pre-processing
-clean <- weatherdata::climate_full |> ...
+clean <- weatherdata::climate_full %>% ...
 
 # use the long form to create subplots for each station
 df_id <- unique(clean$id)
 p <- map(1:length(df_id), function(i){
-  dt <- clean |> filter(id == df_id[i])
-  ggplot(dt) |> ...
+  dt <- clean %>% filter(id == df_id[i])
+  ggplot(dt) %>% ...
 })
 
 # create nested form leaflet map with temperature band as subplots
