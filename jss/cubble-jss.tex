@@ -193,7 +193,7 @@ The function \code{as_cubble()} is used to create a cubble with three arguments:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_nested <- climate_flat |>
+R> cubble_nested <- climate_flat %>%
 +   as_cubble(key = id, index = date, coords = c(long, lat))
 R> cubble_nested
 \end{CodeInput}
@@ -217,7 +217,7 @@ A cubble object is a subclass of the \code{rowwise_df} class where each row form
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_nested |>
+R> cubble_nested %>%
 +   mutate(rain_day = sum(ts$prcp != 0))
 \end{CodeInput}
 \begin{CodeOutput}
@@ -243,7 +243,7 @@ The nested form can be used for those operations where the output is only indexe
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_long <- cubble_nested |> face_temporal()
+R> cubble_long <- cubble_nested %>% face_temporal()
 R> cubble_long
 \end{CodeInput}
 \begin{CodeOutput}
@@ -282,7 +282,7 @@ Wrangling spatio-temporal data can be seen as an iterative process in the spatia
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_back <- cubble_long |> face_spatial()
+R> cubble_back <- cubble_long %>% face_spatial()
 R> cubble_back
 \end{CodeInput}
 \begin{CodeOutput}
@@ -312,7 +312,7 @@ Sometimes, analysts may need to apply some variable transformation that involves
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_unfold <- cubble_long |> unfold(long, lat)
+R> cubble_unfold <- cubble_long %>% unfold(long, lat)
 R> cubble_unfold
 \end{CodeInput}
 \begin{CodeOutput}
@@ -335,7 +335,7 @@ This function should generally be used in the last step of the analysis since it
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_unfold |> face_spatial() |> face_temporal()
+R> cubble_unfold %>% face_spatial() %>% face_temporal()
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:  date, id [5]: long form
@@ -375,9 +375,9 @@ A \code{tsibble} is a \code{tibble} where the \code{index} and \code{key} compon
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> climate_flat_ts <- climate_flat |> 
+R> climate_flat_ts <- climate_flat %>% 
 +   tsibble::as_tsibble(key = id, index = date)
-R> climate_flat_cb <-  climate_flat_ts |> 
+R> climate_flat_cb <-  climate_flat_ts %>% 
 +   cubble::as_cubble(coords = c(long, lat))
 R> climate_flat_cb
 \end{CodeInput}
@@ -400,7 +400,7 @@ When a nested cubble is created, each element in the list-column \code{ts} is a 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> # add station-based features in the nested form.
-R> climate_flat_cb |> 
+R> climate_flat_cb %>% 
 +   mutate(
 +     fabletools::features(
 +       ts, tmax, list(tmax_mean = mean, tmax_var = var)
@@ -573,7 +573,7 @@ Since the start of the pandemic, the Victoria State Government in Australia has 
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> covid |> head(5)
+R> covid %>% head(5)
 \end{CodeInput}
 \begin{CodeOutput}
 # A tsibble: 5 x 5 [1D]
@@ -593,7 +593,7 @@ and the spatial polygons are an ESRI shapefile that looks like:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> lga |> head(5)
+R> lga %>% head(5)
 \end{CodeInput}
 \begin{CodeOutput}
 Simple feature collection with 5 features and 7 fields
@@ -688,35 +688,27 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 \hypertarget{australian-historical-maximum-temperature}{%
 \subsection{Australian historical maximum temperature}\label{australian-historical-maximum-temperature}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data \code{weatherdata::historical_tmax} is a subset containing the records of maximum temperature for 204 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This data is already cast into a \code{cubble} data object (please see Appendix X for the code to extract the data from XX and prepare the data into \code{cubble} form), with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data \code{historical_tmax} is a subset containing the records of maximum temperature for 204 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations. This data is already cast into a \code{cubble} data object (please see Appendix X for the code to extract the data from XX and prepare the data into \code{cubble} form), with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
 
-First of all, the stations across the two states need to be subsetted from the original data \code{weatherdata::historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by ``ASN00'') while the next 6 digits encode the station information following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
+First of all, the stations across the two states need to be subsetted from the original data \code{historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by ``ASN00'') while the next 6 digits encode the station information following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- weatherdata::historical_tmax |>
+R> tmax <- historical_tmax %>%
 +   filter(between(stringr::str_sub(id, 7, 8), 46, 90))
 \end{CodeInput}
 \end{CodeChunk}
 
-and extracting the time periods 1971-1975 and 2016-2020 is a time operation and therefore the nested cubble needs to be switched to the long cubble form by \code{face_temporal()}:
+A monthly maximum average temperature is then calculated for both periods where \code{cubble} easily allows to compute this time operation across all the stations. This is a time operation and therefore the nested cubble needs to be first switched to the long cubble form by \code{face_temporal()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax |>
-+   face_temporal() |>
-+   filter(lubridate::year(date) %in% c(1971:1975, 2016:2020))
-\end{CodeInput}
-\end{CodeChunk}
-
-A monthly maximum average temperature is then calculated for both periods where \code{cubble} easily allows to compute this time operation across all the stations:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> tmax <- tmax |>
-+   group_by(month = lubridate::month(date),
-+          group = as.factor(ifelse(lubridate::year(date) > 2015,
-+                                   "2016 ~ 2020", "1971 ~ 1975"))) |>
+R> tmax <- tmax %>%
++   face_temporal() %>% 
++   group_by(
++     month = lubridate::month(date),
++     group = as.factor(ifelse(lubridate::year(date) > 2015,
++                              "2016 ~ 2020", "1971 ~ 1975"))) %>%
 +   summarise(tmax = mean(tmax, na.rm = TRUE))
 \end{CodeInput}
 \end{CodeChunk}
@@ -725,7 +717,7 @@ Observing the results of the operation above show that a few stations do not hav
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax |> face_spatial() |> filter(nrow(ts) == 24)
+R> tmax <- tmax %>% face_spatial() %>% filter(nrow(ts) == 24)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -733,7 +725,7 @@ Lastly, to create a glyph map where the series of each station are overlayed on 
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax |> face_temporal() |> unfold(long, lat)
+R> tmax <- tmax %>% face_temporal() %>% unfold(long, lat)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -741,15 +733,15 @@ the variable storing the maximum monthly average temperatures \code{tmax} can th
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> nsw_vic <- ozmaps::abs_ste |>
+R> nsw_vic <- ozmaps::abs_ste %>%
 +   filter(NAME %in% c("Victoria", "New South Wales"))
 R> 
 R> ggplot() +
 +   geom_sf(data = nsw_vic,
 +           fill = "transparent", color = "grey", linetype = "dotted") +
 +   geom_glyph(data = tmax,
-+              aes(x_major = longitude, x_minor = month,
-+                  y_major = latitude, y_minor = tmax,
++              aes(x_major = long, x_minor = month,
++                  y_major = lat, y_minor = tmax,
 +                  group = interaction(id, group), color = group),
 +              width = 1, height = 0.5) +
 +   ...
@@ -776,7 +768,7 @@ In the previous example, some overlapping of the glyphs occurred for a few nearb
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> station_nested <- weatherdata::climate_full |> mutate(cluster = ...)
+R> station_nested <- weatherdata::climate_full %>% mutate(cluster = ...)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -784,7 +776,7 @@ To create a group-level cubble, use \code{switch_key()} with the new key variabl
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cluster_nested <- station_nested |> switch_key(cluster)
+R> cluster_nested <- station_nested %>% switch_key(cluster)
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -792,7 +784,7 @@ With the group-level cubble, \code{get_centroid()} is useful to compute the cent
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cluster_nested <- cluster_nested |> get_centroid()
+R> cluster_nested <- cluster_nested %>% get_centroid()
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -905,15 +897,15 @@ The temperature range is calculated as the difference between \code{tmax} and \c
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# data pre{-}processing}
-\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ ...}
+\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ ...}
 
 \CommentTok{\# created SharedData instance for crosstalk}
-\NormalTok{nested }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
-\NormalTok{long }\OtherTok{\textless{}{-}} \FunctionTok{face\_temporal}\NormalTok{(clean) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
+\NormalTok{nested }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
+\NormalTok{long }\OtherTok{\textless{}{-}} \FunctionTok{face\_temporal}\NormalTok{(clean) }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
 
 \CommentTok{\# create the spatial and temporal view each with a ShareData instance}
-\NormalTok{p1 }\OtherTok{\textless{}{-}}\NormalTok{ nested }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ ...}
-\NormalTok{p2 }\OtherTok{\textless{}{-}}\NormalTok{ long }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ ...}
+\NormalTok{p1 }\OtherTok{\textless{}{-}}\NormalTok{ nested }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ ...}
+\NormalTok{p2 }\OtherTok{\textless{}{-}}\NormalTok{ long }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ ...}
 
 \CommentTok{\# Combine p1 and p2}
 \NormalTok{crosstalk}\SpecialCharTok{::}\FunctionTok{bscols}\NormalTok{(plotly}\SpecialCharTok{::}\FunctionTok{ggplotly}\NormalTok{(p1), plotly}\SpecialCharTok{::}\FunctionTok{ggplotly}\NormalTok{(p2), ...)}
@@ -938,20 +930,20 @@ This plot can also be made using \pkg{cubble} and \pkg{leaflet}, in which case t
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# data pre{-}processing}
-\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ ...}
+\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ weatherdata}\SpecialCharTok{::}\NormalTok{climate\_full }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ ...}
 
 \CommentTok{\# use the long form to create subplots for each station}
 \NormalTok{df\_id }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(clean}\SpecialCharTok{$}\NormalTok{id)}
 \NormalTok{p }\OtherTok{\textless{}{-}} \FunctionTok{map}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(df\_id), }\ControlFlowTok{function}\NormalTok{(i)\{}
-\NormalTok{  dt }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{|}\ErrorTok{\textgreater{}} \FunctionTok{filter}\NormalTok{(id }\SpecialCharTok{==}\NormalTok{ df\_id[i])}
-  \FunctionTok{ggplot}\NormalTok{(dt) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}\NormalTok{ ...}
+\NormalTok{  dt }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(id }\SpecialCharTok{==}\NormalTok{ df\_id[i])}
+  \FunctionTok{ggplot}\NormalTok{(dt) }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ ...}
 \NormalTok{\})}
 
 \CommentTok{\# create nested form leaflet map with temperature band as subplots}
 \NormalTok{nested }\OtherTok{\textless{}{-}} \FunctionTok{face\_spatial}\NormalTok{(clean)}
-\FunctionTok{leaflet}\NormalTok{(nested) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{addTiles}\NormalTok{() }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{addCircleMarkers}\NormalTok{(}\AttributeTok{group =} \StringTok{"a"}\NormalTok{, ...) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
+\FunctionTok{leaflet}\NormalTok{(nested) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{addTiles}\NormalTok{() }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{addCircleMarkers}\NormalTok{(}\AttributeTok{group =} \StringTok{"a"}\NormalTok{, ...) }\SpecialCharTok{\%\textgreater{}\%}
 \NormalTok{  leafpop}\SpecialCharTok{::}\FunctionTok{addPopupGraphs}\NormalTok{(}\AttributeTok{graph =}\NormalTok{ p, ...)}
 \end{Highlighting}
 \end{Shaded}
