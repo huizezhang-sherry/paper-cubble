@@ -5,16 +5,17 @@ output: pdf_document
 
 ## Australian precipitation pattern in 2020 {#precip}
 
-In the previous example, some overlapping of the glyphs occurred for a few nearby stations such as the pairs (151E, 34S) and (152E, 33S). This is a problem when mapping more stations at the national level. Aggregation can be helpful in grouping series into clusters before visualising the clusters with a glyph map. This new example shows how to organise data at both levels with \code{switch_key()}.
-
-\code{weatherdata::climate_full}, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for `r nrow(weatherdata::climate_full)` stations in Australia from 2016 to 2020. A simple $k$-means algorithm based on the distance matrix between stations is used to create 20 clusters. The data \code{station_nested} is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used as well, as long as they provide a mapping from each station to a cluster.
-
 ```{r}
 load(here::here("data/station_nested.rda"))
+load(here::here("data/climate_full.rda"))
 ```
 
+In the previous example, some overlapping of the glyphs occurred for a few nearby stations such as the pairs (151E, 34S) and (152E, 33S). This is a problem when mapping more stations at the national level. Aggregation can be helpful in grouping series into clusters before visualising the clusters with a glyph map. This new example shows how to organise data at both levels with \code{switch_key()}.
+
+The data \code{climate_full}, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for `r nrow(climate_full)` stations in Australia from 2016 to 2020. A simple $k$-means algorithm based on the distance matrix between stations is used to create 20 clusters. The data \code{station_nested} is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used as well, as long as they provide a mapping from each station to a cluster.
+
 ```{r eval = FALSE, echo = TRUE}
-station_nested <- weatherdata::climate_full %>% mutate(cluster = ...)
+station_nested <- climate_full %>% mutate(cluster = ...)
 ```
 
 To create a group-level cubble, use \code{switch_key()} with the new key variable, \code{cluster}:

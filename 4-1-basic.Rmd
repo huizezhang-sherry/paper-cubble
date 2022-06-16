@@ -84,27 +84,26 @@ cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 ```
 
 ## Australian historical maximum temperature
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data \code{weatherdata::historical_tmax} is a subset containing the records of maximum temperature for `r nrow(weatherdata::historical_tmax)` Australian stations from `r range(weatherdata::historical_tmax$first_year)[1]` through `r range(weatherdata::historical_tmax$first_year)[2]` and provides information also on the latitude, longitude and elevation of each of the  stations. This data  is already cast into a \code{cubble} data object (please see Appendix X for the code to extract  the data from XX and prepare the data into \code{cubble} form), with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature  between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
 
-First of all, the stations across the two states need to be subsetted from the original data  \code{weatherdata::historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by "ASN00") while the next 6 digits encode the station information following the [Australian Bureau of Meteorology (BOM)](http://www.bom.gov.au/climate/cdo/about/site-num.shtml) coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
+```{r}
+load(here::here("data/historical_tmax.rda"))
+```
+
+
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data \code{weatherdata::historical_tmax} is a subset containing the records of maximum temperature for `r nrow(historical_tmax)` Australian stations from `r range(historical_tmax$first_year)[1]` through `r range(historical_tmax$first_year)[2]` and provides information also on the latitude, longitude and elevation of each of the  stations. This data  is already cast into a \code{cubble} data object (please see Appendix X for the code to extract  the data from XX and prepare the data into \code{cubble} form), with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates. The goal of this example is to compare the monthly average maximum temperature  between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
+
+First of all, the stations across the two states need to be subsetted from the original data  \code{historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by "ASN00") while the next 6 digits encode the station information following the [Australian Bureau of Meteorology (BOM)](http://www.bom.gov.au/climate/cdo/about/site-num.shtml) coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
 
 ```{r echo = TRUE}
-tmax <- weatherdata::historical_tmax %>%
+tmax <- historical_tmax %>%
   filter(between(stringr::str_sub(id, 7, 8), 46, 90))
 ```
 
-and extracting the time periods 1971-1975 and 2016-2020 is a time operation and therefore the nested cubble needs to be switched to the long cubble form by \code{face_temporal()}:
+A monthly maximum average temperature is then calculated for both periods where \code{cubble} easily allows to compute this time operation across all the stations. This is a temporal operation and therefore the nested cubble needs to be switched to the long cubble form by \code{face_temporal()}:
 
 ```{r echo = TRUE}
 tmax <- tmax %>%
-  face_temporal() %>%
-  filter(lubridate::year(date) %in% c(1971:1975, 2016:2020))
-```
-
-A monthly maximum average temperature is then calculated for both periods where \code{cubble} easily allows to compute this time operation across all the stations:
-
-```{r echo = TRUE}
-tmax <- tmax %>%
+  face_temporal() %>% 
   group_by(month = lubridate::month(date),
          group = as.factor(ifelse(lubridate::year(date) > 2015,
                                   "2016 ~ 2020", "1971 ~ 1975"))) %>%
@@ -133,8 +132,8 @@ ggplot() +
   geom_sf(data = nsw_vic,
           fill = "transparent", color = "grey", linetype = "dotted") +
   geom_glyph(data = tmax,
-             aes(x_major = longitude, x_minor = month,
-                 y_major = latitude, y_minor = tmax,
+             aes(x_major = long, x_minor = month,
+                 y_major = lat, y_minor = tmax,
                  group = interaction(id, group), color = group),
              width = 1, height = 0.5) +
   ...

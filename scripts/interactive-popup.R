@@ -3,7 +3,7 @@ library(tidyverse)
 library(leaflet)
 library(leafpop)
 
-clean <-  weatherdata::climate_full %>%
+clean <-  climate_full %>%
   filter(!id %in% c("ASN00067033", "ASN00072091", "ASN00059040", 
                     "ASN00097053", "ASN00040856", "ASN00015548")) %>%
   face_temporal() %>%
