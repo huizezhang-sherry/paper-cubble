@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Linking pipeline
 
-Figure \ref{fig:illu-interactive-2} illustrates the linking pipeline from a point selection on the time series to the map.
+<!-- Figure \ref{fig:illu-interactive-2} illustrates the linking pipeline from a point selection on the time series to the map. -->
 
 ```{r illu-interactive-2, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "An illustration of the data model under interactive graphics with cubble. When a point on the time series is selected, the corresponding row in the long cubble will be activated. This will link to all the rows with the same id in the long cubble and the row in the nested cubble with the same id (middle). Both plots will be updated with the full line selected and the point highlighted on the map (right)."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.005.png"))
@@ -23,7 +23,9 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 # Script to obtain example data
 
-The script below presents the codes required to obtain the data, `historical_tmax`, used in the example of Section 5.2 *Australian historical maximum temperature*. The function `rnoaa::meteo_pull_monitors()` may take a while to query a large number of stations in the first time. A copy of the data is provided in the data folder of the paper repository at: https://github.com/huizezhang-sherry/paper-cubble.
+## Historical maximum temperature
+
+The script below presents the codes required to obtain the data `historical_tmax` used in the example of Section 5.2 *Australian historical maximum temperature*. The function `rnoaa::meteo_pull_monitors()` may take a while to query a large number of stations in the first time. A copy of the data is provided in the data folder of the paper repository at: https://github.com/huizezhang-sherry/paper-cubble.
 
 
 ```{r eval = FALSE}
@@ -62,7 +64,9 @@ historical_tmax <- raw_tmax %>%
 save(historical_tmax, file = here::here("data/historical_tmax.rda"))
 ```
 
-The data `climate_full` used in Section 5.3, 5.4, and 5.6 can be obtained in a similar fashion with a change of variable and date parameter in `rnoaa::meteo_pull_monitors()`. The full script is provided below and a copy of the data is also available in the data folder of the paper repository linked above. 
+## Australian 2016-2020 climate data
+
+The data `climate_full` used in the example in Section 5.3, 5.4, and 5.6 of the main paper can be obtained in a similar fashion with a slight change on the variable and date parameter in `rnoaa::meteo_pull_monitors()`. The full script is provided below and a copy of the data is also available in the data folder of the paper repository linked above. 
 
 ```{r eval = FALSE}
 # all the Australian stations have all of the three PRCP, TMAX, and TMIN recorded
