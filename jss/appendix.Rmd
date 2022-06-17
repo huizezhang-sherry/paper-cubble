@@ -1,6 +1,6 @@
 ---
-title: "Appendix to cubble: An R Package for Organizing and Wrangling Multivariate Spatio-temporal Data"
-author: "Sherry Zhang"
+title: "Appendix to 'cubble: An R Package for Organizing and Wrangling Multivariate Spatio-temporal Data'"
+author: "Sherry Zhang, Dianne Cook, Ursula Laa, Nicolas Langrené, Patricia Menéndez"
 date: '2022-06-14'
 output: 
   pdf_document:
@@ -11,17 +11,20 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+This is the supplementary material for the main paper, containing additional information about the data sets used, and another illustration of linking between multiple plots.
 
-# Linking pipeline
+# Additional illustration on multiple linked plots
 
 <!-- Figure \ref{fig:illu-interactive-2} illustrates the linking pipeline from a point selection on the time series to the map. -->
 
-```{r illu-interactive-2, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "An illustration of the data model under interactive graphics with cubble. When a point on the time series is selected, the corresponding row in the long cubble will be activated. This will link to all the rows with the same id in the long cubble and the row in the nested cubble with the same id (middle). Both plots will be updated with the full line selected and the point highlighted on the map (right)."}
+This figure is a supplement to Section 4.3 of the main paper, illustrating how linking from the time series plot to the map is achieved.
+
+```{r illu-interactive-2, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "Linking between multiple plots. The line plots and the map are constructed from shared crosstalk objects (long and nested cubbles). When a point on the time series is selected, the corresponding row in the long cubble will be activated (a). This will link to all the rows with the same id in the long cubble and the row in the nested cubble with the same id (b). Both plots will be updated with the full line selected and the point highlighted on the map (c)."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.005.png"))
 ```
 
 
-# Script to obtain example data
+# Scripts for creating the example data
 
 ## Historical maximum temperature
 

@@ -342,13 +342,13 @@ R> cubble_unfold |> face_spatial() |> face_temporal()
 # bbox:    [115.97, -32.94, 133.55, -12.42]
 # spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
 #   [dbl]
-  id          date        prcp  tmax  tmin  long   lat
-  <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
-1 ASN00009021 2020-01-01     0  31.9  15.3  116. -31.9
-2 ASN00009021 2020-01-02     0  24.9  16.4  116. -31.9
-3 ASN00009021 2020-01-03     6  23.2  13    116. -31.9
-4 ASN00009021 2020-01-04     0  28.4  12.4  116. -31.9
-5 ASN00009021 2020-01-05     0  35.3  11.6  116. -31.9
+  id          date        prcp  tmax  tmin
+  <chr>       <date>     <dbl> <dbl> <dbl>
+1 ASN00009021 2020-01-01     0  31.9  15.3
+2 ASN00009021 2020-01-02     0  24.9  16.4
+3 ASN00009021 2020-01-03     6  23.2  13  
+4 ASN00009021 2020-01-04     0  28.4  12.4
+5 ASN00009021 2020-01-05     0  35.3  11.6
 # ... with 1,825 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -626,16 +626,13 @@ R> cb <- as_cubble(
 +   )
 \end{CodeInput}
 \begin{CodeOutput}
-! Some sites in the temporal table don't have spatial information
+! Some sites in the temporal table don't have corresponding spatial information
 \end{CodeOutput}
 \begin{CodeOutput}
-! Some sites in the spatial table don't have temporal information
+! Some sites in the spatial table don't have corresponding temporal information
 \end{CodeOutput}
 \begin{CodeOutput}
 ! Use argument `output = "unmatch"` to check on the unmatched key
-\end{CodeOutput}
-\begin{CodeOutput}
-Joining, by = "lga"
 \end{CodeOutput}
 \end{CodeChunk}
 
