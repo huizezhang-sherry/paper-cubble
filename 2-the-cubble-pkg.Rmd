@@ -29,7 +29,7 @@ cubble_nested <- climate_flat |>
 cubble_nested
 ```
 
-Printing a cubble provides some information about the data. \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
+Printing a cubble provides some information about the data. Here \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
 
 A cubble object is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
 
@@ -38,7 +38,7 @@ cubble_nested |>
   mutate(rain_day = sum(ts$prcp != 0))
 ```
 
-A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble, sf. Section \@ref(covid) describes converting multiple tables into a cubble object and Section \@ref(netcdf) illustrates how to convert a netCDF object.
+A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble and sf. Section \@ref(covid) describes converting multiple tables into a cubble object and Section \@ref(netcdf) illustrates how to convert a netCDF object.
 
 
 

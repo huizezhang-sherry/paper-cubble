@@ -1,9 +1,6 @@
 \documentclass[
 ]{jss}
 
-%% recommended packages
-\usepackage{orcidlink,thumbpdf,lmodern}
-
 \usepackage[utf8]{inputenc}
 
 \author{
@@ -155,7 +152,7 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.001} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
 
 }
 
@@ -211,7 +208,7 @@ R> cubble_nested
 \end{CodeOutput}
 \end{CodeChunk}
 
-Printing a cubble provides some information about the data. \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
+Printing a cubble provides some information about the data. Here \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
 
 A cubble object is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
 
@@ -234,7 +231,7 @@ R> cubble_nested |>
 \end{CodeOutput}
 \end{CodeChunk}
 
-A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble, sf. Section \ref{covid} describes converting multiple tables into a cubble object and Section \ref{netcdf} illustrates how to convert a netCDF object.
+A cubble can be created from various common spatio-temporal data formats, including basic R objects like tibble, tsibble and sf. Section \ref{covid} describes converting multiple tables into a cubble object and Section \ref{netcdf} illustrates how to convert a netCDF object.
 
 \hypertarget{change-focus-by-facing-the-time-variables}{%
 \subsection{Change focus by facing the time-variables}\label{change-focus-by-facing-the-time-variables}}
@@ -267,7 +264,7 @@ The first line in the printed cubble now shows it in the long form and the third
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.002} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.002} 
 
 }
 
@@ -342,13 +339,13 @@ R> cubble_unfold |> face_spatial() |> face_temporal()
 # bbox:    [115.97, -32.94, 133.55, -12.42]
 # spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
 #   [dbl]
-  id          date        prcp  tmax  tmin
-  <chr>       <date>     <dbl> <dbl> <dbl>
-1 ASN00009021 2020-01-01     0  31.9  15.3
-2 ASN00009021 2020-01-02     0  24.9  16.4
-3 ASN00009021 2020-01-03     6  23.2  13  
-4 ASN00009021 2020-01-04     0  28.4  12.4
-5 ASN00009021 2020-01-05     0  35.3  11.6
+  id          date        prcp  tmax  tmin  long   lat
+  <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
+1 ASN00009021 2020-01-01     0  31.9  15.3  116. -31.9
+2 ASN00009021 2020-01-02     0  24.9  16.4  116. -31.9
+3 ASN00009021 2020-01-03     6  23.2  13    116. -31.9
+4 ASN00009021 2020-01-04     0  28.4  12.4  116. -31.9
+5 ASN00009021 2020-01-05     0  35.3  11.6  116. -31.9
 # ... with 1,825 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -472,7 +469,7 @@ the cubble redefines the cubble key from the \code{id} column in \code{station_n
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.003} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
 
 }
 
@@ -488,7 +485,7 @@ One task that may interest spatio-temporal analysts is combining data collected 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/illu-matching} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/illu-matching} 
 
 }
 
@@ -520,7 +517,7 @@ Linking is also available starting from the time series plot, by selecting point
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.004} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.004} 
 
 }
 
@@ -626,13 +623,16 @@ R> cb <- as_cubble(
 +   )
 \end{CodeInput}
 \begin{CodeOutput}
-! Some sites in the temporal table don't have corresponding spatial information
+! Some sites in the temporal table don't have spatial information
 \end{CodeOutput}
 \begin{CodeOutput}
-! Some sites in the spatial table don't have corresponding temporal information
+! Some sites in the spatial table don't have temporal information
 \end{CodeOutput}
 \begin{CodeOutput}
 ! Use argument `output = "unmatch"` to check on the unmatched key
+\end{CodeOutput}
+\begin{CodeOutput}
+Joining, by = "lga"
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -875,7 +875,7 @@ Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \citet{hers
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/netcdf} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/netcdf} 
 
 }
 
@@ -913,7 +913,7 @@ In Figure \ref{fig:interactive-linking}, the first row shows the initial view of
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-lower} 
+{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking-lower} 
 
 }
 
@@ -949,7 +949,7 @@ Figure \ref{fig:interactive-popup} shows the same information as Figure \ref{fig
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{../figures/popup-mid} 
+{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/popup-mid} 
 
 }
 
