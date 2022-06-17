@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(cubble)
 library(patchwork)
@@ -47,7 +47,7 @@ cluster_nested <- cluster_nested %>% get_centroid()
 
 Long form cubble at both levels can be accessed through stretching the nested form. With access to both station and cluster-level cubbles, various plots can be made to understand the cluster. Figure \ref{fig:basic-agg} shows two example plots that can be made with this data. Subplot A is a glyph map made with the cluster level cubble in the long form and subplot B inspects the station membership of each cluster using the station level cubble in the nested form.
 
-```{r eval = FALSE}
+```{r eval = FALSE, echo = FALSE}
 coords <- cbind(prcp_aus$long, prcp_aus$lat)
 dist_raw <- geosphere::distm(coords, coords)
 
@@ -67,7 +67,7 @@ save(station_nested, file = here::here("data/station_nested.rda"))
 ```
 
 
-```{r basic-agg, fig.height = 7, fig.width = 15, fig.cap="Profile of aggregated precipitation at 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number is printed in the middle of the y minor axis and can be used as a reference line to read the magnitude. Subplot B shows the station membership of each cluster."}
+```{r basic-agg, fig.height = 7, fig.width = 15, echo = FALSE, fig.cap="Profile of aggregated precipitation at 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number is printed in the middle of the y minor axis and can be used as a reference line to read the magnitude. Subplot B shows the station membership of each cluster."}
 load(here::here("data/station_nested.rda"))
 cluster_nested <- station_nested %>%
   switch_key(cluster) %>% 
