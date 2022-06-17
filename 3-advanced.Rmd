@@ -14,7 +14,7 @@ Spatial locations can have grouping structures either inherent to the data (e.g.
 the cubble redefines the cubble key from the \code{id} column in \code{station_nested} to the \code{cluster} column in \code{cluster_nested}. All the spatial variables belonging to the \code{cluster} column are now nested into a \code{.val} column which allows for summarizing based on cluster.
 
 ```{r illu-hier, echo = FALSE, fig.align="center",out.height="40%", out.width = "100%", fig.cap = "Hierarchical spatial structure can be handled using \\code{switch\\_key()}, to create summaries based on any level. Here the switch is between the station id and a cluster id. Once the change is made the data can be stretched into the long form."}
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
 ```
 
 ## Data fusion and matching {#matching}

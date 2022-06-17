@@ -19,10 +19,6 @@ This paper presents a new \proglang{R} package, \pkg{cubble} which addresses the
 
 The rest of the paper is organized as follows: Section \@ref(cube) introduces the proposed cube structure as a way to conceptualise multivariate spatio-temporal data. Section \@ref(cubble) presents the main design and functionality of \pkg{cubble}. Section \@ref(others) explains how cubble deals with more advanced considerations, including data with hierarchical structure, data matching and how cubble fits with existing static and interactive visualisation tools. Moreover we also illustrate how \pkg{cubble} deals with spatio-temporal data transformations. Section \@ref(examples) uses Australian weather station data and river level data as examples to demonstrate the use of \pkg{cubble}. An example of how \pkg{cubble} handles NetCDF data is also provided. Section \@ref(conclude) discuss the paper contributions and future directions.
 
-```{r illu-input, echo = FALSE, out.width = "100%", fig.cap="An illustration of different spatio-temporal data layouts: (1) a single table for both spatial and temporal variables; (2) separate tables for spatial and temporal variables; and (3) an array data structure that populates variables into a gridded longitude-latitude-time (hyper)cube.", fig.align='center'}
-#knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
-```
-
 
 <!-- Manipulating data in these two levels is usually done separately and the third tidy data principal [@tidydata] recommends each type of observational unit to form a table. Another feature for a spatio-temporal data structure to have is that variables created from subsequent operations can be automatically added to the existing table with the same level. This is better than an output that index the variables with the identifiers since otherwise analysts will need to manually join this output with existing variables in the same level. -->
 
