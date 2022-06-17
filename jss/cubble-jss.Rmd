@@ -87,10 +87,6 @@ library(patchwork)
 
 ```
 
-```{r child = here::here("4-2-agg.Rmd")}
-
-```
-
 
 ```{r child = here::here("4-3-water-level.Rmd")}
 

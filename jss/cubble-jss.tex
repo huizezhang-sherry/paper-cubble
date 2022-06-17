@@ -561,7 +561,7 @@ Some useful controls over the glyph map are also available in the \code{geom_gly
 \hypertarget{examples}{%
 \section{Examples}\label{examples}}
 
-The six examples here are chosen to illustrate creating a cubble for exploring COVID data where location identities need to be matched, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots.
+The five examples here together with an additional in the Appendix are chosen to illustrate creating a cubble for exploring COVID data where location identities need to be matched, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots.
 
 \hypertarget{covid}{%
 \subsection{Victoria COVID spatio-temporal incidence and spread}\label{covid}}
@@ -682,8 +682,8 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 \end{CodeInput}
 \end{CodeChunk}
 
-\hypertarget{australian-historical-maximum-temperature}{%
-\subsection{Australian historical maximum temperature}\label{australian-historical-maximum-temperature}}
+\hypertarget{historicaltmax}{%
+\subsection{Australian historical maximum temperature}\label{historicaltmax}}
 
 The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data \code{historical_tmax} is a subset containing the records of maximum temperature for 236 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations, extracted using the \texttt{rnoaa} package. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
 
@@ -755,47 +755,7 @@ R> ggplot() +
 \end{figure}
 \end{CodeChunk}
 
-\hypertarget{precip}{%
-\subsection{Australian precipitation pattern in 2020}\label{precip}}
-
-In the previous example, some overlapping of the glyphs occurred for a few nearby stations such as the pairs (151E, 34S) and (152E, 33S). This is a problem when mapping more stations at the national level. Aggregation can be helpful in grouping series into clusters before visualising the clusters with a glyph map. This new example shows how to organise data at both levels with \code{switch_key()}.
-
-The data \code{climate_full}, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for 640 stations in Australia from 2016 to 2020. A simple \(k\)-means algorithm based on the distance matrix between stations is used to create 20 clusters. The data \code{station_nested} is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used as well, as long as they provide a mapping from each station to a cluster.
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> station_nested <- climate_full %>% mutate(cluster = ...)
-\end{CodeInput}
-\end{CodeChunk}
-
-To create a group-level cubble, use \code{switch_key()} with the new key variable, \code{cluster}:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> cluster_nested <- station_nested %>% switch_key(cluster)
-\end{CodeInput}
-\end{CodeChunk}
-
-With the group-level cubble, \code{get_centroid()} is useful to compute the centroid of each cluster, which will be used as the major axis for the glyph map later:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> cluster_nested <- cluster_nested %>% get_centroid()
-\end{CodeInput}
-\end{CodeChunk}
-
-Long form cubble at both levels can be accessed through stretching the nested form. With access to both station and cluster-level cubbles, various plots can be made to understand the cluster. Figure \ref{fig:basic-agg} shows two example plots that can be made with this data. Subplot A is a glyph map made with the cluster level cubble in the long form and subplot B inspects the station membership of each cluster using the station level cubble in the nested form.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics{figures/basic-agg-1} 
-
-}
-
-\caption[Profile of aggregated precipitation at 639 weather stations in Australia]{Profile of aggregated precipitation at 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number is printed in the middle of the y minor axis and can be used as a reference line to read the magnitude. Subplot B shows the station membership of each cluster.}\label{fig:basic-agg}
-\end{figure}
-\end{CodeChunk}
+It is worth to mentioned that some overlapping of the glyphs occurred for a few nearby stations as it can be seen from Figure \ref{fig:basic-manip}. This is a common issue when mapping multiple stations in a geographical area. This issue can be mitigated in some instances by aggregating data to group the data into a larger areas which might be useful to learn about clusters in the data as well as for visualizing those clusters in a glyph map. An continuing discussion of Example \ref{historicaltmax} discussing all those issues and can be found in the Appendix.
 
 \hypertarget{river-level-data-in-victoria-water-gauges}{%
 \subsection{River level data in Victoria water gauges}\label{river-level-data-in-victoria-water-gauges}}

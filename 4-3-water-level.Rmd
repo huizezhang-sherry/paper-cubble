@@ -9,6 +9,8 @@ output: html_document
 The Bureau of Meteorology collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges. The collected variables include: electrical conductivity, turbidity, watercourse discharge, watercourse level, and water temperature. We expect that the water level should be related to the precipitation available from climate data, since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria, and we will try to match water gauges with nearby weather stations, taking into account both spatial and temporal information from 2020.
 
 ```{r}
+load(here::here("data/climate_full.rda"))
+
 climate <- climate_full %>%
   filter(between(stringr::str_sub(id, 7, 8), 76, 90)) %>%
   face_temporal() %>%

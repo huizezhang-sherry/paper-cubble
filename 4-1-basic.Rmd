@@ -5,7 +5,7 @@ output: html_document
 
 # Examples {#examples}
 
-The six examples here are chosen to illustrate creating a cubble for exploring COVID data where location identities need to be matched, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. 
+The five examples here together with an additional in the Appendix are chosen to illustrate creating a cubble for exploring COVID data where location identities need to be matched, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. 
 
 ## Victoria COVID spatio-temporal incidence and spread {#covid}
 
@@ -83,7 +83,7 @@ cb <- as_cubble(data = list(spatial = lga, temporal = covid),
                 key = lga, index = date, coords = c(cent_long, cent_lat))
 ```
 
-## Australian historical maximum temperature
+## Australian historical maximum temperature {#historicaltmax}
 
 ```{r}
 load(here::here("data/historical_tmax.rda"))
@@ -192,3 +192,6 @@ p1 +
     data = single, aes(x = 143.7, y = -30, img = img), size = 6)
 
 ```
+It is worth to mentioned that some overlapping of the glyphs occurred for a few nearby stations as it can be seen from Figure  \ref{fig:basic-manip}. This is a common issue when mapping multiple stations in a geographical area. This issue can be mitigated in some instances by aggregating data to group the data into a larger areas which might be useful to learn about clusters in the data as well as for visualizing those clusters in a glyph map. An continuing discussion of Example \@ref(historicaltmax) discussing all those issues and can be found in the Appendix. 
+
+
