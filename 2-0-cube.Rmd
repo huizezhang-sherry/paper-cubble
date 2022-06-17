@@ -23,5 +23,5 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 
 
 ```{r cube-def, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the conceptual spatio-temporal cube with different slicing on time, site, and variable. For each axis, the slicing can be on a single value or a set of values."}
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.007.png"))
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
 ```

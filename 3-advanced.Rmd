@@ -14,7 +14,7 @@ Spatial locations can have grouping structures either inherent to the data (e.g.
 the cubble redefines the cubble key from the \code{id} column in \code{station_nested} to the \code{cluster} column in \code{cluster_nested}. All the spatial variables belonging to the \code{cluster} column are now nested into a \code{.val} column which allows for summarizing based on cluster.
 
 ```{r illu-hier, echo = FALSE, fig.align="center",out.height="40%", out.width = "100%", fig.cap = "Hierarchical spatial structure can be handled using \\code{switch\\_key()}, to create summaries based on any level. Here the switch is between the station id and a cluster id. Once the change is made the data can be stretched into the long form."}
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
 ```
 
 ## Data fusion and matching {#matching}
@@ -42,7 +42,7 @@ The cubble workflow fits works well with an interactive graphics pipeline (e.g. 
 Linking is also available starting from the time series plot, by selecting points. This will be activate rows having the same \code{id} in the long cubble. The corresponding rows in the nested cubble are activated, and highlighted the map. (An illustration can be found in the appendix.) Note that this type of linking, both from the map or the time series, is what @CS07 would call categorical variable linking, where station id is the categorical variable. <!--\ref{fig:illu-interactive-2} in the Appendix illustrates this process.-->
 
 ```{r illu-interactive, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "An illustration of the data model under interactive graphics with cubble. The line plot and the map is made separately with the long and nested cubble. When a station is selected on the map (left), the corresponding row in the nested cubble will be activated. This will link to all the rows with the same id in the long cubble (middle) and update the line plot (right)."}
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.003.png"))
 ```
 
 ## Spatio-temporal transformations {#st_transformation}
