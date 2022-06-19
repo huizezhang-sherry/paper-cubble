@@ -2,9 +2,11 @@
 title: "Appendix to 'cubble: An R Package for Organizing and Wrangling Multivariate Spatio-temporal Data'"
 author: "Sherry Zhang, Dianne Cook, Ursula Laa, Nicolas Langrené, Patricia Menéndez"
 date: '2022-06-14'
-output: 
-  pdf_document:
+output:
+  bookdown::pdf_document2:
+    toc: false
     number_section: true
+   
 ---
 
 ```{r setup, include=FALSE}
@@ -15,7 +17,7 @@ library(patchwork)
 ```
 
 This is the supplementary material for the main paper, containing
-an extended example following example 5.2 to highlight how **cubble** can be used to deal with data that has a hierarchical structure. It also describes in detailed the process to create linking plots. Furthermore, this appendix contains additional information about the sources of the data sets use in the paper and the necessary code for extracting and preparing the data as used in the main text with the goal to ensure reproducibility.
+an extended example following example 5.2 to highlight how **cubble** can be used to deal with data that has a hierarchical structure. It also describes the process to create linking plots. Furthermore, this appendix contains additional information about the data sources and the necessary code for extracting and preparing the data sets used in the paper with the goal to ensure reproducibility.
 
 
 # Extension of example 5.2: Australian precipitation pattern in 2020 {#precip}
@@ -25,7 +27,7 @@ load(here::here("data/station_nested.rda"))
 load(here::here("data/climate_full.rda"))
 ```
 
-In the previous example, some overlapping of the glyphs occurred for a few nearby stations such as the pairs (151E, 34S) and (152E, 33S). This is a problem when mapping more stations at the national level. Aggregation can be helpful in grouping series into clusters before visualising the clusters with a glyph map. This new example shows how to organise data at both levels with `switch_key()`.
+In  example 5.2, some overlapping of the glyphs occurred for a number of stations on the right hand side of the map in Figure 6. This is a problem when mapping time series or other glyphs corresponding to locations that are geographically closed on the map. In some cases it is better to display such information at an aggregated level by grouping the data adequately before exhibiting the information on a figure. The example below shows how can  spatio-temporal data be organised at different hierarchical levels so that information can be grouped both temporal and spatially using  `switch_key()`. The goal of this example is to highlight how easy is to move across the data hierarchy using **cubble**. 
 
 The data `climate_full`, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for `r nrow(climate_full)` stations in Australia from 2016 to 2020. A simple $k$-means algorithm based on the distance matrix between stations is used to create 20 clusters. The data `station_nested` is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used as well, as long as they provide a mapping from each station to a cluster.
 
@@ -168,7 +170,7 @@ save(historical_tmax, file = here::here("data/historical_tmax.rda"))
 
 ## Australian 2016-2020 climate data
 
-The data `climate_full` used in the example in Section 5.3, 5.4, and 5.6 of the main paper can be obtained in a similar fashion with a slight change on the variable and date parameter in `rnoaa::meteo_pull_monitors()`. The full script is provided below and a copy of the data is also available in the data folder of the paper repository linked above. 
+The data `climate_full`, used in the examples in Sections 5.3, 5.4, and 5.5 of the main paper and in \ref{#precip} here, can be obtained in a similar fashion with a slight change on the selected variable and date parameter in `rnoaa::meteo_pull_monitors()` as shown below. The full script is provided below and a copy of the data is also available in the data folder of the paper GitHub repository linked above. 
 
 ```{r eval = FALSE}
 # all the Australian stations have all of the three PRCP, TMAX, and TMIN recorded
