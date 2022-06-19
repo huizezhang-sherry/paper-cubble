@@ -1,6 +1,9 @@
 \documentclass[
 ]{jss}
 
+%% recommended packages
+\usepackage{orcidlink,thumbpdf,lmodern}
+
 \usepackage[utf8]{inputenc}
 
 \author{
@@ -152,7 +155,7 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
+{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.001} 
 
 }
 
@@ -264,7 +267,7 @@ The first line in the printed cubble now shows it in the long form and the third
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.002} 
+{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.002} 
 
 }
 
@@ -469,7 +472,7 @@ the cubble redefines the cubble key from the \code{id} column in \code{station_n
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.003} 
 
 }
 
@@ -485,7 +488,7 @@ One task that may interest spatio-temporal analysts is combining data collected 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/illu-matching} 
+{\centering \includegraphics[width=1\linewidth]{../figures/illu-matching} 
 
 }
 
@@ -517,7 +520,7 @@ Linking is also available starting from the time series plot, by selecting point
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.004} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.004} 
 
 }
 
@@ -821,7 +824,7 @@ Figure \ref{fig:matching} (A) shows the four matched pairs on the map. For these
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis data}\label{era5-climate-reanalysis-data}}
 
-The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF) and it can be directly downloaded from \href{https://cds.climate.copernicus.eu/cdsapp\#!/dataset/reanalysis-era5-pressure-levels?tab=overview}{Copernicus Climate Data Store (CDS)} website or programmatically via the R package \pkg{ecmwfr} \citep{ecwmfr}. In this example we focus on the \code{era5-pressure} data which provides hourly data on pressure levels from 1970 to present. Here we specifically look at the information contained on the variables \emph{specific humidity} measuring the mass of water vapor per kilogram of moist air and the \emph{geopotential} variable recording the gravitational potential energy of a unit mass, at a particular location, relative to mean sea level. The goal of this example is to reproduce the break-up of the southern polar vortex that happened in late September and early October in 2022 in the stratosphere in the Southern Hemisphere. Therefore, we filter data corresponding to the Southern Hemisphere and restrict our analysis to four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Once downloaded, the data can be read into a \code{cubble} as:
+The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF) and it can be directly downloaded from \href{https://cds.climate.copernicus.eu/cdsapp\#!/dataset/reanalysis-era5-pressure-levels?tab=overview}{Copernicus Climate Data Store (CDS)} website or programmatically via the R package \pkg{ecmwfr} \citep{ecwmfr}. In this example we focus on the \code{era5-pressure} data which provides hourly data on pressure levels from 1970 to present. Here we specifically look at the information contained on the variables \emph{specific humidity} measuring the mass of water vapor per kilogram of moist air and the \emph{geopotential} variable recording the gravitational potential energy of a unit mass, at a particular location, relative to mean sea level. The goal of this example is to reproduce the break-up of the southern polar vortex that happened in late September and early October in 2002 in the stratosphere in the Southern Hemisphere. Therefore, we filter data corresponding to the Southern Hemisphere and restrict our analysis to four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04. Once downloaded, the data can be read into a \code{cubble} as:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -835,11 +838,11 @@ Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \citet{hers
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/netcdf} 
+{\centering \includegraphics[width=1\linewidth]{../figures/netcdf} 
 
 }
 
-\caption[A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020)]{A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020).}\label{fig:netcdf}
+\caption[A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002]{A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high speicfic humidity, splits into two on 2002-09-26 and furthers split into four on 2002-10-04.}\label{fig:netcdf}
 \end{figure}
 \end{CodeChunk}
 
@@ -873,7 +876,7 @@ In Figure \ref{fig:interactive-linking}, the first row shows the initial view of
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking-lower} 
+{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-lower} 
 
 }
 
@@ -909,7 +912,7 @@ Figure \ref{fig:interactive-popup} shows the same information as Figure \ref{fig
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/popup-mid} 
+{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{../figures/popup-mid} 
 
 }
 

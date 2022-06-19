@@ -44,7 +44,9 @@ country <- rnaturalearth::ne_coastline("small", returnclass = "sf") %>%
 
 res %>% 
   ggplot() +
+  # q for specific humidity
   geom_point(aes(x = long, y = lat, color = q)) +
+  # z for geopotential
   geom_contour(data = res, aes(x = long, y = lat, z = z),
                color = "grey20", binwidth = 4000, size = 0.5) +
   geom_sf(data = country , alpha = 0.5, fill = "transparent", color = "lightgreen") +
