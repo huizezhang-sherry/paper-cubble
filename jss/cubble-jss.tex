@@ -342,13 +342,13 @@ R> cubble_unfold |> face_spatial() |> face_temporal()
 # bbox:    [115.97, -32.94, 133.55, -12.42]
 # spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
 #   [dbl]
-  id          date        prcp  tmax  tmin  long   lat
-  <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
-1 ASN00009021 2020-01-01     0  31.9  15.3  116. -31.9
-2 ASN00009021 2020-01-02     0  24.9  16.4  116. -31.9
-3 ASN00009021 2020-01-03     6  23.2  13    116. -31.9
-4 ASN00009021 2020-01-04     0  28.4  12.4  116. -31.9
-5 ASN00009021 2020-01-05     0  35.3  11.6  116. -31.9
+  id          date        prcp  tmax  tmin
+  <chr>       <date>     <dbl> <dbl> <dbl>
+1 ASN00009021 2020-01-01     0  31.9  15.3
+2 ASN00009021 2020-01-02     0  24.9  16.4
+3 ASN00009021 2020-01-03     6  23.2  13  
+4 ASN00009021 2020-01-04     0  28.4  12.4
+5 ASN00009021 2020-01-05     0  35.3  11.6
 # ... with 1,825 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -564,7 +564,7 @@ Some useful controls over the glyph map are also available in the \code{geom_gly
 \hypertarget{examples}{%
 \section{Examples}\label{examples}}
 
-The five examples here together with an additional in the Appendix are chosen to illustrate creating a cubble for exploring COVID data where location identities need to be matched, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots.
+The five examples here are chosen to illustrate these aspects of using cubble: creating a cubble from two COVID data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. (There is an additional example and figures in the Appendix, and more examples in the package vignettes.)
 
 \hypertarget{covid}{%
 \subsection{Victoria COVID spatio-temporal incidence and spread}\label{covid}}
@@ -626,16 +626,13 @@ R> cb <- as_cubble(
 +   )
 \end{CodeInput}
 \begin{CodeOutput}
-! Some sites in the temporal table don't have spatial information
+! Some sites in the temporal table don't have corresponding spatial information
 \end{CodeOutput}
 \begin{CodeOutput}
-! Some sites in the spatial table don't have temporal information
+! Some sites in the spatial table don't have corresponding temporal information
 \end{CodeOutput}
 \begin{CodeOutput}
 ! Use argument `output = "unmatch"` to check on the unmatched key
-\end{CodeOutput}
-\begin{CodeOutput}
-Joining, by = "lga"
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -688,9 +685,9 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 \hypertarget{historicaltmax}{%
 \subsection{Australian historical maximum temperature}\label{historicaltmax}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data \code{historical_tmax} is a subset containing the records of maximum temperature for 236 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations, extracted using the \texttt{rnoaa} package. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales.
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the \texttt{rnoaa} package, containing the records of maximum temperature for 236 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales, using a glyph map.
 
-First of all, the stations across the two states need to be subsetted from the original data \code{historical_tmax}. For that, the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries, need to be retrieved. The country code is located in the first 5 digits (Australia is represented by ``ASN00'') while the next 6 digits encode the station information following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. According to those, New South Wales stations correspond to entries in the range 46-75 and the Victorian stations are stored under 76-90. Filtering Victoria and New South Wales stations is a spatial operation and hence uses the \code{cubble} nested form:
+First, the stations need to be filtered to only those corresponding to NSW and Victoria, by using the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a \emph{spatial operation} and hence uses the \code{cubble} nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -699,15 +696,16 @@ R> tmax <- historical_tmax %>%
 \end{CodeInput}
 \end{CodeChunk}
 
-A monthly maximum average temperature is then calculated for both periods where \code{cubble} easily allows to compute this time operation across all the stations. This is a temporal operation and therefore the nested cubble needs to be switched to the long cubble form by \code{face_temporal()}:
+Next, a monthly maximum average temperature is calculated for both periods. This is a \emph{temporal operation} requiring a switch into the long cubble form, and creating a new indicator for the two time periods, before the calculation:
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> tmax <- tmax %>%
 +   face_temporal() %>% 
 +   group_by(month = lubridate::month(date),
-+          group = as.factor(ifelse(lubridate::year(date) > 2015,
-+                                   "2016 ~ 2020", "1971 ~ 1975"))) %>%
++          group = as.factor(
++            ifelse(lubridate::year(date) > 2015,
++            "2016 ~ 2020", "1971 ~ 1975"))) %>%
 +   summarise(tmax = mean(tmax, na.rm = TRUE))
 \end{CodeInput}
 \end{CodeChunk}
@@ -728,7 +726,7 @@ R> tmax <- tmax %>% face_temporal() %>% unfold(long, lat)
 \end{CodeInput}
 \end{CodeChunk}
 
-the variable storing the maximum monthly average temperatures \code{tmax} can then be supplied to \code{geom_glyph()} for the glyph map in Figure \ref{fig:basic-manip} with a station inset on the top left corner:
+The variable \code{tmax} is used by \code{geom_glyph()} to create the glyph map in Figure \ref{fig:basic-manip}. (An insset of one station inset is shown in the top left corner).
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -750,7 +748,7 @@ R> ggplot() +
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{figures/basic-manip-1} 
+{\centering \includegraphics[width=0.7\linewidth]{figures/basic-manip-1} 
 
 }
 
