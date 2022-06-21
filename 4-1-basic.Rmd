@@ -171,7 +171,7 @@ tmax %>% filter(id == "ASN00048027") %>%
 ```
 
 
-```{r basic-manip, out.width="70%", fig.height = 8, fig.width = 8, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations."}
+```{r basic-manip, out.width="50%", fig.height = 6, fig.width = 5, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations."}
 tmax <- tmax %>% unfold(long, lat)
 
 nsw_vic <- ozmaps::abs_ste %>% 
@@ -179,13 +179,14 @@ nsw_vic <- ozmaps::abs_ste %>%
 
 p1 <- ggplot() + 
   geom_sf(data = nsw_vic, fill = "grey95", 
-          color = "white") + 
+          color = "white", size=2) + 
   geom_glyph(data = tmax, 
              aes(x_major = long, x_minor = month, 
                  y_major = lat, y_minor = tmax,
                  group = interaction(id, group), 
                  color = group),
-             width = 1, height = 0.5) +
+             width = 1.2, height = 1, alpha=0.5, 
+             size=1.1) +
   scale_color_brewer("", palette = "Dark2") + 
   theme_bw() + 
   coord_sf(xlim = c(141, 154), ylim = c(-39, -28.5)) + 
