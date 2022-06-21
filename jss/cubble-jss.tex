@@ -687,7 +687,7 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 
 The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the \texttt{rnoaa} package, containing the records of maximum temperature for 236 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales, using a glyph map.
 
-First, the stations need to be filtered to only those corresponding to NSW and Victoria, by using the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a \emph{spatial operation} and hence uses the \code{cubble} nested form:
+First, the stations need to be filtered to those in NSW and Victoria, by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a \emph{spatial operation} and hence uses the \code{cubble} nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -710,23 +710,29 @@ R> tmax <- tmax %>%
 \end{CodeInput}
 \end{CodeChunk}
 
-Observing the results of the operation above show that a few stations do not have records during the time period 1971-1975. Further investigation shows that while the first and last year of each series for those stations are recorded, the years in between are not. Hence, these stations are located and filtered out by examining whether the summarised time series has 24 months. Here, the long cubble needs to be switched to the nested form to carry out this spatial operation using \code{face_spatial()}:
+A quick check on the number of observations for each location is made, revealing that there are several with less than 24 -- these lack temperature values for some months. These stations are removed, by switching to a long cubble to operate on the spatial component over time, and then back to the nested cubble (to make the glyph map):
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax %>% face_spatial() %>% filter(nrow(ts) == 24)
+R> tmax %>% 
++   face_spatial() %>% 
++   mutate(n = nrow(ts)) %>%
++   arrange(n) %>%
++   pull(n) %>% 
++   head(10)
 \end{CodeInput}
-\end{CodeChunk}
-
-Lastly, to create a glyph map where the series of each station are overlayed on a map of Australia, both the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates defining the bounding box for the plot need to be on the same table. For that, spatial variables can be moved to the long form with \code{unfold()}:
-
-\begin{CodeChunk}
+\begin{CodeOutput}
+ [1] 12 12 12 13 19 19 20 24 24 24
+\end{CodeOutput}
 \begin{CodeInput}
-R> tmax <- tmax %>% face_temporal() %>% unfold(long, lat)
+R> tmax <- tmax %>% 
++   face_spatial() %>% 
++   filter(nrow(ts) == 24) %>%
++   face_temporal()
 \end{CodeInput}
 \end{CodeChunk}
 
-The variable \code{tmax} is used by \code{geom_glyph()} to create the glyph map in Figure \ref{fig:basic-manip}. (An insset of one station inset is shown in the top left corner).
+To create a glyph map of the monthly series overlaid on the map (Figure \ref{fig:basic-manip}), requires that the spatial variables be unfolded with the temporal variables. Both of the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates need to be on the same table. The \code{geom_glyph()} function does both the transformation and the plotting. (An inset of the glyph for one station is shown in the top left corner.)
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -735,7 +741,8 @@ R> nsw_vic <- ozmaps::abs_ste %>%
 R> 
 R> ggplot() +
 +   geom_sf(data = nsw_vic,
-+           fill = "transparent", color = "grey", linetype = "dotted") +
++           fill = "transparent", color = "grey",
++           linetype = "dotted") +
 +   geom_glyph(data = tmax,
 +              aes(x_major = long, x_minor = month,
 +                  y_major = lat, y_minor = tmax,
@@ -756,7 +763,7 @@ R> ggplot() +
 \end{figure}
 \end{CodeChunk}
 
-It is worth to mentioned that some overlapping of the glyphs occurred for a few nearby stations as it can be seen from Figure \ref{fig:basic-manip}. This is a common issue when mapping multiple stations in a geographical area. This issue can be mitigated in some instances by aggregating data to group the data into a larger areas which might be useful to learn about clusters in the data as well as for visualizing those clusters in a glyph map. An continuing discussion of Example \ref{historicaltmax} discussing all those issues and can be found in the Appendix.
+Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are gridded. Here they are irregularly spaced, which can result in overlapping glyphs obscurring each other. To fix this one could aggregate data from nearby stations. An example is included in the Appendix.
 
 \hypertarget{river-level-data-in-victoria-water-gauges}{%
 \subsection{River level data in Victoria water gauges}\label{river-level-data-in-victoria-water-gauges}}

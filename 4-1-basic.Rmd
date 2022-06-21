@@ -92,7 +92,7 @@ load(here::here("data/historical_tmax.rda"))
 
 The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the `rnoaa` package, containing the records of maximum temperature for `r nrow(historical_tmax)` Australian stations from `r range(historical_tmax$first_year)[1]` through `r range(historical_tmax$first_year)[2]` and provides information also on the latitude, longitude and elevation of each of the  stations. <!-- This data  is already cast into a \code{cubble} data object (please see Appendix X for the code to extract  the data from XX and prepare the data into \code{cubble} form), with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates.--> The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales, using a glyph map.
 
-First, the stations need to be filtered to only those corresponding to NSW and Victoria, by using the country and the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by "ASN00") and the next 6 digits encode the station following the [Australian Bureau of Meteorology (BOM)](http://www.bom.gov.au/climate/cdo/about/site-num.shtml) coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a *spatial operation* and hence uses the \code{cubble} nested form:
+First, the stations need to be filtered to those in NSW and Victoria, by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by "ASN00") and the next 6 digits encode the station following the [Australian Bureau of Meteorology (BOM)](http://www.bom.gov.au/climate/cdo/about/site-num.shtml) coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a *spatial operation* and hence uses the \code{cubble} nested form:
 
 ```{r echo = TRUE}
 tmax <- historical_tmax %>%
@@ -111,19 +111,23 @@ tmax <- tmax %>%
   summarise(tmax = mean(tmax, na.rm = TRUE))
 ```
 
-Observing the results of the operation above show that a few stations do not have records during the time period 1971-1975. Further investigation shows that while the first and last year of each series for those stations are recorded, the years in between are not. Hence,  these stations are  located and filtered out by examining whether the summarised time series has 24 months. Here, the long cubble needs to be switched to the nested form to carry out this spatial operation using \code{face_spatial()}:
+A quick check on the number of observations for each location is made, revealing that there are several with less than 24 -- these lack temperature values for some months. These stations are removed, by switching to a long cubble to operate on the spatial component over time, and then back to the nested cubble (to make the glyph map):
 
 ```{r echo = TRUE}
-tmax <- tmax %>% face_spatial() %>% filter(nrow(ts) == 24)
+tmax %>% 
+  face_spatial() %>% 
+  mutate(n = nrow(ts)) %>%
+  arrange(n) %>%
+  pull(n) %>% 
+  head(10)
+
+tmax <- tmax %>% 
+  face_spatial() %>% 
+  filter(nrow(ts) == 24) %>%
+  face_temporal()
 ```
 
-Lastly, to create a glyph map where the series of each station are overlayed on a map of Australia, both the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates defining the bounding box for the plot need to be on the same table. For that, spatial variables can be moved to the long form with \code{unfold()}:
-
-```{r echo = TRUE}  
-tmax <- tmax %>% face_temporal() %>% unfold(long, lat)
-```
-
-The variable \code{tmax} is used by \code{geom_glyph()} to create the glyph map in Figure \ref{fig:basic-manip}. (An insset of one station inset is shown in the top left corner). 
+To create a glyph map of the monthly series overlaid on the map (Figure \ref{fig:basic-manip}), requires that the spatial variables be unfolded with the temporal variables. Both of the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates need to be on the same table. The \code{geom_glyph()} function does both the transformation and the plotting. (An inset of the glyph for one station is shown in the top left corner.) 
 
 ```{r eval = FALSE, echo = TRUE}
 nsw_vic <- ozmaps::abs_ste %>%
@@ -131,7 +135,8 @@ nsw_vic <- ozmaps::abs_ste %>%
 
 ggplot() +
   geom_sf(data = nsw_vic,
-          fill = "transparent", color = "grey", linetype = "dotted") +
+          fill = "transparent", color = "grey",
+          linetype = "dotted") +
   geom_glyph(data = tmax,
              aes(x_major = long, x_minor = month,
                  y_major = lat, y_minor = tmax,
@@ -147,11 +152,14 @@ tmax %>% filter(id == "ASN00048027") %>%
              y = tmax,
              color = group)) +
   geom_line(size = 1.5) +
-  scale_color_brewer(palette = "Dark2", guide = "none") +
+  scale_color_brewer(palette = "Dark2", 
+                     guide = "none") +
   scale_x_continuous(breaks = seq(1, 12, 1), 
-                     labels = c("J", "F", "M", "A", "M", "J", 
-                                "J", "A", "S", "O", "N", "D")) +
-  labs(x = "", y  = "Temp (C)", title = "ASN00048027: Cobar") +
+                     labels = c("J", "F", "M", "A",
+                                "M", "J", "J", "A",
+                                "S", "O", "N", "D")) +
+  labs(x = "", y  = "Temp (C)", 
+       title = "ASN00048027: Cobar") +
   theme_bw() +
   theme(
     aspect.ratio = 0.3,
@@ -164,10 +172,14 @@ tmax %>% filter(id == "ASN00048027") %>%
 
 
 ```{r basic-manip, out.width="70%", fig.height = 8, fig.width = 8, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations."}
-nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria", "New South Wales"))
+tmax <- tmax %>% unfold(long, lat)
+
+nsw_vic <- ozmaps::abs_ste %>% 
+  filter(NAME %in% c("Victoria", "New South Wales"))
 
 p1 <- ggplot() + 
-  geom_sf(data = nsw_vic, fill = "grey95", color = "white") + 
+  geom_sf(data = nsw_vic, fill = "grey95", 
+          color = "white") + 
   geom_glyph(data = tmax, 
              aes(x_major = long, x_minor = month, 
                  y_major = lat, y_minor = tmax,
@@ -178,10 +190,12 @@ p1 <- ggplot() +
   theme_bw() + 
   coord_sf(xlim = c(141, 154), ylim = c(-39, -28.5)) + 
   ggthemes::theme_map() +
-  theme(legend.position = "bottom") +
-  labs(x = "Longitude", y = "Latitude")
+  theme(legend.position = "bottom") #+
+  #labs(x = "Longitude", y = "Latitude")
 
-box_df <- tmax %>% face_spatial() %>% filter(id == "ASN00048027")
+box_df <- tmax %>% 
+  face_spatial() %>% 
+  filter(id == "ASN00048027")
 single <- tibble::tibble(img = here::here("figures/basic-manip-inset.png"))
 
 p1 +
@@ -193,6 +207,5 @@ p1 +
     data = single, aes(x = 143.7, y = -30, img = img), size = 6)
 
 ```
-It is worth to mentioned that some overlapping of the glyphs occurred for a few nearby stations as it can be seen from Figure  \ref{fig:basic-manip}. This is a common issue when mapping multiple stations in a geographical area. This issue can be mitigated in some instances by aggregating data to group the data into a larger areas which might be useful to learn about clusters in the data as well as for visualizing those clusters in a glyph map. An continuing discussion of Example \@ref(historicaltmax) discussing all those issues and can be found in the Appendix. 
 
-
+Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are gridded. Here they are irregularly spaced, which can result in overlapping glyphs obscurring each other. To fix this one could aggregate data from nearby stations. An example is included in the Appendix. 
