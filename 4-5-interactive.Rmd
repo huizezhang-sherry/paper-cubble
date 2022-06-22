@@ -5,7 +5,9 @@ output: html_document
 
 ## Interactive graphics
 
-When dealing with spatio-temporal data, users may wish to make plots to learn the spatial distribution of a variable or to find patterns, such as trend or seasonality, in the time series. Combining these two types of plots with interactivity lets users link between points on the map and the corresponding time series to explore the spatial and temporal dimensions of the data simultaneously. Below is an example that describes the process of building an interactive graphic with \pkg{cubble} and \pkg{crosstalk}. This example explores the variation of monthly temperature range within the \code{climate_full} data.
+Interactive graphics can be useful to make it possible to look at the data in a multiple of ways. This is especially important for spatiotemporal data, where we would like to interactively connect spatial and temporal displays. This example describes the process of building an interactive display with \pkg{cubble} and \pkg{crosstalk}. It explores the variation of monthly temperature range within the \code{climate_full} data.
+
+<!--When dealing with spatio-temporal data, users may wish to make plots to learn the spatial distribution of a variable or to find patterns, such as trend or seasonality, in the time series. Combining these two types of plots with interactivity lets users link between points on the map and the corresponding time series to explore the spatial and temporal dimensions of the data simultaneously.--> 
 
 The temperature range is calculated as the difference between \code{tmax} and \code{tmin} and its monthly average over 2016-2020 is taken before calculating the variance. A \code{SharedData} object is constructed for each form of the cubble and the same \code{group} argument ensures the cross-linking of the two forms via the common \code{id} column. The spatial map and time series plot are then made with each \code{SharedData} object separately. In this example, stations on the Australia map, made from the nested form, are coloured by the calculated variance. A ribbon band is constructed using the long form cubble to show each station's maximum and minimum temperature over time. In the case of a different dataset, users could calculate other station-dependent measures in the nested form or make other time-wise summary of the data in the long form to customise the spatial or temporal view. The cross-linking between the two plots is always safeguarded by the shared \code{id} column embedded in the cubble structure. Below is the pseudo-code that outlines the process to construct the interactive graphic described above:
 
@@ -35,30 +37,3 @@ knitr::include_graphics(here::here("figures/linking-lower.png"))
 #knitr::include_graphics(here::here("figures/linking-south.png"))
 ```
 
-This plot can also be made using \pkg{cubble} and \pkg{leaflet}, in which case the temperature range is displayed as a small subplot upon clicking on the map. This procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with \code{leafpop::addPopupGraphs()}:
-
-``` r
-# data pre-processing
-clean <- climate_full %>% ...
-
-# use the long form to create subplots for each station
-df_id <- unique(clean$id)
-p <- map(1:length(df_id), function(i){
-  dt <- clean %>% filter(id == df_id[i])
-  ggplot(dt) %>% ...
-})
-
-# create nested form leaflet map with temperature band as subplots
-nested <- face_spatial(clean)
-leaflet(nested) |>
-  addTiles() |>
-  addCircleMarkers(group = "a", ...) |>
-  leafpop::addPopupGraphs(graph = p, ...)
-
-```
-
-Figure \ref{fig:interactive-popup} shows the same information as Figure \ref{fig:interactive-linking} but using leaflet and popups [@leafpop].
-
-```{r interactive-popup, fig.align='center', echo = FALSE, out.width="45%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Same as Figure 11 except the temperature variation is now shown as a popup in the leaflet map.", fig.show='hold'}
-knitr::include_graphics(here::here("figures/popup-mid.png"))
-```
