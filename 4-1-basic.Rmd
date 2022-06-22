@@ -5,11 +5,11 @@ output: html_document
 
 # Examples {#examples}
 
-The five examples here are chosen to illustrate these aspects of using cubble: creating a cubble from two COVID data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. (There is an additional example and figures in the Appendix, and more examples in the package vignettes.)
+The five examples here are chosen to illustrate these aspects of using cubble: creating a \code{cubble} from two COVID data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. (There is an additional example and figures in the Appendix, and more examples in the package vignettes.)
 
 ## Victoria COVID spatio-temporal incidence and spread {#covid}
 
-Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualise COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Here is how to do this with \pkg{cubble}, including how to handle mismatches arising from different names of the same LGAs in the two tables. The COVID data is a `csv` and looks like:  
+Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualise COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Here is how to do this with \pkg{cubble}, including how to handle mismatches arising from different names of the same LGAs in the two tables. The COVID data is store in a `csv` file and looks like:  
 
 ```{r eval = FALSE}
 library(tidyverse)
@@ -42,13 +42,13 @@ lga <- strayr::read_absmap("lga2018") %>%
 covid %>% head(5)
 ```
 
-and the spatial polygons are an ESRI shapefile that looks like:
+and the spatial polygons are an ESRI shapefile as follows:
 
 ```{r echo = TRUE}
 lga %>% head(5)
 ```
 
-The function \code{as_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments (\code{key}, \code{index}, and \code{coords}) (as described in Section \@ref(create)). It will automatically try to match the sites in both tables and will show a warning message when there are mismatches, as shown below:
+The function \code{as_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments \code{key}, \code{index}, and \code{coords}, (as described in Section \@ref(create)). It will automatically try to match the sites in both tables using the location names and will show a warning message when there are mismatches, as shown below:
 
 ```{r echo = TRUE, warning = TRUE, message= TRUE}
 cb <- as_cubble(
@@ -57,7 +57,7 @@ cb <- as_cubble(
   )
 ```
 
-It can be seen that there are two-way mismatches -- LGAs in the COVID data that don't match with LGAs in the spatial polygon data, and vice versa. The mismatches can be identified by using the \code{output = "unmatch"} argument. <!--Note that \pkg{cubble} will attempt to pair the unmatched sites, these are shown separately from the ones that cannot be paired.-->
+It can be seen that there are two-way mismatches -- LGAs in the COVID data that do not  match with LGAs names in the spatial polygon data, and vice versa. The mismatches can be identified by using the \code{output = "unmatch"} argument in the \code{as_cubble()} functiton: <!--Note that \pkg{cubble} will attempt to pair the unmatched sites, these are shown separately from the ones that cannot be paired.-->
 
 ```{r echo = TRUE}
 pair <- as_cubble(
@@ -69,7 +69,7 @@ pair <- as_cubble(
 pair
 ```
 
-With this information both tables can be fixed, to create the desired cubble, as follows:
+With this information both tables can be fixed, to create the desired \code{cubble} object, as follows:
 
 ```{r echo = TRUE}
 lga <- lga %>%
