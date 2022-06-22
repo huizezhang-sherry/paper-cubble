@@ -112,7 +112,7 @@ p2 <- ggplot() +
 
 # Extension to section 5.5: Interactive graphics
 
-Figure XXX in this section can also be made using `cubble` and `leaflet`, in which case the temperature range is displayed as a small subplot upon clicking on the map. This procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with \code{leafpop::addPopupGraphs()}:
+Figure XXX in this section can also be made using `cubble` and `leaflet`, in which case the temperature range is displayed as a small subplot upon clicking on the map. This procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with `leafpop::addPopupGraphs()`:
 
 ``` r
 # data pre-processing

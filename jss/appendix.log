@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.6.21)  22 JUN 2022 12:27
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.6.21)  22 JUN 2022 12:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -407,8 +407,7 @@ Package graphics Info: Driver file: pdftex.def on input line 107.
 File: l3backend-pdftex.def 2022-04-20 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count303
 \l__pdf_internal_box=\box63
-)
-No file appendix.aux.
+) (./appendix.aux)
 \openout1 = `appendix.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 120.
@@ -453,6 +452,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
 Package hyperref Info: Link coloring OFF on input line 120.
+(./appendix.out) (./appendix.out)
 \@outlinefile=\write4
 \openout4 = `appendix.out'.
 
@@ -534,24 +534,50 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <7> on input line 131.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <5> on input line 131.
-
-LaTeX Warning: Reference `fig:basic-agg' on page 1 undefined on input line 155.
-
-<appendix_files/figure-latex/basic-agg-1.pdf, id=4, 1041.8925pt x 473.77pt>
+<appendix_files/figure-latex/basic-agg-1.pdf, id=29, 1041.8925pt x 473.77pt>
 File: appendix_files/figure-latex/basic-agg-1.pdf Graphic file (type pdf)
 <use appendix_files/figure-latex/basic-agg-1.pdf>
 Package pdftex.def Info: appendix_files/figure-latex/basic-agg-1.pdf  used on input line 159.
 (pdftex.def)             Requested size: 469.75348pt x 213.60658pt.
-! Undefined control sequence.
-l.166 ...reated from the nested cubble, with \code
-                                                  {leafpop::addPopupGraphs()}: 
-Here is how much of TeX's memory you used:
- 13513 strings out of 479998
- 216251 string characters out of 5887614
- 546606 words of memory out of 5000000
- 31421 multiletter control sequences out of 15000+600000
- 514500 words of font info for 97 fonts, out of 8000000 for 9000
- 14 hyphenation exceptions out of 8191
- 72i,6n,77p,1005b,408s stack positions out of 10000i,1000n,20000p,200000b,200000s
+[1
 
-!  ==> Fatal error occurred, no output PDF file produced!
+{/Users/cookd/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 175.
+<../figures/popup-mid.png, id=46, 904.37875pt x 737.75626pt>
+File: ../figures/popup-mid.png Graphic file (type png)
+<use ../figures/popup-mid.png>
+Package pdftex.def Info: ../figures/popup-mid.png  used on input line 193.
+(pdftex.def)             Requested size: 199.32272pt x 162.59956pt.
+<../figures/diagram-keynotes/diagram-keynotes.005.png, id=48, 1927.2pt x 1084.05pt>
+File: ../figures/diagram-keynotes/diagram-keynotes.005.png Graphic file (type png)
+<use ../figures/diagram-keynotes/diagram-keynotes.005.png>
+Package pdftex.def Info: ../figures/diagram-keynotes/diagram-keynotes.005.png  used on input line 207.
+(pdftex.def)             Requested size: 462.50806pt x 260.16077pt.
+[2 <./appendix_files/figure-latex/basic-agg-1.pdf>] [3 <../figures/popup-mid.png>] [4 <../figures/diagram-keynotes/diagram-keynotes.005.png>]
+
+LaTeX Warning: Reference `##precip' on page 5 undefined on input line 265.
+
+[5] (./appendix.aux)
+
+LaTeX Warning: There were undefined references.
+
+Package rerunfilecheck Info: File `appendix.out' has not changed.
+(rerunfilecheck)             Checksum: A93AA0A98743A39B6EDE1C766B8D969D;1670.
+ ) 
+Here is how much of TeX's memory you used:
+ 13615 strings out of 479998
+ 218385 string characters out of 5887614
+ 557020 words of memory out of 5000000
+ 31467 multiletter control sequences out of 15000+600000
+ 523184 words of font info for 109 fonts, out of 8000000 for 9000
+ 14 hyphenation exceptions out of 8191
+ 72i,6n,77p,1005b,490s stack positions out of 10000i,1000n,20000p,200000b,200000s
+{/Users/cookd/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/Users/cookd/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}</Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/cookd/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
+Output written on appendix.pdf (5 pages, 1338845 bytes).
+PDF statistics:
+ 139 PDF objects out of 1000 (max. 8388607)
+ 103 compressed objects within 2 object streams
+ 21 named destinations out of 1000 (max. 500000)
+ 28736 words of extra memory for PDF output out of 29859 (max. 10000000)
+
