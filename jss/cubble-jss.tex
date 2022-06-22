@@ -768,7 +768,8 @@ Glyph maps work well to explore temporal patterns across spatial locations, part
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
 
-River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data from the Bureau of Meteorology \citep{REF} in relation to weather station rainfall from NOAA's climate data. Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria. The goal is to match water gauges with nearby weather stations, spatially and temporally, using 2020 measurements.
+River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology \citep{REF} in relation to weather station rainfall from NOAA's climate data \citep{REF} (\code{climate}). Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria. The goal is to match water gauges with nearby weather stations, spatially and temporally, using 2020 measurements using
+\code{match_sites()} function.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -781,7 +782,7 @@ River level and rainfall data for the same areas should have some similarity. He
 \end{figure}
 \end{CodeChunk}
 
-The \code{match_sites()} function is used. \code{Water_course_level} from \code{river} and \code{prcp} from \code{climate} is used for the temporal matching. The peaks are compared, as explained in Section \ref{sec:matching}. A value of 30 is used for the maximum number of peaks to match, which corresponds to about 2 per month.
+This function requires passing the major and minor data sets used for matching, in this case those are \code{river} and \code{climate}. The variables used for the temporal matching are \code{Water_course_level} from the \code{river} data set and \code{prcp} in the climate data set. The rest of the arguments, as explained in Section \ref{sec:matching}, correspond to the maximum and minimum number of peaks in the time series to be matched. In this example those are set to be a maximum of 30 and a minimum of 15 (approximately 2 and 1 per month).
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -795,7 +796,7 @@ R> res <- match_sites(
 \end{CodeInput}
 \end{CodeChunk}
 
-This function returns a cubble, with additional columns \code{dist} and \code{group} summarising spatial matching, and \code{n_match} for temporal matching.
+This function returns a \code{cubble} object, with additional columns: \code{dist} storing the distance between matched stations, \code{group} summarising spatial matching, and \code{n_match} showing the temporal matching.
 
 \begin{CodeChunk}
 \begin{CodeOutput}
