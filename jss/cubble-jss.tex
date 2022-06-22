@@ -860,9 +860,9 @@ Creating the plot requires making transformations on time, unfolding the data fo
 \hypertarget{interactive-graphics-1}{%
 \subsection{Interactive graphics}\label{interactive-graphics-1}}
 
-Interactive graphics can be useful to make it possible to look at the data in a multiple of ways. This is especially important for spatiotemporal data, where we would like to interactively connect spatial and temporal displays. This example describes the process of building an interactive display with \pkg{cubble} and \pkg{crosstalk}. It explores the variation of monthly temperature range within the \code{climate_full} data.
+Interactive graphics can be useful because they make it possible to look at the data in a multiple of ways on-the-fly. This is especially important for spatio-temporal data, where we would like to interactively connect spatial and temporal displays. This example describes the process of using \pkg{cubble} with \pkg{crosstalk} to build an interactive display connecting a map of Australia, with ribbon plots of temperature range observed at the stations. The purpose is to explore the variation of monthly temperature range over the country. Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity.
 
-The temperature range is calculated as the difference between \code{tmax} and \code{tmin} and its monthly average over 2016-2020 is taken before calculating the variance. A \code{SharedData} object is constructed for each form of the cubble and the same \code{group} argument ensures the cross-linking of the two forms via the common \code{id} column. The spatial map and time series plot are then made with each \code{SharedData} object separately. In this example, stations on the Australia map, made from the nested form, are coloured by the calculated variance. A ribbon band is constructed using the long form cubble to show each station's maximum and minimum temperature over time. In the case of a different dataset, users could calculate other station-dependent measures in the nested form or make other time-wise summary of the data in the long form to customise the spatial or temporal view. The cross-linking between the two plots is always safeguarded by the shared \code{id} column embedded in the cubble structure. Below is the pseudo-code that outlines the process to construct the interactive graphic described above:
+The key steps are to convert both the nested and long forms of the data into shared objects, and to plot these sid-by-side. The two are linked by the station identifier.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -882,7 +882,7 @@ The temperature range is calculated as the difference between \code{tmax} and \c
 \end{Highlighting}
 \end{Shaded}
 
-In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Most regions in Australia have a low variance of temperature range, while the North-West coastline, the bottom of South Australia, and Victoria stand out with larger monthly changes. In the second row, the Mount Elizabeth station, which shows a high variance colour on the initial map, is selected on the map and this produces the ribbon on the right. In the third row, the lowest temperature in August is selected, which highlights the corresponding Thredbo AWS station on the left map. Another station in the Tasmania island is selected on the map to cross compare with Thredbo AWS.
+Plot (a) shows the initial state of the interactive display: all locations are shown as dots on the map, coloured by temperature range, and the right plot shows the ribbons representing maximum to minimum for all stations. In plot (b) the ``mount elizabeth'' station, which shows a high variance colour on the initial map, is selected on the map and this produces the ribbon on the right. In plot (c) the lowest temperature in August is selected, which is ``thredbo'' station on the left map. It was surprising to us that this was not a station in Tasmania, so for comparison a station in Tasmania is selected on the map to show in relation to thredbo. We can see that thredbo has a bigger winter dip in temperature, and although Tasmania is cold generally, it's temperatures are more consistent.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -895,52 +895,14 @@ In Figure \ref{fig:interactive-linking}, the first row shows the initial view of
 \end{figure}
 \end{CodeChunk}
 
-This plot can also be made using \pkg{cubble} and \pkg{leaflet}, in which case the temperature range is displayed as a small subplot upon clicking on the map. This procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with \code{leafpop::addPopupGraphs()}:
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# data pre{-}processing}
-\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ climate\_full }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ ...}
-
-\CommentTok{\# use the long form to create subplots for each station}
-\NormalTok{df\_id }\OtherTok{\textless{}{-}} \FunctionTok{unique}\NormalTok{(clean}\SpecialCharTok{$}\NormalTok{id)}
-\NormalTok{p }\OtherTok{\textless{}{-}} \FunctionTok{map}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(df\_id), }\ControlFlowTok{function}\NormalTok{(i)\{}
-\NormalTok{  dt }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(id }\SpecialCharTok{==}\NormalTok{ df\_id[i])}
-  \FunctionTok{ggplot}\NormalTok{(dt) }\SpecialCharTok{\%\textgreater{}\%}\NormalTok{ ...}
-\NormalTok{\})}
-
-\CommentTok{\# create nested form leaflet map with temperature band as subplots}
-\NormalTok{nested }\OtherTok{\textless{}{-}} \FunctionTok{face\_spatial}\NormalTok{(clean)}
-\FunctionTok{leaflet}\NormalTok{(nested) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{addTiles}\NormalTok{() }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-  \FunctionTok{addCircleMarkers}\NormalTok{(}\AttributeTok{group =} \StringTok{"a"}\NormalTok{, ...) }\SpecialCharTok{|}\ErrorTok{\textgreater{}}
-\NormalTok{  leafpop}\SpecialCharTok{::}\FunctionTok{addPopupGraphs}\NormalTok{(}\AttributeTok{graph =}\NormalTok{ p, ...)}
-\end{Highlighting}
-\end{Shaded}
-
-Figure \ref{fig:interactive-popup} shows the same information as Figure \ref{fig:interactive-linking} but using leaflet and popups \citep{leafpop}.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics[width=0.45\linewidth,height=0.25\textheight]{../figures/popup-mid} 
-
-}
-
-\caption[Same as Figure 11 except the temperature variation is now shown as a popup in the leaflet map]{Same as Figure 11 except the temperature variation is now shown as a popup in the leaflet map.}\label{fig:interactive-popup}
-\end{figure}
-\end{CodeChunk}
-
 \hypertarget{conclude}{%
 \section{Conclusion}\label{conclude}}
 
-This paper presents an \proglang{R} package \pkg{cubble} for organising, manipulating and visualising spatio-temporal data. The package introduces a new data structure for spatio-temporal data, \code{cubble}, that connects the time invariant and varying variables and that allows the user to work with a nested and long form of the data. TThe goal of this work is to add capabilities into the spatio-temporal practitioners toolbox that facilitates their work within the tidy data framework. The data structure and the capabilities introduced in this package can be used and combined with existing spatio-temporal R packages such as \pkg{sf}, data wrangling packages such as \pkg{dplyr}, and visualization packages such as \pkg{ggplot2}, \pkg{plotly} and \pkg{leaflet}.
+This paper presents an \proglang{R} package \pkg{cubble} for organising, manipulating and visualising spatio-temporal data. The package introduces a new data structure for spatio-temporal data, \code{cubble}, that connects the time invariant and varying variables and that allows the user to work with a nested and long form of the data. This work adds capabilities into the spatio-temporal practitioners toolbox to integrate it with a tidy data framework. The data structure and the capabilities introduced in this package can be used and combined with existing spatio-temporal R packages such as \pkg{sf}, data wrangling packages such as \pkg{dplyr}, and visualization packages such as \pkg{ggplot2}, \pkg{plotly} and \pkg{leaflet}.
 
-The data structure and functions are demonstrated with extensive examples. These include creating and coercing wild-caught data with potential mismatch on sites, handling hierarchical data, matching time series spatially and temporally, as well as reproducing ERA5 results from NetCDF data. Visualization of the \code{cubble} objects and derivatives is presented via interactive graphic pipelines using \pkg{plotly} and \pkg{leaflet}.
+Numerous examples are provided. These include creating and coercing data with mismatched names, handling hierarchical data, matching time series spatially and temporally, reproducing ERA5 plots from NetCDF data. Visualization of the \code{cubble} objects can be done with interactive graphic pipelines using \pkg{crosstalk}, \pkg{plotly} and \pkg{leaflet}.
 
-Future directions of the package involves handling sites with moving coordinates. This would involve constructing a list-column for location coordinates and a form these locations can be pivoted into, like the long form for temporal variables. In the multivariate aspect, \pkg{cubble} can also be extended with interface to more high dimensional visualisation methods, i.e., the tour method, to understand variable importance or comparing location similarities.
-
-\newpage
+There are several possible future directions for the work. The data structure only described fixed spatial sites, and it could be useful to provide tools to accommodate moving coordinates as might be encountered in animal movement data. It could be achieved with a list-column for the location coordinates, and an additional form that these locations can be pivoted into, like the long form for temporal variables. For multiple measured variables, \pkg{cubble} could be integrated with dimension reduction methods, and dynamic graphics for multiple dimensions such as a tour \citep{REF}.
 
 \hypertarget{acknowledgement}{%
 \section{Acknowledgement}\label{acknowledgement}}
