@@ -613,7 +613,7 @@ Geodetic CRS:  WGS 84
 \end{CodeOutput}
 \end{CodeChunk}
 
-The function \code{as_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments \code{key}, \code{index}, and \code{coords}, (as described in Section \ref{create}). It will automatically try to match the sites in both tables using the location names and will show a warning message when there are mismatches, as shown below:
+The function \code{as_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments \code{key}, \code{index}, and \code{coords} (as described in Section \ref{create}). It will automatically try to match the sites in both tables using the location names and will show a warning message when there are mismatches, as shown below:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -636,7 +636,7 @@ Joining, by = "lga"
 \end{CodeOutput}
 \end{CodeChunk}
 
-It can be seen that there are two-way mismatches -- LGAs in the COVID data that do not match with LGAs names in the spatial polygon data, and vice versa. The mismatches can be identified by using the \code{output = "unmatch"} argument in the \code{as_cubble()} functiton:
+It can be seen that there are two-way mismatches -- LGAs in the COVID data that do not match with LGAs names in the spatial polygon data, and vice versa. The mismatches can be identified by using the \code{output = "unmatch"} argument in the \code{as_cubble()} function:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -687,7 +687,7 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 
 The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the \texttt{rnoaa} package, containing the records of maximum temperature for 236 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales, using a glyph map.
 
-First, the stations need to be filtered to those in NSW and Victoria, by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a \emph{spatial operation} and hence uses the \code{cubble} nested form:
+First, the stations need to be filtered to those in NSW and Victoria by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a \emph{spatial operation} and hence uses the \code{cubble} nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -696,7 +696,7 @@ R> tmax <- historical_tmax %>%
 \end{CodeInput}
 \end{CodeChunk}
 
-Next, a monthly maximum average temperature is calculated for both periods. This is a \emph{temporal operation} requiring a switch into the long cubble form, and creating a new indicator for the two time periods, before the calculation:
+Next, the monthly maximum average temperature is calculated for both periods. This is a \emph{temporal operation} requiring a switch into the long \code{cubble} form using the \code{face_temporal()} function. In addition, a new indicator for the two time periods of interest is created before the calculation of monthly averages:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -710,7 +710,7 @@ R> tmax <- tmax %>%
 \end{CodeInput}
 \end{CodeChunk}
 
-A quick check on the number of observations for each location is made, revealing that there are several with less than 24 -- these lack temperature values for some months. These stations are removed, by switching to a long cubble to operate on the spatial component over time, and then back to the nested cubble (to make the glyph map):
+A quick check on the number of observations for each location is made, revealing that there are several with less than 24 observations -- these stations lack temperature values for some months. In this example, those stations are removed by switching to a long \code{cubble} to operate on the spatial component over time, and then, move back into the nested \code{cubble} (to make the glyph map):
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -732,7 +732,7 @@ R> tmax <- tmax %>%
 \end{CodeInput}
 \end{CodeChunk}
 
-To create a glyph map of the monthly series overlaid on the map (Figure \ref{fig:basic-manip}), requires that the spatial variables be unfolded with the temporal variables. Both of the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates need to be on the same table. The \code{geom_glyph()} function does both the transformation and the plotting. (An inset of the glyph for one station is shown in the top left corner.)
+In order to create a glyph map displaying the monthly series (Figure \ref{fig:basic-manip}), the spatial variables need to be unfolded with the temporal variables. The reason being that the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates need to be on the same table to create the glyph map. The \code{geom_glyph()} function does both the transformation and the plotting. \textcolor{green}{(An inset of the glyph for one station is shown in the top left corner.)}
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -763,7 +763,7 @@ R> ggplot() +
 \end{figure}
 \end{CodeChunk}
 
-Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are gridded. Here they are irregularly spaced, which can result in overlapping glyphs obscurring each other. To fix this one could aggregate data from nearby stations. An example is included in the Appendix.
+Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are gridded. In this example, they are irregularly spaced, which can result in overlapping glyphs obscuring each other. To fix this, one could aggregate data from nearby stations. An example of this using \textbf{cubble} is included in the Appendix.
 
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
