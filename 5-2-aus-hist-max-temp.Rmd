@@ -49,7 +49,7 @@ tmax <- tmax %>%
   face_temporal()
 ```
 
-In order to create a glyph map displaying the monthly series  (Figure \ref{fig:basic-manip}), the spatial variables need to be unfolded with the temporal variables. The reason being that the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates need to be on the same table to create the glyph map. The \code{geom_glyph()} function does both the transformation and the plotting. \textcolor{green}{(An inset of the glyph for one station is shown in the top left corner.)} 
+In order to create a glyph map displaying the monthly series  (Figure \ref{fig:basic-manip}), the spatial variables need to be unfolded with the temporal variables. The reason being that the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates need to be on the same table to create the glyph map. The \code{geom_glyph()} function does both the transformation and the plotting. 
 
 ```{r eval = FALSE, echo = TRUE}
 nsw_vic <- ozmaps::abs_ste %>%
@@ -67,68 +67,52 @@ ggplot() +
   ...
 ```
 
-```{r create-inset, eval = FALSE}
+```{r}
+cobar <- tmax %>% filter(id == "ASN00048027") %>%
+  ggplot(aes(x = month, y = tmax, color = group)) +
+  geom_line() +
+  scale_color_brewer(palette = "Dark2", guide = "none") +
+  scale_x_continuous(
+    breaks = seq(1, 12, 1), 
+    labels = c("J", "F", "M", "A",
+               "M", "J", "J", "A",
+               "S", "O", "N", "D")
+    ) +
+  labs(x = "", y  = "Temp (C)") +
+  theme_bw() + 
+  theme(aspect.ratio = 0.3)
 
-tmax %>% filter(id == "ASN00048027") %>%
-  ggplot(aes(x = month,
-             y = tmax,
-             color = group)) +
-  geom_line(size = 1.5) +
-  scale_color_brewer(palette = "Dark2", 
-                     guide = "none") +
-  scale_x_continuous(breaks = seq(1, 12, 1), 
-                     labels = c("J", "F", "M", "A",
-                                "M", "J", "J", "A",
-                                "S", "O", "N", "D")) +
-  labs(x = "", y  = "Temp (C)", 
-       title = "ASN00048027: Cobar") +
-  theme_bw() +
-  theme(
-    aspect.ratio = 0.3,
-    axis.text = element_text(size = 20),
-    title =  element_text(size = 20)
-  )
-
-#ggsave(filename = here::here("figures/basic-manip-inset.png"), width = 7)
 ```
 
 
-```{r basic-manip, out.width="50%", fig.height = 6, fig.width = 5, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations."}
+```{r basic-manip, fig.height=6, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations in New South Wales."}
 tmax <- tmax %>% unfold(long, lat)
-
-nsw_vic <- ozmaps::abs_ste %>% 
-  filter(NAME %in% c("Victoria", "New South Wales"))
+box_df <- tmax %>% face_spatial() %>% filter(id == "ASN00048027")
+nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria","New South Wales"))
 
 p1 <- ggplot() + 
   geom_sf(data = nsw_vic, fill = "grey95", 
           color = "white", size=2) + 
-  geom_glyph(data = tmax, 
-             aes(x_major = long, x_minor = month, 
-                 y_major = lat, y_minor = tmax,
-                 group = interaction(id, group), 
-                 color = group),
-             width = 1.2, height = 1, alpha=0.5, 
-             size=1.1) +
+  geom_glyph(
+    data = tmax, 
+    aes(x_major = long, x_minor = month, 
+        y_major = lat, y_minor = tmax,
+        group = interaction(id, group), color = group),
+    width = 1.2, height = 0.8) +
+    geom_rect(
+      data = box_df,
+      aes(xmin = long - 0.6, xmax = long + 0.6,
+          ymin = lat - 0.12, ymax = lat + 0.35),
+      fill = "transparent", color = "black") +
   scale_color_brewer("", palette = "Dark2") + 
-  theme_bw() + 
   coord_sf(xlim = c(141, 154), ylim = c(-39, -28.5)) + 
   ggthemes::theme_map() +
-  theme(legend.position = "bottom",
-        legend.text = element_text(size = 15)) #+
+  theme(legend.position = "bottom", legend.text = element_text(size = 15)) + 
+  guides(color = guide_legend(override.aes = list(size=2)))
 
-box_df <- tmax %>% 
-  face_spatial() %>% 
-  filter(id == "ASN00048027")
-single <- tibble::tibble(img = here::here("figures/basic-manip-inset.png"))
-
-p1 +
-  geom_rect(data = box_df,
-            aes(xmin = long - 0.6, xmax = long + 0.6,
-                ymin = lat - 0.12, ymax = lat + 0.35),
-            fill = "transparent", color = "black") +
-  ggimg::geom_point_img(
-    data = single, aes(x = 143.7, y = -30, img = img), size = 6) + 
-  guides(color = guide_legend(override.aes = list(size=5)))
+(cobar / p1)  + 
+  patchwork::plot_layout(heights = c(1,5)) + 
+  plot_annotation(tag_levels = 'a')
 
 ```
 

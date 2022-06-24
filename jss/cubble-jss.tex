@@ -267,7 +267,7 @@ The first line in the printed cubble now shows it in the long form and the third
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.002} 
+{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{../figures/diagram-keynotes/diagram-keynotes.002} 
 
 }
 
@@ -426,7 +426,7 @@ The size of spatial grid can be reduced if longer time periods or more variables
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> # Assume my_ncdf has a bounding box of [-180, -90, 180, -90]
+R> # Assume my_ncdf has a bounding box of [-180, -90, 180, 90]
 R> # at 0.25 degree resolution and subset it to have
 R> # 1 degree resolution:
 R> dt <- as_cubble(my_ncdf, vars = c("q", "z"),
@@ -498,7 +498,7 @@ Linking is also available starting from the time series plot, by selecting point
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.004} 
+{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{../figures/diagram-keynotes/diagram-keynotes.004} 
 
 }
 
@@ -535,7 +535,7 @@ R> ggplot(data = data) +
 \end{CodeInput}
 \end{CodeChunk}
 
-An example using a glyph map is shown in Section \ref{precip}.
+An example using a glyph map is shown in Section \ref{historicaltmax}.
 
 Some useful controls over the glyph map are also available in the \code{geom_glyph()} implementation. Polar coordinate glyph maps are specified using \code{polar = TRUE}, and parameters \code{width} and \code{height} can be specified in either absolute or relative value. Global and local scale is specified with \code{global_rescale}, which defaults to \code{TRUE}. Reference boxes and lines can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()} lines.
 
@@ -713,7 +713,7 @@ R> tmax <- tmax %>%
 \end{CodeInput}
 \end{CodeChunk}
 
-In order to create a glyph map displaying the monthly series (Figure \ref{fig:basic-manip}), the spatial variables need to be unfolded with the temporal variables. The reason being that the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates need to be on the same table to create the glyph map. The \code{geom_glyph()} function does both the transformation and the plotting. \textcolor{green}{(An inset of the glyph for one station is shown in the top left corner.)}
+In order to create a glyph map displaying the monthly series (Figure \ref{fig:basic-manip}), the spatial variables need to be unfolded with the temporal variables. The reason being that the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates need to be on the same table to create the glyph map. The \code{geom_glyph()} function does both the transformation and the plotting.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -736,11 +736,11 @@ R> ggplot() +
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{figures/basic-manip-1} 
+{\centering \includegraphics{figures/basic-manip-1} 
 
 }
 
-\caption[A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020)]{A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations.}\label{fig:basic-manip}
+\caption[A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020)]{A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations in New South Wales.}\label{fig:basic-manip}
 \end{figure}
 \end{CodeChunk}
 
@@ -810,7 +810,9 @@ The downloaded netcdf data is read into R using the \code{ncdf4} package, and co
 \begin{CodeChunk}
 \begin{CodeInput}
 R> raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
-R> dt <- as_cubble(raw, vars = c("q", "z"))
+R> dt <- as_cubble(
++   raw, vars = c("q", "z"),
++   long_range = seq(-180, 180, 1), lat_range = seq(-90, 90, 1))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -819,7 +821,7 @@ Creating the plot requires making transformations on time, unfolding the data fo
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/netcdf} 
+{\centering \includegraphics{figures/netcdf-1} 
 
 }
 

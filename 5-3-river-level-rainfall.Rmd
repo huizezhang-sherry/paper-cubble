@@ -58,7 +58,8 @@ p1 <-ggplot() +
   scale_color_brewer(palette = "Dark2")  + 
   ggthemes::theme_map() +
   ggplot2::theme(legend.position = "bottom",
-                 legend.text = element_text(size = 15)) +
+                 legend.text = element_text(size = 15),
+                 legend.title = element_text(size = 15)) +
   ggplot2::labs(x = "Longitude", y = "Latitude") + 
   guides(color = guide_legend(override.aes = list(size=5)))
 

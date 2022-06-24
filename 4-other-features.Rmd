@@ -41,7 +41,7 @@ The cubble workflow fits works well with an interactive graphics pipeline (e.g. 
 
 Linking is also available starting from the time series plot, by selecting points. This will be activate rows having the same \code{id} in the long cubble. The corresponding rows in the nested cubble are activated, and highlighted the map. (An illustration can be found in the appendix.) Note that this type of linking, both from the map or the time series, is what @CS07 would call categorical variable linking, where station id is the categorical variable. <!--\ref{fig:illu-interactive-2} in the Appendix illustrates this process.-->
 
-```{r illu-interactive, echo = FALSE, fig.align="center", out.height="40%", out.width = "100%", fig.cap = "Linking between multiple plots. The line plots and the map are constructed from shared crosstalk objects (long and nested cubbles). When a station is selected on the map (a), the corresponding row in the nested cubble will be activated. This will link to all the rows with the same id in the long cubble (b) and update the line plot (c)."}
+```{r illu-interactive, echo = FALSE, fig.align="center", out.height = "35%", out.width = "100%", fig.cap = "Linking between multiple plots. The line plots and the map are constructed from shared crosstalk objects (long and nested cubbles). When a station is selected on the map (a), the corresponding row in the nested cubble will be activated. This will link to all the rows with the same id in the long cubble (b) and update the line plot (c)."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
 
@@ -69,6 +69,6 @@ ggplot(data = data) +
                  y_major = ..., y_minor = ...))
 ```
 
-An example using a glyph map is shown in Section \@ref(precip). 
+An example using a glyph map is shown in Section \@ref(historicaltmax). 
 
 Some useful controls over the glyph map are also available in the \code{geom_glyph()} implementation. Polar coordinate glyph maps are specified using \code{polar = TRUE}, and parameters \code{width} and \code{height} can be specified in either absolute or relative value. Global and local scale is specified with \code{global_rescale}, which defaults to \code{TRUE}. Reference boxes and lines can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()} lines.
