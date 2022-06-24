@@ -8,7 +8,7 @@ This paper presents an \proglang{R} package \pkg{cubble} for organising, manipul
 
 Numerous examples are provided in the main text, appendix and package vignettes. These include creating and coercing data with mismatched names, handling hierarchical data, matching time series spatially and temporally, reproducing ERA5 plots from NetCDF data. Visualization of the \code{cubble} objects can be done with interactive graphic pipelines using \pkg{crosstalk}, \pkg{plotly} and \pkg{leaflet}.
 
-There are several possible future directions for the work. The data structure only described fixed spatial sites, and it could be useful to provide tools to accommodate moving coordinates as might be encountered in animal movement data. That could be achieved with a list-column for the location coordinates, and an additional form that these locations can be pivoted into, like the long form for temporal variables. For multiple measured variables, \pkg{cubble} could be integrated with dimension reduction methods, and dynamic graphics for multiple dimensions such as a tour [@REF].
+There are several possible future directions for the work. The data structure only described fixed spatial sites, and it could be useful to provide tools to accommodate moving coordinates as might be encountered in animal movement data. That could be achieved with a list-column for the location coordinates, and an additional form that these locations can be pivoted into, like the long form for temporal variables. For multiple measured variables, \pkg{cubble} could be integrated with dimension reduction methods, and dynamic graphics for multiple dimensions such as a tour [@wickham_tourr_2011].
 
 # Acknowledgement
 

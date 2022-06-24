@@ -1,6 +1,9 @@
 \documentclass[
 ]{jss}
 
+%% recommended packages
+\usepackage{orcidlink,thumbpdf,lmodern}
+
 \usepackage[utf8]{inputenc}
 
 \author{
@@ -152,7 +155,7 @@ While the data cube model is conceptually convenient for spatio-temporal data, a
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
+{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.001} 
 
 }
 
@@ -264,7 +267,7 @@ The first line in the printed cubble now shows it in the long form and the third
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.002} 
+{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.002} 
 
 }
 
@@ -469,7 +472,7 @@ the cubble redefines the cubble key from the \code{id} column in \code{station_n
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.003} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.003} 
 
 }
 
@@ -485,7 +488,7 @@ One task that may interest spatio-temporal analysts is combining data collected 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/illu-matching} 
+{\centering \includegraphics[width=1\linewidth]{../figures/illu-matching} 
 
 }
 
@@ -517,7 +520,7 @@ Linking is also available starting from the time series plot, by selecting point
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/diagram-keynotes/diagram-keynotes.004} 
+{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.004} 
 
 }
 
@@ -687,7 +690,7 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 
 The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the \texttt{rnoaa} package, containing the records of maximum temperature for 236 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales, using a glyph map.
 
-First, the stations need to be filtered to those in NSW and Victoria by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the \href{http://www.bom.gov.au/climate/cdo/about/site-num.shtml}{Australian Bureau of Meteorology (BOM)} coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a \emph{spatial operation} and hence uses the \code{cubble} nested form:
+First, the stations need to be filtered to those in NSW and Victoria by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the Australian Bureau of Meteorology (BOM) \citep{bom} coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a \emph{spatial operation} and hence uses the \code{cubble} nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -768,7 +771,7 @@ Glyph maps work well to explore temporal patterns across spatial locations, part
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
 
-River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology \citep{REF} in relation to weather station rainfall from NOAA's climate data \citep{REF} (\code{climate}). Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria. The goal is to match water gauges with nearby weather stations, spatially and temporally, using 2020 measurements using
+River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology \citep{bom} in relation to weather station rainfall from NOAA's climate data \citep{noaa} (\code{climate}). Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria. The goal is to match water gauges with nearby weather stations, spatially and temporally, using 2020 measurements using
 \code{match_sites()} function.
 
 \begin{CodeChunk}
@@ -782,7 +785,7 @@ River level and rainfall data for the same areas should have some similarity. He
 \end{figure}
 \end{CodeChunk}
 
-This function requires passing the major and minor data sets used for matching, in this case those are \code{river} and \code{climate}. The variables used for the temporal matching are \code{Water_course_level} from the \code{river} data set and \code{prcp} in the climate data set. The rest of the arguments, as explained in Section \ref{sec:matching}, correspond to the maximum and minimum number of peaks in the time series to be matched. In this example those are set to be a maximum of 30 and a minimum of 15 (approximately 2 and 1 per month).
+This function requires passing the major and minor data sets used for matching, in this case those are \code{river} and \code{climate}. The variables used for the temporal matching are \code{Water_course_level} from the \code{river} data set and \code{prcp} in the climate data set. The rest of the arguments, as explained in Section \ref{matching}, correspond to the maximum and minimum number of peaks in the time series to be matched. In this example those are set to be a maximum of 30 and a minimum of 15 (approximately 2 and 1 per month).
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -830,9 +833,9 @@ Figure \ref{fig:matching} shows four matched pairs on the map (A) and standardis
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis data}\label{era5-climate-reanalysis-data}}
 
-Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \citet{hersbach2020era5}. Here we explain how this would be done using cubble. The plots show that the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also \citet{simmons2020global}, \citet{simmons2005ecmwf}.
+Figure \ref{fig:netcdf} reproduces the ERA5 data \citep{hersbach2020era5} row of Figure 19 in \citep{hersbach2020era5}. Here we explain how this would be done using cubble. The plots show that the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also \citep{simmons2020global}, \citep{simmons2005ecmwf}.
 
-The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF). It can be directly downloaded from \href{https://cds.climate.copernicus.eu/cdsapp\#!/dataset/reanalysis-era5-pressure-levels?tab=overview}{Copernicus Climate Data Store (CDS)} website or via the R package \pkg{ecmwfr} \citep{ecwmfr}.
+The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF). It can be directly downloaded from Copernicus Climate Data Store (CDS) \citep{cds} website or via the R package \pkg{ecmwfr} \citep{ecwmfr}.
 
 For the reproduction, we focus on the \code{era5-pressure} data, hourly pressure levels from 1970 to present, with the \emph{specific humidity} and \emph{geopotential}.
 
@@ -850,7 +853,7 @@ Creating the plot requires making transformations on time, unfolding the data fo
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/netcdf} 
+{\centering \includegraphics[width=1\linewidth]{../figures/netcdf} 
 
 }
 
@@ -888,7 +891,7 @@ Plot (a) shows the initial state of the interactive display: all locations are s
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Google Drive (2)/ Private/PhD supervision/paper-cubble/figures/linking-lower} 
+{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{../figures/linking-lower} 
 
 }
 
@@ -903,7 +906,7 @@ This paper presents an \proglang{R} package \pkg{cubble} for organising, manipul
 
 Numerous examples are provided in the main text, appendix and package vignettes. These include creating and coercing data with mismatched names, handling hierarchical data, matching time series spatially and temporally, reproducing ERA5 plots from NetCDF data. Visualization of the \code{cubble} objects can be done with interactive graphic pipelines using \pkg{crosstalk}, \pkg{plotly} and \pkg{leaflet}.
 
-There are several possible future directions for the work. The data structure only described fixed spatial sites, and it could be useful to provide tools to accommodate moving coordinates as might be encountered in animal movement data. That could be achieved with a list-column for the location coordinates, and an additional form that these locations can be pivoted into, like the long form for temporal variables. For multiple measured variables, \pkg{cubble} could be integrated with dimension reduction methods, and dynamic graphics for multiple dimensions such as a tour \citep{REF}.
+There are several possible future directions for the work. The data structure only described fixed spatial sites, and it could be useful to provide tools to accommodate moving coordinates as might be encountered in animal movement data. That could be achieved with a list-column for the location coordinates, and an additional form that these locations can be pivoted into, like the long form for temporal variables. For multiple measured variables, \pkg{cubble} could be integrated with dimension reduction methods, and dynamic graphics for multiple dimensions such as a tour \citep{wickham_tourr_2011}.
 
 \hypertarget{acknowledgement}{%
 \section{Acknowledgement}\label{acknowledgement}}

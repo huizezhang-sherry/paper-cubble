@@ -69,6 +69,6 @@ ggplot(data = data) +
                  y_major = ..., y_minor = ...))
 ```
 
-An example using a glyph map is shown in Section \ref{precip}. 
+An example using a glyph map is shown in Section \@ref(precip). 
 
 Some useful controls over the glyph map are also available in the \code{geom_glyph()} implementation. Polar coordinate glyph maps are specified using \code{polar = TRUE}, and parameters \code{width} and \code{height} can be specified in either absolute or relative value. Global and local scale is specified with \code{global_rescale}, which defaults to \code{TRUE}. Reference boxes and lines can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()} lines.
