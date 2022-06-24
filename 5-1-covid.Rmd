@@ -1,0 +1,84 @@
+---
+title: "5-1-covid"
+output: html_document
+---
+
+# Examples {#examples}
+
+The five examples here are chosen to illustrate these aspects of using cubble: creating a \code{cubble} from two COVID data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. (There is an additional example and figures in the Appendix, and more examples in the package vignettes.)
+
+## Victoria COVID spatio-temporal incidence and spread {#covid}
+
+Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualise COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Here is how to do this with \pkg{cubble}, including how to handle mismatches arising from different names of the same LGAs in the two tables. The COVID data is store in a `csv` file and looks like:  
+
+```{r eval = FALSE}
+library(tidyverse)
+#https://www.coronavirus.vic.gov.au/victorian-coronavirus-covid-19-data
+raw <- read_csv(here::here("data/NCOV_COVID_Cases_by_LGA_Source_20220324.csv"),
+                  col_names = c("date", "postcode", "source", "lga"), skip = 1)
+
+covid <- raw %>%
+  count(date, lga, source, postcode) %>%
+  filter(date >= as.Date("2022-01-01")) %>%
+  filter(source == "Contact with a confirmed case") %>%
+  group_by(date, lga, source) %>%
+  count() %>%
+  ungroup(date) %>%
+  mutate(roll_mean = zoo::rollmean(n, k = 14, fill = NA)) %>%
+  tsibble::as_tsibble(key = lga, index = date) %>%
+  tsibble::fill_gaps(.full = TRUE)
+save(covid, file = here::here("data/covid.rda"))
+```
+
+```{r}
+load(here::here("data/covid.rda"))
+
+lga <- strayr::read_absmap("lga2018") %>%
+  rename(lga = lga_name_2018) %>%
+  filter(state_name_2016 == "Victoria") 
+```
+
+```{r echo = TRUE}
+covid %>% head(5)
+```
+
+and the spatial polygons are an ESRI shapefile as follows:
+
+```{r echo = TRUE}
+lga %>% head(5)
+```
+
+The function \code{as_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments \code{key}, \code{index}, and \code{coords} (as described in Section \@ref(create)). It will automatically try to match the sites in both tables using the location names and will show a warning message when there are mismatches, as shown below:
+
+```{r echo = TRUE, warning = TRUE, message= TRUE}
+cb <- as_cubble(
+  list(spatial = lga, temporal = covid),
+  key = lga, index = date, coords = c(cent_long, cent_lat)
+  )
+```
+
+It can be seen that there are two-way mismatches -- LGAs in the COVID data that do not  match with LGAs names in the spatial polygon data, and vice versa. The mismatches can be identified by using the \code{output = "unmatch"} argument in the \code{as_cubble()} function: <!--Note that \pkg{cubble} will attempt to pair the unmatched sites, these are shown separately from the ones that cannot be paired.-->
+
+```{r echo = TRUE}
+pair <- as_cubble(
+  list(spatial = lga, temporal = covid),
+  key = lga, index = date, coords = c(cent_long, cent_lat),
+  output = "unmatch"
+  )
+
+pair
+```
+
+With this information both tables can be fixed, to create the desired \code{cubble} object, as follows:
+
+```{r echo = TRUE}
+lga <- lga %>%
+  mutate(lga = ifelse(lga == "Kingston (C) (Vic.)", "Kingston (C)", lga),
+         lga = ifelse(lga == "Latrobe (C) (Vic.)", "Latrobe (C)", lga)) %>%
+  filter(!lga %in% pair$others$spatial)
+
+covid <- covid %>% filter(!lga %in% pair$others$temporal)
+
+cb <- as_cubble(data = list(spatial = lga, temporal = covid),
+                key = lga, index = date, coords = c(cent_long, cent_lat))
+```
