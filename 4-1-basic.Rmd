@@ -193,8 +193,8 @@ p1 <- ggplot() +
   theme_bw() + 
   coord_sf(xlim = c(141, 154), ylim = c(-39, -28.5)) + 
   ggthemes::theme_map() +
-  theme(legend.position = "bottom") #+
-  #labs(x = "Longitude", y = "Latitude")
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 15)) #+
 
 box_df <- tmax %>% 
   face_spatial() %>% 
@@ -207,7 +207,8 @@ p1 +
                 ymin = lat - 0.12, ymax = lat + 0.35),
             fill = "transparent", color = "black") +
   ggimg::geom_point_img(
-    data = single, aes(x = 143.7, y = -30, img = img), size = 6)
+    data = single, aes(x = 143.7, y = -30, img = img), size = 6) + 
+  guides(color = guide_legend(override.aes = list(size=5)))
 
 ```
 

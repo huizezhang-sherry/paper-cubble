@@ -57,8 +57,10 @@ p1 <-ggplot() +
     data = res %>% filter(type == "river"), aes(x = long, y = lat, label = group)) +
   scale_color_brewer(palette = "Dark2")  + 
   ggthemes::theme_map() +
-  ggplot2::theme(legend.position = "bottom") +
-  ggplot2::labs(x = "Longitude", y = "Latitude")
+  ggplot2::theme(legend.position = "bottom",
+                 legend.text = element_text(size = 15)) +
+  ggplot2::labs(x = "Longitude", y = "Latitude") + 
+  guides(color = guide_legend(override.aes = list(size=5)))
 
 res_long <- res %>%
   face_temporal(ts) %>%
@@ -78,5 +80,5 @@ p2 <- res_long %>%
 (p1 | p2) + 
   patchwork::plot_layout(guides = "collect") + 
   plot_annotation(tag_levels = 'a')&
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") 
 ```
