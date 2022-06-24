@@ -5,8 +5,7 @@ output: html_document
 
 ## River levels and rainfall in Victoria
 
-River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology [@bom] in relation to weather station rainfall from NOAA's climate data [@noaa] (\code{climate}). Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria. The goal is to match water gauges with nearby weather stations, spatially and temporally, using 2020 measurements using 
-\code{match_sites()} function.
+River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology [@bom] in relation to weather station rainfall from NOAA's climate data [@noaa] (\code{climate}). The goal is to match water gauges with nearby weather stations, spatially and temporally, using 2020 measurements using \code{match_sites()} function.
 <!--The Bureau of Meteorology collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges. The collected variables include: electrical conductivity, turbidity, watercourse discharge, watercourse level, and water temperature. We expect that the water level should be related to the precipitation available from climate data, since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria, and we will try to match water gauges with nearby weather stations, taking into account both spatial and temporal information from 2020.-->
 
 ```{r}
@@ -22,20 +21,6 @@ climate <- climate_full %>%
 river <- river %>% mutate(type = "river")
 ```
 
-```{r matching-map, fig.height = 7, fig.width=10, fig.cap="Location of weather stations and river gauges in Victoria, Australia."}
-vic_map <- rmapshaper::ms_simplify(ozmaps::abs_ste %>%
-               filter(NAME == "Victoria"))  
-
-ggplot() + 
-  geom_sf(data = vic_map, fill = "grey95", color = "white") + 
-  geom_point(data = dplyr::bind_rows(river, climate), 
-             aes(x = long, y = lat, color = type)) + 
-  ggthemes::theme_map() +
-  theme(legend.position = "bottom") +
-  labs(x = "Longitude", y = "Latitude") + 
-  scale_color_brewer(palette = "Dark2") 
-```
-
 This function requires passing the major and minor data sets used for matching, in this case those are \code{river} and \code{climate}.  The variables used for the temporal matching  are \code{Water_course_level} from the \code{river} data set and \code{prcp} in the climate data set. The rest of the arguments, as explained in Section \@ref(matching), correspond to the maximum and minimum number of peaks in the time series to be matched. In this example those are set to be a maximum of 30 and a minimum of 15 (approximately 2 and 1 per month).  
 
 <!--We first pass in the two datasets, followed by the variables used for the temporal matching, specified in \code{temporal_by} (using the \code{by} syntax from \code{dplyr::join}). With \code{temporal_independent} we select precipitation (\code{prcp}) as the independent variable, and the goal is to see if the water level in the river reflects what is observed in precipitation (for nearby stations). Since we consider a full year of data, we set the number of peaks considered (\code{temporal_n_highest}) to 30 (slightly above the default value of 20), and \code{temporal_min_match} is raised accordingly.-->
@@ -46,7 +31,7 @@ res <- match_sites(
   temporal_by = c("Water_course_level" = "prcp"),
   temporal_independent = "prcp",  
   temporal_n_highest = 30,
-  temporal_min_match = 15
+  temporal_min_match = 15, 
 )
 ```
 
@@ -56,11 +41,17 @@ This function returns a \code{cubble} object, with additional columns: \code{dis
 res %>% print()
 ```
 
-Figure \ref{fig:matching} shows four matched pairs on the map (A) and standardised data as time series (B). The expected concurrent increase in precipitation and water level can be seen clearly.
+Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardised data as time series (b). The expected concurrent increase in precipitation and water level can be seen clearly.
 
-```{r matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here."}
+```{r matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here."}
+vic_map <- ozmaps::abs_ste %>% 
+  filter(NAME == "Victoria") %>% 
+  rmapshaper::ms_simplify()  
+
 p1 <-ggplot() + 
   geom_sf(data = vic_map, fill = "grey95", color = "white") + 
+  geom_point(data = dplyr::bind_rows(river, climate), 
+             aes(x = long, y = lat, color = type), alpha = 0.2, fill = 0.2) +
   geom_point(data = res, aes(x = long, y = lat, color = type)) +
   ggrepel::geom_label_repel(
     data = res %>% filter(type == "river"), aes(x = long, y = lat, label = group)) +
@@ -86,6 +77,6 @@ p2 <- res_long %>%
 
 (p1 | p2) + 
   patchwork::plot_layout(guides = "collect") + 
-  plot_annotation(tag_levels = 'A')&
+  plot_annotation(tag_levels = 'a')&
   theme(legend.position = "bottom")
 ```

@@ -771,19 +771,7 @@ Glyph maps work well to explore temporal patterns across spatial locations, part
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
 
-River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology \citep{bom} in relation to weather station rainfall from NOAA's climate data \citep{noaa} (\code{climate}). Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria. The goal is to match water gauges with nearby weather stations, spatially and temporally, using 2020 measurements using
-\code{match_sites()} function.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics{figures/matching-map-1} 
-
-}
-
-\caption[Location of weather stations and river gauges in Victoria, Australia]{Location of weather stations and river gauges in Victoria, Australia.}\label{fig:matching-map}
-\end{figure}
-\end{CodeChunk}
+River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology \citep{bom} in relation to weather station rainfall from NOAA's climate data \citep{noaa} (\code{climate}). The goal is to match water gauges with nearby weather stations, spatially and temporally, using 2020 measurements using \code{match_sites()} function.
 
 This function requires passing the major and minor data sets used for matching, in this case those are \code{river} and \code{climate}. The variables used for the temporal matching are \code{Water_course_level} from the \code{river} data set and \code{prcp} in the climate data set. The rest of the arguments, as explained in Section \ref{matching}, correspond to the maximum and minimum number of peaks in the time series to be matched. In this example those are set to be a maximum of 30 and a minimum of 15 (approximately 2 and 1 per month).
 
@@ -794,7 +782,7 @@ R> res <- match_sites(
 +   temporal_by = c("Water_course_level" = "prcp"),
 +   temporal_independent = "prcp",  
 +   temporal_n_highest = 30,
-+   temporal_min_match = 15
++   temporal_min_match = 15, 
 + )
 \end{CodeInput}
 \end{CodeChunk}
@@ -817,7 +805,7 @@ This function returns a \code{cubble} object, with additional columns: \code{dis
 \end{CodeOutput}
 \end{CodeChunk}
 
-Figure \ref{fig:matching} shows four matched pairs on the map (A) and standardised data as time series (B). The expected concurrent increase in precipitation and water level can be seen clearly.
+Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardised data as time series (b). The expected concurrent increase in precipitation and water level can be seen clearly.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -826,7 +814,7 @@ Figure \ref{fig:matching} shows four matched pairs on the map (A) and standardis
 
 }
 
-\caption[Matched weather stations and river gauges on the map (A) and across time (B)]{Matched weather stations and river gauges on the map (A) and across time (B). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here.}\label{fig:matching}
+\caption[Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b)]{Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here.}\label{fig:matching}
 \end{figure}
 \end{CodeChunk}
 
