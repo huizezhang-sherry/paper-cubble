@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(cubble)
 library(patchwork)
+library(leaflet)
+library(leafpop)
 ```
 
 This is the supplementary material for the main paper, containing
@@ -36,7 +38,7 @@ station_nested <- climate_full %>% mutate(cluster = ...)
 
 To create a group-level cubble, use `switch_key()` with the new key variable, `cluster`:
 
-```{r echo = TRUE}
+```{r eval = FALSE, echo = TRUE}
 cluster_nested <- station_nested %>% switch_key(cluster)
 ```
 
@@ -49,6 +51,8 @@ cluster_nested <- cluster_nested %>% get_centroid()
 Long form cubble at both levels can be accessed through stretching the nested form. With access to both station and cluster-level cubbles, various plots can be made to understand the cluster. Figure \ref{fig:basic-agg} shows two example plots that can be made with this data. Subplot A is a glyph map made with the cluster level cubble in the long form and subplot B inspects the station membership of each cluster using the station level cubble in the nested form.
 
 ```{r eval = FALSE, echo = FALSE}
+# The kmeans clustering in station_nested data can takes some time to run, 
+# This chunk runs the algorithm and save the result as staiton_nested for further use
 coords <- cbind(prcp_aus$long, prcp_aus$lat)
 dist_raw <- geosphere::distm(coords, coords)
 
@@ -112,7 +116,7 @@ p2 <- ggplot() +
 
 # Extension to section 5.5: Interactive graphics
 
-Figure XXX in this section can also be made using `cubble` and `leaflet`, in which case the temperature range is displayed as a small subplot upon clicking on the map. This procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with `leafpop::addPopupGraphs()`:
+Figure \ref{fig:interactive-popup} in this section can also be made using `cubble` and `leaflet`, in which case the temperature range is displayed as a small subplot upon clicking on the map. This procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with `leafpop::addPopupGraphs()`:
 
 ``` r
 # data pre-processing
@@ -134,10 +138,56 @@ leaflet(nested) |>
 
 ```
 
-Figure \ref{fig:interactive-popup} shows the same information as Figure XXX but using leaflet and popups [@leafpop].
+Figure \ref{fig:interactive-popup} shows the same information as Figure 9 but using leaflet and popups [@leafpop].
+
+```{r eval = FALSE, echo = FALSE}
+clean <-  climate_full %>%
+  filter(!id %in% c("ASN00067033", "ASN00072091", "ASN00059040", 
+                    "ASN00097053", "ASN00040856", "ASN00015548")) %>%
+  face_temporal() %>%
+  mutate(month = lubridate::month(date)) %>% 
+  group_by(month) %>% 
+  summarise(tmax = mean(tmax, na.rm = TRUE),
+            tmin = mean(tmin, na.rm = TRUE),
+            diff = mean(tmax - tmin, na.rm = TRUE)) %>% 
+  ungroup(month) %>% 
+  face_spatial() %>%
+  mutate(temp_diff_var = ts %>% pull(diff) %>% var(na.rm = TRUE)) %>% 
+  face_temporal() %>% 
+  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) %>% 
+  unfold(name)
+  
+df_id <- clean$id %>% unique()
+p <- purrr::map(1:length(df_id), function(i){
+  dt <- clean %>% filter(id == df_id[i])
+  dt %>% 
+    ggplot(aes(x = dummy_date, ymin = tmin, ymax = tmax, group = id)) + 
+    geom_ribbon(color = "grey50", fill = "grey50", alpha = 0.5) + 
+    theme_bw() + 
+    scale_x_date(date_labels = "%b", date_breaks = "1 month") + 
+    labs(x = "Month", y = "Temperature") + 
+    ylim(-10, 50) + 
+    ggtitle(paste0(stringr::str_to_title(unique(dt$name))))
+})
+
+nested <- face_spatial(clean) 
+domain <- nested$temp_diff_var
+pal <- colorNumeric(
+  colorspace::sequential_hcl(
+    "Rocket",  n = 7, cmax = 90, rev = TRUE, 
+    c2 = 40, l2= 85, c1 = 20, l1 = 30),
+  domain = domain)
+
+leaflet(nested) %>% 
+  addTiles() %>% 
+  addCircleMarkers(color = ~pal(domain), radius = 0.1, 
+                   fillOpacity = 1, opacity = 1, 
+                   popup = popupGraph(p, width = 300, height =200)) 
+```
+
 
 ```{r interactive-popup, fig.align='center', echo = FALSE, out.width="45%", out.height="25%", fig.retina = 2, dpi = 300, fig.cap = "Same as Figure 11 except the temperature variation is now shown as a popup in the leaflet map.", fig.show='hold'}
-knitr::include_graphics(here::here("figures/popup-mid.png"))
+knitr::include_graphics(here::here("figures/popup.png"))
 ```
 
 
