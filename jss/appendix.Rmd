@@ -138,7 +138,7 @@ leaflet(nested) |>
 
 ```
 
-Figure \ref{fig:interactive-popup} shows the same information as Figure 9 but using leaflet and popups [@leafpop].
+Figure \ref{fig:interactive-popup} shows the same information as Figure 9 but using leaflet and popups.
 
 ```{r eval = FALSE, echo = FALSE}
 clean <-  climate_full %>%
