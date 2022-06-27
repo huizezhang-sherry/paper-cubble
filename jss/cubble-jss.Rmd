@@ -66,6 +66,12 @@ library(patchwork)
 
 \newpage
 
+```{r child = here::here("reference-hack.Rmd")}
+
+```
+
+\newpage
+
 ```{r child = here::here("1-intro.Rmd")}
 
 ```

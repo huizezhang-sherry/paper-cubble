@@ -12,6 +12,6 @@ There are several possible future directions for the work. The data structure on
 
 # Acknowledgement
 
-This work is funded by a Commonwealth Scientific and Industrial Research Organisation (CSIRO) Data61 Scholarship and started while Nicolas Langrené was affiliated with CSIRO's Data61. The article is created using \pkg{knitr} [@knitr] and \pkg{rmarkdown} [@rmarkdown] in R. The source code for reproducing this paper can be found at: https://github.com/huizezhang-sherry/paper-cubble.
+This work is funded by a Commonwealth Scientific and Industrial Research Organisation (CSIRO) Data61 Scholarship and started while Nicolas Langrené was affiliated with CSIRO's Data61. The article is created using \pkg{knitr} [@knitr] and \pkg{rmarkdown} [@rmarkdown] in R using the `rticles::jss_article` template. The source code for reproducing this paper can be found at: https://github.com/huizezhang-sherry/paper-cubble.
 
 

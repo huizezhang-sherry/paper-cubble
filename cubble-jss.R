@@ -18,6 +18,19 @@ library(tidyverse)
 library(patchwork)
 
 
+## ----child = here::here("reference-hack.Rmd")---------------------------------
+
+## -----------------------------------------------------------------------------
+
+tex <- readLines(here::here("references.bib"))
+b <- tex %>% stringr::str_extract("\\@(article|techreport|misc|Manual|Book)\\{.+,")
+b <- b[!is.na(b)]
+ref_head <- b %>% stringr::str_replace("\\@(article|techreport|misc|Manual|Book)\\{", "") %>% 
+  stringr::str_replace(",", "") 
+res <- paste0("@", ref_head, collapse = ", ")
+
+
+
 ## ----child = here::here("1-intro.Rmd")----------------------------------------
 
 
@@ -269,7 +282,7 @@ cobar <- tmax %>% filter(id == "ASN00048027") %>%
 
 
 
-## ----basic-manip, fig.height=6, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations in New South Wales."----
+## ----basic-manip, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations in New South Wales."----
 tmax <- tmax %>% unfold(long, lat)
 box_df <- tmax %>% face_spatial() %>% filter(id == "ASN00048027")
 nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria","New South Wales"))
@@ -291,11 +304,11 @@ p1 <- ggplot() +
   scale_color_brewer("", palette = "Dark2") + 
   coord_sf(xlim = c(141, 154), ylim = c(-39, -28.5)) + 
   ggthemes::theme_map() +
-  theme(legend.position = "bottom", legend.text = element_text(size = 15)) + 
+  theme(legend.position = "bottom", legend.text = element_text(size = 10)) + 
   guides(color = guide_legend(override.aes = list(size=2)))
 
-(cobar / p1)  + 
-  patchwork::plot_layout(heights = c(1,5)) + 
+(p1 | cobar)  + 
+  patchwork::plot_layout(width = c(1,1)) + 
   plot_annotation(tag_levels = 'a')
 
 
@@ -378,7 +391,7 @@ p2 <- res_long %>%
 raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
 dt <- as_cubble(
   raw, vars = c("q", "z"),
-  long_range = seq(-180, 180, 1), lat_range = seq(-90, 90, 1))
+  long_range = seq(-180, 180, 1), lat_range = seq(-88, 88, 1))
 
 
 ## ----eval = FALSE-------------------------------------------------------------
@@ -409,8 +422,7 @@ dt <- as_cubble(
 ##   path = here::here("data/"))
 
 
-## ----netcdf,  fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high speicfic humidity, splits into two on 2002-09-26 and furthers split into four on 2002-10-04."----
-
+## ----netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high speicfic humidity, splits into two on 2002-09-26 and furthers split into four on 2002-10-04."----
 date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") %>% as.Date()
 res <- dt %>% 
   face_temporal() %>% 
@@ -427,7 +439,8 @@ country <- rnaturalearth::ne_coastline("small", returnclass = "sf") %>%
 res %>% 
   ggplot() +
   # q for specific humidity
-  geom_point(aes(x = long, y = lat, color = q)) +
+  geom_point(aes(x = long, y = lat, color = q), size = 2) + 
+  #geom_tile(aes(x = long, y = lat, fill = q), color = "transparent") +
   # z for geopotential
   geom_contour(data = res, aes(x = long, y = lat, z = z),
                color = "grey20", binwidth = 4000, size = 0.5) +
@@ -442,8 +455,9 @@ res %>%
         panel.grid = element_blank()) + 
   facet_wrap(vars(as.Date(time)), nrow = 1, shrink = TRUE)+  
   colorspace::scale_color_continuous_sequential("Purple-Yellow", name = "Specific humidity") + 
-  labs(x ="", y = "") 
-
+  theme(legend.text = element_text(size = 13),
+        legend.title = element_text(size = 13)) + 
+  labs(x ="", y = "")
 
 
 
