@@ -85,7 +85,7 @@ cobar <- tmax %>% filter(id == "ASN00048027") %>%
 ```
 
 
-```{r basic-manip, fig.height=6, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations in New South Wales."}
+```{r basic-manip, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations in New South Wales."}
 tmax <- tmax %>% unfold(long, lat)
 box_df <- tmax %>% face_spatial() %>% filter(id == "ASN00048027")
 nsw_vic <- ozmaps::abs_ste %>% filter(NAME %in% c("Victoria","New South Wales"))
@@ -107,11 +107,11 @@ p1 <- ggplot() +
   scale_color_brewer("", palette = "Dark2") + 
   coord_sf(xlim = c(141, 154), ylim = c(-39, -28.5)) + 
   ggthemes::theme_map() +
-  theme(legend.position = "bottom", legend.text = element_text(size = 15)) + 
+  theme(legend.position = "bottom", legend.text = element_text(size = 10)) + 
   guides(color = guide_legend(override.aes = list(size=2)))
 
-(cobar / p1)  + 
-  patchwork::plot_layout(heights = c(1,5)) + 
+(p1 | cobar)  + 
+  patchwork::plot_layout(width = c(1,1)) + 
   plot_annotation(tag_levels = 'a')
 
 ```

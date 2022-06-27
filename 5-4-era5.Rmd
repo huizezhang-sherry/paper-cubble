@@ -18,7 +18,7 @@ For the reproduction, we focus on the \code{era5-pressure} data, hourly pressure
 raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
 dt <- as_cubble(
   raw, vars = c("q", "z"),
-  long_range = seq(-180, 180, 1), lat_range = seq(-90, 90, 1))
+  long_range = seq(-180, 180, 1), lat_range = seq(-88, 88, 1))
 ```
 
 <!-- Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in @hersbach2020era5. It shows the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04 in the stratosphere. Readers interested in the analysis of this figure can refer to @hersbach2020era5, @simmons2020global, and @simmons2005ecmwf for more details.-->
@@ -54,8 +54,7 @@ wf_request(
 ```
 
 
-```{r netcdf,  fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high speicfic humidity, splits into two on 2002-09-26 and furthers split into four on 2002-10-04."}
-
+```{r netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high speicfic humidity, splits into two on 2002-09-26 and furthers split into four on 2002-10-04."}
 date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") %>% as.Date()
 res <- dt %>% 
   face_temporal() %>% 
@@ -72,7 +71,8 @@ country <- rnaturalearth::ne_coastline("small", returnclass = "sf") %>%
 res %>% 
   ggplot() +
   # q for specific humidity
-  geom_point(aes(x = long, y = lat, color = q)) +
+  geom_point(aes(x = long, y = lat, color = q), size = 2) + 
+  #geom_tile(aes(x = long, y = lat, fill = q), color = "transparent") +
   # z for geopotential
   geom_contour(data = res, aes(x = long, y = lat, z = z),
                color = "grey20", binwidth = 4000, size = 0.5) +
@@ -87,6 +87,7 @@ res %>%
         panel.grid = element_blank()) + 
   facet_wrap(vars(as.Date(time)), nrow = 1, shrink = TRUE)+  
   colorspace::scale_color_continuous_sequential("Purple-Yellow", name = "Specific humidity") + 
-  labs(x ="", y = "") 
-
+  theme(legend.text = element_text(size = 13),
+        legend.title = element_text(size = 13)) + 
+  labs(x ="", y = "")
 ```
