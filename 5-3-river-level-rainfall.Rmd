@@ -35,13 +35,13 @@ res <- match_sites(
 )
 ```
 
-This function returns a \code{cubble} object, with additional columns: \code{dist} storing the distance between matched stations, \code{group} summarising spatial matching, and \code{n_match} showing the temporal matching.
+This function returns a \code{cubble} object, with additional columns: \code{dist} storing the distance between matched stations, \code{group} summarizing spatial matching, and \code{n_match} showing the temporal matching.
 
 ```{r}
 res %>% print()
 ```
 
-Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardised data as time series (b). The expected concurrent increase in precipitation and water level can be seen clearly.
+Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardized data as time series (b). The expected concurrent increase in precipitation and water level can be seen clearly.
 
 ```{r matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here."}
 vic_map <- ozmaps::abs_ste %>% 

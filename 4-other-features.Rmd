@@ -7,7 +7,7 @@ output: pdf_document
 
 ## Hierarchical structure
 
-Spatial locations can have grouping structures either inherent to the data (e.g. state within country) or obtained during the analysis (e.g. cluster id). In this case, it can be useful to summarise variables at various levels of the hierarchy. The function \code{switch_key()} can be used to change the grouping level of spatial locations. The diagram in Figure \ref{fig:illu-hier} shows how this function can be used to switch the grouping from station ids to cluster ids. The result can also be stretched into long form. By specifying 
+Spatial locations can have grouping structures either inherent to the data (e.g. state within country) or obtained during the analysis (e.g. cluster id). In this case, it can be useful to summarize variables at various levels of the hierarchy. The function \code{switch_key()} can be used to change the grouping level of spatial locations. The diagram in Figure \ref{fig:illu-hier} shows how this function can be used to switch the grouping from station ids to cluster ids. The result can also be stretched into long form. By specifying 
 
 \code{cluster_nested <- station_nested \%>\% switch_key(key = cluster)}, 
 
@@ -47,7 +47,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Spatio-temporal transformations {#st_transformation}
 
-Spatio-temporal data lends itself to a range of transformations. Glyph maps (Section \ref{unfold}) transform the measured variable and time coordinates into microplots at the spatial locations. Calendar plots [@wang2020calendar] deconstruct time to produce plots of variables in a calendar format. Summarising multiple variables is commonly done using projections, or linear combinations. Here we elaborate on the transformations made to produce a glyph map.
+Spatio-temporal data lends itself to a range of transformations. Glyph maps (Section \ref{unfold}) transform the measured variable and time coordinates into microplots at the spatial locations. Calendar plots [@wang2020calendar] deconstruct time to produce plots of variables in a calendar format. Summarizing multiple variables is commonly done using projections, or linear combinations. Here we elaborate on the transformations made to produce a glyph map.
 
 The \proglang{R} package \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equations 1 and 2 in @Wickham2012-yr). The data can then be piped into \code{ggplot} to create the glyph map as:
 

@@ -12,7 +12,7 @@ The ERA5 data [@hersbach2020era5] provides hourly estimates across the Earth for
 
 For the reproduction, we focus on the \code{era5-pressure} data, hourly pressure levels from 1970 to present, with the *specific humidity* and *geopotential*. <!--Here we specifically look at the information  contained on the variables *specific humidity* measuring the mass of water vapor per kilogram of moist air  and the *geopotential* variable recording the gravitational potential energy of a unit mass, at a particular location, relative to mean sea level.--> 
 
-<!--The goal of this example is to reproduce the break-up of the southern polar vortex that happened in late September and early October in 2002 in the stratosphere in the Southern Hemisphere. Therefore, we filter data corresponding to the Southern Hemisphere and restrict our analysis to four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04.--> The downloaded netcdf data is read into R using the \code{ncdf4} package, and converted to a \code{cubble}:
+<!--The goal of this example is to reproduce the break-up of the southern polar vortex that happened in late September and early October in 2002 in the stratosphere in the Southern Hemisphere. Therefore, we filter data corresponding to the Southern Hemisphere and restrict our analysis to four dates: 2002-09-22, 2002-09-26, 2002-09-30, and 2002-10-04.--> The downloaded netCDF data is read into R using the \code{ncdf4} package, and converted to a \code{cubble}:
 
 ```{r echo = TRUE}
 raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
