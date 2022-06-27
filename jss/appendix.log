@@ -1,10 +1,10 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.6.23)  26 JUN 2022 23:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.6.27)  27 JUN 2022 23:27
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **appendix.tex
 (./appendix.tex
-LaTeX2e <2022-06-01> patch level 2
+LaTeX2e <2022-06-01> patch level 3
 L3 programming layer <2022-06-16> (/Users/hzha400/Library/TinyTeX/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2021/10/04 v1.4n Standard LaTeX document class
 (/Users/hzha400/Library/TinyTeX/texmf-dist/tex/latex/base/size10.clo
@@ -143,7 +143,7 @@ Package: textcomp 2020/02/02 v2.0n Standard LaTeX package
 ) (/Users/hzha400/Library/TinyTeX/texmf-dist/tex/latex/upquote/upquote.sty
 Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verbatim
 ) (/Users/hzha400/Library/TinyTeX/texmf-dist/tex/latex/microtype/microtype.sty
-Package: microtype 2022/06/20 v3.0e Micro-typographical refinements (RS)
+Package: microtype 2022/06/23 v3.0f Micro-typographical refinements (RS)
 (/Users/hzha400/Library/TinyTeX/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
 \KV@toks@=\toks23
@@ -157,19 +157,19 @@ Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
 LaTeX Info: Redefining \noprotrusionifhmode on input line 1045.
 LaTeX Info: Redefining \leftprotrusion on input line 1046.
 LaTeX Info: Redefining \rightprotrusion on input line 1056.
-LaTeX Info: Redefining \textls on input line 1240.
+LaTeX Info: Redefining \textls on input line 1234.
 \MT@outer@kern=\dimen148
-LaTeX Info: Redefining \textmicrotypecontext on input line 1864.
+LaTeX Info: Redefining \textmicrotypecontext on input line 1858.
 \MT@listname@count=\count273
 (/Users/hzha400/Library/TinyTeX/texmf-dist/tex/latex/microtype/microtype-pdftex.def
-File: microtype-pdftex.def 2022/06/20 v3.0e Definitions specific to pdftex (RS)
-LaTeX Info: Redefining \lsstyle on input line 902.
-LaTeX Info: Redefining \lslig on input line 902.
+File: microtype-pdftex.def 2022/06/23 v3.0f Definitions specific to pdftex (RS)
+LaTeX Info: Redefining \lsstyle on input line 900.
+LaTeX Info: Redefining \lslig on input line 900.
 \MT@outer@space=\skip52
 )
 Package microtype Info: Loading configuration file microtype.cfg.
 (/Users/hzha400/Library/TinyTeX/texmf-dist/tex/latex/microtype/microtype.cfg
-File: microtype.cfg 2022/06/20 v3.0e microtype main configuration file (RS)
+File: microtype.cfg 2022/06/23 v3.0f microtype main configuration file (RS)
 )) (/Users/hzha400/Library/TinyTeX/texmf-dist/tex/latex/parskip/parskip.sty
 Package: parskip 2021-03-14 v2.0h non-zero parskip adjustments
 (/Users/hzha400/Library/TinyTeX/texmf-dist/tex/latex/kvoptions/kvoptions.sty
@@ -555,12 +555,12 @@ Package pdftex.def Info: ../figures/popup.png  used on input line 193.
 File: ../figures/diagram-keynotes/diagram-keynotes.005.png Graphic file (type png)
 <use ../figures/diagram-keynotes/diagram-keynotes.005.png>
 Package pdftex.def Info: ../figures/diagram-keynotes/diagram-keynotes.005.png  used on input line 207.
-(pdftex.def)             Requested size: 462.50806pt x 260.16077pt.
-[2 <./appendix_files/figure-latex/basic-agg-1.pdf>] [3 <../figures/popup.png>] [4 <../figures/diagram-keynotes/diagram-keynotes.005.png>]
+(pdftex.def)             Requested size: 404.69455pt x 227.64067pt.
+[2 <./appendix_files/figure-latex/basic-agg-1.pdf>] [3 <../figures/popup.png> <../figures/diagram-keynotes/diagram-keynotes.005.png>]
 
-LaTeX Warning: Reference `##precip' on page 5 undefined on input line 265.
+LaTeX Warning: Reference `##precip' on page 4 undefined on input line 265.
 
-[5] (./appendix.aux)
+[4] [5] (./appendix.aux)
 
 LaTeX Warning: There were undefined references.
 
@@ -568,15 +568,15 @@ Package rerunfilecheck Info: File `appendix.out' has not changed.
 (rerunfilecheck)             Checksum: A93AA0A98743A39B6EDE1C766B8D969D;1670.
  ) 
 Here is how much of TeX's memory you used:
- 13658 strings out of 479997
- 219813 string characters out of 5887434
- 557862 words of memory out of 5000000
- 31504 multiletter control sequences out of 15000+600000
+ 13657 strings out of 479997
+ 219802 string characters out of 5887434
+ 557826 words of memory out of 5000000
+ 31503 multiletter control sequences out of 15000+600000
  523350 words of font info for 111 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 60i,6n,67p,1005b,490s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 60i,6n,67p,1005b,482s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/Users/hzha400/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/Users/hzha400/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}</Users/hzha400/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/hzha400/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/hzha400/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></Users/hzha400/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/hzha400/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/hzha400/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr17.pfb></Users/hzha400/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/hzha400/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></Users/hzha400/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></Users/hzha400/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on appendix.pdf (5 pages, 1339132 bytes).
+Output written on appendix.pdf (5 pages, 1339117 bytes).
 PDF statistics:
  138 PDF objects out of 1000 (max. 8388607)
  103 compressed objects within 2 object streams
