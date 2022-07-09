@@ -21,7 +21,7 @@ cubble::climate_flat
 
 ## Create a cubble {#create}
 
-The function \code{as_cubble()} is used to create a cubble with three arguments: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order  (longitude, latitude). The arguments \code{key} and \code{index} follow the wording in \pkg{tsibble} to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a cubble out of \code{climate_flat} (a single tibble) with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
+The function \code{as_cubble()} is used to create a cubble with three arguments: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order  (longitude, latitude). The arguments \code{key} and \code{index} follow the wording in the \pkg{tsibble} package to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a cubble out of \code{climate_flat} (a single tibble) with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
 
 ```{r echo = TRUE}
 cubble_nested <- climate_flat |>
@@ -31,20 +31,20 @@ cubble_nested
 
 Printing a cubble provides some information about the data. Here \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
 
-A cubble object is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
+A \code{cubble} object is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
 
 ```{r echo = TRUE}
 cubble_nested |>
   mutate(rain_day = sum(ts$prcp != 0))
 ```
 
-A cubble can be created from various common spatio-temporal data formats, including basic \proglang{R} objects like tibble, tsibble and sf. Section \@ref(covid) describes converting multiple tables into a cubble object and Section \@ref(netcdf) illustrates how to convert a netCDF object.
+A cubble can be created from various common spatio-temporal data formats, including basic \proglang{R} objects like \code{tibble}, \code{tsibble}, and \code{sf}. Section \@ref(covid) describes converting multiple tables into a \code{cubble} object and Section \@ref(netcdf) illustrates how to convert a netCDF object.
 
 
 
 ## Change focus by facing the time-variables
 
-The nested form can be used for those operations where the output is only indexed by the spatial identifier (\code{key}), but becomes inadequate when outputs need both a spatial and a temporal identifier (\code{key} and \code{index}). The \pkg{cubble} class also provides a long form, which expands the \code{ts} column and temporarily "hides" the spatial variables. The function \code{face_temporal()} is used to switch from the nested cubble into the long one. The first row in Figure \ref{fig:face} illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face. This code switches the cubble just created into its long form:
+The nested form can be used for those operations where the output is only indexed by the spatial identifier (\code{key}), but becomes inadequate when outputs need both a spatial and a temporal identifier (\code{key} and \code{index}). The \code{cubble} class also provides a long form, which expands the \code{ts} column and temporarily "hides" the spatial variables. The function \code{face_temporal()} is used to switch from the nested cubble into the long one. The first row in Figure \ref{fig:face} illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face. This code switches the cubble just created into its long form:
 
 ```{r echo = TRUE}
 cubble_long <- cubble_nested |> face_temporal()
@@ -88,7 +88,7 @@ Some readers may question why a new data structure is needed rather than directl
 
 ## Compatibility with existing packages {#compact}
 
-The \code{cubble} package leverages tools available in existing packages used for spatial and temporal analysis, specifically, \code{dplyr}, \code{tsibble}, \code{sf} (\code{s2}), and \code{netcdf4}, as explained here.
+The \pkg{cubble} package leverages tools available in existing packages used for spatial and temporal analysis, specifically, \pkg{dplyr}, \pkg{tsibble}, \pkg{sf} (\pkg{s2}), and \pkg{netcdf4}, as explained here.
 
 ### dplyr
 
@@ -96,7 +96,7 @@ The \code{dplyr} package has many tools for wrangling tidy data,  many of which 
 
 ### tsibble
 
-A \code{tsibble} is a \code{tibble} where the \code{index} and \code{key} components are used to store temporal and strata information, that makes working with temporal data cognitively efficient. A \code{cubble} can use a \code{tsibble} for storing the temporal information, and effectively utilize the specialist time series operations in the \code{tsibble} package. It is easy to cast an existing \code{tsibble} into a \code{cubble} simply by supplying the \code{coords}:
+A \code{tsibble} object is a tibble where the \code{index} and \code{key} components are used to store temporal and strata information, that makes working with temporal data cognitively efficient. A \code{cubble} object can use a tsibble for storing the temporal information, and effectively utilize the specialist time series operations in the \pkg{tsibble} package. It is easy to cast an existing \code{tsibble} object into a cubble simply by supplying the \code{coords}:
 
 ```{r echo = TRUE}
 climate_flat_ts <- climate_flat |> 
@@ -106,7 +106,7 @@ climate_flat_cb <-  climate_flat_ts |>
 climate_flat_cb
 ```
 
-When a nested cubble is created, each element in the list-column \code{ts} is a \code{tsibble} class (labelled \code{tbl_ts})  and operations available to the \code{tsibble} class are still valid on this element. For example, the code below calculates two time series features (mean and variance) of maximum temperature, utilizing the tsibble structure in the cubble:
+When a nested cubble is created, each element in the list-column \code{ts} has a \code{tsibble} class (labelled \code{tbl_ts})  and operations available to the \code{tsibble} class are still valid on this element. For example, the code below calculates two time series features (mean and variance) of maximum temperature, utilizing the tsibble structure in the cubble:
 
 ```{r echo = TRUE}
 climate_flat_cb |> 
@@ -119,7 +119,7 @@ climate_flat_cb |>
 
 ### sf and s2
 
-The \code{sf} is a spatial data object, containing a feature geometry list-column (\code{sfc}) in the form of various geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}). The \code{sf} package provides functions that operate efficiently on this spatial information. A cubble can store the spatial information as an \code{sf} object. Methods for the \code{sfc} class can be applied in the nested form of the cubble object.  An illustration is in Section \@ref(covid). A spatial data object with an \code{s2} vector can also be used to store the spatial information in a \code{cubble}.
+An \code{sf} object is a spatial data object, containing a feature geometry list-column (\code{sfc}) in the form of various geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}). The \pkg{sf} package provides functions that operate efficiently on this spatial information. A cubble can store the spatial information as an \code{sf} object. Methods for the \code{sfc} class can be applied in the nested form of the cubble object.  An illustration is in Section \@ref(covid). The spatial information can also be stored as an \code{s2} in a cubble object.
 
 
 <!-- These spatial operations are also valuable for spatio-temporal data analysis, but an \code{sf} object *usually* does not contain temporal variables. This means \code{sf} cannot be directly cast into a \code{cubble}, however, \code{cubble} does support \code{sfc} columns in the nested form and spatial operations applied to the \code{sfc} column in \code{sf} can still be applied to the \code{sfc} column in a cubble. The following example shows how to create an \code{sfc} column of \code{POINT} type from latitude and longitude in cubble. Then \code{sf::st_within} is used to add the state \code{MULTIPOLYGON} of each weather station before a coordinate transformation is made. -->
@@ -167,7 +167,7 @@ The \code{sf} is a spatial data object, containing a feature geometry list-colum
 
 NetCDF data is another format commonly used for storing spatio-temporal data. It has two main components: *dimension* for defining the spatio-temporal grid (longitude, latitude, and time) and *variable* that populates the defined grid. Attributes  can be associated with dimensions or variables. Because there can be many different styles of representing this information there is a metadata convention [@hassell_data_2017] to standardize the format of the attributes. A few packages in \proglang{R} exist for manipulating NetCDF data and these include a high-level R interface: \pkg{ncdf4} [@ncdf4], a low-level interface that calls a C-interface: \pkg{RNetCDF} [@rnetcdf], and a tidyverse implementation: \pkg{tidync} [@tidync].
 
-Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble}. It maps each combination of longitude and latitude into an \code{id} as the \code{key}:
+Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble} object. It maps each combination of longitude and latitude into an \code{id} as the \code{key}:
 
 ```{r echo = TRUE, eval = FALSE}
 raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))

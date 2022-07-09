@@ -8,3 +8,9 @@ The repo contains:
 * `figures/`: figures used in the article, including diagram illustrations and figures
 * `jss/`: the main folder used to create the article and the appendix
 * `*.Rmd`: individual rmarkdown files for each section
+
+The current working rule used to markup: 
+  * use \pkg{} when refers to the package 
+  * use \code{} when refers to the class or object i.e., the cubble object, the long/ nested cubble)
+  * whenever possible, avoid using a bare cubble
+  * ggplot is not marked up currently  

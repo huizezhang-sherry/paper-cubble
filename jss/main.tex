@@ -16,7 +16,7 @@ H. Sherry Zhang\\Monash University \And Dianne Cook\\Monash University \AND Ursu
 
 
 \Abstract{
-Multivariate spatio-temporal data refers to multiple measurements taken across space and time. For many analyses, spatial and time components can be separately studied: for example, to explore the temporal trend of one variable for a single spatial location, or to model the spatial distribution of one variable at a given time. However for some studies, it is important to analyze different aspects of the spatio-temporal data simultaneously, like for instance, temporal trends of multiple variables across locations. In order to facilitate the study of different portions or combinations of spatio-temporal data, we introduce a new data structure, \code{cubble}, with a suite of functions enabling easy slicing and dicing on the different components spatio-temporal components. The proposed \code{cubble} structure ensures that all the components of the data are easy to access and manipulate while providing flexibility for data analysis. In addition, \code{cubble} facilitates visual and numerical explorations of the data while easing data wrangling and modelling. The \code{cubble} structure and the functions provided in the \code{cubble} \proglang{R} package equip users with the capability to handle hierarchical spatial and temporal structures. The \code{cubble} structure and the tools implemented in the package are illustrated with different examples of Australian climate data.
+Multivariate spatio-temporal data refers to multiple measurements taken across space and time. For many analyses, spatial and time components can be separately studied: for example, to explore the temporal trend of one variable for a single spatial location, or to model the spatial distribution of one variable at a given time. However for some studies, it is important to analyze different aspects of the spatio-temporal data simultaneously, like for instance, temporal trends of multiple variables across locations. In order to facilitate the study of different portions or combinations of spatio-temporal data, we introduce a new data structure, \code{cubble}, with a suite of functions enabling easy slicing and dicing on the different components spatio-temporal components. The proposed \code{cubble} structure ensures that all the components of the data are easy to access and manipulate while providing flexibility for data analysis. In addition, \code{cubble} facilitates visual and numerical explorations of the data while easing data wrangling and modelling. The \code{cubble} structure and the functions provided in the \pkg{cubble} \proglang{R} package equip users with the capability to handle hierarchical spatial and temporal structures. The \code{cubble} structure and the tools implemented in the package are illustrated with different examples of Australian climate data.
 }
 
 \Keywords{spatial, temporal, spatio temporal, \proglang{R}, environmental data, exploratory data analysis}
@@ -147,18 +147,18 @@ Still, the data representation for spatio-temporal data can be further extended 
 
 The other reason is about tidy data concepts \citep{tidydata} and how they should be applied to spatio-temporal data. According to the tidy data principles, data should be structured into 1) one row per observation, 2) one column per variable, and 3) one type of data per table. The long form data is preferred over wide data form given the downstream software such as \pkg{dplyr} \citep{dplyr} and \pkg{ggplot2} \citep{ggplot2} for data wrangling and visualization. However, the long form can be inefficient to store feature geometries, especially for large multipolygons for hourly, daily or sub-daily periods over years, which are extensively collected and handled, for example in time series analysis. This poses the question of how to arrange spatial and temporal variables in a way that would make data wrangling, visualizing and analyzing spatio-temporal data easier.
 
-This paper presents a new \proglang{R} package, \pkg{cubble} which addresses the two issues mentioned above. In the package, a new data structure, also called \code{cubble}, is proposed to organize spatial and temporal variables as two forms of a single data object so that they can be wrangled separately or combined while being kept synchronized. Among the four spacetime layouts in \citet{spacetime}, \pkg{cubble} can be applied to full grid, sparse grid, or irregular, but not trajectory, which is outside the scope of this work. The software is available from the Comprehensive \proglang{R} Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=cubble}.
+This paper presents a new \proglang{R} package, \pkg{cubble}, which addresses the two issues mentioned above. In the package, a new data structure, also called cubble, is proposed to organize spatial and temporal variables as two forms of a single data object so that they can be wrangled separately or combined while being kept synchronized. Among the four spacetime layouts in \citet{spacetime}, cubble can be applied to full grid, sparse grid, or irregular, but not trajectory, which is outside the scope of this work. The software is available from the Comprehensive \proglang{R} Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=cubble}.
 
-The rest of the paper is organized as follows: Section \ref{cube} introduces the proposed cube structure as a way to conceptualize multivariate spatio-temporal data. Section \ref{cubble} presents the main design and functionality of \pkg{cubble}. Section \ref{others} explains how cubble deals with more advanced considerations, including data with hierarchical structure, data matching and how cubble fits with existing static and interactive visualization tools. Moreover we also illustrate how \pkg{cubble} deals with spatio-temporal data transformations. Section \ref{examples} uses Australian weather station data and river level data as examples to demonstrate the use of \pkg{cubble}. An example of how \pkg{cubble} handles NetCDF data is also provided. Section \ref{conclude} discuss the paper contributions and future directions.
+The rest of the paper is organized as follows: Section \ref{cube} introduces the proposed cube structure as a way to conceptualize multivariate spatio-temporal data. Section \ref{cubble} presents the main design and functionality of the \pkg{cubble} package. Section \ref{others} explains how the \pkg{cubble} package deals with more advanced considerations, including data with hierarchical structure, data matching and how it fits with existing static and interactive visualization tools. Moreover we also illustrate how the \pkg{cubble} package deals with spatio-temporal data transformations. Section \ref{examples} uses Australian weather station data and river level data as examples to demonstrate the use of the \pkg{cubble} package. An example of how cubble handles NetCDF data is also provided. Section \ref{conclude} discuss the paper contributions and future directions.
 
 \hypertarget{cube}{%
 \section{Conceptual framework: spatio-temporal cube}\label{cube}}
 
 Spatio-temporal data can be conceptualized using a cubical data model with three axes which typically are, time, latitude and longitude. This abstraction can be useful for generalizing operations and visualization purposes: \citet{lu_multidimensional_2018} shows how array operations (select, scale, reduce, rearrange, and compute) can be mapped onto the cube; \citet{bach_review_2014} reviews the temporal data visualization based on space-time cube operations. Notice that the term space-time cube in their article ``does not need to involve spatial data'', but refers to ``an abstract 2D substrate that is used to visualize data at a specific time''. Despite its main focus being on temporal data, the mindset of abstracting out data representation to construct visualizations, still applies to our spatio-temporal data manipulation and visualization approaches.
 
-The most common space-time cube uses the three axes, time, latitude, longitude, and can be considered stacking space across time. Ours is a multivariate spatio-temporal cube with the three axes defined to be time, site and variables, as illustrated in the leftmost column of Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hyper-cubes when describing multivariate spatio-temporal data and is the conceptual framework behind the \pkg{cubble} objects. With this conceptual model, operations on spatio-temporal data can be mapped to operations on the cube and the rest of Figure \ref{fig:cube-def} show examples of slicing on site, time, and variable.
+The most common space-time cube uses the three axes, time, latitude, longitude, and can be considered stacking space across time. Ours is a multivariate spatio-temporal cube with the three axes defined to be time, site and variables, as illustrated in the leftmost column of Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hyper-cubes when describing multivariate spatio-temporal data and is the conceptual framework behind the \code{cubble} objects. With this conceptual model, operations on spatio-temporal data can be mapped to operations on the cube and the rest of Figure \ref{fig:cube-def} show examples of slicing on site, time, and variable.
 
-While the data cube model is conceptually convenient for spatio-temporal data, a 3D data array is not sufficiently rich for data wrangling, for several reasons. Although arrays can be efficient for the computation on numerical values, spatio-temporal data typically includes various types of variables. For example, character strings and specific datetime classes are common. In addition, it will be generally useful to be able to create new variables which is trickier to manage in an array. Thus for convenient wrangling, we have opted to create a special \texttt{cubble} class.
+While the data cube model is conceptually convenient for spatio-temporal data, a 3D data array is not sufficiently rich for data wrangling, for several reasons. Although arrays can be efficient for the computation on numerical values, spatio-temporal data typically includes various types of variables. For example, character strings and specific datetime classes are common. In addition, it will be generally useful to be able to create new variables which is trickier to manage in an array. Thus for convenient wrangling, we have opted to create a special \code{cubble} class.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -197,7 +197,7 @@ The data \code{climate_flat} is used to illustrate \pkg{cubble} functionality. T
 \hypertarget{create}{%
 \subsection{Create a cubble}\label{create}}
 
-The function \code{as_cubble()} is used to create a cubble with three arguments: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order (longitude, latitude). The arguments \code{key} and \code{index} follow the wording in \pkg{tsibble} to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a cubble out of \code{climate_flat} (a single tibble) with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
+The function \code{as_cubble()} is used to create a cubble with three arguments: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order (longitude, latitude). The arguments \code{key} and \code{index} follow the wording in the \pkg{tsibble} package to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a cubble out of \code{climate_flat} (a single tibble) with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -221,7 +221,7 @@ R> cubble_nested
 
 Printing a cubble provides some information about the data. Here \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
 
-A cubble object is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
+A \code{cubble} object is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested cubble. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -242,12 +242,12 @@ R> cubble_nested |>
 \end{CodeOutput}
 \end{CodeChunk}
 
-A cubble can be created from various common spatio-temporal data formats, including basic \proglang{R} objects like tibble, tsibble and sf. Section \ref{covid} describes converting multiple tables into a cubble object and Section \ref{netcdf} illustrates how to convert a netCDF object.
+A cubble can be created from various common spatio-temporal data formats, including basic \proglang{R} objects like \code{tibble}, \code{tsibble}, and \code{sf}. Section \ref{covid} describes converting multiple tables into a \code{cubble} object and Section \ref{netcdf} illustrates how to convert a netCDF object.
 
 \hypertarget{change-focus-by-facing-the-time-variables}{%
 \subsection{Change focus by facing the time-variables}\label{change-focus-by-facing-the-time-variables}}
 
-The nested form can be used for those operations where the output is only indexed by the spatial identifier (\code{key}), but becomes inadequate when outputs need both a spatial and a temporal identifier (\code{key} and \code{index}). The \pkg{cubble} class also provides a long form, which expands the \code{ts} column and temporarily ``hides'' the spatial variables. The function \code{face_temporal()} is used to switch from the nested cubble into the long one. The first row in Figure \ref{fig:face} illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face. This code switches the cubble just created into its long form:
+The nested form can be used for those operations where the output is only indexed by the spatial identifier (\code{key}), but becomes inadequate when outputs need both a spatial and a temporal identifier (\code{key} and \code{index}). The \code{cubble} class also provides a long form, which expands the \code{ts} column and temporarily ``hides'' the spatial variables. The function \code{face_temporal()} is used to switch from the nested cubble into the long one. The first row in Figure \ref{fig:face} illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face. This code switches the cubble just created into its long form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -347,7 +347,7 @@ Some readers may question why a new data structure is needed rather than directl
 \hypertarget{compact}{%
 \subsection{Compatibility with existing packages}\label{compact}}
 
-The \code{cubble} package leverages tools available in existing packages used for spatial and temporal analysis, specifically, \code{dplyr}, \code{tsibble}, \code{sf} (\code{s2}), and \code{netcdf4}, as explained here.
+The \pkg{cubble} package leverages tools available in existing packages used for spatial and temporal analysis, specifically, \pkg{dplyr}, \pkg{tsibble}, \pkg{sf} (\pkg{s2}), and \pkg{netcdf4}, as explained here.
 
 \hypertarget{dplyr}{%
 \subsubsection{dplyr}\label{dplyr}}
@@ -357,7 +357,7 @@ The \code{dplyr} package has many tools for wrangling tidy data, many of which a
 \hypertarget{tsibble}{%
 \subsubsection{tsibble}\label{tsibble}}
 
-A \code{tsibble} is a \code{tibble} where the \code{index} and \code{key} components are used to store temporal and strata information, that makes working with temporal data cognitively efficient. A \code{cubble} can use a \code{tsibble} for storing the temporal information, and effectively utilize the specialist time series operations in the \code{tsibble} package. It is easy to cast an existing \code{tsibble} into a \code{cubble} simply by supplying the \code{coords}:
+A \code{tsibble} object is a tibble where the \code{index} and \code{key} components are used to store temporal and strata information, that makes working with temporal data cognitively efficient. A \code{cubble} object can use a tsibble for storing the temporal information, and effectively utilize the specialist time series operations in the \pkg{tsibble} package. It is easy to cast an existing \code{tsibble} object into a cubble simply by supplying the \code{coords}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -381,7 +381,7 @@ R> climate_flat_cb
 \end{CodeOutput}
 \end{CodeChunk}
 
-When a nested cubble is created, each element in the list-column \code{ts} is a \code{tsibble} class (labelled \code{tbl_ts}) and operations available to the \code{tsibble} class are still valid on this element. For example, the code below calculates two time series features (mean and variance) of maximum temperature, utilizing the tsibble structure in the cubble:
+When a nested cubble is created, each element in the list-column \code{ts} has a \code{tsibble} class (labelled \code{tbl_ts}) and operations available to the \code{tsibble} class are still valid on this element. For example, the code below calculates two time series features (mean and variance) of maximum temperature, utilizing the tsibble structure in the cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -409,14 +409,14 @@ R> climate_flat_cb |>
 \hypertarget{sf-and-s2}{%
 \subsubsection{sf and s2}\label{sf-and-s2}}
 
-The \code{sf} is a spatial data object, containing a feature geometry list-column (\code{sfc}) in the form of various geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}). The \code{sf} package provides functions that operate efficiently on this spatial information. A cubble can store the spatial information as an \code{sf} object. Methods for the \code{sfc} class can be applied in the nested form of the cubble object. An illustration is in Section \ref{covid}. A spatial data object with an \code{s2} vector can also be used to store the spatial information in a \code{cubble}.
+An \code{sf} object is a spatial data object, containing a feature geometry list-column (\code{sfc}) in the form of various geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}). The \pkg{sf} package provides functions that operate efficiently on this spatial information. A cubble can store the spatial information as an \code{sf} object. Methods for the \code{sfc} class can be applied in the nested form of the cubble object. An illustration is in Section \ref{covid}. The spatial information can also be stored as an \code{s2} in a cubble object.
 
 \hypertarget{netcdf}{%
 \subsubsection{netCDF}\label{netcdf}}
 
 NetCDF data is another format commonly used for storing spatio-temporal data. It has two main components: \emph{dimension} for defining the spatio-temporal grid (longitude, latitude, and time) and \emph{variable} that populates the defined grid. Attributes can be associated with dimensions or variables. Because there can be many different styles of representing this information there is a metadata convention \citep{hassell_data_2017} to standardize the format of the attributes. A few packages in \proglang{R} exist for manipulating NetCDF data and these include a high-level R interface: \pkg{ncdf4} \citep{ncdf4}, a low-level interface that calls a C-interface: \pkg{RNetCDF} \citep{rnetcdf}, and a tidyverse implementation: \pkg{tidync} \citep{tidync}.
 
-Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble}. It maps each combination of longitude and latitude into an \code{id} as the \code{key}:
+Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble} object. It maps each combination of longitude and latitude into an \code{id} as the \code{key}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -443,9 +443,13 @@ R> dt <- as_cubble(
 \hypertarget{hierarchical-structure}{%
 \subsection{Hierarchical structure}\label{hierarchical-structure}}
 
-Spatial locations can have grouping structures either inherent to the data (e.g., state within country) or obtained during the analysis (e.g., cluster id). In this case, it can be useful to summarize variables at various levels of the hierarchy. The function \code{switch_key()} can be used to change the grouping level of spatial locations. The diagram in Figure \ref{fig:illu-hier} shows how this function can be used to switch the grouping from station ids to cluster ids. The result can also be stretched into long form. By specifying
+Spatial locations can have grouping structures either inherent to the data e.g., state within country or obtained during the analysis e.g., cluster id. In this case, it can be useful to summarize variables at various levels of the hierarchy. The function \code{switch_key()} can be used to change the grouping level of spatial locations. The diagram in Figure \ref{fig:illu-hier} shows how this function can be used to switch the grouping from station ids to cluster ids. The result can also be stretched into long form. By specifying
 
-\code{cluster_nested <- station_nested \%>\% switch_key(key = cluster)},
+\begin{CodeChunk}
+\begin{CodeInput}
+R> cluster_nested <- station_nested %>% switch_key(key = cluster)
+\end{CodeInput}
+\end{CodeChunk}
 
 the cubble redefines the cubble key from the \code{id} column in \code{station_nested} to the \code{cluster} column in \code{cluster_nested}. All the spatial variables belonging to the \code{cluster} column are now nested into a \code{.val} column which allows for summarizing based on cluster.
 
@@ -463,7 +467,7 @@ the cubble redefines the cubble key from the \code{id} column in \code{station_n
 \hypertarget{matching}{%
 \subsection{Data fusion and matching}\label{matching}}
 
-One task that may interest spatio-temporal analysts is combining data collected at nearby but not exactly the same sites, for example, weather station measured rainfall and river levels. This can be considered to be a matching problem \citep{stuart2010matching, mcintosh2018using} to pair similar time series from nearby locations, or even a data fusion exercise that merges data collected from different sources \citep{cocchi2019data}. The function \code{match_sites()} in \pkg{cubble} provides a simple algorithm for this task. The algorithm first matches spatially by computing the pairwise distance on latitude and longitude. Then it matches temporally by computing the number of matched peaks within a fixed length moving window. Figure \ref{fig:illu-matching} illustrates this temporal matching. In the two series, \code{A} and \code{a}, three peaks have been identified in each. An interval, of fixed length, is constructed for each peak in series \code{A}, while the peaks in series \code{a} are tested against whether they fall into any of the intervals. Here two out of three peaks match. Options for \code{match_sites()} are:
+One task that may interest spatio-temporal analysts is combining data collected at nearby but not exactly the same sites, for example, weather station measured rainfall and river levels. This can be considered to be a matching problem \citep{stuart2010matching, mcintosh2018using} to pair similar time series from nearby locations, or even a data fusion exercise that merges data collected from different sources \citep{cocchi2019data}. The function \code{match_sites()} in the \pkg{cubble} package provides a simple algorithm for this task. The algorithm first matches spatially by computing the pairwise distance on latitude and longitude. Then it matches temporally by computing the number of matched peaks within a fixed length moving window. Figure \ref{fig:illu-matching} illustrates this temporal matching. In the two series, A and a, three peaks have been identified in each. An interval, of fixed length, is constructed for each peak in series A, while the peaks in series a are tested against whether they fall into any of the intervals. Here two out of three peaks match. Options for \code{match_sites()} are:
 
 \begin{CodeChunk}
 \begin{figure}
@@ -493,9 +497,9 @@ One task that may interest spatio-temporal analysts is combining data collected 
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}
 
-The cubble workflow fits works well with an interactive graphics pipeline (e.g., \citet{buja1988elements}, \citet{buja1996interactive}, \citet{sutherland2000orca}, \citet{xie2014reactive}, \citet{cheng2016enabling}) that is available in \proglang{R} with the package crosstalk \citep{crosstalk}. Figure \ref{fig:illu-interactive} illustrates how linking can be achieved between a map and multiple time series using a cubble. The map (produced from the nested form) and time series (produced from the long form) are both shared crosstalk objects. When a user makes a selection on the map, the site is highlighted (a). This activates a row in the nested cubble object, which is then communicated to the long cubble -- all the observations with the same \code{id} (b) will be selected. The long cubble will then highlight the corresponding series in the time series plot (c).
+The cubble workflow fits works well with an interactive graphics pipeline (e.g., \citet{buja1988elements}, \citet{buja1996interactive}, \citet{sutherland2000orca}, \citet{xie2014reactive}, \citet{cheng2016enabling}) that is available in \proglang{R} with the package \pkg{crosstalk} \citep{crosstalk}. Figure \ref{fig:illu-interactive} illustrates how linking can be achieved between a map and multiple time series using a cubble. The map (produced from the nested form) and time series (produced from the long form) are both shared \code{crosstalk} objects. When a user makes a selection on the map, the site is highlighted (a). This activates a row in the nested \code{cubble} object, which is then communicated to the long cubble -- all the observations with the same id (b) will be selected. The long cubble will then highlight the corresponding series in the time series plot (c).
 
-Linking is also available starting from the time series plot, by selecting points. This will be activate rows having the same \code{id} in the long cubble. The corresponding rows in the nested cubble are activated, and highlighted the map. (An illustration can be found in the appendix.) Note that this type of linking, both from the map or the time series, is what \citet{CS07} would call categorical variable linking, where station id is the categorical variable.
+Linking is also available starting from the time series plot, by selecting points. This will be activate rows having the same id in the long cubble. The corresponding rows in the nested cubble are activated, and highlighted the map. (An illustration can be found in the appendix.) Note that this type of linking, both from the map or the time series, is what \citet{CS07} would call categorical variable linking, where station id is the categorical variable.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -504,7 +508,7 @@ Linking is also available starting from the time series plot, by selecting point
 
 }
 
-\caption[Linking between multiple plots]{Linking between multiple plots. The line plots and the map are constructed from shared crosstalk objects (long and nested cubbles). When a station is selected on the map (a), the corresponding row in the nested cubble will be activated. This will link to all the rows with the same id in the long cubble (b) and update the line plot (c).}\label{fig:illu-interactive}
+\caption[Linking between multiple plots]{Linking between multiple plots. The line plots and the map are constructed from shared \code{crosstalk} objects (long and nested cubbles). When a station is selected on the map (a), the corresponding row in the nested cubble will be activated. This will link to all the rows with the same id in the long cubble (b) and update the line plot (c).}\label{fig:illu-interactive}
 \end{figure}
 \end{CodeChunk}
 
@@ -513,7 +517,7 @@ Linking is also available starting from the time series plot, by selecting point
 
 Spatio-temporal data lends itself to a range of transformations. Glyph maps (Section \ref{unfold}) transform the measured variable and time coordinates into microplots at the spatial locations. Calendar plots \citep{wang2020calendar} deconstruct time to produce plots of variables in a calendar format. Summarizing multiple variables is commonly done using projections, or linear combinations. Here we elaborate on the transformations made to produce a glyph map.
 
-The \proglang{R} package \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equations 1 and 2 in \citet{Wickham2012-yr}). The data can then be piped into \code{ggplot} to create the glyph map as:
+The package \pkg{GGally} \citep{ggally} has implemented glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equations 1 and 2 in \citet{Wickham2012-yr}). The data can then be piped into ggplot to create the glyph map as:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -544,12 +548,12 @@ Some useful controls over the glyph map are also available in the \code{geom_gly
 \hypertarget{examples}{%
 \section{Examples}\label{examples}}
 
-The five examples here are chosen to illustrate these aspects of using cubble: creating a \code{cubble} from two COVID data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. (There is an additional example and figures in the Appendix, and more examples in the package vignettes.)
+The five examples here are chosen to illustrate these aspects of using cubble: creating a \code{cubble} object from two COVID data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. (There is an additional example and figures in the Appendix, and more examples in the package vignettes.)
 
 \hypertarget{covid}{%
 \subsection{Victoria COVID spatio-temporal incidence and spread}\label{covid}}
 
-Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualize COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Here is how to do this with \pkg{cubble}, including how to handle mismatches arising from different names of the same LGAs in the two tables. The COVID data is store in a csv file and looks like:
+Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualize COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Here is how to do this with the \pkg{cubble} package, including how to handle mismatches arising from different names of the same LGAs in the two tables. The COVID data is store in a csv file and looks like:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -665,9 +669,9 @@ R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
 \hypertarget{historicaltmax}{%
 \subsection{Australian historical maximum temperature}\label{historicaltmax}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the \pkg{rnoaa}\citep{rnoaa} package, containing the records of maximum temperature for 236 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales, using a glyph map.
+The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the package \pkg{rnoaa} \citep{rnoaa}, containing the records of maximum temperature for 236 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales, using a glyph map.
 
-First, the stations need to be filtered to those in NSW and Victoria by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the Australian Bureau of Meteorology (BOM) \citep{bom} coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a \emph{spatial operation} and hence uses the \code{cubble} nested form:
+First, the stations need to be filtered to those in NSW and Victoria by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the Australian Bureau of Meteorology (BOM) \citep{bom} coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a \emph{spatial operation} and hence uses the \code{cubble} object in the nested form:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -676,7 +680,7 @@ R> tmax <- historical_tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-Next, the monthly maximum average temperature is calculated for both periods. This is a \emph{temporal operation} requiring a switch into the long \code{cubble} form using the \code{face_temporal()} function. In addition, a new indicator for the two time periods of interest is created before the calculation of monthly averages:
+Next, the monthly maximum average temperature is calculated for both periods. This is a \emph{temporal operation} requiring a switch into the long cubble form using the \code{face_temporal()} function. In addition, a new indicator for the two time periods of interest is created before the calculation of monthly averages:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -743,7 +747,7 @@ R> ggplot() +
 \end{figure}
 \end{CodeChunk}
 
-Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are gridded. In this example, they are irregularly spaced, which can result in overlapping glyphs obscuring each other. To fix this, one could aggregate data from nearby stations. An example of this using \textbf{cubble} is included in the Appendix.
+Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are gridded. In this example, they are irregularly spaced, which can result in overlapping glyphs obscuring each other. To fix this, one could aggregate data from nearby stations. An example of this using is included in the Appendix.
 
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
@@ -800,11 +804,11 @@ Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardiz
 
 Figure \ref{fig:netcdf} reproduces the ERA5 data \citep{hersbach2020era5} row of Figure 19 in \citep{hersbach2020era5}. Here we explain how this would be done using cubble. The plots show that the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also \citep{simmons2020global}, \citep{simmons2005ecmwf}.
 
-The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF). It can be directly downloaded from Copernicus Climate Data Store (CDS) \citep{cds} website or via the \proglang{R} package \pkg{ecmwfr} \citep{ecwmfr}.
+The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF). It can be directly downloaded from Copernicus Climate Data Store (CDS) \citep{cds} website or via the package \pkg{ecmwfr} \citep{ecwmfr}.
 
 For the reproduction, we focus on the \code{era5-pressure} data, hourly pressure levels from 1970 to present, with the \emph{specific humidity} and \emph{geopotential}.
 
-The downloaded netCDF data is read into \proglang{R} using the \code{ncdf4} package, and converted to a \code{cubble}:
+The downloaded netCDF data is read into \proglang{R} using the \pkg{ncdf4} package, and converted to a \code{cubble} object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -815,7 +819,7 @@ R> dt <- as_cubble(
 \end{CodeInput}
 \end{CodeChunk}
 
-Creating the plot requires making transformations on time, unfolding the data for computing the statistic of interest, which is plotted directly as a contour plot with \code{ggplot}. Code is provided to accomplish this in the supplementary material.
+Creating the plot requires making transformations on time, unfolding the data for computing the statistic of interest, which is plotted directly as a contour plot with ggplot. Code is provided to accomplish this in the supplementary material.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -833,7 +837,7 @@ Creating the plot requires making transformations on time, unfolding the data fo
 
 Interactive graphics can be useful because they make it possible to look at the data in a multiple of ways on-the-fly. This is especially important for spatio-temporal data, where we would like to interactively connect spatial and temporal displays. This example describes the process of using \pkg{cubble} with \pkg{crosstalk} to build an interactive display connecting a map of Australia, with ribbon plots of temperature range observed at the stations. The purpose is to explore the variation of monthly temperature range over the country. Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity.
 
-The key steps are to convert both the nested and long forms of the data into shared objects, and to plot these side-by-side. The two are linked by the station identifier.
+The key steps are to convert both the nested and long forms of the data into shared \code{crosstalk} objects, and to plot these side-by-side. The two are linked by the station identifier.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -865,16 +869,16 @@ Plot (a) shows the initial state of the interactive display: all locations are s
 \hypertarget{conclude}{%
 \section{Conclusion}\label{conclude}}
 
-This paper presents an \proglang{R} package \pkg{cubble} for organizing, manipulating and visualizing spatio-temporal data. The package introduces a new data structure for spatio-temporal data, \code{cubble}, that connects the time invariant and varying variables and that allows the user to work with a nested and long form of the data. This work adds capabilities into the spatio-temporal practitioners toolbox to integrate it with a tidy data framework. The data structure and functions introduced in this package can be used and combined with existing spatio-temporal \proglang{R} packages such as \pkg{sf}, data wrangling packages such as \pkg{dplyr}, and visualization packages such as \pkg{ggplot2}, \pkg{plotly} and \pkg{leaflet}.
+This paper presents an \proglang{R} package \pkg{cubble} for organizing, manipulating and visualizing spatio-temporal data. The package introduces a new data structure for spatio-temporal data, \code{cubble}, that connects the time invariant and varying variables and that allows the user to work with a nested and long form of the data. This work adds capabilities into the spatio-temporal practitioners toolbox to integrate it with a tidy data framework. The data structure and functions introduced in this package can be used and combined with existing spatial data analysis packages such as \pkg{sf}, data wrangling packages such as \pkg{dplyr}, and visualization packages such as \pkg{ggplot2}, \pkg{plotly} and \pkg{leaflet}.
 
 Numerous examples are provided in the main text, appendix and package vignettes. These include creating and coercing data with mismatched names, handling hierarchical data, matching time series spatially and temporally, reproducing ERA5 plots from netCDF data. Visualization of the \code{cubble} objects can be done with interactive graphic pipelines using \pkg{crosstalk}, \pkg{plotly} and \pkg{leaflet}.
 
-There are several possible future directions for the work. The data structure only described fixed spatial sites, and it could be useful to provide tools to accommodate moving coordinates as might be encountered in animal movement data. That could be achieved with a list-column for the location coordinates, and an additional form that these locations can be pivoted into, like the long form for temporal variables. For multiple measured variables, \pkg{cubble} could be integrated with dimension reduction methods, and dynamic graphics for multiple dimensions such as a tour \citep{wickham_tourr_2011}.
+There are several possible future directions for the work. The data structure only described fixed spatial sites, and it could be useful to provide tools to accommodate moving coordinates as might be encountered in animal movement data. That could be achieved with a list-column for the location coordinates, and an additional form that these locations can be pivoted into, like the long form for temporal variables. For multiple measured variables, the \pkg{cubble} package could be integrated with dimension reduction methods, and dynamic graphics for multiple dimensions such as a tour \citep{wickham_tourr_2011}.
 
 \hypertarget{acknowledgement}{%
 \section{Acknowledgement}\label{acknowledgement}}
 
-This work is funded by a Commonwealth Scientific and Industrial Research Organisation (CSIRO) Data61 Scholarship and started while Nicolas Langrené was affiliated with CSIRO's Data61. The article is created using \pkg{knitr} \citep{knitr} and \pkg{rmarkdown} \citep{rmarkdown} in R using the \code{rticles::jss_article} template. The source code for reproducing this paper can be found at: \url{https://github.com/huizezhang-sherry/paper-cubble}.
+This work is funded by a Commonwealth Scientific and Industrial Research Organisation (CSIRO) Data61 Scholarship and started while Nicolas Langrené was affiliated with CSIRO's Data61. The article is created using the package \pkg{knitr} \citep{knitr} and \pkg{rmarkdown} \citep{rmarkdown} in \proglang{R} with the \code{rticles::jss_article} template. The source code for reproducing this paper can be found at: \url{https://github.com/huizezhang-sherry/paper-cubble}.
 
 \bibliography{../references.bib}
 
