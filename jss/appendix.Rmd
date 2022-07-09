@@ -10,11 +10,11 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
-library(tidyverse)
-library(cubble)
-library(patchwork)
-library(leaflet)
-library(leafpop)
+library("tidyverse")
+library("cubble")
+library("patchwork")
+library("leaflet")
+library("leafpop")
 ```
 
 This is the supplementary material for the main paper, containing

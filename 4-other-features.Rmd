@@ -52,7 +52,7 @@ Spatio-temporal data lends itself to a range of transformations. Glyph maps (Sec
 The \proglang{R} package \pkg{GGally} implements glyph maps through the \code{glyphs()} function. The function constructs a data frame with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equations 1 and 2 in @Wickham2012-yr). The data can then be piped into \code{ggplot} to create the glyph map as:
 
 ```{r eval = FALSE, echo = TRUE}
-library(ggplot2)
+library("ggplot2")
 gly <- glyphs(data,
               x_major = ..., x_minor = ...,
               y_major = ..., y_minor = ..., ...)

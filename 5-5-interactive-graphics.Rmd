@@ -32,8 +32,8 @@ Plot (a) shows the initial state of the interactive display: all locations are s
 
 ```{r eval = FALSE}
 # This chunk generates the interactive graphic and save it as figures/linking.html, where the three screencasts in the figure comes from.
-library(crosstalk)
-library(plotly)
+library("crosstalk")
+library("plotly")
 
 clean <- climate_full %>%
   filter(!id %in% c("ASN00067033", "ASN00072091", "ASN00059040", 
