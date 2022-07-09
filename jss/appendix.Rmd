@@ -119,17 +119,14 @@ p2 <- ggplot() +
 Figure \ref{fig:interactive-popup} in this section can also be made using `cubble` and `leaflet`, in which case the temperature range is displayed as a small subplot upon clicking on the map. This procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with `leafpop::addPopupGraphs()`:
 
 ``` r
-# data pre-processing
 clean <- climate_full %>% ...
 
-# use the long form to create subplots for each station
 df_id <- unique(clean$id)
 p <- map(1:length(df_id), function(i){
   dt <- clean %>% filter(id == df_id[i])
   ggplot(dt) %>% ...
 })
 
-# create nested form leaflet map with temperature band as subplots
 nested <- face_spatial(clean)
 leaflet(nested) |>
   addTiles() |>
@@ -251,7 +248,6 @@ save(historical_tmax, file = here::here("data/historical_tmax.rda"))
 The data `climate_full`, used in the examples in Sections 5.3, 5.4, and 5.5 of the main paper and in \ref{#precip} here, can be obtained in a similar fashion with a slight change on the selected variable and date parameter in `rnoaa::meteo_pull_monitors()` as shown below. The full script is provided below and a copy of the data is also available in the data folder of the paper GitHub repository linked above. 
 
 ```{r eval = FALSE}
-# all the Australian stations have all of the three PRCP, TMAX, and TMIN recorded
 aus_stations <- all_stations %>%
   filter(element %in% c("PRCP", "TMAX", "TMIN")) %>%
   nest(element: last_year) %>%

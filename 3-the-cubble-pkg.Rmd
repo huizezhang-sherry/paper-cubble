@@ -109,7 +109,6 @@ climate_flat_cb
 When a nested cubble is created, each element in the list-column \code{ts} is a \code{tsibble} class (labelled \code{tbl_ts})  and operations available to the \code{tsibble} class are still valid on this element. For example, the code below calculates two time series features (mean and variance) of maximum temperature, utilizing the tsibble structure in the cubble:
 
 ```{r echo = TRUE}
-# add station-based features in the nested form.
 climate_flat_cb |> 
   mutate(
     fabletools::features(
@@ -171,10 +170,7 @@ NetCDF data is another format commonly used for storing spatio-temporal data. It
 Cubble provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble}. It maps each combination of longitude and latitude into an \code{id} as the \code{key}:
 
 ```{r echo = TRUE, eval = FALSE}
-# read in the .nc file as a ncdf4 class
 raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
-
-# convert the variable q and z in the ncdf4 into a cubble
 dt <- as_cubble(raw, vars = c("q", "z"))
 ```
 
@@ -182,10 +178,8 @@ NetCDF data can be quite large, and it is sometimes best to subset the data when
 The size of spatial grid can be reduced if longer time periods or more variables are needed, through \code{long_range} and \code{lat_range}:
 
 ```{r eval = FALSE, echo = TRUE}
-# Assume my_ncdf has a bounding box of [-180, -90, 180, 90]
-# at 0.25 degree resolution and subset it to have
-# 1 degree resolution:
-dt <- as_cubble(my_ncdf, vars = c("q", "z"),
-                long_range = seq(-180, 180, 1),
-                lat_range = seq(-90, 90, 1))
+dt <- as_cubble(
+  my_ncdf, vars = c("q", "z"),
+  long_range = seq(-180, 180, 1),lat_range = seq(-90, 90, 1)
+  )
 ```
