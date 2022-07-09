@@ -22,7 +22,7 @@ author:
     address: 21 Chancellors Walk, Clayton VIC 3800 Australia
     email:  patricia.menendez@monash.edu
 title:
-  formatted: "\\pkg{cubble}: An \proglang{R} Package for Organizing and Wrangling Multivariate Spatio-temporal Data"
+  formatted: "\\pkg{cubble}: An \\proglang{R} Package for Organizing and Wrangling Multivariate Spatio-temporal Data"
   # If you use tex in the formatted title, alsoge supply version without
   plain:     "cubble: An R Package for Organizing and Wrangling Multivariate Spatio-temporal Data"
   # For running headers, if needed
