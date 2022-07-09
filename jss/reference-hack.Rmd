@@ -8,7 +8,6 @@ The `rticles::jss_article` template used during preparation (https://github.com/
 Here a hack is used to overcome this temporarily
 
 ```{r}
-
 tex <- readLines(here::here("references.bib"))
 b <- tex %>% stringr::str_extract("\\@(article|techreport|misc|Manual|Book)\\{.+,")
 b <- b[!is.na(b)]

@@ -5,7 +5,7 @@ output: html_document
 
 ## River levels and rainfall in Victoria
 
-River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology [@bom] in relation to weather station rainfall from NOAA's climate data [@noaa] (\code{climate}). The goal is to match water gauges with nearby weather stations, spatially and temporally, using 2020 measurements using \code{match_sites()} function.
+River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology [@bom] in relation to weather station rainfall from NOAA's climate data (\code{climate}). The goal is to match water gauges with nearby weather stations, spatially and temporally, using 2020 measurements using \code{match_sites()} function.
 <!--The Bureau of Meteorology collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges. The collected variables include: electrical conductivity, turbidity, watercourse discharge, watercourse level, and water temperature. We expect that the water level should be related to the precipitation available from climate data, since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria, and we will try to match water gauges with nearby weather stations, taking into account both spatial and temporal information from 2020.-->
 
 ```{r}

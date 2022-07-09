@@ -10,9 +10,9 @@ load(here::here("data/historical_tmax.rda"))
 ```
 
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the package \pkg{rnoaa} [@rnoaa], containing the records of maximum temperature for `r nrow(historical_tmax)` Australian stations from `r range(historical_tmax$first_year)[1]` through `r range(historical_tmax$first_year)[2]` and provides information also on the latitude, longitude and elevation of each of the  stations. <!-- This data  is already cast into a \code{cubble} data object (please see Appendix X for the code to extract  the data from XX and prepare the data into \code{cubble} form), with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates.--> The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales, using a glyph map.
+The GHCN provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the package \pkg{rnoaa} [@rnoaa], containing the records of maximum temperature for `r nrow(historical_tmax)` Australian stations from `r range(historical_tmax$first_year)[1]` through `r range(historical_tmax$first_year)[2]` and provides information also on the latitude, longitude and elevation of each of the  stations. <!-- This data  is already cast into a \code{cubble} data object (please see Appendix X for the code to extract  the data from XX and prepare the data into \code{cubble} form), with \code{id} as the key, \code{date} as the index, and \code{c(longitude, latitude)} as the coordinates.--> The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales (NSW), using a glyph map.
 
-First, the stations need to be filtered to those in NSW and Victoria by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by "ASN00") and the next 6 digits encode the station following the Australian Bureau of Meteorology (BOM) [@bom] coding protocols. New South Wales stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a *spatial operation* and hence uses the \code{cubble} object in the nested form:
+First, the stations need to be filtered to those in Victoria and NSW by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by "ASN00") and the next 6 digits encode the station following the Australian Bureau of Meteorology (BOM) [@bom] coding protocols. The NSW stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and New South Wales stations is a *spatial operation* and hence uses the \code{cubble} object in the nested form:
 
 <!-- BOM link: http://www.bom.gov.au/climate/cdo/about/site-num.shtml -->
 
@@ -21,7 +21,7 @@ tmax <- historical_tmax |>
   filter(between(stringr::str_sub(id, 7, 8), 46, 90))
 ```
 
-Next, the monthly maximum average temperature is  calculated for both periods. This is a *temporal operation* requiring a switch into the long cubble form using the \code{face_temporal()} function. In addition, a new indicator for the two time periods of interest is created before the calculation of monthly averages:
+Next, the monthly maximum average temperature is  calculated for both periods. This is a *temporal operation* requiring a switch into the long \code{cubble} form using the \code{face_temporal()} function. In addition, a new indicator for the two time periods of interest is created before the calculation of monthly averages:
 
 ```{r echo = TRUE}
 tmax <- tmax |>
@@ -85,7 +85,7 @@ cobar <- tmax |> filter(id == "ASN00048027") |>
 ```
 
 
-```{r basic-manip, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales for the periods (1971-1975, 2016-2020). The corresponding average time series for the Cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations in New South Wales."}
+```{r basic-manip, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales (NSW) for the periods (1971-1975, 2016-2020). The corresponding average time series for the cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations in NSW."}
 tmax <- tmax |> unfold(long, lat)
 box_df <- tmax |> face_spatial() |> filter(id == "ASN00048027")
 nsw_vic <- ozmaps::abs_ste |> filter(NAME %in% c("Victoria","New South Wales"))

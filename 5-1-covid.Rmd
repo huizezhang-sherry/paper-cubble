@@ -5,7 +5,7 @@ output: html_document
 
 # Examples {#examples}
 
-The five examples here are chosen to illustrate these aspects of using cubble: creating a \code{cubble} object from two COVID data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading netCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. (There is an additional example and figures in the Appendix, and more examples in the package vignettes.)
+The five examples here are chosen to illustrate these aspects of the \pkg{cubble} package: creating a \code{cubble} object from two coronavirus (COVID) data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading NetCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. (There is an additional example and figures in the Appendix, and more examples in the package vignettes.)
 
 ## Victoria COVID spatio-temporal incidence and spread {#covid}
 
