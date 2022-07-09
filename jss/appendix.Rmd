@@ -33,19 +33,19 @@ In  example 5.2, some overlapping of the glyphs occurred for a number of station
 The data `climate_full`, also extracted from the GHCN, records daily precipitation and maximum/minimum temperature for `r nrow(climate_full)` stations in Australia from 2016 to 2020. A simple $k$-means algorithm based on the distance matrix between stations is used to create 20 clusters. The data `station_nested` is a nested cubble with a cluster column indicating the group to which each station belongs. More advanced clustering algorithms can be used as well, as long as they provide a mapping from each station to a cluster.
 
 ```{r eval = FALSE, echo = TRUE}
-station_nested <- climate_full %>% mutate(cluster = ...)
+station_nested <- climate_full |> mutate(cluster = ...)
 ```
 
 To create a group-level cubble, use `switch_key()` with the new key variable, `cluster`:
 
 ```{r eval = FALSE, echo = TRUE}
-cluster_nested <- station_nested %>% switch_key(cluster)
+cluster_nested <- station_nested |> switch_key(cluster)
 ```
 
 With the group-level cubble, `get_centroid()` is useful to compute the centroid of each cluster, which will be used as the major axis for the glyph map later:
 
 ```{r eval = FALSE, echo = TRUE}
-cluster_nested <- cluster_nested %>% get_centroid()
+cluster_nested <- cluster_nested |> get_centroid()
 ```
 
 Long form cubble at both levels can be accessed through stretching the nested form. With access to both station and cluster-level cubbles, various plots can be made to understand the cluster. Figure \ref{fig:basic-agg} shows two example plots that can be made with this data. Subplot A is a glyph map made with the cluster level cubble in the long form and subplot B inspects the station membership of each cluster using the station level cubble in the nested form.
@@ -56,17 +56,17 @@ Long form cubble at both levels can be accessed through stretching the nested fo
 coords <- cbind(prcp_aus$long, prcp_aus$lat)
 dist_raw <- geosphere::distm(coords, coords)
 
-station_long <- cubble::prcp_aus %>%
-  face_temporal(ts) %>%
-  mutate(wk = lubridate::week(date)) %>%
-  group_by(wk) %>%
-  summarise(prcp = sum(prcp, na.rm = TRUE)) %>%
+station_long <- cubble::prcp_aus |>
+  face_temporal(ts) |>
+  mutate(wk = lubridate::week(date)) |>
+  group_by(wk) |>
+  summarise(prcp = sum(prcp, na.rm = TRUE)) |>
   unfold(cluster)
 
 set.seed(123)
-station_nested <- station_long %>%
-  face_spatial() %>%
-  strip_rowwise() %>%
+station_nested <- station_long |>
+  face_spatial() |>
+  strip_rowwise() |>
   mutate(cluster = kmeans(dist_raw,centers = 20, nstart = 500)$cluster)
 save(station_nested, file = here::here("data/station_nested.rda"))
 ```
@@ -74,24 +74,24 @@ save(station_nested, file = here::here("data/station_nested.rda"))
 
 ```{r basic-agg, fig.height = 7, fig.width = 15, echo = FALSE, fig.cap="Profile of aggregated precipitation at 639 weather stations in Australia. Subplot A shows the glyph map of the weekly averaged precipitation of each cluster. The group number is printed in the middle of the y minor axis and can be used as a reference line to read the magnitude. Subplot B shows the station membership of each cluster."}
 load(here::here("data/station_nested.rda"))
-cluster_nested <- station_nested %>%
-  switch_key(cluster) %>% 
+cluster_nested <- station_nested |>
+  switch_key(cluster) |> 
   get_centroid()
 
-cluster_long <- cluster_nested %>% 
-  face_temporal() %>% 
-  group_by(wk) %>%
-  summarise(prcp = mean(prcp, na.rm = TRUE)) %>% 
+cluster_long <- cluster_nested |> 
+  face_temporal() |> 
+  group_by(wk) |>
+  summarise(prcp = mean(prcp, na.rm = TRUE)) |> 
   unfold(cent_long, cent_lat)
 
 state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
 
-ggplot_smooth <- cluster_long %>% 
+ggplot_smooth <- cluster_long |> 
   ggplot() +
   geom_smooth(aes(x = wk, y = prcp, group = cluster), span = 0.4) 
 
-smoother <- layer_data(ggplot_smooth) %>% 
-  left_join(cluster_long %>% select(cluster, cent_long, cent_lat), by = c("group" = "cluster"))
+smoother <- layer_data(ggplot_smooth) |> 
+  left_join(cluster_long |> select(cluster, cent_long, cent_lat), by = c("group" = "cluster"))
 
 p1 <- ggplot(data = smoother, 
              aes(x_minor = x, y_minor = y, x_major = cent_long, y_major = cent_lat)) + 
@@ -106,7 +106,7 @@ p2 <- ggplot() +
   geom_sf(data = state_map, inherit.aes = FALSE,
           color = "grey80", alpha = 0.4, linetype = 3) + 
   geom_point(data = station_nested, aes(x = long, y = lat), size = 0.5) +
-  ggforce::geom_mark_hull(data = cluster_nested %>% tidyr::unnest(hull),
+  ggforce::geom_mark_hull(data = cluster_nested |> tidyr::unnest(hull),
                           expand = 0, radius = 0,
                           aes(x = long, y = lat, group = cluster)) + 
   theme_void()
@@ -119,12 +119,12 @@ p2 <- ggplot() +
 Figure \ref{fig:interactive-popup} in this section can also be made using `cubble` and `leaflet`, in which case the temperature range is displayed as a small subplot upon clicking on the map. This procedure involves first creating the popup plots from the long form cubble as a vector and then adding these plots to a leaflet map created from the nested cubble, with `leafpop::addPopupGraphs()`:
 
 ``` r
-clean <- climate_full %>% ...
+clean <- climate_full |> ...
 
 df_id <- unique(clean$id)
 p <- map(1:length(df_id), function(i){
-  dt <- clean %>% filter(id == df_id[i])
-  ggplot(dt) %>% ...
+  dt <- clean |> filter(id == df_id[i])
+  ggplot(dt) |> ...
 })
 
 nested <- face_spatial(clean)
@@ -138,26 +138,26 @@ leaflet(nested) |>
 Figure \ref{fig:interactive-popup} shows the same information as Figure 9 but using leaflet and popups.
 
 ```{r eval = FALSE, echo = FALSE}
-clean <-  climate_full %>%
+clean <-  climate_full |>
   filter(!id %in% c("ASN00067033", "ASN00072091", "ASN00059040", 
-                    "ASN00097053", "ASN00040856", "ASN00015548")) %>%
-  face_temporal() %>%
-  mutate(month = lubridate::month(date)) %>% 
-  group_by(month) %>% 
+                    "ASN00097053", "ASN00040856", "ASN00015548")) |>
+  face_temporal() |>
+  mutate(month = lubridate::month(date)) |> 
+  group_by(month) |> 
   summarise(tmax = mean(tmax, na.rm = TRUE),
             tmin = mean(tmin, na.rm = TRUE),
-            diff = mean(tmax - tmin, na.rm = TRUE)) %>% 
-  ungroup(month) %>% 
-  face_spatial() %>%
-  mutate(temp_diff_var = ts %>% pull(diff) %>% var(na.rm = TRUE)) %>% 
-  face_temporal() %>% 
-  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) %>% 
+            diff = mean(tmax - tmin, na.rm = TRUE)) |> 
+  ungroup(month) |> 
+  face_spatial() |>
+  mutate(temp_diff_var = ts |> pull(diff) |> var(na.rm = TRUE)) |> 
+  face_temporal() |> 
+  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) |> 
   unfold(name)
   
-df_id <- clean$id %>% unique()
+df_id <- clean$id |> unique()
 p <- purrr::map(1:length(df_id), function(i){
-  dt <- clean %>% filter(id == df_id[i])
-  dt %>% 
+  dt <- clean |> filter(id == df_id[i])
+  dt |> 
     ggplot(aes(x = dummy_date, ymin = tmin, ymax = tmax, group = id)) + 
     geom_ribbon(color = "grey50", fill = "grey50", alpha = 0.5) + 
     theme_bw() + 
@@ -175,8 +175,8 @@ pal <- colorNumeric(
     c2 = 40, l2= 85, c1 = 20, l1 = 30),
   domain = domain)
 
-leaflet(nested) %>% 
-  addTiles() %>% 
+leaflet(nested) |> 
+  addTiles() |> 
   addCircleMarkers(color = ~pal(domain), radius = 0.1, 
                    fillOpacity = 1, opacity = 1, 
                    popup = popupGraph(p, width = 300, height =200)) 
@@ -210,34 +210,34 @@ The script below presents the codes required to obtain the data `historical_tmax
 ```{r eval = FALSE}
 library(tidyverse)
 library(cubble)
-all_stations <- rnoaa::ghcnd_stations() %>%
-  filter(str_starts(id, "ASN")) %>% # Australian stations start wiht "ASN"
-  filter(last_year >= 2020) %>%
-  mutate(wmo_id = as.numeric(wmo_id), name = str_to_lower(name)) %>%
-  select(-state, -gsn_flag) %>%
+all_stations <- rnoaa::ghcnd_stations() |>
+  filter(str_starts(id, "ASN")) |> # Australian stations start wiht "ASN"
+  filter(last_year >= 2020) |>
+  mutate(wmo_id = as.numeric(wmo_id), name = str_to_lower(name)) |>
+  select(-state, -gsn_flag) |>
   select(id, longitude, latitude, elevation, name,
-         wmo_id, element, first_year, last_year) %>%
+         wmo_id, element, first_year, last_year) |>
   rename(long = longitude, lat = latitude, elev = elevation) 
 
-tmax_stations <- all_stations %>% 
+tmax_stations <- all_stations |> 
   filter(element == "TMAX", first_year < 1970, !is.na(wmo_id))
 
-raw_tmax <- all_stations %>%
-  rowwise() %>%
+raw_tmax <- all_stations |>
+  rowwise() |>
   mutate(ts = list(rnoaa::meteo_pull_monitors(
     monitors = id, var = "TMAX",
     date_min = glue::glue("{first_year}-01-01"),
     date_max = glue::glue("{last_year}-12-31")
-    ) %>%
+    ) |>
       select(-id)
     )
   )
 
-historical_tmax <- raw_tmax %>%
-  select(-element) %>%
-  unnest(ts) %>%
-  mutate(tmax = tmax/10) %>%
-  filter(lubridate::year(date) %in% c(1971: 1975, 2016:2020)) %>% 
+historical_tmax <- raw_tmax |>
+  select(-element) |>
+  unnest(ts) |>
+  mutate(tmax = tmax/10) |>
+  filter(lubridate::year(date) %in% c(1971: 1975, 2016:2020)) |> 
   as_cubble(index = date, key = id, coords = c(long, lat))
 
 save(historical_tmax, file = here::here("data/historical_tmax.rda"))
@@ -248,27 +248,27 @@ save(historical_tmax, file = here::here("data/historical_tmax.rda"))
 The data `climate_full`, used in the examples in Sections 5.3, 5.4, and 5.5 of the main paper and in \ref{#precip} here, can be obtained in a similar fashion with a slight change on the selected variable and date parameter in `rnoaa::meteo_pull_monitors()` as shown below. The full script is provided below and a copy of the data is also available in the data folder of the paper GitHub repository linked above. 
 
 ```{r eval = FALSE}
-aus_stations <- all_stations %>%
-  filter(element %in% c("PRCP", "TMAX", "TMIN")) %>%
-  nest(element: last_year) %>%
-  rowwise() %>%
-  filter(nrow(data) == 3) %>%
+aus_stations <- all_stations |>
+  filter(element %in% c("PRCP", "TMAX", "TMIN")) |>
+  nest(element: last_year) |>
+  rowwise() |>
+  filter(nrow(data) == 3) |>
   select(-data)
 
-aus_climate_raw <- aus_stations %>%
-  rowwise() %>%
+aus_climate_raw <- aus_stations |>
+  rowwise() |>
   mutate(ts = list(
     rnoaa::meteo_pull_monitors(
       monitors = id, var = c("PRCP", "TMAX", "TMIN"),
       date_min = "2016-01-01", date_max = "2020-12-31"
-      ) %>%
+      ) |>
       select(-id)
     )
   )
 
-climate_full <- aus_climate_raw %>%
-  unnest(ts) %>%
-  mutate(tmax = tmax/10, tmin = tmin/10) %>%
+climate_full <- aus_climate_raw |>
+  unnest(ts) |>
+  mutate(tmax = tmax/10, tmin = tmin/10) |>
   cubble::as_cubble(key = id, index = date, coords = c(long, lat))
 
 save(climate_full, file = here::here("data/climate_full.rda"))

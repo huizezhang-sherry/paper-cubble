@@ -55,20 +55,20 @@ wf_request(
 
 
 ```{r netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high speicfic humidity, splits into two on 2002-09-26 and furthers split into four on 2002-10-04."}
-date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") %>% as.Date()
-res <- dt %>% 
-  face_temporal() %>% 
-  filter(lubridate::date(time) %in% date) %>%
-  unfold(long, lat) %>% 
+date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") |> as.Date()
+res <- dt |> 
+  face_temporal() |> 
+  filter(lubridate::date(time) %in% date) |>
+  unfold(long, lat) |> 
   mutate(q =  q* 10^6)
 
 box = c(xmin = -180, ymin = -90, xmax = 180, ymax = -5)
 sf::sf_use_s2(FALSE)
-country <- rnaturalearth::ne_coastline("small", returnclass = "sf") %>% 
-  sf::st_crop(box) %>% 
+country <- rnaturalearth::ne_coastline("small", returnclass = "sf") |> 
+  sf::st_crop(box) |> 
   sf::st_cast("MULTILINESTRING")
 
-res %>% 
+res |> 
   ggplot() +
   # q for specific humidity
   geom_point(aes(x = long, y = lat, color = q), size = 2) + 

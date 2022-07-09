@@ -14,13 +14,13 @@ The key steps are to convert both the nested and long forms of the data into sha
 <!--The temperature range is calculated as the difference between \code{tmax} and \code{tmin} and its monthly average over 2016-2020 is taken before calculating the variance. A \code{SharedData} object is constructed for each form of the cubble and the same \code{group} argument ensures the cross-linking of the two forms via the common \code{id} column. The spatial map and time series plot are then made with each \code{SharedData} object separately. In this example, stations on the Australia map, made from the nested form, are coloured by the calculated variance. A ribbon band is constructed using the long form cubble to show each station's maximum and minimum temperature over time. In the case of a different dataset, users could calculate other station-dependent measures in the nested form or make other time-wise summary of the data in the long form to customise the spatial or temporal view. The cross-linking between the two plots is always safeguarded by the shared \code{id} column embedded in the cubble structure. Below is the pseudo-code that outlines the process to construct the interactive graphic described above:-->
 
 ``` r
-clean <- climate_full %>% ...
+clean <- climate_full |> ...
 
-nested <- clean %>% SharedData$new(~id, group = "cubble")
-long <- face_temporal(clean) %>% SharedData$new(~id, group = "cubble")
+nested <- clean |> SharedData$new(~id, group = "cubble")
+long <- face_temporal(clean) |> SharedData$new(~id, group = "cubble")
 
-p1 <- nested %>% ...
-p2 <- long %>% ...
+p1 <- nested |> ...
+p2 <- long |> ...
 
 crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 
@@ -35,34 +35,34 @@ Plot (a) shows the initial state of the interactive display: all locations are s
 library("crosstalk")
 library("plotly")
 
-clean <- climate_full %>%
+clean <- climate_full |>
   filter(!id %in% c("ASN00067033", "ASN00072091", "ASN00059040", 
-                    "ASN00097053", "ASN00040856", "ASN00015548")) %>%
-  face_temporal() %>% 
-  mutate(month = lubridate::month(date)) %>%
-  group_by(month) %>%
+                    "ASN00097053", "ASN00040856", "ASN00015548")) |>
+  face_temporal() |> 
+  mutate(month = lubridate::month(date)) |>
+  group_by(month) |>
   summarise(
     tmax = mean(tmax, na.rm = TRUE),
     tmin = mean(tmin, na.rm = TRUE),
     diff = mean(tmax - tmin, na.rm = TRUE)
-    ) %>% 
-  ungroup(month) %>%
-  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) %>% 
-  face_spatial() %>% 
-  mutate(temp_diff_var = ts %>% pull(diff) %>% var(na.rm = TRUE))
+    ) |> 
+  ungroup(month) |>
+  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) |> 
+  face_spatial() |> 
+  mutate(temp_diff_var = ts |> pull(diff) |> var(na.rm = TRUE))
   
-nested <- clean %>% 
+nested <- clean |> 
   SharedData$new(~id, group = "cubble")
 
-long <- clean %>% 
-  face_temporal() %>% 
-  unfold(temp_diff_var) %>% 
-  arrange(temp_diff_var) %>% 
+long <- clean |> 
+  face_temporal() |> 
+  unfold(temp_diff_var) |> 
+  arrange(temp_diff_var) |> 
   SharedData$new(~id, group = "cubble")
 
 state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
 
-p1 <- nested %>% 
+p1 <- nested |> 
   ggplot() +
   geom_sf(data = state_map, fill = "grey95", color = "white") +
   geom_point(aes(x = long, y = lat,color = temp_diff_var, label = name)) +
@@ -77,7 +77,7 @@ p1 <- nested %>%
     legend.position = "none"
     )
 
-p2 <- long %>% 
+p2 <- long |> 
   ggplot(aes(x = dummy_date, group = id, 
              fill = temp_diff_var, color = temp_diff_var)) +
   geom_ribbon(aes(ymin = tmin, ymax = tmax), size = 0.1, alpha = 0.3) + 
@@ -100,12 +100,12 @@ p2 <- long %>%
     )
 
 out <- bscols(
-  ggplotly(p1, width = 900, height = 700, tooltip = "label") %>%
+  ggplotly(p1, width = 900, height = 700, tooltip = "label") |>
     highlight(
       on = "plotly_selected", 
       off = "plotly_deselect", 
       opacityDim = 0.1),
-  ggplotly(p2, width = 1200, height = 700, tooltip = "label") %>% 
+  ggplotly(p2, width = 1200, height = 700, tooltip = "label") |> 
     highlight(
       on = "plotly_selected", 
       off = "plotly_deselect", 
