@@ -25,11 +25,11 @@ One task that may interest spatio-temporal analysts is combining data collected 
 knitr::include_graphics(here::here("figures/illu-matching.png"))
 ```
 
- - \code{spatial_n_keep}: the number of spatial match for each site to keep
- - \code{spatial_dist_max}: the maximum distance allowed for a matched pair
- - \code{temporal_n_highest}: the number of peaks used - 3 in the example above
- - \code{temporal_window}: the length of the interval - 5 in the example above
- - \code{temporal_min_match}: the minimum number of matched peaks for a valid matched pair
+ - \code{spatial_n_keep}: the number of spatial match for each site to keep;
+ - \code{spatial_dist_max}: the maximum distance allowed for a matched pair;
+ - \code{temporal_n_highest}: the number of peaks used - 3 in the example above;
+ - \code{temporal_window}: the length of the interval - 5 in the example above; and
+ - \code{temporal_min_match}: the minimum number of matched peaks for a valid matched pair.
 
 ## Interactive graphics
 
