@@ -10,7 +10,5 @@ The repo contains:
 * `*.Rmd`: individual rmarkdown files for each section
 
 The current working rule used to markup: 
-  * use \pkg{} when refers to the package 
-  * use \code{} when refers to the class or object i.e., the cubble object, the long/ nested cubble)
-  * whenever possible, avoid using a bare cubble
+  * cubble is either marked up using \pkg{} when refers to the package or using \code{} when refers to the class or object.
   * ggplot is not marked up currently  
