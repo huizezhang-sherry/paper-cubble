@@ -384,11 +384,9 @@ When a nested \code{cubble} is created, each element in the list-column \code{ts
 \begin{CodeChunk}
 \begin{CodeInput}
 R> climate_flat_cb |> 
-+   mutate(
-+     fabletools::features(
-+       ts, tmax, list(tmax_mean = mean, tmax_var = var)
-+       )
-+   )
++   mutate(fabletools::features(
++     ts, tmax, list(tmax_mean = mean, tmax_var = var)
++     ))
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   id [5]: nested form

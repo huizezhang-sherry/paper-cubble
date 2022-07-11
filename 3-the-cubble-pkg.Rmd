@@ -110,11 +110,9 @@ When a nested \code{cubble} is created, each element in the list-column \code{ts
 
 ```{r echo = TRUE}
 climate_flat_cb |> 
-  mutate(
-    fabletools::features(
-      ts, tmax, list(tmax_mean = mean, tmax_var = var)
-      )
-  )
+  mutate(fabletools::features(
+    ts, tmax, list(tmax_mean = mean, tmax_var = var)
+    ))
 ```
 
 
