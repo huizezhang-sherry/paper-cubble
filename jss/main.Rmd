@@ -1,5 +1,6 @@
 ---
 documentclass: jss
+classoption: shortnames
 author:
   - name: H. Sherry Zhang
     affiliation: Monash University
@@ -63,14 +64,6 @@ library(cubble)
 library(tidyverse)
 library(patchwork)
 ```
-
-\newpage
-
-```{r child = here::here("jss/reference-hack.Rmd")}
-
-```
-
-\newpage
 
 ```{r child = here::here("1-intro.Rmd")}
 
