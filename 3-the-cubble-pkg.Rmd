@@ -53,7 +53,7 @@ cubble_long
 
 The first line in the header now shows it in the long form and the third line has been changed to display the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. Unlike the nested form, the long \code{cubble} is built from a \code{grouped_df} class where all the observations from the same site form a group.
 
-```{r face, echo = FALSE, fig.align="center", out.height = "35%", out.width = "100%", fig.cap = "An illustration of function \\code{face\\_temporal} and \\code{face\\_spatial}. In the first row, \\code{face\\_temporal} switches a \\code{cubble} object from the nested form into the long form and the focus has switched from the spatial aspect (the side face) to the temporal aspect (the front face). In the second row, \\code{face\\_spatial} switches a \\code{cubble} object back to the nested form from the long form and shifts focus back to the spatial aspect."}
+```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of function \\code{face\\_temporal} and \\code{face\\_spatial}. In the first row, \\code{face\\_temporal} switches a \\code{cubble} object from the nested form into the long form and the focus has switched from the spatial aspect (the side face) to the temporal aspect (the front face). In the second row, \\code{face\\_spatial} switches a \\code{cubble} object back to the nested form from the long form and shifts focus back to the spatial aspect."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
 ```
 
@@ -169,8 +169,7 @@ The NetCDF data is another format commonly used for storing spatio-temporal data
 The \pkg{cubble} package provides an \code{as_cubble()} method to coerce the \code{ncdf4} class from the \pkg{ncdf4} package into a \code{cubble} object. It maps each combination of longitude and latitude into an \code{id} as the \code{key}:
 
 ```{r echo = TRUE, eval = FALSE}
-raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
-dt <- as_cubble(raw, vars = c("q", "z"))
+dt <- as_cubble(my_ncdf, vars = c("q", "z"))
 ```
 
 Sometimes NetCDF data can be quite large, and it is best to subset the data when converting to a \code{cubble} object. We would recommend reducing to about 300 $\times$ 300 grid points for three daily variables in one year. A 300 by 300 spatial grid can be a bounding box of [100, -80, 180, 0] at 0.25 degree resolution or a global bounding box [-180, -90, 180, -90] at 1 degree resolution.

@@ -124,6 +124,8 @@ Multivariate spatio-temporal data refers to multiple measurements taken across s
 
 
 
+\newpage
+
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
@@ -265,7 +267,7 @@ The first line in the header now shows it in the long form and the third line ha
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{../figures/diagram-keynotes/diagram-keynotes.002} 
+{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.002} 
 
 }
 
@@ -404,8 +406,7 @@ The \pkg{cubble} package provides an \code{as_cubble()} method to coerce the \co
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
-R> dt <- as_cubble(raw, vars = c("q", "z"))
+R> dt <- as_cubble(my_ncdf, vars = c("q", "z"))
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -783,11 +784,10 @@ Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardiz
 
 Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \citet{hersbach2020era5}. Here we explain how this would be done using in the \pkg{cubble} package. The plots show that the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in \citet{simmons2020global} and \citet{simmons2005ecmwf}.
 
-The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF). It can be directly downloaded from Copernicus Climate Data Store (CDS) \citep{cds} website or via the \pkg{ecmwfr} package \citep{ecwmfr}. For the reproduction, we focus on the \code{era5-pressure} data, hourly pressure levels from 1970 to present, with the \emph{specific humidity} and \emph{geopotential}. The downloaded NetCDF data is read into \proglang{R} using the \pkg{ncdf4} package, and converted to a \code{cubble} object:
+The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF). It can be directly downloaded from Copernicus Climate Data Store (CDS) \citep{cds} website or via the \pkg{ecmwfr} package \citep{ecwmfr}. For the reproduction, we focus on the \code{era5-pressure} data, hourly pressure levels from 1970 to present, with the \emph{specific humidity} and \emph{geopotential}. The downloaded NetCDF data (\texttt{raw}) is read into \proglang{R} using the \pkg{ncdf4} package, and converted to a \code{cubble} object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
 R> dt <- as_cubble(
 +   raw, vars = c("q", "z"),
 +   long_range = seq(-180, 180, 1), lat_range = seq(-88, 88, 1))

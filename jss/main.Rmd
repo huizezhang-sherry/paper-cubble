@@ -56,7 +56,7 @@ knitr::opts_chunk$set(
 
 options(prompt = "R> ", continue = "+ ",
         tibble.print_max = 5, tibble.print_min = 5,
-        width = 70)
+        width = 70, styler.cache_root = "styler-perm")
 ```
 
 ```{r echo = FALSE}
@@ -64,6 +64,8 @@ library(cubble)
 library(tidyverse)
 library(patchwork)
 ```
+
+\newpage 
 
 ```{r child = here::here("1-intro.Rmd")}
 
