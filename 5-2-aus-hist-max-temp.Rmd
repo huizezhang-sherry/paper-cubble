@@ -26,10 +26,11 @@ Next, the monthly maximum average temperature is  calculated for both periods. T
 ```{r echo = TRUE}
 tmax <- tmax |>
   face_temporal() |> 
-  group_by(month = lubridate::month(date),
+  mutate(month = lubridate::month(date),
          group = as.factor(
            ifelse(lubridate::year(date) > 2015,
            "2016 ~ 2020", "1971 ~ 1975"))) |>
+  group_by(month, group) |> 
   summarise(tmax = mean(tmax, na.rm = TRUE))
 ```
 
@@ -92,7 +93,7 @@ nsw_vic <- ozmaps::abs_ste |> filter(NAME %in% c("Victoria","New South Wales"))
 
 p1 <- ggplot() + 
   geom_sf(data = nsw_vic, fill = "grey95", 
-          color = "white", size=2) + 
+          color = "white") + 
   geom_glyph(
     data = tmax, 
     aes(x_major = long, x_minor = month, 
