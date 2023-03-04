@@ -5,13 +5,9 @@ output: pdf_document
 
 # The cubble package {#cubble}
 
-The \code{cubble} class is an S3 class [@advr] built on the \code{tibble} class, specifically to organize spatio-temporal data. The \code{cubble} class uses an attribute "form",  to arrange the spatial or temporal data components tidily. The form attribute can take a value of either "nested" or "long". The nested \code{cubble} is a subclass of rowwise \code{tibble} (\code{rowwise_df}). It arranges each spatial site in a row, and uses list columns to store the feature geometry and the temporal information. The long \code{cubble} is a subclass of grouped \code{tibble} (\code{grouped_df}), which expands the temporal information into the long form and stores the spatial information in a "spatial" attribute.
+The \code{cubble} class is an S3 class [@advr] built on the \code{tibble} class, specifically to organize spatio-temporal data. The \code{cubble} class uses an attribute "form",  to arrange the spatial or temporal data components tidily. The form attribute can take a value of either "nested" or "long". The nested \code{cubble} is a subclass of rowwise \code{tibble} (\code{rowwise_df}). It arranges each spatial site in a row, and uses list columns to store the feature geometry and the temporal information. The long \code{cubble} is a subclass of grouped \code{tibble} (\code{grouped_df}), which expands the temporal information into the long form and stores the spatial information in a "spatial" attribute. The main functions in the package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()}.
 
 <!-- A cubble is a data object that arranges spatio-temporal information in a spatial and temporal tidy way. It uses two forms to achieve this: the nested form presents the spatial variables, including the feature geometry, and nests the temporal information for spatial wrangling. The long form expands the temporal information and stashes the spatial variables for temporal wrangling. A benefit of cubble is that it interfaces directly with existing spatial and temporal data wrangling packages. For example, operations on feature geometry from the \code{sf} package and temporal operations, i.e., temporal ordering, duplication check. and gap filling, from the \code{tsibble} package.  -->
-
-
-
-The main functions in the package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()}. The following sections explain their roles, why the new \code{cubble} class is needed and how the package relates to existing packages for spatial and temporal data analysis.
 
 The data \code{climate_flat} is used to illustrate functionality in the \pkg{cubble} package. This is a subset from National Oceanic and Atmospheric Administration (NOAA) [@noaa] Global Historical Climatology Network (GHCN) Daily data. It contains spatial variables, station id, latitude, longitude, elevation, station name, world meteorology organisation id, in additional to daily temporal information,  maximum and minimum temperature values and precipitation records for year 2020. The first five rows of the data are shown below:
 
@@ -21,7 +17,7 @@ cubble::climate_flat
 
 ## Create a cubble {#create}
 
-The function \code{as_cubble()} is used to create a \code{cubble} object with three arguments: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order (longitude, latitude). The arguments \code{key} and \code{index} follow the wording in the \pkg{tsibble} package to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a \code{cubble} object out of \code{climate_flat} (a single \code{tibble}) with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
+The function \code{as_cubble()} is used to create a \code{cubble} object with three arguments: \code{key} as the spatial identifier; \code{index} as the temporal identifier; and a vector of \code{coords} in the order (longitude, latitude). The arguments \code{key} and \code{index} follow the conventions in the \pkg{tsibble} package to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. The code below creates a \code{cubble} object out of \code{climate_flat} (a single \code{tibble}) with \code{id} as the key, \code{date} as the index, and \code{c(long, lat)} as the coordinates:
 
 ```{r echo = TRUE}
 cubble_nested <- climate_flat |>
@@ -38,7 +34,7 @@ cubble_nested |>
   mutate(rain_day = sum(ts$prcp != 0))
 ```
 
-A \code{cubble} class can be created from various common spatio-temporal data formats, including \code{tibble}, \code{tsibble}, and \code{sf} when both spatial and tmeporal information are available. Section \@ref(covid) describes converting multiple tables into a \code{cubble} object and Section \@ref(netcdf) illustrates how to convert a NetCDF object.
+A \code{cubble} class can be created from various common spatio-temporal data formats, including \code{tibble}, \code{tsibble}, and \code{sf} when both spatial and temporal information are available. Section \@ref(covid) describes converting multiple tables into a \code{cubble} object and Section \@ref(netcdf) illustrates how to convert a NetCDF object.
 
 
 

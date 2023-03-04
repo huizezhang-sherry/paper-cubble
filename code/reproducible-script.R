@@ -310,7 +310,7 @@ dt <- as_cubble(
 ##   path = here::here("data/"))
 
 
-## ----netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high speicfic humidity, splits into two on 2002-09-26 and furthers split into four on 2002-10-04."----
+## ----netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04."----
 date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") |> as.Date()
 res <- dt |> 
   face_temporal() |> 
