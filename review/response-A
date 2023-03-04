@@ -1,0 +1,59 @@
+From the editorial team:
+
+o Combine main article and appendix into a single PDF. The appendix should be included as appendix in the main article file, but with usual style.
+  
+  - see the submitted-article.pdf
+
+o Provide a single R script which contains the code to reproduce the results. Providing also the html file obtained when executing is recommended, but not compulsory.
+
+  - see the R script: reproducible-script.R
+
+o Maybe it would be preferable to use the new |> pipe consisently in main and appendix.
+
+  - changed to use |> instead of %>% 
+
+Manuscript style comments:
+
+The code presented in the manuscript should not contain comments within the verbatim code. Instead the comments should be made in the normal LaTeX text.
+
+  - comments in the code have been removed. 
+
+o For R-related manuscripts: The first argument of data() and library() should always be quoted, e.g., library("foo").
+
+  - quoted libraries when loaded as library("foo")
+
+o If using "e.g." and "i.e." add a comma after the period to keep LaTeX from interpreting them as the end of a sentence, i.e.: "e.g., " and "i.e., ".
+
+  - "e.g." & "i.e." -> "e.g., " & "i.e., "
+
+o For bullet lists/itemized lists please use either a comma, semi-colon, or period at the end of each item.
+  
+  - added semi-colon between bullet lists and period at the end in section 4.2
+
+o Abbreviations should be spelled in upper-case letters without additional formatting (i.e., without periods, without small caps, italics, etc.).  All abbreviations should be introduced with their expansion where the expansion should not be capitalized.
+
+  - revised 
+
+o As a reminder, please make sure that:
+	- \proglang, \pkg and \code have been used for highlighting throughout the paper (including titles and references), except where explicitly escaped.
+
+  - revised
+
+References:
+
+o Springer-Verlag (not: Springer)
+	using R and GGobi. Springer, New York. With contributions from Buja, A., Temple Lang,
+
+  - changed 
+
+o Please make sure that all software packages are \cite{}'d properly.
+o All references should be in title style.
+o See FAQ for specific reference instructions.
+  
+  - checked
+
+Code:
+
+o Please make sure that the files needed to replicate all code/examples within the manuscript are included in a standalone replication script.
+
+  - see the second point under "From the editorial team"
