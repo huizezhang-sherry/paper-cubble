@@ -18,7 +18,7 @@ First, the stations need to be filtered to those in Victoria and NSW by using th
 
 ```{r echo = TRUE}
 tmax <- historical_tmax |>
-  filter(between(stringr::str_sub(id, 7, 8), 46, 90))
+  filter(between(as.numeric(stringr::str_sub(id, 7, 8)), 46, 90))
 ```
 
 Next, the monthly maximum average temperature is  calculated for both periods. This is a *temporal operation* requiring a switch into the long \code{cubble} using the \code{face_temporal()} function. In addition, a new indicator for the two time periods of interest is created before the calculation of monthly averages:
