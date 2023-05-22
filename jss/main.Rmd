@@ -71,10 +71,6 @@ library(patchwork)
 
 ```
 
-```{r child = here::here("2-cube.Rmd")}
-
-```
-
 ```{r child = here::here("3-the-cubble-pkg.Rmd")}
 
 ``` 
