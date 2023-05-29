@@ -163,31 +163,104 @@ The rest of the paper is organized as follows: Section \ref{cubble} presents the
   headers
 \end{itemize}
 
-The \code{cubble} class is an S3 class \citep{advr} built on the \code{tibble} class, specifically to organize spatio-temporal data. The \code{cubble} class uses an attribute ``form'', to arrange the spatial or temporal data components tidily. The form attribute can take a value of either ``nested'' or ``long''. The nested \code{cubble} is a subclass of rowwise \code{tibble} (\code{rowwise_df}). It arranges each spatial site in a row, and uses list columns to store the feature geometry and the temporal information. The long \code{cubble} is a subclass of grouped \code{tibble} (\code{grouped_df}), which expands the temporal information into the long form and stores the spatial information in a ``spatial'' attribute. The main functions in the package are \code{as_cubble()}, \code{face_spatial()}, \code{face_temporal()}, and \code{unfold()}.
-
-The data \code{climate_flat} is used to illustrate functionality in the \pkg{cubble} package. This is a subset from National Oceanic and Atmospheric Administration (NOAA) \citep{noaa} Global Historical Climatology Network (GHCN) Daily data. It contains spatial variables, station id, latitude, longitude, elevation, station name, world meteorology organisation id, in additional to daily temporal information, maximum and minimum temperature values and precipitation records for year 2020. The first five rows of the data are shown below:
+The \code{cubble} class is an S3 class \citep{advr} built on the \code{tibble} class, specifically to organize spatio-temporal data. The \code{cubble} class uses an attribute ``form'', to arrange the spatial or temporal data components tidily. The form attribute can take a value of either ``nested'' or ``long''. The nested \code{cubble} is a subclass of rowwise \code{tibble} (\code{rowwise_df}). It arranges each spatial site in a row, and uses list columns to store the feature geometry and the temporal information. The long \code{cubble} is a subclass of grouped \code{tibble} (\code{grouped_df}), which expands the temporal information into the long form and stores the spatial information in a ``spatial'' attribute.
 
 \begin{CodeChunk}
+\begin{CodeInput}
+R> cb_nested
+\end{CodeInput}
 \begin{CodeOutput}
-# A tibble: 1,830 x 10
-  id         lat  long  elev name  wmo_id date        prcp  tmax  tmin
-  <chr>    <dbl> <dbl> <dbl> <chr>  <dbl> <date>     <dbl> <dbl> <dbl>
-1 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-01     0  31.9  15.3
-2 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-02     0  24.9  16.4
-3 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-03     6  23.2  13  
-4 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-04     0  28.4  12.4
-5 ASN0000~ -31.9  116.  15.4 pert~  94610 2020-01-05     0  35.3  11.6
-# ... with 1,825 more rows
+# cubble:   key: id [3], index: date, nested form
+# extent:   [144.8321, -37.98, 145.0964, -37.6655]
+# temporal: prcp [dbl], tmax [dbl], tmin [dbl]
+  id           long   lat  elev name              wmo_id ts      
+  <chr>       <dbl> <dbl> <dbl> <chr>              <dbl> <list>  
+1 ASN00086038  145. -37.7  78.4 essendon airport   95866 <tibble>
+2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870 <tibble>
+3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble>
+\end{CodeOutput}
+\begin{CodeInput}
+R> class(cb_nested)
+\end{CodeInput}
+\begin{CodeOutput}
+[1] "spatial_cubble_df" "cubble_df"         "rowwise_df"       
+[4] "tbl_df"            "tbl"               "data.frame"       
+\end{CodeOutput}
+\end{CodeChunk}
+
+Printing a \code{cubble} object provides some information about the data. Here \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> cb_long
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:  key: id [3], index: date, long form
+# extent:  2020-01-01 -- 2020-01-10 [1D], no gaps
+# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id
+#   [dbl]
+  id          date        prcp  tmax  tmin
+  <chr>       <date>     <dbl> <dbl> <dbl>
+1 ASN00086038 2020-01-01     0  26.8  11  
+2 ASN00086038 2020-01-02     0  26.3  12.2
+3 ASN00086038 2020-01-03     0  34.5  12.7
+4 ASN00086038 2020-01-04     0  29.3  18.8
+5 ASN00086038 2020-01-05    18  16.1  12.5
+# i 25 more rows
+\end{CodeOutput}
+\begin{CodeInput}
+R> class(cb_long)
+\end{CodeInput}
+\begin{CodeOutput}
+[1] "temporal_cubble_df" "cubble_df"          "tbl_df"            
+[4] "tbl"                "data.frame"        
 \end{CodeOutput}
 \end{CodeChunk}
 
 \hypertarget{create}{%
-\subsection{Casting into the cubble class}\label{create}}
+\subsection{Creation and coercion}\label{create}}
+
+\hypertarget{create-from-separate-spatial-and-temporal-table}{%
+\subsubsection{Create from separate spatial and temporal table}\label{create-from-separate-spatial-and-temporal-table}}
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> make_cubble(
++   spatial = stations, temporal = meteo,
++   key = id, index = date, coords = c(long, lat)
++   )
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:   key: id [3], index: date, nested form
+# extent:   [144.8321, -37.98, 145.0964, -37.6655]
+# temporal: prcp [dbl], tmax [dbl], tmin [dbl]
+  id           long   lat  elev name              wmo_id ts      
+  <chr>       <dbl> <dbl> <dbl> <chr>              <dbl> <list>  
+1 ASN00086038  145. -37.7  78.4 essendon airport   95866 <tibble>
+2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870 <tibble>
+3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble>
+\end{CodeOutput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> make_cubble(
++   spatial = stations_sf, temporal = meteo, key = id, index = date
++   )
+R> 
+R> make_cubble(
++   spatial = stations, temporal = meteo_ts, coords = c(long, lat)
++   )
+R> 
+R> make_cubble(spatial = stations_sf, temporal = meteo_ts)
+\end{CodeInput}
+\end{CodeChunk}
+
+\hypertarget{coerce-from-other-objects}{%
+\subsubsection{Coerce from other objects}\label{coerce-from-other-objects}}
 
 \begin{itemize}
 \tightlist
-\item
-  key, index, coords
 \item
   import different data: an expand data, spatial + temporal, netcdf, stars, sftime
 \end{itemize}
@@ -196,45 +269,17 @@ The function \code{as_cubble()} is used to create a \code{cubble} object with th
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_nested <- climate_flat |>
-+   as_cubble(key = id, index = date, coords = c(long, lat))
-R> cubble_nested
+R> climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 \end{CodeInput}
 \begin{CodeOutput}
-# cubble:   id [5]: nested form
-# bbox:     [115.9764, -32.9342, 133.5407, -12.4239]
-# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>
-2 ASN00010311 -31.9  117. 179   york            94623 <tibble>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>
-\end{CodeOutput}
-\end{CodeChunk}
-
-Printing a \code{cubble} object provides some information about the data. Here \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
-
-The created \code{cubble} is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested \code{cubble}. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> cubble_nested |>
-+   mutate(rain_day = sum(ts$prcp != 0))
-\end{CodeInput}
-\begin{CodeOutput}
-# cubble:   id [5]: nested form
-# bbox:     [115.9764, -32.9342, 133.5407, -12.4239]
-# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts       rain_~1
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>     <int>
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>     104
-2 ASN00010311 -31.9  117. 179   york            94623 <tibble>      89
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>      90
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>     106
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>      63
-# ... with abbreviated variable name 1: rain_day
+# cubble:   key: id [3], index: date, nested form
+# extent:   [144.8321, -37.98, 145.0964, -37.6655]
+# temporal: prcp [dbl], tmax [dbl], tmin [dbl]
+  id           long   lat  elev name              wmo_id ts      
+  <chr>       <dbl> <dbl> <dbl> <chr>              <dbl> <list>  
+1 ASN00086038  145. -37.7  78.4 essendon airport   95866 <tibble>
+2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870 <tibble>
+3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble>
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -264,10 +309,37 @@ R> dt <- as_cubble(
 \end{CodeInput}
 \end{CodeChunk}
 
+\emph{stars}
+
+\emph{sftimes}
+
 \hypertarget{functions-and-methods-in-cubble}{%
 \subsection{Functions and methods in cubble}\label{functions-and-methods-in-cubble}}
 
 \emph{Print all the methods with methods(class = ``cubble\_df'')}
+
+\hypertarget{dplyr-methods}{%
+\subsubsection{dplyr methods}\label{dplyr-methods}}
+
+The \pkg{dplyr} package has many tools for wrangling tidy data, many of which are useful in the spatio-temporal analysis. The \pkg{cubble} package provides methods that support the use of the following operations in the \pkg{dplyr} package on both the nested and long forms: \texttt{mutate}, \texttt{filter}, \texttt{summarise}, \texttt{select}, \texttt{arrange}, \texttt{rename}, \texttt{left\_join}, and the slice family (\texttt{slice\_*}).
+
+The created \code{cubble} is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested \code{cubble}. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> cb_nested |> mutate(rain_day = sum(ts$prcp != 0))
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:   key: id [3], index: date, nested form
+# extent:   [144.8321, -37.98, 145.0964, -37.6655]
+# temporal: prcp [dbl], tmax [dbl], tmin [dbl]
+  id           long   lat  elev name          wmo_id rain_day ts      
+  <chr>       <dbl> <dbl> <dbl> <chr>          <dbl>    <int> <list>  
+1 ASN00086038  145. -37.7  78.4 essendon air~  95866        3 <tibble>
+2 ASN00086077  145. -38.0  12.1 moorabbin ai~  94870        3 <tibble>
+3 ASN00086282  145. -37.7 113.  melbourne ai~  94866        3 <tibble>
+\end{CodeOutput}
+\end{CodeChunk}
 
 \hypertarget{cubble-specific-methods}{%
 \subsubsection{cubble specific methods}\label{cubble-specific-methods}}
@@ -278,22 +350,21 @@ The nested form can be used for those operations where the output is only indexe
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_long <- cubble_nested |> face_temporal()
-R> cubble_long
+R> (cb_long <- cb_nested |> face_temporal())
 \end{CodeInput}
 \begin{CodeOutput}
-# cubble:  date, id [5]: long form
-# bbox:    [115.9764, -32.9342, 133.5407, -12.4239]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
+# cubble:  key: id [3], index: date, long form
+# extent:  2020-01-01 -- 2020-01-10 [1D], no gaps
+# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id
 #   [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
-1 ASN00009021 2020-01-01     0  31.9  15.3
-2 ASN00009021 2020-01-02     0  24.9  16.4
-3 ASN00009021 2020-01-03     6  23.2  13  
-4 ASN00009021 2020-01-04     0  28.4  12.4
-5 ASN00009021 2020-01-05     0  35.3  11.6
-# ... with 1,825 more rows
+1 ASN00086038 2020-01-01     0  26.8  11  
+2 ASN00086038 2020-01-02     0  26.3  12.2
+3 ASN00086038 2020-01-03     0  34.5  12.7
+4 ASN00086038 2020-01-04     0  29.3  18.8
+5 ASN00086038 2020-01-05    18  16.1  12.5
+# i 25 more rows
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -314,26 +385,24 @@ Wrangling spatio-temporal data can be seen as an iterative process in the spatia
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_back <- cubble_long |> face_spatial()
-R> cubble_back
+R> cb_back <- cb_long |> face_spatial()
+R> cb_back
 \end{CodeInput}
 \begin{CodeOutput}
-# cubble:   id [5]: nested form
-# bbox:     [115.9764, -32.9342, 133.5407, -12.4239]
-# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tibble>
-2 ASN00010311 -31.9  117. 179   york            94623 <tibble>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tibble>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tibble>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tibble>
+# cubble:   key: id [3], index: date, nested form
+# extent:   [144.8321, -37.98, 145.0964, -37.6655]
+# temporal: prcp [dbl], tmax [dbl], tmin [dbl]
+  id           long   lat  elev name              wmo_id ts      
+  <chr>       <dbl> <dbl> <dbl> <chr>              <dbl> <list>  
+1 ASN00086038  145. -37.7  78.4 essendon airport   95866 <tibble>
+2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870 <tibble>
+3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble>
 \end{CodeOutput}
 \begin{CodeInput}
-R> identical(cubble_nested, cubble_back)
+R> identical(cb_nested, cb_back)
 \end{CodeInput}
 \begin{CodeOutput}
-[1] TRUE
+[1] FALSE
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -341,29 +410,23 @@ Sometimes, analysts may need to apply some variable transformation that involves
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cubble_unfold <- cubble_long |> unfold(long, lat)
-R> cubble_unfold
+R> cb_long |> unfold(long, lat)
 \end{CodeInput}
 \begin{CodeOutput}
-# cubble:  date, id [5]: long form
-# bbox:    [115.9764, -32.9342, 133.5407, -12.4239]
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id
+# cubble:  key: id [3], index: date, long form
+# extent:  2020-01-01 -- 2020-01-10 [1D], no gaps
+# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id
 #   [dbl]
   id          date        prcp  tmax  tmin  long   lat
   <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
-1 ASN00009021 2020-01-01     0  31.9  15.3  116. -31.9
-2 ASN00009021 2020-01-02     0  24.9  16.4  116. -31.9
-3 ASN00009021 2020-01-03     6  23.2  13    116. -31.9
-4 ASN00009021 2020-01-04     0  28.4  12.4  116. -31.9
-5 ASN00009021 2020-01-05     0  35.3  11.6  116. -31.9
-# ... with 1,825 more rows
+1 ASN00086038 2020-01-01     0  26.8  11    145. -37.7
+2 ASN00086038 2020-01-02     0  26.3  12.2  145. -37.7
+3 ASN00086038 2020-01-03     0  34.5  12.7  145. -37.7
+4 ASN00086038 2020-01-04     0  29.3  18.8  145. -37.7
+5 ASN00086038 2020-01-05    18  16.1  12.5  145. -37.7
+# i 25 more rows
 \end{CodeOutput}
 \end{CodeChunk}
-
-\hypertarget{dplyr-methods}{%
-\subsubsection{dplyr methods}\label{dplyr-methods}}
-
-The \pkg{dplyr} package has many tools for wrangling tidy data, many of which are useful in the spatio-temporal analysis. The \pkg{cubble} package provides methods that support the use of the following operations in the \pkg{dplyr} package on both the nested and long forms: \texttt{mutate}, \texttt{filter}, \texttt{summarise}, \texttt{select}, \texttt{arrange}, \texttt{rename}, \texttt{left\_join}, and the slice family (\texttt{slice\_*}).
 
 \hypertarget{compatibility-with-other-packages}{%
 \subsection{Compatibility with other packages}\label{compatibility-with-other-packages}}
@@ -374,47 +437,25 @@ The \code{tsibble} class is a subclass of \code{tibble} where the \code{index} a
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> climate_flat_ts <- climate_flat |> 
-+   tsibble::as_tsibble(key = id, index = date)
-R> climate_flat_cb <-  climate_flat_ts |> 
-+   cubble::as_cubble(coords = c(long, lat))
-R> climate_flat_cb
+R> cb <- make_cubble(
++   spatial = stations, temporal = meteo_ts, 
++   coords = c(long, lat))
 \end{CodeInput}
-\begin{CodeOutput}
-# cubble:   id [5]: nested form
-# bbox:     [115.9764, -32.9342, 133.5407, -12.4239]
-# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name           wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>  
-1 ASN00009021 -31.9  116.  15.4 perth airport   94610 <tbl_ts>
-2 ASN00010311 -31.9  117. 179   york            94623 <tbl_ts>
-3 ASN00010614 -32.9  117. 338   narrogin        94627 <tbl_ts>
-4 ASN00014015 -12.4  131.  30.4 darwin airport  94120 <tbl_ts>
-5 ASN00015131 -17.6  134. 220   elliott         94236 <tbl_ts>
-\end{CodeOutput}
 \end{CodeChunk}
 
 When a nested \code{cubble} is created, each element in the list-column \code{ts} is in the \code{tsibble} class (labelled \code{tbl_ts}) and operations available to the \code{tsibble} class are still valid on these elements. For example, the code below calculates two time series features (mean and variance) of maximum temperature, utilizing the \code{tsibble} syntax in the \code{cubble} object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> climate_flat_cb |> 
-+   mutate(fabletools::features(
-+     ts, tmax, list(tmax_mean = mean, tmax_var = var)
-+     ))
+R> cb %>% face_temporal() %>% tsibble::has_gaps()
 \end{CodeInput}
 \begin{CodeOutput}
-# cubble:   id [5]: nested form
-# bbox:     [115.9764, -32.9342, 133.5407, -12.4239]
-# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id            lat  long  elev name   wmo_id ts       tmax_~1 tmax_~2
-  <chr>       <dbl> <dbl> <dbl> <chr>   <dbl> <list>     <dbl>   <dbl>
-1 ASN00009021 -31.9  116.  15.4 perth~  94610 <tbl_ts>    25.7   38.6 
-2 ASN00010311 -31.9  117. 179   york    94623 <tbl_ts>    26.2   51.1 
-3 ASN00010614 -32.9  117. 338   narro~  94627 <tbl_ts>    23.7   45.4 
-4 ASN00014015 -12.4  131.  30.4 darwi~  94120 <tbl_ts>    33.1    3.02
-5 ASN00015131 -17.6  134. 220   ellio~  94236 <tbl_ts>    34.6   24.7 
-# ... with abbreviated variable names 1: tmax_mean, 2: tmax_var
+# A tibble: 3 x 2
+  id          .gaps
+  <chr>       <lgl>
+1 ASN00086038 FALSE
+2 ASN00086077 FALSE
+3 ASN00086282 FALSE
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -423,6 +464,22 @@ R> climate_flat_cb |>
 \emph{add an example on changing CRS?}
 
 The \code{sf} class is also a subclass of \code{tibble} with a specialized feature geometry list-column (\code{sfc}) to store different geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}, etc). The package \pkg{sf} provides functions that operate efficiently on this spatial information. A \code{cubble} object can store spatial information in the \code{sf} class. Methods for the \code{sfc} class can be applied in the nested form of the cubble object. An illustration is in Section \ref{covid}. The spatial information can also be stored as an \code{s2} vector in a \code{cubble} object.
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> cb <- make_cubble(
++   spatial = stations_sf, temporal = meteo, 
++   key = id, index = date)
+R> class(cb)
+\end{CodeInput}
+\begin{CodeOutput}
+[1] "spatial_cubble_df" "cubble_df"         "sf"               
+[4] "tbl_df"            "tbl"               "data.frame"       
+\end{CodeOutput}
+\begin{CodeInput}
+R> #cb %>% sf::st_transform(crs = "EPSG:3857")
+\end{CodeInput}
+\end{CodeChunk}
 
 \hypertarget{tidyverse}{%
 \subsection{Comparison to other spatio-temporal classes}\label{tidyverse}}
@@ -455,20 +512,15 @@ This happens when different stations have different start date and require other
 
 The approach taken by the \pkg{sftime} package is to combine the spatial and temporal variables together into a joint table. {[}for sf objects with daily observation, memory efficiency{]}
 
-Consider the climate data used in the \pkg{cubble} package, \code{climate_aus}. It contains daily precipitation, minimum and maximum temperature for 639 weather stations across Australia in 2020. The converted sftime object is 13.6830016 times the size of the cubble object:
+Consider the climate data used in the \pkg{cubble} package, \code{climate_aus}. It contains daily precipitation, minimum and maximum temperature for 639 weather stations across Australia in 2020. The converted sftime object is times the size of the cubble object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> climate_aus %>% sftime::st_as_sftime() %>% object.size()
-\end{CodeInput}
-\begin{CodeOutput}
-118243136 bytes
-\end{CodeOutput}
-\begin{CodeInput}
+R> #climate_aus %>% sftime::st_as_sftime() %>% object.size()
 R> climate_aus %>% object.size()
 \end{CodeInput}
 \begin{CodeOutput}
-8641608 bytes
+8523040 bytes
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -607,61 +659,50 @@ and the spatial polygons are an ESRI shapefile as follows:
 R> lga |> head(5)
 \end{CodeInput}
 \begin{CodeOutput}
-Simple feature collection with 5 features and 7 fields
+Simple feature collection with 5 features and 1 field
 Geometry type: MULTIPOLYGON
 Dimension:     XY
 Bounding box:  xmin: 142.3535 ymin: -38.67876 xmax: 147.3909 ymax: -36.39269
 Geodetic CRS:  WGS 84
-    lga_code_2018            lga state_code_2016 state_name_2016
-132         20110     Alpine (S)               2        Victoria
-133         20260    Ararat (RC)               2        Victoria
-134         20570   Ballarat (C)               2        Victoria
-135         20660    Banyule (C)               2        Victoria
-136         20740 Bass Coast (S)               2        Victoria
-    areasqkm_2018 cent_long  cent_lat                       geometry
-132     4788.1568  146.9742 -36.85357 MULTIPOLYGON (((146.7258 -3...
-133     4211.1171  142.8432 -37.47271 MULTIPOLYGON (((143.1807 -3...
-134      739.0321  143.7815 -37.49286 MULTIPOLYGON (((143.6622 -3...
-135       62.5402  145.0851 -37.73043 MULTIPOLYGON (((145.1357 -3...
-136      865.8095  145.5581 -38.50730 MULTIPOLYGON (((145.5207 -3...
+               lga                       geometry
+132     Alpine (S) MULTIPOLYGON (((146.7258 -3...
+133    Ararat (RC) MULTIPOLYGON (((143.1807 -3...
+134   Ballarat (C) MULTIPOLYGON (((143.6622 -3...
+135    Banyule (C) MULTIPOLYGON (((145.1357 -3...
+136 Bass Coast (S) MULTIPOLYGON (((145.5207 -3...
 \end{CodeOutput}
 \end{CodeChunk}
 
-The function \code{as_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments \code{key}, \code{index}, and \code{coords} (as described in Section \ref{create}). It will automatically try to match the sites in both tables using the location names and will show a warning message when there are mismatches, as shown below:
+The function \code{make_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments \code{key}, \code{index}, and \code{coords} (as described in Section \ref{create}). It will automatically try to match the sites in both tables using the location names and will show a warning message when there are mismatches, as shown below:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cb <- as_cubble(
-+   list(spatial = lga, temporal = covid),
-+   key = lga, index = date, coords = c(cent_long, cent_lat)
-+   )
+R> cb <- make_cubble(spatial = lga, temporal = covid)
 \end{CodeInput}
 \begin{CodeOutput}
-! Some sites in the temporal table don't have spatial information
+Warning: st_centroid assumes attributes are constant over geometries
 \end{CodeOutput}
 \begin{CodeOutput}
 ! Some sites in the spatial table don't have temporal information
 \end{CodeOutput}
 \begin{CodeOutput}
-! Use argument `output = "unmatch"` to check on the unmatched key
+! Some sites in the temporal table don't have spatial information
+\end{CodeOutput}
+\begin{CodeOutput}
+! Use `check_key()` to check on the unmatched key
+The cubble is created only with sites having both spatial and temporal information
 \end{CodeOutput}
 \end{CodeChunk}
 
-It can be seen that there are two-way mismatches -- LGAs in the COVID data that do not match with LGAs names in the spatial polygon data, and vice versa. The mismatches can be identified by using the \code{output = "unmatch"} argument in the \code{as_cubble()} function:
+It can be seen that there are two-way mismatches -- LGAs in the COVID data that do not match with LGAs names in the spatial polygon data, and vice versa. The mismatches can be identified by using the function \code{check_key}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> pair <- as_cubble(
-+   list(spatial = lga, temporal = covid),
-+   key = lga, index = date, coords = c(cent_long, cent_lat),
-+   output = "unmatch"
-+   )
-R> 
-R> pair
+R> (check_res <- check_key(spatial = lga, temporal = covid))
 \end{CodeInput}
 \begin{CodeOutput}
 $paired
-# A tibble: 80 x 2
+# A tibble: 78 x 2
   spatial        temporal      
   <chr>          <chr>         
 1 Alpine (S)     Alpine (S)    
@@ -669,15 +710,22 @@ $paired
 3 Ballarat (C)   Ballarat (C)  
 4 Banyule (C)    Banyule (C)   
 5 Bass Coast (S) Bass Coast (S)
-# ... with 75 more rows
+# i 73 more rows
+
+$potential_pairs
+# A tibble: 2 x 2
+  spatial             temporal    
+  <chr>               <chr>       
+1 Kingston (C) (Vic.) Kingston (C)
+2 Latrobe (C) (Vic.)  Latrobe (C) 
 
 $others
-$others$temporal
-[1] "Interstate" "Overseas"   "Unknown"   
-
 $others$spatial
 [1] "No usual address (Vic.)"               
 [2] "Migratory - Offshore - Shipping (Vic.)"
+
+$others$temporal
+[1] "Interstate" "Overseas"   "Unknown"   
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -685,22 +733,34 @@ With this information both tables can be fixed, to create the desired \code{cubb
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> lga <- lga |>
+R> lga2 <- lga |>
 +   mutate(lga = ifelse(lga == "Kingston (C) (Vic.)", "Kingston (C)", lga),
 +          lga = ifelse(lga == "Latrobe (C) (Vic.)", "Latrobe (C)", lga)) |>
-+   filter(!lga %in% pair$others$spatial)
++   filter(!lga %in% check_res$others$spatial)
 R> 
-R> covid <- covid |> filter(!lga %in% pair$others$temporal)
+R> covid2 <- covid |> filter(!lga %in% check_res$others$temporal)
 R> 
-R> cb <- as_cubble(data = list(spatial = lga, temporal = covid),
-+                 key = lga, index = date, coords = c(cent_long, cent_lat))
+R> (cb <- make_cubble(spatial = lga2, temporal = covid2))
 \end{CodeInput}
+\begin{CodeOutput}
+# cubble:   key: lga [80], index: date, nested form, [sf]
+# extent:   [140.961682, -39.1591895, 149.976291, -33.9804256]
+# temporal: source [chr], n [int], roll_mean [dbl]
+  lga             long   lat                       geometry ts        
+  <chr>          <dbl> <dbl>             <MULTIPOLYGON [°]> <list>    
+1 Alpine (S)      147. -36.9 (((146.7258 -36.45922, 146.80~ <gropd_ts>
+2 Ararat (RC)     143. -37.5 (((143.1807 -37.73152, 143.17~ <gropd_ts>
+3 Ballarat (C)    144. -37.5 (((143.6622 -37.57241, 143.66~ <gropd_ts>
+4 Banyule (C)     145. -37.7 (((145.1357 -37.74091, 145.13~ <gropd_ts>
+5 Bass Coast (S)  146. -38.5 (((145.5207 -38.30667, 145.54~ <gropd_ts>
+# i 75 more rows
+\end{CodeOutput}
 \end{CodeChunk}
 
 \hypertarget{historicaltmax}{%
 \subsection{Australian historical maximum temperature}\label{historicaltmax}}
 
-The GHCN provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the package \pkg{rnoaa} \citep{rnoaa}, containing the records of maximum temperature for 236 Australian stations from 1859 through 1969 and provides information also on the latitude, longitude and elevation of each of the stations. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales (NSW), using a glyph map.
+The GHCN provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the package \pkg{rnoaa} \citep{rnoaa}, containing the records of maximum temperature for 237 Australian stations from \ensuremath{\infty{}} through \ensuremath{-\infty{}} and provides information also on the latitude, longitude and elevation of each of the stations. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales (NSW), using a glyph map.
 
 First, the stations need to be filtered to those in Victoria and NSW by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the Australian Bureau of Meteorology (BOM) \citep{bom} coding protocols. The NSW stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and NSW stations is a \emph{spatial operation} and hence uses the nested \code{cubble}:
 
@@ -717,11 +777,11 @@ Next, the monthly maximum average temperature is calculated for both periods. Th
 \begin{CodeInput}
 R> tmax <- tmax |>
 +   face_temporal() |> 
-+   mutate(month = lubridate::month(date),
-+          group = as.factor(
-+            ifelse(lubridate::year(date) > 2015,
-+            "2016 ~ 2020", "1971 ~ 1975"))) |>
-+   group_by(month, group) |> 
++   group_by(
++     yearmonth = tsibble::make_yearmonth(
++       year = ifelse(lubridate::year(date) > 2015, 2016, 1971),
++       month = lubridate::month(date))
++     )|>
 +   summarise(tmax = mean(tmax, na.rm = TRUE))
 \end{CodeInput}
 \end{CodeChunk}
@@ -738,7 +798,7 @@ R> tmax |>
 +   head(10)
 \end{CodeInput}
 \begin{CodeOutput}
- [1] 24 24 12 24 24 24 24 24 24 24
+ [1] 12 12 12 13 19 19 20 24 24 24
 \end{CodeOutput}
 \begin{CodeInput}
 R> tmax <- tmax |> 
@@ -802,34 +862,7 @@ R> res <- match_sites(
 
 This function returns a \code{cubble} object, with additional columns: \code{dist} storing the distance between matched stations, \code{group} summarizing spatial matching, and \code{n_match} showing the temporal matching.
 
-\begin{CodeChunk}
-\begin{CodeOutput}
-# cubble:   id [8]: nested form
-# bbox:     [144.5203, -37.727706, 146.059205, -36.5523]
-# temporal: date [date], matched_var [dbl]
-  id          name        lat  long type   dist group ts       n_match
-  <chr>       <chr>     <dbl> <dbl> <chr> <dbl> <int> <list>     <int>
-1 230200      MARIBYRN~ -37.7  145. river  6.17     6 <tibble>      19
-2 404207      HOLLAND ~ -36.6  146. river  8.54    10 <tibble>      21
-3 405234      SEVEN CR~ -36.9  146. river  6.15     5 <tibble>      21
-4 406213      CAMPASPE~ -37.0  145. river  1.84     1 <tibble>      18
-5 ASN00082042 strathbo~ -36.8  146. clim~  6.15     5 <tibble>      21
-# ... with 3 more rows
-\end{CodeOutput}
-\end{CodeChunk}
-
 Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardized data as time series (b). The expected concurrent increase in precipitation and water level can be seen clearly.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/matching-1} 
-
-}
-
-\caption[Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b)]{Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here.}\label{fig:matching}
-\end{figure}
-\end{CodeChunk}
 
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis data}\label{era5-climate-reanalysis-data}}

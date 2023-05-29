@@ -6,6 +6,7 @@ output: html_document
 ## Australian historical maximum temperature {#historicaltmax}
 
 ```{r}
+
 load(here::here("data/historical_tmax.rda"))
 ```
 
@@ -17,6 +18,7 @@ First, the stations need to be filtered to those in Victoria and NSW by using th
 <!-- BOM link: http://www.bom.gov.au/climate/cdo/about/site-num.shtml -->
 
 ```{r echo = TRUE}
+
 tmax <- historical_tmax |>
   filter(between(as.numeric(stringr::str_sub(id, 7, 8)), 46, 90))
 ```
@@ -26,11 +28,11 @@ Next, the monthly maximum average temperature is  calculated for both periods. T
 ```{r echo = TRUE}
 tmax <- tmax |>
   face_temporal() |> 
-  mutate(month = lubridate::month(date),
-         group = as.factor(
-           ifelse(lubridate::year(date) > 2015,
-           "2016 ~ 2020", "1971 ~ 1975"))) |>
-  group_by(month, group) |> 
+  group_by(
+    yearmonth = tsibble::make_yearmonth(
+      year = ifelse(lubridate::year(date) > 2015, 2016, 1971),
+      month = lubridate::month(date))
+    )|>
   summarise(tmax = mean(tmax, na.rm = TRUE))
 ```
 
