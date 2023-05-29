@@ -20,32 +20,81 @@ The package and the proposed data structures could certainly constitute a valuab
 
 Given the small size of the package, the paper feels a bit on the heavy side. Most of the code in the paper is not self-contained which makes it rather difficult to follow. Examples at the end of the paper don’t elucidate the inner workings of the package but rather advertise the functionality of other, mostly visualization, packages.
 
-**\textcolor{purple}{Re: We select the code and output relevant to demonstrate the cubble package in the examples while leaving the rest in the github repository, where users can look up for more details: https://github.com/huizezhang-sherry/paper-cubble. [on the visualisation packages: xxx]}**
+**\textcolor{purple}{Re: We select the code and output relevant to demonstrate the cubble package in the examples while leaving the rest in the github repository, where users can look up for more details: https://github.com/huizezhang-sherry/paper-cubble. [on the visualisation packages: xxx]}. After addressing all the issues raised by the reviewers, the paper is now xxx pages, including 4 pages of reference and required affiliation.**
 
 More fundamentally, the design of the package has an immediately apparent drawback. The cubble class is used to represent two incompatible data types - long and nested. Internally, the two data types are distinguished by the internal attribute “form”. In other words, the authors use an attribute of an object to mimic the functionality of a sub-class.
 
 **\textcolor{purple}{Re: [TODO] }**
 
+A more natural implementation would be start with two distinct data structures, both sub-classes of the abstract cubble_df class, c("spatial_cubble_df", "cubble_df") and c("spatial_temporal_df", "cubble_df"). Such a generic implementation would allow for natural extension of the functionality trough dedicated methods. Currently an ever-present check on “form” attribute is necessary throughout the code base. To make matters worse, as_cubble currently produces yet another data structure - a list of paired matches, as can be seen from example 5.1 in the paper.
+
+**\textcolor{purple}{Re: Now as\_cubble will consistantly produce a cubble object, or error messages if it fails. When there are unmatched pairs, as\_cubble will create with cubble with sites that have both spatial and temporal information and instruct users to use check\_key() to check on key matching. Below is a much simplified example to show the current workflow:}**
+
+``` r
+library(cubble)
+library(dplyr)
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+three_sites <-  stations %>% head(3)
+five_ts <- climate %>% filter(lubridate::month(date) == 1)
+cb <- as_cubble(
+  list(spatial = three_sites, temporal = five_ts),
+  key = id, index = date, coords = c(long, lat)
+)
+#> ! Some sites in the temporal table don't have spatial information
+#> ! Use `check_key()` to check on the unmatched key
+#> The cubble is created only with sites having both spatial and temporal information
+check_key(spatial = three_sites, temporal = five_ts)
+#> $paired
+#> # A tibble: 3 × 2
+#>   spatial     temporal   
+#>   <chr>       <chr>      
+#> 1 ASN00009021 ASN00009021
+#> 2 ASN00010311 ASN00010311
+#> 3 ASN00010614 ASN00010614
+#> 
+#> $potential_pairs
+#> # A tibble: 0 × 0
+#> 
+#> $others
+#> $others$temporal
+#> [1] "ASN00014015" "ASN00015131"
+#> 
+#> $others$spatial
+#> character(0)
+```
+
+<sup>Created on 2023-05-23 with [reprex v2.0.2](https://reprex.tidyverse.org)</sup>
+
+
 Relatedly, the rationale for the parallel naming convention long/nested and temporal/spatial is not entirely clear. It seems to me that the semantically unambiguous temporal/spatial could be used throughout without ambiguity, thus resolving the terminological redundancy.
 
-**\textcolor{purple}{Re: xxx}**
+**\textcolor{purple}{Re: The naming of long/nested comes from the tidy data concept where the "spatial" form has the nested temporal information and the "temporal" form uses the long form data from the tidy data. We understand it could be more intuitive to refer to them as spaital/ temporal and we add them as a "common name" to the form in the definitional section (now section 2). This naming is also used in the paper when it is more straightforward to use spatial/temporal than nested/long.}**
 
 My recommendation would be a combination of the following:
 
   * Rework the definitional parts (sections 2 and 3) by following more closely the “design” vignette. **\textcolor{purple}{Re: [TODO: follow the design vignette]}**
   * Describe at a glance the core functions which operate on the class and their motivation. **\textcolor{purple}{Re: Methods available for a cubble object is now printed in xxx, before introducing the main functionality: face\_temporal(), face\_spatial(), and unfold().}**
-  * Rework section 4 by making it more concise and provide links to sections in supplementary material or dedicated vignettes. **\textcolor{purple}{Re: xxx}**
+  * Rework section 4 by making it more concise and provide links to sections in supplementary material or dedicated vignettes. **\textcolor{purple}{Re: }**
   * Rework examples section 5 into “Applications”. Briefly describe the applications and provide and refer to dedicated and self-contained vignettes. **\textcolor{purple}{Re: xxx}**
 
 ## The Package
 
 The package is generally badly documented. The meaning of the arguments is almost never clear from the documentation alone. For example the documentation of as_cubble states:
 
-* What objects are supported as input data?
-* What is the assumption of the “nestedness” of the input data. 
-* What is the accepted data type of key, index and coords?
+**\textcolor{purple}{Re: Documentation of the package has been improved with a focus on clarifying the input arguemnt types, providing examples, [more] }**
 
-**\textcolor{purple}{Re: [TODO: add documentation on these! ]}**
+* What objects are supported as input data? **\textcolor{purple}{Re: the objects supported are 1) list with two elements named spatial and temporal, 2) data frame/ tibble, 3) netcdf objects, 4) stars objects, and 5) sftime objects. }**
+* What is the assumption of the “nestedness” of the input data. **\textcolor{purple}{Re: }**
+* What is the accepted data type of key, index and coords? **\textcolor{purple}{Re: Key supports character and factor. Index supports base R classes Date, POSIXlt, POSIXct and tsibble's yearmonth, yearweek, and yearquarter class. Coords support both projected/ unprojected coordinates in columns (can be omitted if created from sf and its subclass). }**
+
+
 
 ## Further suggestion
 
@@ -152,20 +201,30 @@ I have been a bit puzzled by the “print” of a nested cubble in its temporal 
 
 would have been more intuitive. Possibly also including the temporal range (as for the spatial domain its bbox).
 
-**\textcolor{purple}{Re: [TODO] use tsibble functions to print temporal range in the long form, something looks like:}**
+**\textcolor{purple}{Re: Thanks reviewers for the suggestion and this has now been incorporated in the package. The second line in the header, when printed in the long (temporal) form will now show the start and the end date, the date interval, and whether there are gaps in the data. See the reprex example below: }**
 
-```r
-## nested:
-
-# cubble:   key: id [5], index: date, nested form
-# extent:   [115.9764, -32.9342, 133.5407, -12.4239]
-# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-
-## long:
-# cubble:   key: id [5], index: date, nested form
-# extent:   from/to/by
-# spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
+``` r
+library(cubble)
+face_temporal(climate_aus)
+#> # cubble:  key: id [639], index: date, long form
+#> # extent:  2020-01-01 -- 2020-12-31 [1D], has gaps!
+#> # spatial: lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]
+#>    id          date        prcp  tmax  tmin
+#>    <chr>       <date>     <dbl> <dbl> <dbl>
+#>  1 ASN00001006 2020-01-01   164  38.3  25.3
+#>  2 ASN00001006 2020-01-02     0  40.6  30.5
+#>  3 ASN00001006 2020-01-03    16  39.7  27.2
+#>  4 ASN00001006 2020-01-04     0  38.2  27.3
+#>  5 ASN00001006 2020-01-05     2  39.3  26.7
+#>  6 ASN00001006 2020-01-06    60  32.9  25.6
+#>  7 ASN00001006 2020-01-07   146  34.1  25.5
+#>  8 ASN00001006 2020-01-08    40  36.6  26.2
+#>  9 ASN00001006 2020-01-09     0  38.2  27.6
+#> 10 ASN00001006 2020-01-10     0  38.9  29.7
+#> # … with 230,750 more rows
 ```
+
+<sup>Created on 2023-05-23 with [reprex v2.0.2](https://reprex.tidyverse.org)</sup>
 
 
 In the manuscript and in the reproducible-script.R, a data set `historical_tmax` is introduced. In the package, the corresponding data set seems to be `tmax_hist`.
@@ -182,8 +241,6 @@ The manuscript cannot be reproduced, as the reproducible-script.R (part of the s
 section cubble object under 3. the cubble package, on 1) the conceptual framework, 2)  the nested and long form as per the design vig
 
 print of methods
-
-
 
 section 4/5: work on the text to make it more concise
 
