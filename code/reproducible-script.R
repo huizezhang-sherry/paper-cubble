@@ -556,64 +556,64 @@ knitr::include_graphics(here::here("figures/popup.png"))
 
 
 ## ----eval = FALSE-------------------------------------------------------------
-## library(tidyverse)
-## library(cubble)
-## all_stations <- rnoaa::ghcnd_stations() |>
-##   filter(str_starts(id, "ASN")) |> # Australian stations start wiht "ASN"
-##   filter(last_year >= 2020) |>
-##   mutate(wmo_id = as.numeric(wmo_id), name = str_to_lower(name)) |>
-##   select(-state, -gsn_flag) |>
-##   select(id, longitude, latitude, elevation, name,
-##          wmo_id, element, first_year, last_year) |>
-##   rename(long = longitude, lat = latitude, elev = elevation)
-## 
-## tmax_stations <- all_stations |>
-##   filter(element == "TMAX", first_year < 1970, !is.na(wmo_id))
-## 
-## raw_tmax <- all_stations |>
-##   rowwise() |>
-##   mutate(ts = list(rnoaa::meteo_pull_monitors(
-##     monitors = id, var = "TMAX",
-##     date_min = glue::glue("{first_year}-01-01"),
-##     date_max = glue::glue("{last_year}-12-31")
-##     ) |>
-##       select(-id)
-##     )
-##   )
-## 
-## historical_tmax <- raw_tmax |>
-##   select(-element) |>
-##   unnest(ts) |>
-##   mutate(tmax = tmax/10) |>
-##   filter(lubridate::year(date) %in% c(1971: 1975, 2016:2020)) |>
-##   as_cubble(index = date, key = id, coords = c(long, lat))
-## 
-## save(historical_tmax, file = here::here("data/historical_tmax.rda"))
+# library(tidyverse)
+# library(cubble)
+# all_stations <- rnoaa::ghcnd_stations() |>
+#   filter(str_starts(id, "ASN")) |> # Australian stations start wiht "ASN"
+#   filter(last_year >= 2020) |>
+#   mutate(wmo_id = as.numeric(wmo_id), name = str_to_lower(name)) |>
+#   select(-state, -gsn_flag) |>
+#   select(id, longitude, latitude, elevation, name,
+#          wmo_id, element, first_year, last_year) |>
+#   rename(long = longitude, lat = latitude, elev = elevation)
+# 
+# tmax_stations <- all_stations |>
+#   filter(element == "TMAX", first_year < 1970, !is.na(wmo_id))
+# 
+# raw_tmax <- tmax_stations|>
+#   rowwise() |>
+#   mutate(ts = list(rnoaa::meteo_pull_monitors(
+#     monitors = id, var = "TMAX",
+#     date_min = glue::glue("{first_year}-01-01"),
+#     date_max = glue::glue("{last_year}-12-31")
+#     ) |>
+#       select(-id)
+#     )
+#   )
+# 
+# historical_tmax <- raw_tmax |>
+#   select(-element, -first_year, - last_year) |>
+#   unnest(ts) |>
+#   mutate(tmax = tmax/10) |>
+#   filter(lubridate::year(date) %in% c(1971: 1975, 2016:2020)) |>
+#   as_cubble(index = date, key = id, coords = c(long, lat))
+# 
+# save(historical_tmax, file = here::here("data/historical_tmax.rda"))
 
 
 ## ----eval = FALSE-------------------------------------------------------------
-## aus_stations <- all_stations |>
-##   filter(element %in% c("PRCP", "TMAX", "TMIN")) |>
-##   nest(element: last_year) |>
-##   rowwise() |>
-##   filter(nrow(data) == 3) |>
-##   select(-data)
-## 
-## aus_climate_raw <- aus_stations |>
-##   rowwise() |>
-##   mutate(ts = list(
-##     rnoaa::meteo_pull_monitors(
-##       monitors = id, var = c("PRCP", "TMAX", "TMIN"),
-##       date_min = "2016-01-01", date_max = "2020-12-31"
-##       ) |>
-##       select(-id)
-##     )
-##   )
-## 
-## climate_full <- aus_climate_raw |>
-##   unnest(ts) |>
-##   mutate(tmax = tmax/10, tmin = tmin/10) |>
-##   cubble::as_cubble(key = id, index = date, coords = c(long, lat))
-## 
-## save(climate_full, file = here::here("data/climate_full.rda"))
-
+# aus_stations <- all_stations |>
+#   filter(element %in% c("PRCP", "TMAX", "TMIN")) |>
+#   nest(element: last_year) |>
+#   rowwise() |>
+#   filter(nrow(data) == 3) |>
+#   select(-data)
+# 
+# aus_climate_raw <- aus_stations |>
+#   rowwise() |>
+#   mutate(ts = list(
+#     rnoaa::meteo_pull_monitors(
+#       monitors = id, var = c("PRCP", "TMAX", "TMIN"),
+#       date_min = "2016-01-01", date_max = "2020-12-31"
+#       ) |>
+#       select(-id)
+#     )
+#   )
+# 
+# climate_full <- aus_climate_raw |>
+#   unnest(ts) |>
+#   mutate(tmax = tmax/10, tmin = tmin/10) |>
+#   cubble::as_cubble(key = id, index = date, coords = c(long, lat))
+# 
+# save(climate_full, file = here::here("data/climate_full.rda"))
+# 
