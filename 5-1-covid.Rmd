@@ -30,55 +30,45 @@ covid <- raw |>
 save(covid, file = here::here("data/covid.rda"))
 ```
 
-```{r}
+```{r covid-1}
 load(here::here("data/covid.rda"))
-
 lga <- strayr::read_absmap("lga2018") |>
   rename(lga = lga_name_2018) |>
-  filter(state_name_2016 == "Victoria") 
+  filter(state_name_2016 == "Victoria") |>
+  select(lga, geometry)
 ```
 
-```{r echo = TRUE}
+```{r covid-2, echo = TRUE}
 covid |> head(5)
 ```
 
 and the spatial polygons are an ESRI shapefile as follows:
 
-```{r echo = TRUE}
+```{r covid-3, echo = TRUE}
 lga |> head(5)
 ```
 
-The function \code{as_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments \code{key}, \code{index}, and \code{coords} (as described in Section \@ref(create)). It will automatically try to match the sites in both tables using the location names and will show a warning message when there are mismatches, as shown below:
+The function \code{make_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments \code{key}, \code{index}, and \code{coords} (as described in Section \@ref(create)). It will automatically try to match the sites in both tables using the location names and will show a warning message when there are mismatches, as shown below:
 
-```{r echo = TRUE, warning = TRUE, message= TRUE}
-cb <- as_cubble(
-  list(spatial = lga, temporal = covid),
-  key = lga, index = date, coords = c(cent_long, cent_lat)
-  )
+```{r covid-4, echo = TRUE, warning = TRUE, message= TRUE}
+cb <- make_cubble(spatial = lga, temporal = covid)
 ```
 
-It can be seen that there are two-way mismatches -- LGAs in the COVID data that do not  match with LGAs names in the spatial polygon data, and vice versa. The mismatches can be identified by using the \code{output = "unmatch"} argument in the \code{as_cubble()} function: <!--Note that \pkg{cubble} will attempt to pair the unmatched sites, these are shown separately from the ones that cannot be paired.-->
+It can be seen that there are two-way mismatches -- LGAs in the COVID data that do not  match with LGAs names in the spatial polygon data, and vice versa. The mismatches can be identified by using the function \code{check_key}: 
 
-```{r echo = TRUE}
-pair <- as_cubble(
-  list(spatial = lga, temporal = covid),
-  key = lga, index = date, coords = c(cent_long, cent_lat),
-  output = "unmatch"
-  )
-
-pair
+```{r covid-5, echo = TRUE}
+(check_res <- check_key(spatial = lga, temporal = covid))
 ```
 
 With this information both tables can be fixed, to create the desired \code{cubble} object, as follows:
 
-```{r echo = TRUE}
-lga <- lga |>
+```{r covid-6, echo = TRUE}
+lga2 <- lga |>
   mutate(lga = ifelse(lga == "Kingston (C) (Vic.)", "Kingston (C)", lga),
          lga = ifelse(lga == "Latrobe (C) (Vic.)", "Latrobe (C)", lga)) |>
-  filter(!lga %in% pair$others$spatial)
+  filter(!lga %in% check_res$others$spatial)
 
-covid <- covid |> filter(!lga %in% pair$others$temporal)
+covid2 <- covid |> filter(!lga %in% check_res$others$temporal)
 
-cb <- as_cubble(data = list(spatial = lga, temporal = covid),
-                key = lga, index = date, coords = c(cent_long, cent_lat))
+(cb <- make_cubble(spatial = lga2, temporal = covid2))
 ```
