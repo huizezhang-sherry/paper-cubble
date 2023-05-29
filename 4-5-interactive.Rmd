@@ -1,0 +1,126 @@
+---
+title: "4-5-interactive"
+output: html_document
+---
+
+## Interactive graphics
+
+Interactive graphics can be useful because they make it possible to look at the data in multiple ways on-the-fly. This is especially important for spatio-temporal data, where we would like to interactively connect spatial and temporal displays. This example describes the process of using the \pkg{cubble} package with the \pkg{crosstalk} package to build an interactive display connecting a map of Australia, with ribbon plots of temperature range observed at the stations. The purpose is to explore the variation of monthly temperature range over the country. Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity.
+
+<!--When dealing with spatio-temporal data, users may wish to make plots to learn the spatial distribution of a variable or to find patterns, such as trend or seasonality, in the time series. Combining these two types of plots with interactivity lets users link between points on the map and the corresponding time series to explore the spatial and temporal dimensions of the data simultaneously.--> 
+
+The key steps are to convert both the nested and long forms of the data into shared \code{crosstalk} objects, and to plot these side-by-side. The two are linked by the station identifier.
+
+<!--The temperature range is calculated as the difference between \code{tmax} and \code{tmin} and its monthly average over 2016-2020 is taken before calculating the variance. A \code{SharedData} object is constructed for each form of the cubble and the same \code{group} argument ensures the cross-linking of the two forms via the common \code{id} column. The spatial map and time series plot are then made with each \code{SharedData} object separately. In this example, stations on the Australia map, made from the nested form, are coloured by the calculated variance. A ribbon band is constructed using the long form cubble to show each station's maximum and minimum temperature over time. In the case of a different dataset, users could calculate other station-dependent measures in the nested form or make other time-wise summary of the data in the long form to customise the spatial or temporal view. The cross-linking between the two plots is always safeguarded by the shared \code{id} column embedded in the cubble structure. Below is the pseudo-code that outlines the process to construct the interactive graphic described above:-->
+
+``` r
+clean <- climate_full |> ...
+
+nested <- clean |> SharedData$new(~id, group = "cubble")
+long <- face_temporal(clean) |> SharedData$new(~id, group = "cubble")
+
+p1 <- nested |> ...
+p2 <- long |> ...
+
+crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
+
+```
+
+Plot (a) shows the initial state of the interactive display: all locations are shown as dots on the map, coloured by temperature range, and the right plot shows the ribbons representing maximum to minimum for all stations. In plot (b) the "Mount Elizabeth" station, which shows a high variance colour on the initial map, is selected on the map and this produces the ribbon on the right. In plot (c) the lowest temperature in August is selected, which is "Thredbo" station on the left map. It was surprising to us that this was not a station in Tasmania, so for comparison a station in Tasmania is selected on the map to show in relation to Thredbo. We can see that Thredbo has a bigger winter dip in temperature, and although Tasmania is cold generally, it's temperatures are more constant
+
+<!-- In Figure \ref{fig:interactive-linking}, the first row shows the initial view of the interactive graphic. Most regions in Australia have a low variance of temperature range, while the North-West coastline, the bottom of South Australia, and Victoria stand out with larger monthly changes. In the second row, the Mount Elizabeth station, which shows a high variance colour on the initial map, is selected on the map and this produces the ribbon on the right. In the third row, the lowest temperature in August is selected, which highlights the corresponding thredbo station on the left map. -->
+
+```{r eval = FALSE}
+# This chunk generates the interactive graphic and save it as figures/linking.html, where the three screencasts in the figure comes from.
+library("crosstalk")
+library("plotly")
+
+clean <- climate_full |>
+  filter(!id %in% c("ASN00067033", "ASN00072091", "ASN00059040", 
+                    "ASN00097053", "ASN00040856", "ASN00015548")) |>
+  face_temporal() |> 
+  mutate(month = lubridate::month(date)) |>
+  group_by(month) |>
+  summarise(
+    tmax = mean(tmax, na.rm = TRUE),
+    tmin = mean(tmin, na.rm = TRUE),
+    diff = mean(tmax - tmin, na.rm = TRUE)
+    ) |> 
+  ungroup(month) |>
+  mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) |> 
+  face_spatial() |> 
+  mutate(temp_diff_var = ts |> pull(diff) |> var(na.rm = TRUE))
+  
+nested <- clean |> 
+  SharedData$new(~id, group = "cubble")
+
+long <- clean |> 
+  face_temporal() |> 
+  unfold(temp_diff_var) |> 
+  arrange(temp_diff_var) |> 
+  SharedData$new(~id, group = "cubble")
+
+state_map <- rmapshaper::ms_simplify(ozmaps::abs_ste, keep = 2e-3)
+
+p1 <- nested |> 
+  ggplot() +
+  geom_sf(data = state_map, fill = "grey95", color = "white") +
+  geom_point(aes(x = long, y = lat,color = temp_diff_var, label = name)) +
+  colorspace::scale_color_continuous_sequential(
+    "Rocket",  n_interp = 7, cmax = 90, rev = TRUE, 
+    c2 = 40, l2= 85, c1 = 20, l1 = 30, name = "Var. temp. diff.") +
+  labs(x = "Longitude", y = "Latitude") + 
+  coord_sf() + 
+  theme_bw() + 
+  theme(
+    panel.grid.major = element_blank(),
+    legend.position = "none"
+    )
+
+p2 <- long |> 
+  ggplot(aes(x = dummy_date, group = id, 
+             fill = temp_diff_var, color = temp_diff_var)) +
+  geom_ribbon(aes(ymin = tmin, ymax = tmax), size = 0.1, alpha = 0.3) + 
+  geom_line(aes(y = tmin), alpha = 0.1) + 
+  geom_line(aes(y = tmax), alpha = 0.1) + 
+  geom_point(aes(y = tmax), size = 0.1) + 
+  geom_point(aes(y = tmin), size = 0.1) + 
+  colorspace::scale_fill_continuous_sequential(
+    "Rocket",  n_interp = 7, cmax = 90, rev = TRUE, 
+    c2 = 40, l2= 85, c1 = 20, l1 = 30, name = "Var. temp. diff.") +
+  colorspace::scale_colour_continuous_sequential(
+    "Rocket",  n_interp = 7, cmax = 90, rev = TRUE, 
+    c2 = 40, l2= 85, c1 = 20, l1 = 30, name = "Var. temp. diff.") +
+  scale_x_date(date_labels = "%b", date_breaks = "1 month") + 
+  labs(x = "Month", y = "Temperature") + 
+  theme_bw() + 
+  theme(
+    panel.grid.major = element_blank(),
+    legend.position = "bottom"
+    )
+
+out <- bscols(
+  ggplotly(p1, width = 900, height = 700, tooltip = "label") |>
+    highlight(
+      on = "plotly_selected", 
+      off = "plotly_deselect", 
+      opacityDim = 0.1),
+  ggplotly(p2, width = 1200, height = 700, tooltip = "label") |> 
+    highlight(
+      on = "plotly_selected", 
+      off = "plotly_deselect", 
+      opacityDim = 0.012),
+  widths = c(5, 5)
+)
+
+htmltools::save_html(out, file = "figures/linking.html")
+
+```
+
+
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a particular location on the map (here Mount Elizabeth) produces the plot in the second row. The maximum and minimum temperatures are shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display, which highlights the corresponding station on the map (Thredbo). Another  station, located in the Tasmania Island, is then selected to compare its temperature variation with the Thredbo station.", fig.show='hold'}
+knitr::include_graphics(here::here("figures/linking.png"))
+knitr::include_graphics(here::here("figures/linking-north.png"))
+knitr::include_graphics(here::here("figures/linking-lower.png"))
+```
+

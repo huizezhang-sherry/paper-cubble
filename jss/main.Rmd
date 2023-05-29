@@ -71,37 +71,37 @@ library(patchwork)
 
 ```
 
-```{r child = here::here("3-the-cubble-pkg.Rmd")}
+```{r child = here::here("2-cubble.Rmd")}
 
 ``` 
 
-```{r child = here::here("4-other-features.Rmd")}
+```{r child = here::here("3-advanced.Rmd")}
 
 ```
 
-```{r child = here::here("5-1-covid.Rmd")}
+```{r child = here::here("4-1-covid.Rmd")}
 
 ```
 
-```{r child = here::here("5-2-aus-hist-max-temp.Rmd")}
-
-```
-
-
-```{r child = here::here("5-3-river-level-rainfall.Rmd")}
+```{r child = here::here("4-2-glyph.Rmd")}
 
 ```
 
 
-```{r child = here::here("5-4-era5.Rmd")}
-
-```
-
-```{r child = here::here("5-5-interactive-graphics.Rmd")}
+```{r child = here::here("4-3-matching.Rmd")}
 
 ```
 
 
-```{r child = here::here("6-conclusion.Rmd")}
+```{r child = here::here("4-4-netcdf.Rmd")}
+
+```
+
+```{r child = here::here("4-5-interactive.Rmd")}
+
+```
+
+
+```{r child = here::here("5-conclusion.Rmd")}
 
 ```

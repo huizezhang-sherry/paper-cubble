@@ -244,13 +244,11 @@ R> make_cubble(
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> make_cubble(
-+   spatial = stations_sf, temporal = meteo, key = id, index = date
-+   )
+R> make_cubble(spatial = stations_sf, temporal = meteo, 
++             key = id, index = date)
 R> 
-R> make_cubble(
-+   spatial = stations, temporal = meteo_ts, coords = c(long, lat)
-+   )
+R> make_cubble(spatial = stations, temporal = meteo_ts, 
++             coords = c(long, lat))
 R> 
 R> make_cubble(spatial = stations_sf, temporal = meteo_ts)
 \end{CodeInput}
@@ -385,8 +383,7 @@ Wrangling spatio-temporal data can be seen as an iterative process in the spatia
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cb_back <- cb_long |> face_spatial()
-R> cb_back
+R> (cb_back <- cb_long |> face_spatial())
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [3], index: date, nested form
@@ -399,11 +396,8 @@ R> cb_back
 3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble>
 \end{CodeOutput}
 \begin{CodeInput}
-R> identical(cb_nested, cb_back)
+R> #identical(cb_nested, cb_back)
 \end{CodeInput}
-\begin{CodeOutput}
-[1] FALSE
-\end{CodeOutput}
 \end{CodeChunk}
 
 Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps \citep{Wickham2012-yr}. (How to make glyph maps will be explained in Section \ref{st_transformation}, and are illustrated in the second example.) This type of operation can be seen as flattening, or \emph{unfolding}, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long \code{cubble}:
