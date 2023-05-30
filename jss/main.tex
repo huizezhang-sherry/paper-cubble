@@ -146,8 +146,8 @@ The rest of the paper is organized as follows: Section \ref{cubble} presents the
 \hypertarget{cubble}{%
 \section{The cubble package}\label{cubble}}
 
-\hypertarget{the-cubble-object}{%
-\subsection{The cubble object}\label{the-cubble-object}}
+\hypertarget{object}{%
+\subsection{The cubble object}\label{object}}
 
 \emph{the conceptual framework + nested and long form as per the design vignette}
 
@@ -222,41 +222,25 @@ R> class(cb_long)
 \hypertarget{create}{%
 \subsection{Creation and coercion}\label{create}}
 
-\hypertarget{creating-from-separate-spatial-and-temporal-table}{%
-\subsubsection{Creating from separate spatial and temporal table}\label{creating-from-separate-spatial-and-temporal-table}}
+\hypertarget{creating-from-separate-spatial-and-temporal-tables}{%
+\subsubsection{Creating from separate spatial and temporal tables}\label{creating-from-separate-spatial-and-temporal-tables}}
+
+Spatio-temporal data may arrives in separate tables for analysts. For example, in climate data, analysts may initially receive station data containing geographic location information, variables recorded and their recording periods. They can then query the temporal variables using the stations of interest to obtain the corresponding temporal data. Alternatively, analyses may begin as purely spatial or temporal, and analysts may obtain additional temporal or spatial data to expand the result to spatio-temporal.
+
+The function \code{make_cubble()} composes a \code{cubble} object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}) with the three attributes introduced in the subsection \ref{object}: \code{key}, \code{index}, and \code{coords}. The following code creates the nested \code{cubble} object shown previously:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> make_cubble(
-+   spatial = stations, temporal = meteo,
-+   key = id, index = date, coords = c(long, lat)
-+   )
-\end{CodeInput}
-\begin{CodeOutput}
-# cubble:   key: id [3], index: date, nested form
-# extent:   [144.8321, -37.98, 145.0964, -37.6655]
-# temporal: prcp [dbl], tmax [dbl], tmin [dbl]
-  id           long   lat  elev name              wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>              <dbl> <list>  
-1 ASN00086038  145. -37.7  78.4 essendon airport   95866 <tibble>
-2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870 <tibble>
-3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble>
-\end{CodeOutput}
-\end{CodeChunk}
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> make_cubble(spatial = stations_sf, temporal = meteo, 
-+             key = id, index = date)
-R> 
-R> make_cubble(spatial = stations, temporal = meteo_ts, 
-+             coords = c(long, lat))
+R> make_cubble(spatial = stations, temporal = meteo,
++             key = id, index = date, coords = c(long, lat))
 \end{CodeInput}
 \end{CodeChunk}
 
+The \code{key} and \code{index} argument comes from the same arguments from the \code{tsibble} objects and \code{coords} derives from the geometry column in an \code{sf} object. Hence, the corresponding argument can be safely omitted, if the spatial data is an \code{sf} object, i.e.~\code{stations_sf}, or the temporal data is a \code{tsibble} object, i.e.~\code{meteo_ts}. The \code{sf} and \code{tsibble} class from the input will be carried over to the \code{cubble} object:
+
 \begin{CodeChunk}
 \begin{CodeInput}
-R> make_cubble(spatial = stations_sf, temporal = meteo_ts)
+R> (res <- make_cubble(spatial = stations_sf, temporal = meteo_ts))
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [3], index: date, nested form, [sf]
@@ -269,12 +253,25 @@ R> make_cubble(spatial = stations_sf, temporal = meteo_ts)
 3 ASN00086282  145. -37.7 113.  melb~  94866 (144.8321 -37.6655)
 # i 1 more variable: ts <list>
 \end{CodeOutput}
+\begin{CodeInput}
+R> class(res)
+\end{CodeInput}
+\begin{CodeOutput}
+[1] "spatial_cubble_df" "cubble_df"         "sf"               
+[4] "tbl_df"            "tbl"               "data.frame"       
+\end{CodeOutput}
+\begin{CodeInput}
+R> class(res$ts[[1]])
+\end{CodeInput}
+\begin{CodeOutput}
+[1] "tbl_ts"     "tbl_df"     "tbl"        "data.frame"
+\end{CodeOutput}
 \end{CodeChunk}
 
 \hypertarget{coercing-from-foregin-objects}{%
 \subsubsection{Coercing from foregin objects}\label{coercing-from-foregin-objects}}
 
-Spatio-temporal data in other foreign objects can be coerced into cubble with the function \code{as_cubble()}. This includes casting from a \code{tibble} or \code{data.frame} with both spatial and temporal information, a netCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. The two examples below shows the casting from a tibble and a netcdf object to a cubble object.
+Spatio-temporal data in other foreign objects can be coerced into cubble with the function \code{as_cubble()}. This includes casting from a \code{tibble} or \code{data.frame} with both spatial and temporal information, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. The two examples below shows the casting from a tibble and a Netcdf object to a cubble object.
 
 The dataset \code{climate_flat} joins the spatial data, \code{stations}, with the temporal data, \code{meteo}, into a single tibble object and it can be coerced into a cubble using:
 
@@ -282,19 +279,9 @@ The dataset \code{climate_flat} joins the spatial data, \code{stations}, with th
 \begin{CodeInput}
 R> climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 \end{CodeInput}
-\begin{CodeOutput}
-# cubble:   key: id [3], index: date, nested form
-# extent:   [144.8321, -37.98, 145.0964, -37.6655]
-# temporal: prcp [dbl], tmax [dbl], tmin [dbl]
-  id           long   lat  elev name              wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>              <dbl> <list>  
-1 ASN00086038  145. -37.7  78.4 essendon airport   95866 <tibble>
-2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870 <tibble>
-3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble>
-\end{CodeOutput}
 \end{CodeChunk}
 
-The NetCDF data is another format commonly used for storing spatio-temporal data. In \proglang{R}, packages for wrangling NetCDF data include a high-level R interface: \pkg{ncdf4} \citep{ncdf4}, a low-level interface that calls a C-interface: \pkg{RNetCDF} \citep{rnetcdf}, and a tidyverse implementation: \pkg{tidync} \citep{tidync}. The code below casts a netCDF object in the \code{ncdf4} class into a cubble object:
+The NetCDF data is another format commonly used for storing spatio-temporal data. In \proglang{R}, packages for wrangling NetCDF data include a high-level R interface: \pkg{ncdf4} \citep{ncdf4}, a low-level interface that calls a C-interface: \pkg{RNetCDF} \citep{rnetcdf}, and a tidyverse implementation: \pkg{tidync} \citep{tidync}. The code below casts a NetCDF object in the \code{ncdf4} class into a cubble object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -317,14 +304,12 @@ R> as_cubble(raw)
 \end{CodeOutput}
 \end{CodeChunk}
 
-Sometimes, one may want to read in a subset of the netcdf data and the argument \code{vars}, \code{long_range} and \code{lat_range} can be used to subset on the variable and the grid resolution:
+Sometimes, one may want to read in a subset of the NetCDF data and the argument \code{vars}, \code{long_range} and \code{lat_range} can be used to subset on the variable and the grid resolution:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> as_cubble(
-+   raw, vars = "q",
-+   long_range = seq(-180, 180, 1), lat_range = seq(-90, 90, 1)
-+   )
+R> as_cubble(raw, vars = "q",
++           long_range = seq(-180, 180, 1), lat_range = seq(-90, 90, 1))
 \end{CodeInput}
 \end{CodeChunk}
 
