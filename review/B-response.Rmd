@@ -20,58 +20,44 @@ The package and the proposed data structures could certainly constitute a valuab
 
 Given the small size of the package, the paper feels a bit on the heavy side. Most of the code in the paper is not self-contained which makes it rather difficult to follow. Examples at the end of the paper don’t elucidate the inner workings of the package but rather advertise the functionality of other, mostly visualization, packages.
 
-**\textcolor{purple}{Re: We select the code and output relevant to demonstrate the cubble package in the examples while leaving the rest in the github repository, where users can look up for more details: https://github.com/huizezhang-sherry/paper-cubble. [on the visualisation packages: xxx]}. After addressing all the issues raised by the reviewers, the paper is now xxx pages, including 4 pages of reference and required affiliation.**
+**\textcolor{purple}{Re: We select the code and output relevant to demonstrate the cubble package in the examples while leaving the rest in the github repository, where users can look up for more details: https://github.com/huizezhang-sherry/paper-cubble. [on the visualisation packages: xxx]. After addressing all the issues raised by the reviewers, the paper is now xxx pages, including 4 pages of reference and required affiliation.}**
 
-More fundamentally, the design of the package has an immediately apparent drawback. The cubble class is used to represent two incompatible data types - long and nested. Internally, the two data types are distinguished by the internal attribute “form”. In other words, the authors use an attribute of an object to mimic the functionality of a sub-class.
+More fundamentally, the design of the package has an immediately apparent drawback. The cubble class is used to represent two incompatible data types - long and nested. Internally, the two data types are distinguished by the internal attribute “form”. In other words, the authors use an attribute of an object to mimic the functionality of a sub-class. A more natural implementation would be start with two distinct data structures, both sub-classes of the abstract cubble_df class, c("spatial_cubble_df", "cubble_df") and c("spatial_temporal_df", "cubble_df"). Such a generic implementation would allow for natural extension of the functionality trough dedicated methods.
 
-**\textcolor{purple}{Re: [TODO] }**
+**\textcolor{purple}{Re: We thanks reviewer for the suggestion on the refactorand now: }**
 
-A more natural implementation would be start with two distinct data structures, both sub-classes of the abstract cubble_df class, c("spatial_cubble_df", "cubble_df") and c("spatial_temporal_df", "cubble_df"). Such a generic implementation would allow for natural extension of the functionality trough dedicated methods. Currently an ever-present check on “form” attribute is necessary throughout the code base. To make matters worse, as_cubble currently produces yet another data structure - a list of paired matches, as can be seen from example 5.1 in the paper.
+  * **\textcolor{purple}{a nested/spatial cubble has class c("spatial\_cubble\_df", "cubble\_df")}**
+  * **\textcolor{purple}{a long/temporal cubble has class c("temporal\_cubble\_df", "cubble\_df")}**
+  
+**\textcolor{purple}{As a result, S3 methods are now written separately for the two classes unless it doesn't differentiate between the form. For example:}**
 
-**\textcolor{purple}{Re: Now as\_cubble will consistantly produce a cubble object, or error messages if it fails. When there are unmatched pairs, as\_cubble will create with cubble with sites that have both spatial and temporal information and instruct users to use check\_key() to check on key matching. Below is a much simplified example to show the current workflow:}**
+  * **\textcolor{purple}{face\_temporal() will do different things depending on whether it is a nested/long cubble:}**
 
-``` r
-library(cubble)
-library(dplyr)
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
-three_sites <-  stations %>% head(3)
-five_ts <- climate %>% filter(lubridate::month(date) == 1)
-cb <- as_cubble(
-  list(spatial = three_sites, temporal = five_ts),
-  key = id, index = date, coords = c(long, lat)
-)
-#> ! Some sites in the temporal table don't have spatial information
-#> ! Use `check_key()` to check on the unmatched key
-#> The cubble is created only with sites having both spatial and temporal information
-check_key(spatial = three_sites, temporal = five_ts)
-#> $paired
-#> # A tibble: 3 × 2
-#>   spatial     temporal   
-#>   <chr>       <chr>      
-#> 1 ASN00009021 ASN00009021
-#> 2 ASN00010311 ASN00010311
-#> 3 ASN00010614 ASN00010614
-#> 
-#> $potential_pairs
-#> # A tibble: 0 × 0
-#> 
-#> $others
-#> $others$temporal
-#> [1] "ASN00014015" "ASN00015131"
-#> 
-#> $others$spatial
-#> character(0)
+```{r eval = FALSE}
+face_temporal <- function(...){
+  UseMethod("face_temporal")
+}
+
+face_temporal.spatial_cubble_df <- function(...){
+  
+}
+
+face_temporal.temporal_cubble_df <- function(...){
+  # if already in the temporal face, return the cubble as it is
+}
 ```
 
-<sup>Created on 2023-05-23 with [reprex v2.0.2](https://reprex.tidyverse.org)</sup>
+  * **\textcolor{purple}{key\_vars() will anyway extract the key variable of a cubble object despite of the form:}**
 
+```{r eval = FALSE}
+key_vars.cubble_df <- function(){
+  ...
+}
+``` 
+
+Currently an ever-present check on “form” attribute is necessary throughout the code base. To make matters worse, as_cubble currently produces yet another data structure - a list of paired matches, as can be seen from example 5.1 in the paper.
+
+**\textcolor{purple}{Re: as\_cubble() now can coerce four types of foreign objects into a cubble object: 1) a single joint table, 2) NetCDF data, 3) a stars object, 4) a sftime object. The code related to output matching pairs has been moved to a separate function check\_key() and reflected in the current example 5.1}**
 
 Relatedly, the rationale for the parallel naming convention long/nested and temporal/spatial is not entirely clear. It seems to me that the semantically unambiguous temporal/spatial could be used throughout without ambiguity, thus resolving the terminological redundancy.
 
@@ -79,8 +65,19 @@ Relatedly, the rationale for the parallel naming convention long/nested and temp
 
 My recommendation would be a combination of the following:
 
-  * Rework the definitional parts (sections 2 and 3) by following more closely the “design” vignette. **\textcolor{purple}{Re: [TODO: follow the design vignette]}**
-  * Describe at a glance the core functions which operate on the class and their motivation. **\textcolor{purple}{Re: Methods available for a cubble object is now printed in xxx, before introducing the main functionality: face\_temporal(), face\_spatial(), and unfold().}**
+  * Rework the definitional parts (sections 2 and 3) by following more closely the “design” vignette. **\textcolor{purple}{Re: Section 2 and 3 have now been combined into a section 2 and the following subsections are includeded: }**
+    
+      > **\textcolor{purple}{2.1 introduce the cubble class}**
+    
+      > **\textcolor{purple}{2.2 create and coerce foreign objects into a cubble object}**
+    
+      > **\textcolor{purple}{2.3 functions and methods in cubble (dplyr and cubble functions)}**
+    
+      > **\textcolor{purple}{2.4 compatibility with tsibble and sf}**
+    
+      > **\textcolor{purple}{2.5 comparision with other existing spatio-temporal class: stars and sftime}**
+    
+  * Describe at a glance the core functions which operate on the class and their motivation. **\textcolor{purple}{Re: A method at glance has been printed at the beginning of subsection 2.3 }**
   * Rework section 4 by making it more concise and provide links to sections in supplementary material or dedicated vignettes. **\textcolor{purple}{Re: }**
   * Rework examples section 5 into “Applications”. Briefly describe the applications and provide and refer to dedicated and self-contained vignettes. **\textcolor{purple}{Re: xxx}**
 
@@ -101,7 +98,7 @@ The package is generally badly documented. The meaning of the arguments is almos
 
 Consider not throwing an error when face_spatial is applied to the spatial object. This would allow for generic code where the “form” of the input the data is not known or does not matter.
 
-**\textcolor{purple}{Re: Adopted. Now when applying face\_spatial to a nested cubble (a spatial object), the cubble will be printed as it is with a message signalling it is already in the nested form. see the reprex below. Same for face\_temporal on a long cubble}**
+**\textcolor{purple}{Re: Adopted. Now when applying face\_spatial to a nested cubble, the cubble will be printed as it is with a message signalling it is already in the nested form. see the reprex below. Same for face\_temporal on a long cubble object}**
 
 ``` r
 library(cubble)
@@ -128,7 +125,7 @@ face_spatial(nested)
 
 It would be useful to print a few rows of the spatial attribute of the “long” object.
 
-**\textcolor{purple}{Re: xxx. we could have a function to print }**
+**\textcolor{purple}{Re: the spatial attribute can be checked with function spaital(<cubbble\_obj>)}**
 
 Section 3.6 is missing `tidyr` package which is especially relevant here given its nesting and unnesting operations https://tidyr.tidyverse.org/articles/nest.html
 
@@ -149,9 +146,9 @@ and how the package relates to existing packages for spatial and temporal data a
 
   - on p6, section 3.2, yet another reason to call this data structure "cubble_temporal" instead of the semantically unobvious "long". **\textcolor{purple}{Re: see paragraph 4 under section The paper }**
 
-  - on p8 section 3.5, Isn't the root reason the memory efficiency? That is, the spatial component cannot be represented as part of the nested tibble without repetition. **\textcolor{purple}{Re: [TODO - also compare with sftime] added.}**
+  - on p8 section 3.5, Isn't the root reason the memory efficiency? That is, the spatial component cannot be represented as part of the nested tibble without repetition. **\textcolor{purple}{Re: this has now been incorporated in subsection 2.5 to compare with a sftime object}**
 
-  - on p8 section 3.6, The missing elephant is tidyr which has nesting and unnesting operations  https://tidyr.tidyverse.org/articles/nest.html. **\textcolor{purple}{Re: addressed under section Further suggestion}**
+  - on p8 section 3.6, The missing elephant is tidyr which has nesting and unnesting operations  https://tidyr.tidyverse.org/articles/nest.html. **\textcolor{purple}{Re: addressed under section Further suggestion in this response}**
 
 # Response to B-review_2_1
 
@@ -159,7 +156,7 @@ and how the package relates to existing packages for spatial and temporal data a
 
 The manuscript is in general clearly structured. However, an important reference to the R-package sftime is missing that also deals with the representation of spatiotemporal data. It might be beneficial to provide illustrative examples in the manuscript that clearly compare between a cubble representation and representations of existing packages. Which data sets/structures cannot (or with a greater effort) be represented with existing R-packages such as e.g. stars and sftime? 
 
-**\textcolor{purple}{Re: [TODO] The section 3.5 are extended to also discuss why not just use existing data structure. This includes the comparision with sftime on memory efficiency, with stars on representing spatio-temporal data in an array format with illustrative examples}**
+**\textcolor{purple}{Re: The comparison with other existing spatio-temporal class, i.e. stars and sftime, has been addressed in subsection 2.5 (after combining the original section 2 and 3 into section 2)}**
 
 For spatial data, the coordinate reference system is essential metadata information. In one example of the manuscript, the input data does have information on the CRS but it is not discussed in the manuscript how that is handled within cubble. How would coordinate transformations be handled with cubble?
 
@@ -229,21 +226,9 @@ face_temporal(climate_aus)
 
 In the manuscript and in the reproducible-script.R, a data set `historical_tmax` is introduced. In the package, the corresponding data set seems to be `tmax_hist`.
 
-**\textcolor{purple}{Re: [TODO] The two datasets are related but not the same. The data historical\_tmax contains daily weather stations data for the two periods: 1971-1975 and 2016-2020 and amounts to 3.2MB, which is not suitable to include in the package given the size restriction. The tmax\_hist summarises the daily data into monthly to produce the dataset suitable to include in the package. The documentation to tmax\_hist now include more details on this. }**
+**\textcolor{purple}{Re: [TODO] The two datasets are related but not the same. The data historical\_tmax contains daily weather stations data for the two periods: 1971-1975 and 2016-2020 and amounts to 3.2MB, which is not suitable to include in the package given its size. The tmax\_hist summarises the daily data into monthly to produce the dataset suitable to include in the package. The documentation to tmax\_hist now include more details on this. }**
 
 The manuscript cannot be reproduced, as the reproducible-script.R (part of the submission to JSS) only uses a subset, but does not provide a separate result file that would allow to compare the reproduced outputs with the desired output for the subset.
 
 **\textcolor{purple}{Re: A result file in html has been submitted this time.}**
 
-
-
-
-section cubble object under 3. the cubble package, on 1) the conceptual framework, 2)  the nested and long form as per the design vig
-
-print of methods
-
-section 4/5: work on the text to make it more concise
-
-connnecting dat ais gneerally a difficult task from different sources in spatial temporal data, point it to the future work 
-
-In the end talk to the users to check the vignette for the full code for examples. match titles.
