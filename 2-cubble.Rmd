@@ -35,6 +35,10 @@ class(cb_nested)
 
 Printing a \code{cubble} object provides some information about the data. Here \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
 
+The first line in the header now shows it in the long form and the third line has been changed to display the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. Unlike the nested form, the long \code{cubble} is built from a \code{grouped_df} class where all the observations from the same site form a group.
+
+The nested form can be used for those operations where the output is only indexed by the spatial identifier (\code{key}), but becomes inadequate when outputs need both a spatial and a temporal identifier (\code{key} and \code{index}). The \code{cubble} class also provides a long form, which expands the \code{ts} column and stores the spatial variables as an attribute. The function \code{face_temporal()} is used to switch from the nested \code{cubble} into the long one. The first row in Figure  illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face. 
+
 
 ```{r}
 cb_long <- face_temporal(climate_mel)
@@ -97,41 +101,59 @@ as_cubble(raw, vars = "q",
 
 We would recommend reducing to about 300 $\times$ 300 grid points for three daily variables in one year. A 300 by 300 spatial grid can be a bounding box of [100, -80, 180, 0] at 0.25 degree resolution or a global bounding box [-180, -90, 180, -90] at 1 degree resolution.
 
-## Functions and methods in cubble
+## Functionalities
 
-*Print all the methods with methods(class = "cubble_df")*
+Table \@ref(tab:funs) summarises functions implemented in the \pkg{cubble} package.
 
-### dplyr methods
+Table: (\#tab:funs) Functions implemented in the \pkg{cubble} package
+
+|Category | Details |  Functions|
+|---|---|--------------|
+|base R | subset | `[`, `[<-`, `names<-`, `[[`, `[[<-`| 
+|tidyverse | dplyr |`dplyr_row_slice`, `dplyr_col_modify`, `dplyr_reconstruct`, `select`, `mutate`, `arrange`, `filter`, `summarise`, `slice`, `group_by`, `ungroup`|
+|tidyverse| tidyr| | 
+|tidyverse| pillar| `type_sum` | 
+|sf| | | 
+|tsibble| | | 
+|cubble | basics| `face_temporal`, `face_spatial`, `unfold`|
+| | attributes| `key`, `key_vars`, `key_data`, `index`, `index_var`, `coords`, `spatial`|
+| |hierarchy|  `switch_key`|
+| |matching |   `match_sites`, `match_spatial`, `match_temporal`| 
+| |glyph map | `geom_glyph`, `geom_glyph_box`, `geom_glyph_line`|
+
+### dplyr and tidyr
 
 The \pkg{dplyr} package has many tools for wrangling tidy data,  many of which are useful in the spatio-temporal analysis. The \pkg{cubble} package provides methods that support the use of the following operations in the \pkg{dplyr} package on both the nested and long forms: `mutate`, `filter`, `summarise`, `select`, `arrange`, `rename`, `left_join`, and the slice family (`slice_*`).
 
-The created \code{cubble} is a subclass of the \code{rowwise_df} class where each row forms a group. All the temporal variables are nested in a list column, hence it is also called the nested \code{cubble}. The rowwise structure makes it simpler to operate on the list using the \code{mutate()} syntax, which is simpler than the \code{purr::map()} when working with a list column. For example, calculating the number of rainy days can be done by:
-
+The toy example below demonstrates using dplyr verbs on a nested cubble: 
 ```{r echo = TRUE}
-cb_nested |> mutate(rain_day = sum(ts$prcp != 0))
+cb_nested %>% 
+  mutate(avg_temp = mean(ts$tmax, na.rm = TRUE)) %>% 
+  select(-elev) %>% 
+  filter(avg_temp > 26) %>% 
+  arrange(-avg_temp)
 ```
 
-### cubble specific methods
+### cubble 
 
-The three cubble specific functions are \code{face_temporal()}, \code{face_spatial()}, and \code{unfold}.
+The three basic cubble functions, \code{face_temporal()}, \code{face_spatial()}, and \code{unfold()}, are introduced in this section before more advanced functionalities in Section \@ref(others).
 
-The nested form can be used for those operations where the output is only indexed by the spatial identifier (\code{key}), but becomes inadequate when outputs need both a spatial and a temporal identifier (\code{key} and \code{index}). The \code{cubble} class also provides a long form, which expands the \code{ts} column and stores the spatial variables as an attribute. The function \code{face_temporal()} is used to switch from the nested \code{cubble} into the long one. The first row in Figure \ref{fig:face} illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face. This code switches the \code{cubble} object just created into its long form:
+The pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the cubble object between the spatial and temporal face of the multivariate spatio-temporal cube, as illustrated in Figure \ref{fig:face}. The code below uses the function \code{face_temporal()} and \code{face_spatial()} to transform between a nested cubble (\code{cb_nested}) and a long one (\code{cb_long}), introduced earlier in subsection \@ref(object): 
 
 ```{r echo = TRUE}
-(cb_long <- cb_nested |> face_temporal())
+identical(face_temporal(cb_nested), cb_long)
+identical(face_spatial(cb_long), cb_nested)
 ```
 
-The first line in the header now shows it in the long form and the third line has been changed to display the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. Unlike the nested form, the long \code{cubble} is built from a \code{grouped_df} class where all the observations from the same site form a group.
+The pair of verbs are exact inverse and apply both functions on a cubble object will result in the object itself: 
 
-```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of function \\code{face\\_temporal} and \\code{face\\_spatial}. In the first row, \\code{face\\_temporal} switches a \\code{cubble} object from the nested form into the long form and the focus has switched from the spatial aspect (the side face) to the temporal aspect (the front face). In the second row, \\code{face\\_spatial} switches a \\code{cubble} object back to the nested form from the long form and shifts focus back to the spatial aspect."}
+```{r echo = TRUE}
+identical(face_spatial(face_temporal(cb_nested)), cb_nested)
+identical(face_temporal(face_spatial(cb_long)), cb_long)
+```
+
+```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the function \\code{face\\_temporal()} and \\code{face\\_spatial()}: \\code{face\\_temporal()} converts a spatial cubble (neseted form) into a temporal cubble (long form) to focus on the temporal variables. Conversely, \\code{face\\_spatial()} transforms a temporal cubble into a spatial one to emphasize spatial variables."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
-```
-
-Wrangling spatio-temporal data can be seen as an iterative process in the spatial and temporal dimensions. Switching the focus back to the site-variable face can be accomplished by the function \code{face_spatial()}, which is the inverse of \code{face_temporal()}. The second row of Figure \ref{fig:face} illustrates the function, which is used as follows:
-
-```{r echo = TRUE}
-(cb_back <- cb_long |> face_spatial())
-#identical(cb_nested, cb_back)
 ```
 
 Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps [@Wickham2012-yr]. (How to make glyph maps will be explained in Section \ref{st_transformation}, and are illustrated in the second example.) This type of operation can be seen as flattening, or *unfolding*, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long \code{cubble}:
