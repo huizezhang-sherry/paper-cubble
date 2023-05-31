@@ -225,7 +225,7 @@ R> class(cb_long)
 \hypertarget{creating-from-separate-spatial-and-temporal-tables}{%
 \subsubsection{Creating from separate spatial and temporal tables}\label{creating-from-separate-spatial-and-temporal-tables}}
 
-Spatio-temporal data may arrives in separate tables for analysts. For example, in climate data, analysts may initially receive station data containing geographic location information, variables recorded and their recording periods. They can then query the temporal variables using the stations of interest to obtain the corresponding temporal data. Alternatively, analyses may begin as purely spatial or temporal, and analysts may obtain additional temporal or spatial data to expand the result to spatio-temporal.
+Spatio-temporal data may arrive in separate tables for analysts. For example, in climate data, analysts may initially receive station data containing geographic location information, variables recorded and their recording periods. They can then query the temporal variables using the stations of interest to obtain the corresponding temporal data. Alternatively, analyses may begin as purely spatial or temporal, and analysts may obtain additional temporal or spatial data to expand the result to spatio-temporal.
 
 The function \code{make_cubble()} composes a \code{cubble} object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}) with the three attributes introduced in the subsection \ref{object}: \code{key}, \code{index}, and \code{coords}. The following code creates the nested \code{cubble} object shown previously:
 
@@ -236,7 +236,7 @@ R> make_cubble(spatial = stations, temporal = meteo,
 \end{CodeInput}
 \end{CodeChunk}
 
-The \code{key} and \code{index} argument comes from the same arguments from the \code{tsibble} objects and \code{coords} derives from the geometry column in an \code{sf} object. Hence, the corresponding argument can be safely omitted, if the spatial data is an \code{sf} object, i.e.~\code{stations_sf}, or the temporal data is a \code{tsibble} object, i.e.~\code{meteo_ts}. The \code{sf} and \code{tsibble} class from the input will be carried over to the \code{cubble} object:
+The \code{key} and \code{index} arguments corresponds to the \code{tsibble} counterpart and \code{coords} derives from the geometry column in an \code{sf} object. Hence, the corresponding argument can be safely omitted, if the spatial data is an \code{sf} object, i.e.~\code{stations_sf}, or the temporal data is a \code{tsibble} object, i.e.~\code{meteo_ts}. The \code{sf} and \code{tsibble} class from the input will be carried over to the \code{cubble} object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -271,7 +271,7 @@ R> class(res$ts[[1]])
 \hypertarget{coercing-from-foregin-objects}{%
 \subsubsection{Coercing from foregin objects}\label{coercing-from-foregin-objects}}
 
-Spatio-temporal data in other foreign objects can be coerced into cubble with the function \code{as_cubble()}. This includes casting from a \code{tibble} or \code{data.frame} with both spatial and temporal information, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. The two examples below shows the casting from a tibble and a Netcdf object to a cubble object.
+Spatio-temporal data in other foreign objects can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes casting from a \code{tibble} or \code{data.frame} with both spatial and temporal information, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. The two examples below show the casting from a tibble and a NetCDF object to a cubble object.
 
 The dataset \code{climate_flat} joins the spatial data, \code{stations}, with the temporal data, \code{meteo}, into a single tibble object and it can be coerced into a cubble using:
 
