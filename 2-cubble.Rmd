@@ -65,14 +65,7 @@ make_cubble(spatial = stations, temporal = meteo,
             key = id, index = date, coords = c(long, lat))
 ```
 
-The \code{key} and \code{index} arguments corresponds to the \code{tsibble} counterpart and \code{coords} derives from the geometry column in an \code{sf} object. Hence, the corresponding argument can be safely omitted, if the spatial data is an \code{sf} object, i.e. \code{stations_sf}, or the temporal data is a \code{tsibble} object, i.e. \code{meteo_ts}. The \code{sf} and \code{tsibble} class from the input will be carried over to the \code{cubble} object:
-
-```{r echo = TRUE}
-(res <- make_cubble(spatial = stations_sf, temporal = meteo_ts))
-class(res)
-class(res$ts[[1]])
-```
-
+[also talk about the by argument with example]
 
 ### Coercing from foregin objects
 
@@ -108,11 +101,11 @@ Table \@ref(tab:funs) summarises functions implemented in the \pkg{cubble} packa
 Table: (\#tab:funs) Functions implemented in the \pkg{cubble} package
 
 |Category | Details |  Functions|
-|---|---|--------------|
+|--|---|----------------|
 |base R | subset | `[`, `[<-`, `names<-`, `[[`, `[[<-`| 
 |tidyverse | dplyr |`dplyr_row_slice`, `dplyr_col_modify`, `dplyr_reconstruct`, `select`, `mutate`, `arrange`, `filter`, `summarise`, `slice`, `group_by`, `ungroup`|
-|tidyverse| tidyr| | 
-|tidyverse| pillar| `type_sum` | 
+|| tidyr| | 
+|| pillar| `type_sum` | 
 |sf| | | 
 |tsibble| | | 
 |cubble | basics| `face_temporal`, `face_spatial`, `unfold`|
@@ -164,35 +157,55 @@ cb_long |> unfold(long, lat)
 
 ## Compatibility with other packages
 
-\subsubsection[]{\code{tsibble}}
+Analysts often have their own preferred spatial or temporal data structure, which they may wish to keep for spatio-temporal analysis. For example, the \code{tbl_ts} class from the \code{tsibble} package [@tsibble] is commonly used in time series forecasting and similarly, the \code{sf} class [@sf] is often used in spatial data science. In \code{cubble}, analysts can combine these two structures together by allowing the spatial component to also be an \code{sf} object and the temporal component to also be a \code{tsibble} object.
 
-The \code{tsibble} class is a subclass of \code{tibble} where the \code{index} and \code{key} components are used to store temporal and strata information, that makes working with temporal data cognitively efficient. A \code{cubble} object can use the \code{tsibble} class to store the temporal information, and effectively utilize the specialist time series operations in the \pkg{tsibble} package. A \code{tsibble} object can also be casted into a \code{cubble} object through supplying the coordinate information in the argument `coords`:
+
+### tsibble
+
+The \code{key} and \code{index} arguments in a \code{cubble} object corresponds to the \code{tsibble} counterparts and they can be safely omitted, if the temporal component is a \code{tsibble} object, i.e. \code{meteo_ts} in the example below. The \code{tsibble} class from the input will be carried over to the \code{cubble} object:
 
 ```{r echo = TRUE}
-cb <- make_cubble(
-  spatial = stations, temporal = meteo_ts, 
-  coords = c(long, lat))
+res <- make_cubble(
+  spatial = stations, temporal = meteo_ts, coords = c(long, lat))
+(res_long <- face_temporal(res))
+class(res_long)
 ```
 
-When a nested \code{cubble} is created, each element in the list-column \code{ts} is in the \code{tsibble} class (labelled \code{tbl_ts})  and operations available to the \code{tsibble} class are still valid on these elements. For example, the code below calculates two time series features (mean and variance) of maximum temperature, utilizing the \code{tsibble} syntax in the \code{cubble} object:
+The long cubble shows \code{[tsibble]} in the header to indicate the object also being in a \code{tbl_ts} class (\code{tsibble}). Methods applies to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
 
 ```{r echo = TRUE}
-cb %>% face_temporal() %>% tsibble::has_gaps()
+res_long %>% tsibble::has_gaps()
 ```
 
-
-\subsubsection[]{\code{sf} (\code{s2})} 
-
-*add an example on changing CRS?*
-
-The \code{sf} class is also a subclass of \code{tibble} with a specialized feature geometry list-column (\code{sfc}) to store different geometry types (\code{POINT}, \code{LINESTRING}, \code{POLYGON}, \code{MULTIPOLYGON}, etc). The package \pkg{sf} provides functions that operate efficiently on this spatial information. A \code{cubble} object can store spatial information in  the \code{sf} class. Methods for the \code{sfc} class can be applied in the nested form of the cubble object.  An illustration is in Section \@ref(covid). The spatial information can also be stored as an \code{s2} vector in a \code{cubble} object.
+An existing \code{cubble} object can promote its temporal component to a \code{tsibble} object by applying \code{make_temporal_tsibble()}. The following code illustrates this with the object \code{cb_long} created in section \@ref(create) and the promoted cubble object is equal to the cubble object originally created from a \code{tsibble} object:
 
 ```{r echo = TRUE}
-cb <- make_cubble(
+cb_long2 <- cb_long %>% make_temporal_tsibble() 
+all.equal(cb_long2, res_long)
+```
+
+### sf
+
+Similarly, an \code{sf} object can be supplied as the spatial component to create a \code{cubble} object, with the \code{coords} argument being omitted. This opens up the possibility to represent fixed area with polygons or multipolygons (see Applications \@ref(covid)) and the \code{coords} argument will be calculated as the centroids of the (multi)polygons. The \code{[sf]} print in the cubble header suggest an spatial component being also a \code{sf} object:
+
+```{r echo = TRUE}
+(res_nested <- make_cubble(
   spatial = stations_sf, temporal = meteo, 
-  key = id, index = date)
-class(cb)
-#cb %>% sf::st_transform(crs = "EPSG:3857")
+  key = id, index = date))
+class(res_nested)
+```
+
+The \code{sf} functions applicable to a \code{cubble} object have been listed in Table \@ref(tab:funs) and the following code shows how to perform coordinate transformation with \code{st_transform} on a cubble object:  
+
+```{r echo =TRUE}
+#res_nested %>% sf::st_transform(crs = "EPSG:3857")
+```
+
+The counterpart to promote the spatial component in an existing \code{cubble} to be an \code{sf} object is \code{make_spatial_sf()}:
+
+```{r echo = TRUE}
+cb_nested2 <- cb_nested %>% make_spatial_sf() 
+all.equal(cb_nested2, res_nested)
 ```
 
 
