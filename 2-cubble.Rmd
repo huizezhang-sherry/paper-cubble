@@ -7,22 +7,38 @@ output: pdf_document
 
 ## The cubble object {#object}
 
+<!-- Spatio-temporal data -->
+
+<!-- remote sensing, spatio-temporal cube: longitude, latitude, and time -->
+
+<!-- trajectory: each observation has unique coordinate (spatial) and temporal information -->
+
+<!-- the spacetime paper classifies spatio-temporal data into four different categories based on different spatial and temporal characteristics.  -->
+
+<!-- Analysts to be clear about the spatio-temporal layouts and choose the corresponding data structure for analysis. -->
+
 <!-- Spatio-temporal data can be conceptualized using a cubical data model with three axes which typically are, time, latitude and longitude. This abstraction can be useful for generalizing operations and visualization purposes: @lu_multidimensional_2018 shows how array operations (select, scale, reduce, rearrange, and compute) can be mapped onto the cube; @bach_review_2014 reviews the temporal data visualization based on space-time cube operations. Notice that the term space-time cube in their article "does not need to involve spatial data", but refers to "an abstract 2D substrate that is used to visualize data at a specific time". Despite its main focus being on temporal data, the mindset of abstracting out data representation to construct visualizations, still applies to our spatio-temporal data manipulation and visualization approaches. -->
 
 <!-- The most common space-time cube uses the three axes, time, latitude, longitude, and can be considered stacking space across time. Ours is a multivariate spatio-temporal cube with the three axes defined to be time, site and variables, as illustrated in the leftmost column of Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hyper-cubes when describing multivariate spatio-temporal data and is the conceptual framework behind the \code{cubble} class. With this conceptual model, operations on spatio-temporal data can be mapped to operations on the cube and the rest of Figure \ref{fig:cube-def} show examples of slicing on site, time, and variable.  -->
 
-
-*the conceptual framework + nested and long form as per the design vignette*
-
-  - diagram, 
-  - two forms: long/ nested - spatial/ temporal
-  - attributes
-  - headers
-  
+[conceptual framework] The \code{cubble} class tackles the spatio-temporal data collected at unique fixed locations and allowed for irregularity in the temporal dimension, i.e. irregular time steps and missingness. 
  
-The \code{cubble} class is an S3 class [@advr] built on the \code{tibble} class, specifically to organize spatio-temporal data. The \code{cubble} class uses an attribute "form",  to arrange the spatial or temporal data components tidily. The form attribute can take a value of either "nested" or "long". The nested \code{cubble} is a subclass of rowwise \code{tibble} (\code{rowwise_df}). It arranges each spatial site in a row, and uses list columns to store the feature geometry and the temporal information. The long \code{cubble} is a subclass of grouped \code{tibble} (\code{grouped_df}), which expands the temporal information into the long form and stores the spatial information in a "spatial" attribute.
+The \code{cubble} class (\code{cubble_df}) is an S3 class [@advr] built on the \code{tibble} class, specifically to organize spatio-temporal data. 
+It uses three attributes to character the spatio-temporal data:
 
-The arguments \code{key} and \code{index} follow the conventions in the \pkg{tsibble} package to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site. 
+  * \code{key} identifies the spatial locations 
+  * \code{date} identifies the temporal order, and 
+  * \code{coords} identifies the longitude and latitude coordinate associated with the location.
+
+The base class \code{cubble_df} has two specialised class \code{spatial_cubble_df} and \code{temporal_cubble_df} to arrange the spatio-temporal data in two forms, as illustrated in Figure \ref{fig:class}. 
+  
+
+
+### nested cubble
+
+A nested cubble (in the spatial form) has class \code{c("spatial_cubble_df", "cubble_df")} and is built from a rowwise tibble (\code{rowwise_df}). The nested cubble arranges spatial variables in columns and nests temporal variables in a specialised \code{ts} column. The \code{rowwise_df} class is used to work better with the \code{ts} list column to compute per station summary. 
+
+Below prints an nested cubble object using the weather station data collected in three airports. The data is a subset of a larger data \code{climate_aus} collected from National Oceanic and Atmospheric Administration (NOAA) Global Historical Climatology Network Daily (GHCND). The data include spatial variables such as station ID, longitude, latitude, elevation, station name, world meteorology organisation ID, in additional to daily temporal information, maximum and minimum temperature values and precipitation for the year 2020. The airport data is a subset of three airport stations in Melbourne for the initial 10 days of the year (the creation of a cubble object will be explained in Section \@ref(create)):
 
 ```{r}
 cb_nested <- climate_mel
@@ -33,13 +49,12 @@ cb_nested
 class(cb_nested)
 ```
 
-Printing a \code{cubble} object provides some information about the data. Here \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
+A nested cubble header prints the key and index variable name and its form. The spatial extent is given by the bounding box with CRS information (missing here). The nested cubble header also shows the name of temporal variables nested in the \code{ts} column and their variable types: \code{prcp [dbl], tmax [dbl], tmin [dbl]}.
 
-The first line in the header now shows it in the long form and the third line has been changed to display the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. Unlike the nested form, the long \code{cubble} is built from a \code{grouped_df} class where all the observations from the same site form a group.
+### long cubble
 
-The nested form can be used for those operations where the output is only indexed by the spatial identifier (\code{key}), but becomes inadequate when outputs need both a spatial and a temporal identifier (\code{key} and \code{index}). The \code{cubble} class also provides a long form, which expands the \code{ts} column and stores the spatial variables as an attribute. The function \code{face_temporal()} is used to switch from the nested \code{cubble} into the long one. The first row in Figure  illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face. 
-
-
+A long cubble (in the temporal form) has class \code{c("temporal_cubble_df", "cubble_df")}. It is built from a grouped tibble (\code{grouped_df}), which expands the temporal variables into the long form and stores the spatial variables as a data attribute.
+  
 ```{r}
 cb_long <- face_temporal(climate_mel)
 ```
@@ -49,8 +64,13 @@ cb_long
 class(cb_long)
 ```
 
+In the header of a long cubble object, the extent now prints the temporal range, the interval, and whether there is gaps in the data. It also prints the available spatial variables, as oppose to the temporal variables in the nested cubble. The spatial component can be printed with \code{spatial()}:
 
-<!-- The data \code{climate_flat} is used to illustrate functionality in the \pkg{cubble} package. This is a subset from National Oceanic and Atmospheric Administration (NOAA) [@noaa] Global Historical Climatology Network (GHCN) Daily data. It contains spatial variables, station id, latitude, longitude, elevation, station name, world meteorology organisation id, in additional to daily temporal information,  maximum and minimum temperature values and precipitation records for year 2020. The first five rows of the data are shown below: -->
+```{r}
+spatial(cb_long)
+```
+
+<!-- The data \code{climate_flat} is used to illustrate functionality in the \pkg{cubble} package.  The first five rows of the data are shown below: -->
 
 ## Creation and coercion {#create}
 
@@ -165,23 +185,23 @@ Analysts often have their own preferred spatial or temporal data structure, whic
 The \code{key} and \code{index} arguments in a \code{cubble} object corresponds to the \code{tsibble} counterparts and they can be safely omitted, if the temporal component is a \code{tsibble} object, i.e. \code{meteo_ts} in the example below. The \code{tsibble} class from the input will be carried over to the \code{cubble} object:
 
 ```{r echo = TRUE}
-res <- make_cubble(
+ts_nested <- make_cubble(
   spatial = stations, temporal = meteo_ts, coords = c(long, lat))
-(res_long <- face_temporal(res))
-class(res_long)
+(ts_long <- face_temporal(ts_nested))
+class(ts_long)
 ```
 
 The long cubble shows \code{[tsibble]} in the header to indicate the object also being in a \code{tbl_ts} class (\code{tsibble}). Methods applies to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
 
 ```{r echo = TRUE}
-res_long %>% tsibble::has_gaps()
+ts_long %>% tsibble::has_gaps()
 ```
 
 An existing \code{cubble} object can promote its temporal component to a \code{tsibble} object by applying \code{make_temporal_tsibble()}. The following code illustrates this with the object \code{cb_long} created in section \@ref(create) and the promoted cubble object is equal to the cubble object originally created from a \code{tsibble} object:
 
 ```{r echo = TRUE}
-cb_long2 <- cb_long %>% make_temporal_tsibble() 
-all.equal(cb_long2, res_long)
+ts_long2 <- cb_long %>% make_temporal_tsibble() 
+identical(ts_long2, ts_long)
 ```
 
 ### sf
@@ -189,23 +209,23 @@ all.equal(cb_long2, res_long)
 Similarly, an \code{sf} object can be supplied as the spatial component to create a \code{cubble} object, with the \code{coords} argument being omitted. This opens up the possibility to represent fixed area with polygons or multipolygons (see Applications \@ref(covid)) and the \code{coords} argument will be calculated as the centroids of the (multi)polygons. The \code{[sf]} print in the cubble header suggest an spatial component being also a \code{sf} object:
 
 ```{r echo = TRUE}
-(res_nested <- make_cubble(
+(sf_nested <- make_cubble(
   spatial = stations_sf, temporal = meteo, 
   key = id, index = date))
-class(res_nested)
+class(sf_nested)
 ```
 
 The \code{sf} functions applicable to a \code{cubble} object have been listed in Table \@ref(tab:funs) and the following code shows how to perform coordinate transformation with \code{st_transform} on a cubble object:  
 
 ```{r echo =TRUE}
-#res_nested %>% sf::st_transform(crs = "EPSG:3857")
+#sf_nested %>% sf::st_transform(crs = "EPSG:3857")
 ```
 
 The counterpart to promote the spatial component in an existing \code{cubble} to be an \code{sf} object is \code{make_spatial_sf()}:
 
 ```{r echo = TRUE}
-cb_nested2 <- cb_nested %>% make_spatial_sf() 
-all.equal(cb_nested2, res_nested)
+sf_nested <- cb_nested %>% make_spatial_sf() 
+all.equal(sf_nested, sf_nested)
 ```
 
 

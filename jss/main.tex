@@ -149,23 +149,29 @@ The rest of the paper is organized as follows: Section \ref{cubble} presents the
 \hypertarget{object}{%
 \subsection{The cubble object}\label{object}}
 
-\emph{the conceptual framework + nested and long form as per the design vignette}
+{[}conceptual framework{]} The \code{cubble} class tackles the spatio-temporal data collected at unique fixed locations and allowed for irregularity in the temporal dimension, i.e.~irregular time steps and missingness.
+
+The \code{cubble} class (\code{cubble_df}) is an S3 class \citep{advr} built on the \code{tibble} class, specifically to organize spatio-temporal data.
+It uses three attributes to character the spatio-temporal data:
 
 \begin{itemize}
 \tightlist
 \item
-  diagram,
+  \code{key} identifies the spatial locations
 \item
-  two forms: long/ nested - spatial/ temporal
+  \code{date} identifies the temporal order, and
 \item
-  attributes
-\item
-  headers
+  \code{coords} identifies the longitude and latitude coordinate associated with the location.
 \end{itemize}
 
-The \code{cubble} class is an S3 class \citep{advr} built on the \code{tibble} class, specifically to organize spatio-temporal data. The \code{cubble} class uses an attribute ``form'', to arrange the spatial or temporal data components tidily. The form attribute can take a value of either ``nested'' or ``long''. The nested \code{cubble} is a subclass of rowwise \code{tibble} (\code{rowwise_df}). It arranges each spatial site in a row, and uses list columns to store the feature geometry and the temporal information. The long \code{cubble} is a subclass of grouped \code{tibble} (\code{grouped_df}), which expands the temporal information into the long form and stores the spatial information in a ``spatial'' attribute.
+The base class \code{cubble_df} has two specialised class \code{spatial_cubble_df} and \code{temporal_cubble_df} to arrange the spatio-temporal data in two forms, as illustrated in Figure \ref{fig:class}.
 
-The arguments \code{key} and \code{index} follow the conventions in the \pkg{tsibble} package to describe the temporal order and multiple series while \code{coords} specifies the spatial location of each site.
+\hypertarget{nested-cubble}{%
+\subsubsection{nested cubble}\label{nested-cubble}}
+
+A nested cubble (in the spatial form) has class \code{c("spatial_cubble_df", "cubble_df")} and is built from a rowwise tibble (\code{rowwise_df}). The nested cubble arranges spatial variables in columns and nests temporal variables in a specialised \code{ts} column. The \code{rowwise_df} class is used to work better with the \code{ts} list column to compute per station summary.
+
+Below prints an nested cubble object using the weather station data collected in three airports. The data is a subset of a larger data \code{climate_aus} collected from National Oceanic and Atmospheric Administration (NOAA) Global Historical Climatology Network Daily (GHCND). The data include spatial variables such as station ID, longitude, latitude, elevation, station name, world meteorology organisation ID, in additional to daily temporal information, maximum and minimum temperature values and precipitation for the year 2020. The airport data is a subset of three airport stations in Melbourne for the initial 10 days of the year (the creation of a cubble object will be explained in Section \ref{create}):
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -190,11 +196,12 @@ R> class(cb_nested)
 \end{CodeOutput}
 \end{CodeChunk}
 
-Printing a \code{cubble} object provides some information about the data. Here \code{id} is the variable name to identify each location and there are five unique locations. The bounding box is \code{[115.97, -32.94, 133.55, -12.42]} and provides information about the coordinates in the data. The third row shows the name and type of all variables nested in the \code{ts} column. In this example, it includes \code{date [date], prcp [dbl], tmax [dbl], tmin [dbl]}.
+A nested cubble header prints the key and index variable name and its form. The spatial extent is given by the bounding box with CRS information (missing here). The nested cubble header also shows the name of temporal variables nested in the \code{ts} column and their variable types: \code{prcp [dbl], tmax [dbl], tmin [dbl]}.
 
-The first line in the header now shows it in the long form and the third line has been changed to display the name and type of spatial variables: \code{lat [dbl], long [dbl], elev [dbl], name [chr], wmo_id [dbl]}. Unlike the nested form, the long \code{cubble} is built from a \code{grouped_df} class where all the observations from the same site form a group.
+\hypertarget{long-cubble}{%
+\subsubsection{long cubble}\label{long-cubble}}
 
-The nested form can be used for those operations where the output is only indexed by the spatial identifier (\code{key}), but becomes inadequate when outputs need both a spatial and a temporal identifier (\code{key} and \code{index}). The \code{cubble} class also provides a long form, which expands the \code{ts} column and stores the spatial variables as an attribute. The function \code{face_temporal()} is used to switch from the nested \code{cubble} into the long one. The first row in Figure illustrates this operation where the focus of the cube now changes from the site-variable face to the time-variable face.
+A long cubble (in the temporal form) has class \code{c("temporal_cubble_df", "cubble_df")}. It is built from a grouped tibble (\code{grouped_df}), which expands the temporal variables into the long form and stores the spatial variables as a data attribute.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -220,6 +227,20 @@ R> class(cb_long)
 \begin{CodeOutput}
 [1] "temporal_cubble_df" "cubble_df"          "tbl_df"            
 [4] "tbl"                "data.frame"        
+\end{CodeOutput}
+\end{CodeChunk}
+
+In the header of a long cubble object, the extent now prints the temporal range, the interval, and whether there is gaps in the data. It also prints the available spatial variables, as oppose to the temporal variables in the nested cubble. The spatial component can be printed with \code{spatial()}:
+
+\begin{CodeChunk}
+\begin{CodeOutput}
+# A tibble: 3 x 6
+# Rowwise: 
+  id           long   lat  elev name              wmo_id
+  <chr>       <dbl> <dbl> <dbl> <chr>              <dbl>
+1 ASN00086038  145. -37.7  78.4 essendon airport   95866
+2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870
+3 ASN00086282  145. -37.7 113.  melbourne airport  94866
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -352,10 +373,10 @@ R> cb_nested %>%
 # cubble:   key: id [2], index: date, nested form
 # extent:   [144.8321, -37.7276, 144.9066, -37.6655]
 # temporal: prcp [dbl], tmax [dbl], tmin [dbl]
-  id           long   lat name              wmo_id avg_temp ts      
-  <chr>       <dbl> <dbl> <chr>              <dbl>    <dbl> <list>  
-1 ASN00086282  145. -37.7 melbourne airport  94866     26.6 <tibble>
-2 ASN00086038  145. -37.7 essendon airport   95866     26.5 <tibble>
+  id           long   lat name              wmo_id avg_temp ts               
+  <chr>       <dbl> <dbl> <chr>              <dbl>    <dbl> <list>           
+1 ASN00086282  145. -37.7 melbourne airport  94866     26.6 <tibble [10 x 4]>
+2 ASN00086038  145. -37.7 essendon airport   95866     26.5 <tibble [10 x 4]>
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -418,8 +439,7 @@ R> cb_long |> unfold(long, lat)
 \begin{CodeOutput}
 # cubble:  key: id [3], index: date, long form
 # extent:  2020-01-01 -- 2020-01-10 [1D], no gaps
-# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin  long   lat
   <chr>       <date>     <dbl> <dbl> <dbl> <dbl> <dbl>
 1 ASN00086038 2020-01-01     0  26.8  11    145. -37.7
@@ -443,15 +463,14 @@ The \code{key} and \code{index} arguments in a \code{cubble} object corresponds 
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> res <- make_cubble(
+R> ts_nested <- make_cubble(
 +   spatial = stations, temporal = meteo_ts, coords = c(long, lat))
-R> (res_long <- face_temporal(res))
+R> (ts_long <- face_temporal(ts_nested))
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:  key: id [3], index: date, long form, [tsibble]
 # extent:  2020-01-01 -- 2020-01-10 [1D], no gaps
-# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
 1 ASN00086038 2020-01-01     0  26.8  11  
@@ -462,7 +481,7 @@ R> (res_long <- face_temporal(res))
 # i 25 more rows
 \end{CodeOutput}
 \begin{CodeInput}
-R> class(res_long)
+R> class(ts_long)
 \end{CodeInput}
 \begin{CodeOutput}
 [1] "temporal_cubble_df" "cubble_df"          "tbl_ts"            
@@ -474,7 +493,7 @@ The long cubble shows \code{[tsibble]} in the header to indicate the object also
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> res_long %>% tsibble::has_gaps()
+R> ts_long %>% tsibble::has_gaps()
 \end{CodeInput}
 \begin{CodeOutput}
 # A tibble: 3 x 2
@@ -490,8 +509,8 @@ An existing \code{cubble} object can promote its temporal component to a \code{t
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cb_long2 <- cb_long %>% make_temporal_tsibble() 
-R> all.equal(cb_long2, res_long)
+R> ts_long2 <- cb_long %>% make_temporal_tsibble() 
+R> identical(ts_long2, ts_long)
 \end{CodeInput}
 \begin{CodeOutput}
 [1] TRUE
@@ -505,7 +524,7 @@ Similarly, an \code{sf} object can be supplied as the spatial component to creat
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> (res_nested <- make_cubble(
+R> (sf_nested <- make_cubble(
 +   spatial = stations_sf, temporal = meteo, 
 +   key = id, index = date))
 \end{CodeInput}
@@ -513,15 +532,14 @@ R> (res_nested <- make_cubble(
 # cubble:   key: id [3], index: date, nested form, [sf]
 # extent:   [144.8321, -37.98, 145.0964, -37.6655]
 # temporal: prcp [dbl], tmax [dbl], tmin [dbl]
-  id           long   lat  elev name  wmo_id            geometry
-  <chr>       <dbl> <dbl> <dbl> <chr>  <dbl>         <POINT [°]>
-1 ASN00086038  145. -37.7  78.4 esse~  95866 (144.9066 -37.7276)
-2 ASN00086077  145. -38.0  12.1 moor~  94870   (145.0964 -37.98)
-3 ASN00086282  145. -37.7 113.  melb~  94866 (144.8321 -37.6655)
-# i 1 more variable: ts <list>
+  id           long   lat  elev name   wmo_id            geometry ts      
+  <chr>       <dbl> <dbl> <dbl> <chr>   <dbl>         <POINT [°]> <list>  
+1 ASN00086038  145. -37.7  78.4 essen~  95866 (144.9066 -37.7276) <tibble>
+2 ASN00086077  145. -38.0  12.1 moora~  94870   (145.0964 -37.98) <tibble>
+3 ASN00086282  145. -37.7 113.  melbo~  94866 (144.8321 -37.6655) <tibble>
 \end{CodeOutput}
 \begin{CodeInput}
-R> class(res_nested)
+R> class(sf_nested)
 \end{CodeInput}
 \begin{CodeOutput}
 [1] "spatial_cubble_df" "cubble_df"         "sf"               
@@ -534,7 +552,7 @@ The \code{sf} functions applicable to a \code{cubble} object have been listed in
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> #res_nested %>% sf::st_transform(crs = "EPSG:3857")
+R> #sf_nested %>% sf::st_transform(crs = "EPSG:3857")
 \end{CodeInput}
 \end{CodeChunk}
 
@@ -542,8 +560,8 @@ The counterpart to promote the spatial component in an existing \code{cubble} to
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cb_nested2 <- cb_nested %>% make_spatial_sf() 
-R> all.equal(cb_nested2, res_nested)
+R> sf_nested <- cb_nested %>% make_spatial_sf() 
+R> all.equal(sf_nested, sf_nested)
 \end{CodeInput}
 \begin{CodeOutput}
 [1] TRUE

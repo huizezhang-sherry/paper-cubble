@@ -56,7 +56,7 @@ knitr::opts_chunk$set(
 
 options(prompt = "R> ", continue = "+ ",
         tibble.print_max = 5, tibble.print_min = 5,
-        width = 90, styler.cache_root = "styler-perm")
+        width = 80, styler.cache_root = "styler-perm")
 ```
 
 ```{r echo = FALSE}
