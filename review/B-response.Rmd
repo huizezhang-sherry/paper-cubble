@@ -156,7 +156,11 @@ and how the package relates to existing packages for spatial and temporal data a
 
 The manuscript is in general clearly structured. However, an important reference to the R-package sftime is missing that also deals with the representation of spatiotemporal data. It might be beneficial to provide illustrative examples in the manuscript that clearly compare between a cubble representation and representations of existing packages. Which data sets/structures cannot (or with a greater effort) be represented with existing R-packages such as e.g. stars and sftime? 
 
-**\textcolor{purple}{Re: The comparison with other existing spatio-temporal class, i.e. stars and sftime, has been addressed in subsection 2.5 (after combining the original section 2 and 3 into section 2)}**
+**\textcolor{purple}{Re: The comparison with other existing spatio-temporal class, i.e. stars and sftime, has been addressed in Section 2.5 (after combining the original section 2 and 3 into section 2)}.**
+
+  * **\textcolor{purple}{The stars object uses an array structure underneath while cubble is built from a tibble. It is a matter of choice from the analysts on which structure they are more comfortable to use. We believe spatio-temporal analysts who are more comfortable processing data with data frame (tidyverse) will benefit from cubble}**
+  
+  * **\textcolor{purple}{With sftime, the main benefit cubble provides is memory efficiency and this efficiency comes with the assumption that the spatial sites are fixed in cubble (full space-time grids and sparse space-time layouts). This is beneficial when spatial variables are duplicated because of long temporal observational frequency: daily or subdaily or when the spatial geoemtry (polygons or multipolygons) are expensive to duplicate. We include a quick comparison of object size between an sftime object and the same data in a cubble object in the paper.}**
 
 For spatial data, the coordinate reference system is essential metadata information. In one example of the manuscript, the input data does have information on the CRS but it is not discussed in the manuscript how that is handled within cubble. How would coordinate transformations be handled with cubble?
 
