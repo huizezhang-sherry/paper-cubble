@@ -137,8 +137,9 @@ Table: (\#tab:funs) Functions implemented in the \pkg{cubble} package
 
 The \pkg{dplyr} package has many tools for wrangling tidy data,  many of which are useful in the spatio-temporal analysis. The \pkg{cubble} package provides methods that support the use of the following operations in the \pkg{dplyr} package on both the nested and long forms: `mutate`, `filter`, `summarise`, `select`, `arrange`, `rename`, `left_join`, and the slice family (`slice_*`).
 
-The toy example below demonstrates using dplyr verbs on a nested cubble: 
-```{r echo = TRUE}
+The toy example below demonstrates the using of a collection of dplyr functions (\code{mutate}, \code{select}, \code{filter}, and \code{arrange}) on a nested cubble object \code{cb_nested}: 
+
+```{r echo = TRUE, eval = FALSE}
 cb_nested %>% 
   mutate(avg_temp = mean(ts$tmax, na.rm = TRUE)) %>% 
   select(-elev) %>% 
@@ -152,14 +153,14 @@ The three basic cubble functions, \code{face_temporal()}, \code{face_spatial()},
 
 The pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the cubble object between the spatial and temporal face of the multivariate spatio-temporal cube, as illustrated in Figure \ref{fig:face}. The code below uses the function \code{face_temporal()} and \code{face_spatial()} to transform between a nested cubble (\code{cb_nested}) and a long one (\code{cb_long}), introduced earlier in subsection \@ref(object): 
 
-```{r echo = TRUE}
+```{r cubble-fun, echo = TRUE}
 identical(face_temporal(cb_nested), cb_long)
 identical(face_spatial(cb_long), cb_nested)
 ```
 
 The pair of verbs are exact inverse and apply both functions on a cubble object will result in the object itself: 
 
-```{r echo = TRUE}
+```{r cubble-fun2, echo = TRUE}
 identical(face_spatial(face_temporal(cb_nested)), cb_nested)
 identical(face_temporal(face_spatial(cb_long)), cb_long)
 ```

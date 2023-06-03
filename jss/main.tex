@@ -192,11 +192,11 @@ R> cb_nested
 # cubble:   key: id [3], index: date, nested form
 # extent:   [144.8321, -37.98, 145.0964, -37.6655]
 # temporal: prcp [dbl], tmax [dbl], tmin [dbl]
-  id           long   lat  elev name              wmo_id ts      
-  <chr>       <dbl> <dbl> <dbl> <chr>              <dbl> <list>  
-1 ASN00086038  145. -37.7  78.4 essendon airport   95866 <tibble>
-2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870 <tibble>
-3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble>
+  id           long   lat  elev name              wmo_id ts               
+  <chr>       <dbl> <dbl> <dbl> <chr>              <dbl> <list>           
+1 ASN00086038  145. -37.7  78.4 essendon airport   95866 <tibble [10 x 4]>
+2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870 <tibble [10 x 4]>
+3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble [10 x 4]>
 \end{CodeOutput}
 \begin{CodeInput}
 R> class(cb_nested)
@@ -221,8 +221,7 @@ R> cb_long
 \begin{CodeOutput}
 # cubble:  key: id [3], index: date, long form
 # extent:  2020-01-01 -- 2020-01-10 [1D], no gaps
-# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id
-#   [dbl]
+# spatial: long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id [dbl]
   id          date        prcp  tmax  tmin
   <chr>       <date>     <dbl> <dbl> <dbl>
 1 ASN00086038 2020-01-01     0  26.8  11  
@@ -368,7 +367,7 @@ cubble & basics & \texttt{face\_temporal}, \texttt{face\_spatial}, \texttt{unfol
 
 The \pkg{dplyr} package has many tools for wrangling tidy data, many of which are useful in the spatio-temporal analysis. The \pkg{cubble} package provides methods that support the use of the following operations in the \pkg{dplyr} package on both the nested and long forms: \texttt{mutate}, \texttt{filter}, \texttt{summarise}, \texttt{select}, \texttt{arrange}, \texttt{rename}, \texttt{left\_join}, and the slice family (\texttt{slice\_*}).
 
-The toy example below demonstrates using dplyr verbs on a nested cubble:
+The toy example below demonstrates the using of a collection of dplyr functions (\code{mutate}, \code{select}, \code{filter}, and \code{arrange}) on a nested cubble object \code{cb_nested}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -378,15 +377,6 @@ R> cb_nested %>%
 +   filter(avg_temp > 26) %>% 
 +   arrange(-avg_temp)
 \end{CodeInput}
-\begin{CodeOutput}
-# cubble:   key: id [2], index: date, nested form
-# extent:   [144.8321, -37.7276, 144.9066, -37.6655]
-# temporal: prcp [dbl], tmax [dbl], tmin [dbl]
-  id           long   lat name              wmo_id avg_temp ts               
-  <chr>       <dbl> <dbl> <chr>              <dbl>    <dbl> <list>           
-1 ASN00086282  145. -37.7 melbourne airport  94866     26.6 <tibble [10 x 4]>
-2 ASN00086038  145. -37.7 essendon airport   95866     26.5 <tibble [10 x 4]>
-\end{CodeOutput}
 \end{CodeChunk}
 
 \hypertarget{cubble-1}{%
@@ -401,13 +391,13 @@ The pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the c
 R> identical(face_temporal(cb_nested), cb_long)
 \end{CodeInput}
 \begin{CodeOutput}
-[1] FALSE
+[1] TRUE
 \end{CodeOutput}
 \begin{CodeInput}
 R> identical(face_spatial(cb_long), cb_nested)
 \end{CodeInput}
 \begin{CodeOutput}
-[1] FALSE
+[1] TRUE
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -418,13 +408,13 @@ The pair of verbs are exact inverse and apply both functions on a cubble object 
 R> identical(face_spatial(face_temporal(cb_nested)), cb_nested)
 \end{CodeInput}
 \begin{CodeOutput}
-[1] FALSE
+[1] TRUE
 \end{CodeOutput}
 \begin{CodeInput}
 R> identical(face_temporal(face_spatial(cb_long)), cb_long)
 \end{CodeInput}
 \begin{CodeOutput}
-[1] FALSE
+[1] TRUE
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -689,57 +679,18 @@ Some useful controls over the glyph map are also available in the \code{geom_gly
 \hypertarget{examples}{%
 \section{Applications}\label{examples}}
 
-The five examples here are chosen to illustrate these aspects of the \pkg{cubble} package: creating a \code{cubble} object from two Coronavirus (COVID) data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, aggregating information spatially to explore precipitation patterns, matching river level data and weather station records for analysis of water supply, reading NetCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. (There is an additional example and figures in the Appendix, and more examples in the package vignettes.)
+The five examples here are chosen to illustrate these aspects of the \pkg{cubble} package: creating a \code{cubble} object from two Coronavirus (COVID) data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, matching river level data and weather station records for analysis of water supply, reading NetCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots. (The Appendix provides another example on aggregating information spatially to explore precipitation patterns.)
 
 \hypertarget{covid}{%
 \subsection{Victoria COVID spatio-temporal incidence and spread}\label{covid}}
 
-Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualize COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Here is how to do this with the \pkg{cubble} package, including how to handle mismatches arising from different names of the same LGAs in the two tables. The COVID data is store in a csv file and looks like:
+Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualize COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Both the COVID count data (\code{covid}) and the LGA information (\code{lga}) are available in the \pkg{cubble} package with the \code{covid} data stored as a \code{tsibble} object, the \code{lga} data as an \code{sf} object.
+
+The \code{make_cubble()} function is used to create a \code{cubble} object from the two spatial and temporal tables as described in Section \ref{create}. The \code{by} argument allows for mismatch of key names from the two tables in the \code{*_join()} \code{by} syntax:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> covid |> head(5)
-\end{CodeInput}
-\begin{CodeOutput}
-# A tsibble: 5 x 5 [1D]
-# Key:       lga [1]
-# Groups:    lga, source [1]
-  date       lga        source                            n roll_mean
-  <date>     <chr>      <chr>                         <int>     <dbl>
-1 2022-01-01 Alpine (S) Contact with a confirmed case     1        NA
-2 2022-01-02 Alpine (S) Contact with a confirmed case     2        NA
-3 2022-01-03 Alpine (S) Contact with a confirmed case     4        NA
-4 2022-01-04 Alpine (S) Contact with a confirmed case     4        NA
-5 2022-01-05 Alpine (S) Contact with a confirmed case     2        NA
-\end{CodeOutput}
-\end{CodeChunk}
-
-and the spatial polygons are an ESRI shapefile as follows:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> lga |> head(5)
-\end{CodeInput}
-\begin{CodeOutput}
-Simple feature collection with 5 features and 1 field
-Geometry type: MULTIPOLYGON
-Dimension:     XY
-Bounding box:  xmin: 142.3535 ymin: -38.67876 xmax: 147.3909 ymax: -36.39269
-Geodetic CRS:  WGS 84
-               lga                       geometry
-132     Alpine (S) MULTIPOLYGON (((146.7258 -3...
-133    Ararat (RC) MULTIPOLYGON (((143.1807 -3...
-134   Ballarat (C) MULTIPOLYGON (((143.6622 -3...
-135    Banyule (C) MULTIPOLYGON (((145.1357 -3...
-136 Bass Coast (S) MULTIPOLYGON (((145.5207 -3...
-\end{CodeOutput}
-\end{CodeChunk}
-
-The function \code{make_cubble()} is used to create a \code{cubble} object from the two spatial and temporal tables, and requires specifying the arguments \code{key}, \code{index}, and \code{coords} (as described in Section \ref{create}). It will automatically try to match the sites in both tables using the location names and will show a warning message when there are mismatches, as shown below:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> cb <- make_cubble(spatial = lga, temporal = covid)
+R> cb <- make_cubble(lga, covid, by = c("lga_name_2018" = "lga"))
 \end{CodeInput}
 \begin{CodeOutput}
 Warning: st_centroid assumes attributes are constant over geometries
@@ -756,11 +707,14 @@ The cubble is created only with sites having both spatial and temporal informati
 \end{CodeOutput}
 \end{CodeChunk}
 
-It can be seen that there are two-way mismatches -- LGAs in the COVID data that do not match with LGAs names in the spatial polygon data, and vice versa. The mismatches can be identified by using the function \code{check_key}:
+The warning message reports on the mismatches of location from both sides: there are LGAs in the COVID data that do not match with LGAs names in the spatial polygon data, and vice versa. The \code{make_cubble()} function prompts the use of \code{check_key()} to identify the mismatches:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> (check_res <- check_key(spatial = lga, temporal = covid))
+R> (check_res <- check_key(
++   spatial = lga, temporal = covid, 
++   by = c("lga_name_2018" = "lga")
++ ))
 \end{CodeInput}
 \begin{CodeOutput}
 $paired
@@ -791,15 +745,16 @@ $others$temporal
 \end{CodeOutput}
 \end{CodeChunk}
 
-With this information both tables can be fixed, to create the desired \code{cubble} object, as follows:
+The check result is a list with three elements: 1) matched pairs from both tables, 2) those pairs that can be potentially paired, and 3) others. Here the main mismatch comes from different encodings of two LGAs: Kingston and Latrobe. Analysts can then modify the input spatial and temporal data accordingly and create the cubble again:
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> lga2 <- lga |>
++   rename(lga = lga_name_2018) |> 
 +   mutate(lga = ifelse(lga == "Kingston (C) (Vic.)", "Kingston (C)", lga),
 +          lga = ifelse(lga == "Latrobe (C) (Vic.)", "Latrobe (C)", lga)) |>
-+   filter(!lga %in% check_res$others$spatial)
-R> 
++   filter(!lga %in% check_res$others$spatial) 
+R>   
 R> covid2 <- covid |> filter(!lga %in% check_res$others$temporal)
 R> 
 R> (cb <- make_cubble(spatial = lga2, temporal = covid2))
@@ -808,13 +763,13 @@ R> (cb <- make_cubble(spatial = lga2, temporal = covid2))
 # cubble:   key: lga [80], index: date, nested form, [sf]
 # extent:   [140.961682, -39.1591895, 149.976291, -33.9804256]
 # temporal: source [chr], n [int], roll_mean [dbl]
-  lga             long   lat                       geometry ts        
-  <chr>          <dbl> <dbl>             <MULTIPOLYGON [°]> <list>    
-1 Alpine (S)      147. -36.9 (((146.7258 -36.45922, 146.80~ <gropd_ts>
-2 Ararat (RC)     143. -37.5 (((143.1807 -37.73152, 143.17~ <gropd_ts>
-3 Ballarat (C)    144. -37.5 (((143.6622 -37.57241, 143.66~ <gropd_ts>
-4 Banyule (C)     145. -37.7 (((145.1357 -37.74091, 145.13~ <gropd_ts>
-5 Bass Coast (S)  146. -38.5 (((145.5207 -38.30667, 145.54~ <gropd_ts>
+  lga             long   lat                                   geometry ts      
+  <chr>          <dbl> <dbl>                         <MULTIPOLYGON [°]> <list>  
+1 Alpine (S)      147. -36.9 (((146.7258 -36.45922, 146.8033 -36.45139~ <tbl_ts>
+2 Ararat (RC)     143. -37.5 (((143.1807 -37.73152, 143.1793 -37.73242~ <tbl_ts>
+3 Ballarat (C)    144. -37.5 (((143.6622 -37.57241, 143.6686 -37.53844~ <tbl_ts>
+4 Banyule (C)     145. -37.7 (((145.1357 -37.74091, 145.1331 -37.74281~ <tbl_ts>
+5 Bass Coast (S)  146. -38.5 (((145.5207 -38.30667, 145.5418 -38.30938~ <tbl_ts>
 # i 75 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -843,25 +798,16 @@ R> tmax <- tmax |>
 +     yearmonth = tsibble::make_yearmonth(
 +       year = ifelse(lubridate::year(date) > 2015, 2016, 1971),
 +       month = lubridate::month(date))
-+     )|>
-+   summarise(tmax = mean(tmax, na.rm = TRUE))
++       )|>
++   summarise(tmax = mean(tmax, na.rm = TRUE)) %>% 
++   mutate(group = as.factor(lubridate::year(yearmonth)),
++          month = lubridate::month(yearmonth))
 \end{CodeInput}
 \end{CodeChunk}
 
-A quick check on the number of observations for each location is made, revealing that there are several with less than 24 observations -- these stations lack temperature values for some months. In this example, those stations are removed by switching to a long \code{cubble} to operate on the spatial component over time, and then, move back into the nested \code{cubble} (to make the glyph map):
+A quick check on the number of observations for each location is made, revealing that there are several with less than 24 observations -- these stations lack temperature values for some months. In this example, those stations are removed by switching to the nested \code{cubble} to operate on the spatial component over time, and then, move back into the long \code{cubble} (to make the glyph map):
 
 \begin{CodeChunk}
-\begin{CodeInput}
-R> tmax |> 
-+   face_spatial() |> 
-+   mutate(n = nrow(ts)) |>
-+   arrange(n) |>
-+   pull(n) |> 
-+   head(10)
-\end{CodeInput}
-\begin{CodeOutput}
- [1] 12 12 12 13 19 19 20 24 24 24
-\end{CodeOutput}
 \begin{CodeInput}
 R> tmax <- tmax |> 
 +   face_spatial() |> 
@@ -874,18 +820,13 @@ In order to create a glyph map displaying the monthly series (Figure \ref{fig:ba
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> nsw_vic <- ozmaps::abs_ste |>
-+   filter(NAME %in% c("Victoria", "New South Wales"))
-R> 
 R> ggplot() +
-+   geom_sf(data = nsw_vic,
-+           fill = "transparent", color = "grey",
-+           linetype = "dotted") +
++   geom_sf(data = MAP_DATA, ...) +
 +   geom_glyph(data = tmax,
 +              aes(x_major = long, x_minor = month,
 +                  y_major = lat, y_minor = tmax,
 +                  group = interaction(id, group), color = group),
-+              width = 1, height = 0.5) +
++              width = 1, height = 0.5) + 
 +   ...
 \end{CodeInput}
 \end{CodeChunk}
@@ -942,17 +883,6 @@ R> dt <- as_cubble(
 \end{CodeChunk}
 
 Creating the plot requires making transformations on time, unfolding the data for computing the statistic of interest, which is plotted directly as a contour plot with ggplot. Code is provided to accomplish this in the supplementary material.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/netcdf-1} 
-
-}
-
-\caption[A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002]{A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04.}\label{fig:netcdf}
-\end{figure}
-\end{CodeChunk}
 
 \hypertarget{interactive-graphics-1}{%
 \subsection{Interactive graphics}\label{interactive-graphics-1}}
