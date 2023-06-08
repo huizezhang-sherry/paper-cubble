@@ -6,7 +6,6 @@ output: html_document
 ## Australian historical maximum temperature {#historicaltmax}
 
 ```{r}
-
 load(here::here("data/historical_tmax.rda"))
 ```
 
@@ -42,6 +41,7 @@ A quick check on the number of observations for each location is made, revealing
 ```{r echo = TRUE}
 tmax <- tmax |> 
   face_spatial() |> 
+  rowwise() %>% 
   filter(nrow(ts) == 24) |>
   face_temporal()
 ```
