@@ -502,8 +502,16 @@ The long cubble shows \code{[tsibble]} in the header to indicate the object also
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> #ts_long %>% has_gaps()
+R> ts_long %>% has_gaps()
 \end{CodeInput}
+\begin{CodeOutput}
+# A tibble: 3 x 2
+  id          .gaps
+  <chr>       <lgl>
+1 ASN00086038 FALSE
+2 ASN00086077 FALSE
+3 ASN00086282 FALSE
+\end{CodeOutput}
 \end{CodeChunk}
 
 An existing \code{cubble} object can promote its temporal component to a \code{tsibble} object by applying \code{make_temporal_tsibble()}. The following code illustrates this with the object \code{cb_long} created in section \ref{create} and the promoted cubble object is equal to the cubble object originally created from a \code{tsibble} object:
@@ -586,7 +594,7 @@ Given the vast spatio-temporal data structure available in \proglang{R} to repre
 
 The \pkg{stars} package \citep{stars} uses an array structure, as oppose to tibble in the \code{cubble} package, to represent multivariate spatio-temporal data. While both packages support vector and raster data, it is a matter of choice on which structure to use given the application. Analysts working on satellite imageries may prefer the array structure while others originally working with spatio-temporal data in the 2D data frames may find \pkg{cubble} easier to adopt from their existing computing workflow.
 
-The \pkg{sftime} package \citep{sftime} also builds from a tibble object, with a main focus to handle irregular spatio-temporal data. While \pkg{sftime} can also handle full space-time grids and sparse space-time layouts, \pkg{cubble} can be thought of as simplifying the repetition in spatial variables with two linked tibbles. This simplification gives memory efficiency when data is observed frequent, i.e.~daily or subdaily, or the spatial geometry is expensive to repeat, i.e.~polygons or multipolygons. Consider the \code{climate_aus} data in the \pkg{cubble} package with 639 stations observed daily in a single year 2020. The created \code{sftime} object is approximately 14 times larger than the corresponding \code{cubble} object (118.24 MB vs.~8.43 MB).
+The \pkg{sftime} package \citep{sftime} also builds from a tibble object, with a main focus to handle irregular spatio-temporal data. While \pkg{sftime} can also handle full space-time grids and sparse space-time layouts, \pkg{cubble} can be thought of as simplifying the repetition in spatial variables with two linked tibbles. This simplification gives memory efficiency when data is observed frequent, i.e.~daily or subdaily, or the spatial geometry is expensive to repeat, i.e.~polygons or multipolygons. Consider the \code{climate_aus} data in the \pkg{cubble} package with 639 stations observed daily in a single year 2020. The created \code{sftime} object is approximately 14 times larger than the corresponding \code{cubble} object (118.24 MB vs.~8.52 MB).
 
 \hypertarget{others}{%
 \section{Other features and considerations}\label{others}}
@@ -595,17 +603,6 @@ The \pkg{sftime} package \citep{sftime} also builds from a tibble object, with a
 \subsection{Hierarchical structure}\label{hierarchical-structure}}
 
 Spatial locations can have grouping structures either inherent to the data e.g., state within country or obtained during the analysis e.g., cluster id. In this case, it can be useful to summarize variables at various levels of the hierarchy. The function \code{switch_key()} can be used to change the grouping level of spatial locations. The diagram in Figure \ref{fig:illu-hier} shows how this function can be used to switch the grouping from station ids to cluster ids. The result can also be stretched into long form. By specifying \code{cluster_nested <- station_nested \%>\% switch_key(key = cluster)}, the \code{cubble} object redefines its \code{key} from the \code{id} column in \code{station_nested} to the \code{cluster} column in \code{cluster_nested}. All the spatial variables belonging to the \code{cluster} column are now nested into a \code{.val} column which allows for summarizing based on cluster.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics[width=1\linewidth,height=0.4\textheight]{../figures/diagram-keynotes/diagram-keynotes.003} 
-
-}
-
-\caption[Hierarchical spatial structure can be handled using \code{switch\_key()}, to create summaries based on any level]{Hierarchical spatial structure can be handled using \code{switch\_key()}, to create summaries based on any level. Here the switch is between the station id and a cluster id. Once the change is made the data can be stretched into the long form.}\label{fig:illu-hier}
-\end{figure}
-\end{CodeChunk}
 
 \hypertarget{matching}{%
 \subsection{Data fusion and matching}\label{matching}}
@@ -866,19 +863,91 @@ This function requires passing the major and minor data sets used for matching, 
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> res <- match_sites(
-+   river, climate,
-+   temporal_by = c("Water_course_level" = "prcp"),
-+   temporal_independent = "prcp",  
-+   temporal_n_highest = 30,
-+   temporal_min_match = 15, 
-+ )
+R> (res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10))
 \end{CodeInput}
+\begin{CodeOutput}
+# A tibble: 10 x 4
+  from        to      dist group
+  <chr>       <chr>    [m] <int>
+1 ASN00088051 406213 1838.     1
+2 ASN00084145 222201 2185.     2
+3 ASN00085072 226027 3282.     3
+4 ASN00080015 406704 4034.     4
+5 ASN00085298 226027 4207.     5
+# i 5 more rows
+\end{CodeOutput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+\begin{CodeOutput}
+# cubble:   key: id [16], index: date, nested form
+# spatial:  [144.5203, -38.144913, 148.4667, -36.128657], Missing CRS!
+# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+  id           long   lat  elev name           wmo_id ts       type   dist group
+  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>   <chr>   [m] <int>
+1 ASN00080015  145. -36.2  96   echuca  aerod~  94861 <tibble> clim~ 4034.     4
+2 ASN00080091  145. -36.3 105   kyabram dpi     95833 <tibble> clim~ 7460.    10
+3 ASN00082042  146. -36.8 502   strathbogie     95843 <tibble> clim~ 6153.     6
+4 ASN00084145  148. -37.7  62.7 orbost          95918 <tibble> clim~ 2185.     2
+5 ASN00085072  147. -38.1   4.6 east sale air~  94907 <tibble> clim~ 3282.     3
+# i 11 more rows
+\end{CodeOutput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> (res_tm <- res_sp %>% 
++   match_temporal(
++     match_id = group,
++     temporal_by = c("prcp" = "Water_course_level"),
++     temporal_n_highest = 30,
++     temporal_min_match = 15))
+\end{CodeInput}
+\begin{CodeOutput}
+# A tibble: 8 x 2
+  group n_matches
+  <int>     <dbl>
+1     1        30
+2     7        26
+3     6        23
+4     9        21
+5     4        20
+# i 3 more rows
+\end{CodeOutput}
+\end{CodeChunk}
+
+Or use \code{return_cubble = TRUE} to return a cubble object:
+
+\begin{CodeChunk}
+\begin{CodeOutput}
+# cubble:   key: id [16], index: date, nested form
+# spatial:  [144.5203, -38.144913, 148.4667, -36.128657], Missing CRS!
+# temporal: date [date], matched [dbl]
+  id          long   lat  elev name  wmo_id type   dist group ts       n_matches
+  <chr>      <dbl> <dbl> <dbl> <chr>  <dbl> <chr>   [m] <int> <list>       <dbl>
+1 ASN000880~  145. -37.0 290   rede~  94859 clim~ 1838.     1 <tibble>        30
+2 406213      145. -37.0  NA   CAMP~     NA river 1838.     1 <tibble>        30
+3 ASN000841~  148. -37.7  62.7 orbo~  95918 clim~ 2185.     2 <tibble>         5
+4 222201      148. -37.7  NA   SNOW~     NA river 2185.     2 <tibble>         5
+5 ASN000850~  147. -38.1   4.6 east~  94907 clim~ 3282.     3 <tibble>        14
+# i 11 more rows
+\end{CodeOutput}
 \end{CodeChunk}
 
 This function returns a \code{cubble} object, with additional columns: \code{dist} storing the distance between matched stations, \code{group} summarizing spatial matching, and \code{n_match} showing the temporal matching.
 
 Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardized data as time series (b). The expected concurrent increase in precipitation and water level can be seen clearly.
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/matching-1} 
+
+}
+
+\caption[Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b)]{Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here.}\label{fig:matching}
+\end{figure}
+\end{CodeChunk}
 
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis data}\label{era5-climate-reanalysis-data}}
@@ -896,6 +965,17 @@ R> dt <- as_cubble(
 \end{CodeChunk}
 
 Creating the plot requires making transformations on time, unfolding the data for computing the statistic of interest, which is plotted directly as a contour plot with ggplot. Code is provided to accomplish this in the supplementary material.
+
+\begin{CodeChunk}
+\begin{figure}
+
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/netcdf-1} 
+
+}
+
+\caption[A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002]{A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04.}\label{fig:netcdf}
+\end{figure}
+\end{CodeChunk}
 
 \hypertarget{interactive-graphics-1}{%
 \subsection{Interactive graphics}\label{interactive-graphics-1}}

@@ -196,7 +196,7 @@ class(ts_long)
 The long cubble shows \code{[tsibble]} in the header to indicate the object also being in a \code{tbl_ts} class (\code{tsibble}). Methods applies to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
 
 ```{r echo = TRUE}
-#ts_long %>% has_gaps()
+ts_long %>% has_gaps()
 ```
 
 An existing \code{cubble} object can promote its temporal component to a \code{tsibble} object by applying \code{make_temporal_tsibble()}. The following code illustrates this with the object \code{cb_long} created in section \@ref(create) and the promoted cubble object is equal to the cubble object originally created from a \code{tsibble} object:
