@@ -21,25 +21,14 @@ output: pdf_document
 
 <!-- The most common space-time cube uses the three axes, time, latitude, longitude, and can be considered stacking space across time. Ours is a multivariate spatio-temporal cube with the three axes defined to be time, site and variables, as illustrated in the leftmost column of Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hyper-cubes when describing multivariate spatio-temporal data and is the conceptual framework behind the \code{cubble} class. With this conceptual model, operations on spatio-temporal data can be mapped to operations on the cube and the rest of Figure \ref{fig:cube-def} show examples of slicing on site, time, and variable.  -->
 
-[conceptual framework] The \code{cubble} class tackles the spatio-temporal data collected at unique fixed locations and allowed for irregularity in the temporal dimension, i.e. irregular time steps and missingness. 
- 
-The \code{cubble} class (\code{cubble_df}) is an S3 class [@advr] built on the \code{tibble} class, specifically to organize spatio-temporal data. 
-It uses three attributes to character the spatio-temporal data:
+[conceptual framework] Spatio-temporal data comes various spatial and temporal characteristics and requires different data structures to wrangle: climate weather stations are recorded at fixed point location but with potential temporal data quality issue (missingness on the day); GPS data tracks unique point locations at different timestamps; satellite imageries captures snapshots of landscape at selected time. The type of spatio-temporal data cubble tackles are those collected at unique fixed locations while allowed for irregularity in the temporal dimension, like the weather station data. In the four layouts presented by the spacetime paper [@spacetime], cubble handles full space-time and sparse space-time layouts.
 
-  * \code{key} identifies the spatial locations 
-  * \code{date} identifies the temporal order, and 
-  * \code{coords} identifies the longitude and latitude coordinate associated with the location.
+The cubble class is an S3 class, built on tibble, to pivot spatio-temporal data into a nested (spatial) form and a long (temporal) form. It has two subclasses:
 
-The base class \code{cubble_df} has two specialised class \code{spatial_cubble_df} and \code{temporal_cubble_df} to arrange the spatio-temporal data in two forms, as illustrated in Figure \ref{fig:class}. 
+-   a nested/ spatial cubble has class `c("spatial_cubble_df", "cubble_df")`
+-   a long/ temporal cubble has class `c("temporal_cubble_df", "cubble_df")`
 
-```{r class, fig.align="center", out.width = "100%", fig.cap = "Illustration of a cubble object in the long form and nested form, along with the associated attributes."}
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.007.png"))
-```
-
-
-### nested cubble
-
-A nested cubble (in the spatial form) has class \code{c("spatial_cubble_df", "cubble_df")}. It arranges spatial variables in columns and nests temporal variables in a specialised \code{ts} column. Below prints an nested cubble object using the weather station data collected in three airports. The data is a subset of a larger data \code{climate_aus} collected from National Oceanic and Atmospheric Administration (NOAA) Global Historical Climatology Network Daily (GHCND). The data include spatial variables such as station ID, longitude, latitude, elevation, station name, world meteorology organisation ID, in additional to daily temporal information, maximum and minimum temperature values and precipitation for the year 2020. The airport data is a subset of three airport stations in Melbourne for the initial 10 days of the year (the creation of a cubble object will be explained in Section \@ref(create)):
+A nested cubble arranges spatial variables in columns and nests temporal variables in a specialised `ts` column. Below prints an nested cubble object using the weather station data collected in three airports (the creation of a cubble object will be explained in Section \@ref(create)). This toy data is a subset of a larger data \code{climate_aus} collected from Global Historical Climatology Network Daily (GHCND). The three airport stations in Melbourne are recorded with station metadata: station ID, longitude, latitude, elevation, station name, world meteorology organisation ID. The temporal variables are precipitation, maximum and minimum temperature, which can be read from the cubble header:
 
 ```{r}
 cb_nested <- climate_mel
@@ -47,27 +36,39 @@ cb_nested <- climate_mel
 
 ```{r echo = TRUE}
 cb_nested
-class(cb_nested)
 ```
 
-A nested cubble header prints the key and index variable name and its form. The spatial extent is given by the bounding box with CRS information (missing here). The nested cubble header also shows the name of temporal variables nested in the \code{ts} column and their variable types: \code{prcp [dbl], tmax [dbl], tmin [dbl]}.
+<!-- A nested cubble header prints the key and index variable name and its form. The spatial extent is given by the bounding box with CRS information (missing here). The nested cubble header also shows the name of temporal variables nested in the \code{ts} column and their variable types: \code{prcp [dbl], tmax [dbl], tmin [dbl]}. -->
 
-### long cubble
+A long cubble expands the temporal variables into the long form and stores the spatial variables as a data attribute. In the header of a long cubble object, the extent now prints the temporal range, the interval, and whether there is gaps in the data. It also prints the available spatial variables, as oppose to the temporal variables in the nested cubble.
 
-A long cubble (in the temporal form) has class \code{c("temporal_cubble_df", "cubble_df")}, which expands the temporal variables into the long form and stores the spatial variables as a data attribute.
-  
 ```{r}
 cb_long <- face_temporal(climate_mel)
 ```
 
 ```{r echo = TRUE}
 cb_long
-class(cb_long)
 ```
 
-In the header of a long cubble object, the extent now prints the temporal range, the interval, and whether there is gaps in the data. It also prints the available spatial variables, as oppose to the temporal variables in the nested cubble. The spatial component can be printed with \code{spatial()}:
+### The cubble attributes
 
-```{r}
+```{r class, fig.align="center", out.width = "100%", fig.cap = "Illustration of a cubble object in the long form and nested form, along with the associated attributes."}
+#knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
+```
+
+A cubble object inherits the attributes from tibble (and its subclasses): `class`, `row.names`, and `names`, in addition to three specialised attributes:
+
+-   `key`: the spatial identifier
+-   `index`: the temporal identifier
+-   `coords`: a pair of ordered coordinates associated with the location
+
+Readers known the `key` and `index` attributes from the `tsibble` package would already be familiar the two arguments. In cubble, the `key` attribute identifies the row in the nested cubble, and together with the `index` argument, identifies the row in the long cubble. Currently, cubble only supports one variable as the key and the accepted temporal class for index includes the base R class `Date`, `POSIXlt`, `POSIXct` and tsibble's `yearmonth`, `yearweek`, and `yearquarter` class.
+
+The `coords` attribute takes an ordered pair of coordinate. It can be a unprojected pair of longitude and latitude, or a projected easting and northing values. Under the hood, the `sf` package is used to calculate the bounding box, shown in the header of a nested cubble, and other spatial operations.
+
+The long cubble has a special attribute `spatial` to store the spatial variables: all the variables in the nested cubble, except for the `ts` column. The shortcut function are available to extract components in the attributes, for example, \code{spatial()} for extracting the tibble object for the spatial variables: 
+
+```{r echo = TRUE}
 spatial(cb_long)
 ```
 
@@ -77,14 +78,14 @@ spatial(cb_long)
 
 Spatio-temporal data may arrive in separate tables for analysts. For example, in climate data, analysts may initially receive station data containing geographic location information, variables recorded and their recording periods. They can then query the temporal variables using the stations of interest to obtain the corresponding temporal data. Alternatively, analyses may begin as purely spatial or temporal, and analysts may obtain additional temporal or spatial data to expand the result to spatio-temporal.
 
-The function \code{make_cubble()} composes a \code{cubble} object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}) with the three attributes introduced in the subsection \@ref(object):  \code{key}, \code{index}, and \code{coords}. The following code creates the nested \code{cubble} object shown previously:
+The function \code{make_cubble()} composes a \code{cubble} object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}) with the three attributes introduced in the subsection \@ref(object): \code{key}, \code{index}, and \code{coords}. The following code creates the nested \code{cubble} object shown previously:
 
 ```{r echo = TRUE, eval = FALSE}
 make_cubble(spatial = stations, temporal = meteo,
             key = id, index = date, coords = c(long, lat))
 ```
 
-### Coercing from foregin objects
+### Coercing from foreign objects
 
 Spatio-temporal data in other foreign objects can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes casting from a \code{tibble} or \code{data.frame} with both spatial and temporal information, a NetCDF object, a \code{stars} object [@stars], and a \code{sftime} object [@sftime]. The two examples below show the casting from a tibble and a NetCDF object to a cubble object.
 
@@ -113,33 +114,35 @@ We would recommend reducing to about 300 $\times$ 300 grid points for three dail
 
 ## Functions and methods
 
-Table \@ref(tab:funs) summarises functions implemented in the \pkg{cubble} package and Table \@ref(tab:methods) details the methods implemented for each of the three cubble classes: \code{cubble\_df}, \code{spatial\_cubble\_df}, and \code{temporal\_cubble\_df}. 
+Table \@ref(tab:funs) summarises functions implemented in the \pkg{cubble} package and Table \@ref(tab:methods) details the methods implemented for each of the three cubble classes: \code{cubble\_df}, \code{spatial\_cubble\_df}, and \code{temporal\_cubble\_df}.
 
-Table: (\#tab:funs) Functions implemented in the \pkg{cubble} package
+| Category  | Functions |
+|--------|--------------------------------------------------------|
+| base R    | `[`, `[[<-`, `names<-` |
+| tidyverse | `dplyr_row_slice`, `dplyr_col_modify`, `dplyr_reconstruct`, `select`, `mutate`, `arrange`, `filter`, `group_by`, `ungroup`, `summarise`, `select`, `slice`, `rowwise`, `rename`, `bind_rows`, `bind_cols`, `relocate`, `type_sum`, the slice family (`slice_head`, `slice_tail`, `slice_max`, `slice_min`, `slice_sample`) and the join family (`left_join`, `right_join`, `inner_join`, `full_join`, `anti_join`, `semi_join`) |
+| cubble    | `as_cubble`, `cubble`, `make_cubble`, `check_key` `face_temporal`, `face_spatial`, `unfold`, `key`, `key_vars`, `key_data`, `index`, `index_var`, `coords`, `spatial`, `match_sites`, `match_spatial`, `match_temporal`, `geom_glyph`, `geom_glyph_box`, `geom_glyph_line`, `make_spatial_sf`, `make_temporal_tsibble`, `fill_gaps`, `scan_gaps`                                                                                |
 
-|Category |   Functions|
-|---|----------------|
-|base R | `[`, `[<-`, `names<-`, `[[`, `[[<-`| 
-|tidyverse |`dplyr_row_slice`, `dplyr_col_modify`, `dplyr_reconstruct`, `select`, `mutate`, `arrange`, `filter`, `summarise`, `select`, `slice`, `rowwise`, `rename`, `bind_cols`, `group_by`, `ungroup`, `slice_*`, `*_join`, `relocate`, `type_sum` | 
-|cubble | `cubble`, `make_cubble`, `new_spatial_cubble`, `new_temporal_cubble`, `make_spatial_sf`, `make_temporal_tsibble`, `face_temporal`, `face_spatial`, `unfold`, `key`, `key_vars`, `key_data`, `index`, `index_var`, `coords`, `spatial`, `fill_gaps`, `scan_gaps`, `switch_key`, `match_sites`, `match_spatial`, `match_temporal`, `geom_glyph`, `geom_glyph_box`, `geom_glyph_line`|
+: (#tab:funs) Functions implemented in the \pkg{cubble} package
 
-Table: (\#tab:methods) Methods implemented for the three \code{cubble} classes: \code{cubble\_df}, \code{spatial\_cubble\_df}, and \code{temporal\_cubble\_df}
+| Class                | Methods|
+|------------------|------------------------------------------------------|
+| `cubble_df`          | `[[<-, dplyr_col_modify, key_data, key_vars, key, print`                                                                                                                                                                                     |
+| `spatial_cubble_df`  | `[, names<-,  tbl_sum, dplyr_reconstruct, dplyr_row_slice, face_spatial, face_temporal, unfold, arrange, rename, rowwise, group_by, ungroup, select, spatial, summarise, unfold, update_cubble`                                              |
+| `temporal_cubble_df` | `[, names<-, tbl_sum, arrange, dplyr_reconstruct, dplyr_row_slice, face_spatial, face_temporal, unfold, fill_gaps, group_by, ungroup,  rename, rowwise, scan_gaps, select, spatial, summarise, tbl_sum, bind_rows, bind_cols, update_cubble` |
 
-|Class | Methods | 
-| ----- | ----------------|
-|`cubble_df` | `[, dplyr_col_modify, key_data, key_vars, key, names<-, print, tbl_sum`|
-|`spatial_cubble_df` | `dplyr_reconstruct, dplyr_row_slice, face_spatial, face_temporal, arrange, rename, rowwise, group_by, ungroup, select, spatial, summarise, tbl_sum, unfold, update_cubble`|
-|`temporal_cubble_df` | `arrange, dplyr_reconstruct, dplyr_row_slice, face_spatial, face_temporal, fill_gaps, group_by, ungroup,  rename, rowwise, scan_gaps, select, spatial, summarise, tbl_sum, unfold, update_cubble`|
+: (#tab:methods) Methods implemented for the three \code{cubble} classes: \code{cubble\_df}, \code{spatial\_cubble\_df}, and \code{temporal\_cubble\_df}
 
 <!-- methods(class = "cubble_df") |> paste0(collapse = ", ") |> stringr::str_remove_all(".cubble_df") -->
+
 <!-- methods(class = "spatial_cubble_df") |> paste0(collapse = ", ") |> stringr::str_remove_all(".spatial_cubble_df") -->
+
 <!-- methods(class = "temporal_cubble_df") |> paste0(collapse = ", ") |> stringr::str_remove_all(".temporal_cubble_df") -->
 
-### dplyr and tidyr
+### dplyr
 
-The \pkg{dplyr} package has many tools for wrangling tidy data,  many of which are useful in the spatio-temporal analysis. The \pkg{cubble} package provides methods that support the use of the following operations in the \pkg{dplyr} package on both the nested and long forms: `mutate`, `filter`, `summarise`, `select`, `arrange`, `rename`, `left_join`, and the slice family (`slice_*`).
+The \pkg{dplyr} package has many tools for wrangling tidy data, many of which are useful in the spatio-temporal analysis. The \pkg{cubble} package provides methods that support the use of the following operations in the \pkg{dplyr} package on both the nested and long forms: `mutate`, `filter`, `summarise`, `select`, `arrange`, `rename`, `left_join`, and the slice family (`slice_*`).
 
-The toy example below demonstrates the using of a collection of dplyr functions (\code{mutate}, \code{select}, \code{filter}, and \code{arrange}) on a nested cubble object \code{cb_nested}: 
+The toy example below demonstrates the using of a collection of dplyr functions (\code{mutate}, \code{select}, \code{filter}, and \code{arrange}) on a nested cubble object \code{cb_nested}:
 
 ```{r echo = TRUE, eval = FALSE}
 cb_nested %>% 
@@ -149,18 +152,18 @@ cb_nested %>%
   arrange(-avg_temp)
 ```
 
-### cubble 
+### cubble
 
 The three basic cubble functions, \code{face_temporal()}, \code{face_spatial()}, and \code{unfold()}, are introduced in this section before more advanced functionalities in Section \@ref(others).
 
-The pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the cubble object between the spatial and temporal face of the multivariate spatio-temporal cube, as illustrated in Figure \ref{fig:face}. The code below uses the function \code{face_temporal()} and \code{face_spatial()} to transform between a nested cubble (\code{cb_nested}) and a long one (\code{cb_long}), introduced earlier in subsection \@ref(object): 
+The pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the cubble object between the spatial and temporal face of the multivariate spatio-temporal cube, as illustrated in Figure \ref{fig:face}. The code below uses the function \code{face_temporal()} and \code{face_spatial()} to transform between a nested cubble (\code{cb_nested}) and a long one (\code{cb_long}), introduced earlier in subsection \@ref(object):
 
 ```{r cubble-fun, echo = TRUE}
 identical(face_temporal(cb_nested), cb_long)
 identical(face_spatial(cb_long), cb_nested)
 ```
 
-The pair of verbs are exact inverse and apply both functions on a cubble object will result in the object itself: 
+The pair of verbs are exact inverse and apply both functions on a cubble object will result in the object itself:
 
 ```{r cubble-fun2, echo = TRUE}
 identical(face_spatial(face_temporal(cb_nested)), cb_nested)
@@ -168,7 +171,7 @@ identical(face_temporal(face_spatial(cb_long)), cb_long)
 ```
 
 ```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the function \\code{face\\_temporal()} and \\code{face\\_spatial()}: \\code{face\\_temporal()} converts a spatial cubble (neseted form) into a temporal cubble (long form) to focus on the temporal variables. Conversely, \\code{face\\_spatial()} transforms a temporal cubble into a spatial one to emphasize spatial variables."}
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
+knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
 ```
 
 Sometimes, analysts may need to apply some variable transformation that involves both the spatial and temporal variables. An example of this is the transformation of temporal variables into the spatial dimension in glyph maps [@Wickham2012-yr]. (How to make glyph maps will be explained in Section \ref{st_transformation}, and are illustrated in the second example.) This type of operation can be seen as flattening, or *unfolding*, the cube into a 2D data frame. Here the function \code{unfold()} moves the spatial variables \code{long} and \code{lat} into the long \code{cubble}:
@@ -180,7 +183,6 @@ cb_long |> unfold(long, lat)
 ## Compatibility with other packages
 
 Analysts often have their own preferred spatial or temporal data structure, which they may wish to keep for spatio-temporal analysis. For example, the \code{tbl_ts} class from the \code{tsibble} package [@tsibble] is commonly used in time series forecasting and similarly, the \code{sf} class [@sf] is often used in spatial data science. In \code{cubble}, analysts can combine these two structures together by allowing the spatial component to also be an \code{sf} object and the temporal component to also be a \code{tsibble} object.
-
 
 ### tsibble
 
@@ -217,7 +219,7 @@ Similarly, an \code{sf} object can be supplied as the spatial component to creat
 class(sf_nested)
 ```
 
-The \code{sf} functions applicable to a \code{cubble} object have been listed in Table \@ref(tab:funs) and the following code shows how to perform coordinate transformation with \code{st_transform} on a cubble object:  
+The \code{sf} functions applicable to a \code{cubble} object have been listed in Table \@ref(tab:funs) and the following code shows how to perform coordinate transformation with \code{st_transform} on a cubble object:
 
 ```{r echo =TRUE, message=FALSE}
 sf_nested %>% sf::st_transform(crs = "EPSG:3857")
@@ -230,11 +232,10 @@ sf_nested <- cb_nested %>% make_spatial_sf()
 all.equal(sf_nested, sf_nested)
 ```
 
-
 ## Comparison to other spatio-temporal classes {#tidyverse}
 
-Given the vast spatio-temporal data structure available  in \proglang{R} to represent spatio-temporal data, this section compares and contrast the \pkg{cubble} with other existing alternative, namely \pkg{stars} and \pkg{sftime}.
+Given the vast spatio-temporal data structure available in \proglang{R} to represent spatio-temporal data, this section compares and contrast the \pkg{cubble} with other existing alternative, namely \pkg{stars} and \pkg{sftime}.
 
 The \pkg{stars} package [@stars] uses an array structure, as oppose to tibble in the \code{cubble} package, to represent multivariate spatio-temporal data. While both packages support vector and raster data, it is a matter of choice on which structure to use given the application. Analysts working on satellite imageries may prefer the array structure while others originally working with spatio-temporal data in the 2D data frames may find \pkg{cubble} easier to adopt from their existing computing workflow.
 
-The \pkg{sftime} package [@sftime] also builds from a tibble object, with a main focus to handle irregular spatio-temporal data. While \pkg{sftime} can also handle full space-time grids and sparse space-time layouts, \pkg{cubble} can be thought of as simplifying the repetition in spatial variables with two linked tibbles. This simplification gives memory efficiency when data is observed frequent, i.e. daily or subdaily, or the spatial geometry is expensive to repeat, i.e. polygons or multipolygons. Consider the \code{climate_aus} data in the \pkg{cubble} package with `r nrow(cubble::climate_aus)` stations observed daily in a single year 2020. The created \code{sftime} object is approximately `r library("cubble"); round(object.size(sftime::st_as_sftime(climate_aus))/object.size(climate_aus))` times larger than the corresponding \code{cubble} object (`r round(object.size(sftime::st_as_sftime(climate_aus))/1e6, 2)` MB vs. `r round(object.size(cubble::climate_aus)/1e6, 2)` MB). 
+The \pkg{sftime} package [@sftime] also builds from a tibble object, with a main focus to handle irregular spatio-temporal data. While \pkg{sftime} can also handle full space-time grids and sparse space-time layouts, \pkg{cubble} can be thought of as simplifying the repetition in spatial variables with two linked tibbles. This simplification gives memory efficiency when data is observed frequent, i.e. daily or subdaily, or the spatial geometry is expensive to repeat, i.e. polygons or multipolygons. Consider the \code{climate_aus} data in the \pkg{cubble} package with `r nrow(cubble::climate_aus)` stations observed daily in a single year 2020. The created \code{sftime} object is approximately `r library("cubble"); round(object.size(sftime::st_as_sftime(climate_aus))/object.size(climate_aus))` times larger than the corresponding \code{cubble} object (`r round(object.size(sftime::st_as_sftime(climate_aus))/1e6, 2)` MB vs. `r round(object.size(cubble::climate_aus)/1e6, 2)` MB).
