@@ -12,19 +12,8 @@ River level and rainfall data for the same areas should have some similarity. He
 climate_vic <- climate_aus |>
   filter(between(as.numeric(stringr::str_sub(id, 7, 8)), 76, 90)) |>
   mutate(type = "climate")
-
 river <- cubble::river %>% mutate(type = "river") 
-
 vic_map <- ozmaps::abs_ste %>%  filter(NAME == "Victoria")
-
-# ggplot() + 
-#   geom_sf(data = vic_map) + 
-#   geom_point(data = dplyr::bind_rows(river, climate_vic), 
-#              aes(x = long, y = lat, color = type)) + 
-#   theme_bw() +
-#   theme(legend.position = "bottom") +
-#   labs(x = "Longitude", y = "Latitude") + 
-#   scale_color_brewer(palette = "Dark2")
 ```
 
 This function requires passing the major and minor data sets used for matching, in this case those are \code{river} and \code{climate}.  The variables used for the temporal matching  are \code{Water_course_level} from the \code{river} data set and \code{prcp} in the climate data set. The rest of the arguments, as explained in Section \@ref(matching), correspond to the maximum and minimum number of peaks in the time series to be matched. In this example those are set to be a maximum of 30 and a minimum of 15 (approximately 2 and 1 per month).  
@@ -34,24 +23,14 @@ This function requires passing the major and minor data sets used for matching, 
 ```
 
 ```{r echo = FALSE}
-res_sp <- res_sp %>% 
-  filter(!group %in% c(5, 8)) %>% 
-  tidyr::pivot_longer(from:to, names_to = "order", values_to = "id") %>% 
-  select(-order)
-res_sp <- bind_rows(climate_vic, river %>% rename(id = station)) %>% 
-  inner_join(res_sp) 
+res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10, return_cubble = TRUE)
+(res_sp2 <- res_sp[-c(5, 8)] %>% bind_rows())
 ```
-
-
-```{r}
-res_sp
-```
-
 
 ```{r echo = TRUE}
-(res_tm <- res_sp %>% 
+(res_tm <- res_sp2 %>% 
   match_temporal(
-    match_id = group,
+    match_id = group, data_id = type,
     temporal_by = c("prcp" = "Water_course_level"),
     temporal_n_highest = 30,
     temporal_min_match = 15))
@@ -61,13 +40,14 @@ res_sp
 Or use \code{return_cubble = TRUE} to return a cubble object: 
 
 ```{r}
-(res_tm <- res_sp %>% 
+(res_tm <- res_sp2 %>% 
   match_temporal(
-    match_id = group,
+    match_id = group, data_id = type,
     temporal_by = c("prcp" = "Water_course_level"),
     return_cubble = TRUE, 
     temporal_n_highest = 30,
-    temporal_min_match = 15))
+    temporal_min_match = 15) %>% 
+   bind_rows())
 ```
 
 
@@ -83,9 +63,8 @@ res_tm <- res_tm %>%  filter(group %in% c(1, 7, 6, 9))
 res_tm_long <- res_tm %>%  
   face_temporal() %>%  
   unfold(group, type) %>%  
-  rename(prcp = matched) %>%  
   group_by(group, type) %>%
-  mutate(prcp = (prcp - min(prcp, na.rm = TRUE))/ (max(prcp, na.rm = TRUE) - min(prcp, na.rm = TRUE))) 
+  mutate(matched = (matched - min(matched, na.rm = TRUE))/ (max(matched, na.rm = TRUE) - min(matched, na.rm = TRUE))) 
 
 vic_map <- ozmaps::abs_ste |> 
   filter(NAME == "Victoria") |> 
@@ -94,10 +73,13 @@ vic_map <- ozmaps::abs_ste |>
 p1 <-ggplot() + 
   geom_sf(data = vic_map, fill = "grey95", color = "white") + 
   geom_point(data = dplyr::bind_rows(river, climate_vic), 
-             aes(x = long, y = lat, color = type), alpha = 0.2, fill = 0.2) +
-  geom_point(data = res_tm, aes(x = long, y = lat, color = type)) +
+             aes(x = long, y = lat, color = type), 
+             alpha = 0.2, fill = 0.2) +
+  geom_point(data = res_tm %>% as_tibble(), 
+             aes(x = long, y = lat, color = type)) +
   ggrepel::geom_label_repel(
-    data = res_tm |> filter(type == "river"), aes(x = long, y = lat, label = group)) +
+    data = res_tm |> filter(type == "river") %>% as_tibble(), 
+    aes(x = long, y = lat, label = group)) +
   scale_color_brewer(palette = "Dark2")  + 
   ggthemes::theme_map() +
   ggplot2::theme(legend.position = "bottom",
@@ -107,7 +89,7 @@ p1 <-ggplot() +
   guides(color = guide_legend(override.aes = list(size=5)))
 
 p2 <- res_tm_long %>%  
-  ggplot(aes(x = date, y = prcp, group = type,color = type)) + 
+  ggplot(aes(x = date, y = matched, group = type,color = type)) + 
   geom_line() + 
   facet_wrap(vars(group)) + 
   scale_color_brewer(palette = "Dark2", guide = "none") + 

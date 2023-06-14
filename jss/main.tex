@@ -149,38 +149,19 @@ The rest of the paper is organized as follows: Section \ref{cubble} presents the
 \hypertarget{object}{%
 \subsection{The cubble object}\label{object}}
 
-{[}conceptual framework{]} The \code{cubble} class tackles the spatio-temporal data collected at unique fixed locations and allowed for irregularity in the temporal dimension, i.e.~irregular time steps and missingness.
+{[}conceptual framework{]} Spatio-temporal data comes various spatial and temporal characteristics and requires different data structures to wrangle: climate weather stations are recorded at fixed point location but with potential temporal data quality issue (missingness on the day); GPS data tracks unique point locations at different timestamps; satellite imageries captures snapshots of landscape at selected time. The type of spatio-temporal data cubble tackles are those collected at unique fixed locations while allowed for irregularity in the temporal dimension, like the weather station data. In the four layouts presented by the spacetime paper \citep{spacetime}, cubble handles full space-time and sparse space-time layouts.
 
-The \code{cubble} class (\code{cubble_df}) is an S3 class \citep{advr} built on the \code{tibble} class, specifically to organize spatio-temporal data.
-It uses three attributes to character the spatio-temporal data:
+The cubble class is an S3 class, built on tibble, to pivot spatio-temporal data into a nested (spatial) form and a long (temporal) form. It has two subclasses:
 
 \begin{itemize}
 \tightlist
 \item
-  \code{key} identifies the spatial locations
+  a nested/ spatial cubble has class \texttt{c("spatial\_cubble\_df",\ "cubble\_df")}
 \item
-  \code{date} identifies the temporal order, and
-\item
-  \code{coords} identifies the longitude and latitude coordinate associated with the location.
+  a long/ temporal cubble has class \texttt{c("temporal\_cubble\_df",\ "cubble\_df")}
 \end{itemize}
 
-The base class \code{cubble_df} has two specialised class \code{spatial_cubble_df} and \code{temporal_cubble_df} to arrange the spatio-temporal data in two forms, as illustrated in Figure \ref{fig:class}.
-
-\begin{CodeChunk}
-\begin{figure}
-
-{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.007} 
-
-}
-
-\caption[Illustration of a cubble object in the long form and nested form, along with the associated attributes]{Illustration of a cubble object in the long form and nested form, along with the associated attributes.}\label{fig:class}
-\end{figure}
-\end{CodeChunk}
-
-\hypertarget{nested-cubble}{%
-\subsubsection{nested cubble}\label{nested-cubble}}
-
-A nested cubble (in the spatial form) has class \code{c("spatial_cubble_df", "cubble_df")}. It arranges spatial variables in columns and nests temporal variables in a specialised \code{ts} column. Below prints an nested cubble object using the weather station data collected in three airports. The data is a subset of a larger data \code{climate_aus} collected from National Oceanic and Atmospheric Administration (NOAA) Global Historical Climatology Network Daily (GHCND). The data include spatial variables such as station ID, longitude, latitude, elevation, station name, world meteorology organisation ID, in additional to daily temporal information, maximum and minimum temperature values and precipitation for the year 2020. The airport data is a subset of three airport stations in Melbourne for the initial 10 days of the year (the creation of a cubble object will be explained in Section \ref{create}):
+A nested cubble arranges spatial variables in columns and nests temporal variables in a specialised \texttt{ts} column. Below prints an nested cubble object using the weather station data collected in three airports (the creation of a cubble object will be explained in Section \ref{create}). This toy data is a subset of a larger data \code{climate_aus} collected from Global Historical Climatology Network Daily (GHCND). The three airport stations in Melbourne are recorded with station metadata: station ID, longitude, latitude, elevation, station name, world meteorology organisation ID. The temporal variables are precipitation, maximum and minimum temperature, which can be read from the cubble header:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -196,21 +177,9 @@ R> cb_nested
 2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870 <tibble [10 x 4]>
 3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble [10 x 4]>
 \end{CodeOutput}
-\begin{CodeInput}
-R> class(cb_nested)
-\end{CodeInput}
-\begin{CodeOutput}
-[1] "spatial_cubble_df" "cubble_df"         "tbl_df"           
-[4] "tbl"               "data.frame"       
-\end{CodeOutput}
 \end{CodeChunk}
 
-A nested cubble header prints the key and index variable name and its form. The spatial extent is given by the bounding box with CRS information (missing here). The nested cubble header also shows the name of temporal variables nested in the \code{ts} column and their variable types: \code{prcp [dbl], tmax [dbl], tmin [dbl]}.
-
-\hypertarget{long-cubble}{%
-\subsubsection{long cubble}\label{long-cubble}}
-
-A long cubble (in the temporal form) has class \code{c("temporal_cubble_df", "cubble_df")}, which expands the temporal variables into the long form and stores the spatial variables as a data attribute.
+A long cubble expands the temporal variables into the long form and stores the spatial variables as a data attribute. In the header of a long cubble object, the extent now prints the temporal range, the interval, and whether there is gaps in the data. It also prints the available spatial variables, as oppose to the temporal variables in the nested cubble.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -229,18 +198,33 @@ R> cb_long
 5 ASN00086038 2020-01-05    18  16.1  12.5
 # i 25 more rows
 \end{CodeOutput}
-\begin{CodeInput}
-R> class(cb_long)
-\end{CodeInput}
-\begin{CodeOutput}
-[1] "temporal_cubble_df" "cubble_df"          "tbl_df"            
-[4] "tbl"                "data.frame"        
-\end{CodeOutput}
 \end{CodeChunk}
 
-In the header of a long cubble object, the extent now prints the temporal range, the interval, and whether there is gaps in the data. It also prints the available spatial variables, as oppose to the temporal variables in the nested cubble. The spatial component can be printed with \code{spatial()}:
+\hypertarget{the-cubble-attributes}{%
+\subsubsection{The cubble attributes}\label{the-cubble-attributes}}
+
+A cubble object inherits the attributes from tibble (and its subclasses): \texttt{class}, \texttt{row.names}, and \texttt{names}, in addition to three specialised attributes:
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{key}: the spatial identifier
+\item
+  \texttt{index}: the temporal identifier
+\item
+  \texttt{coords}: a pair of ordered coordinates associated with the location
+\end{itemize}
+
+Readers known the \texttt{key} and \texttt{index} attributes from the \texttt{tsibble} package would already be familiar the two arguments. In cubble, the \texttt{key} attribute identifies the row in the nested cubble, and together with the \texttt{index} argument, identifies the row in the long cubble. Currently, cubble only supports one variable as the key and the accepted temporal class for index includes the base R class \texttt{Date}, \texttt{POSIXlt}, \texttt{POSIXct} and tsibble's \texttt{yearmonth}, \texttt{yearweek}, and \texttt{yearquarter} class.
+
+The \texttt{coords} attribute takes an ordered pair of coordinate. It can be a unprojected pair of longitude and latitude, or a projected easting and northing values. Under the hood, the \texttt{sf} package is used to calculate the bounding box, shown in the header of a nested cubble, and other spatial operations.
+
+The long cubble has a special attribute \texttt{spatial} to store the spatial variables: all the variables in the nested cubble, except for the \texttt{ts} column. The shortcut function are available to extract components in the attributes, for example, \code{spatial()} for extracting the tibble object for the spatial variables:
 
 \begin{CodeChunk}
+\begin{CodeInput}
+R> spatial(cb_long)
+\end{CodeInput}
 \begin{CodeOutput}
 # A tibble: 3 x 6
   id           long   lat  elev name              wmo_id
@@ -268,8 +252,8 @@ R> make_cubble(spatial = stations, temporal = meteo,
 \end{CodeInput}
 \end{CodeChunk}
 
-\hypertarget{coercing-from-foregin-objects}{%
-\subsubsection{Coercing from foregin objects}\label{coercing-from-foregin-objects}}
+\hypertarget{coercing-from-foreign-objects}{%
+\subsubsection{Coercing from foreign objects}\label{coercing-from-foreign-objects}}
 
 Spatio-temporal data in other foreign objects can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes casting from a \code{tibble} or \code{data.frame} with both spatial and temporal information, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. The two examples below show the casting from a tibble and a NetCDF object to a cubble object.
 
@@ -321,8 +305,8 @@ We would recommend reducing to about 300 \(\times\) 300 grid points for three da
 Table \ref{tab:funs} summarises functions implemented in the \pkg{cubble} package and Table \ref{tab:methods} details the methods implemented for each of the three cubble classes: \code{cubble\_df}, \code{spatial\_cubble\_df}, and \code{temporal\_cubble\_df}.
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1579}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.8421}}@{}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.8750}}@{}}
 \caption{\label{tab:funs} Functions implemented in the \pkg{cubble} package}\tabularnewline
 \toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
@@ -340,15 +324,15 @@ Functions
 \end{minipage} \\
 \midrule()
 \endhead
-base R & \texttt{{[}}, \texttt{{[}\textless{}-}, \texttt{names\textless{}-}, \texttt{{[}{[}}, \texttt{{[}{[}\textless{}-} \\
-tidyverse & \texttt{dplyr\_row\_slice}, \texttt{dplyr\_col\_modify}, \texttt{dplyr\_reconstruct}, \texttt{select}, \texttt{mutate}, \texttt{arrange}, \texttt{filter}, \texttt{summarise}, \texttt{select}, \texttt{slice}, \texttt{rowwise}, \texttt{rename}, \texttt{bind\_cols}, \texttt{group\_by}, \texttt{ungroup}, \texttt{slice\_*}, \texttt{*\_join}, \texttt{relocate}, \texttt{type\_sum} \\
-cubble & \texttt{cubble}, \texttt{make\_cubble}, \texttt{new\_spatial\_cubble}, \texttt{new\_temporal\_cubble}, \texttt{make\_spatial\_sf}, \texttt{make\_temporal\_tsibble}, \texttt{face\_temporal}, \texttt{face\_spatial}, \texttt{unfold}, \texttt{key}, \texttt{key\_vars}, \texttt{key\_data}, \texttt{index}, \texttt{index\_var}, \texttt{coords}, \texttt{spatial}, \texttt{fill\_gaps}, \texttt{scan\_gaps}, \texttt{switch\_key}, \texttt{match\_sites}, \texttt{match\_spatial}, \texttt{match\_temporal}, \texttt{geom\_glyph}, \texttt{geom\_glyph\_box}, \texttt{geom\_glyph\_line} \\
+base R & \texttt{{[}}, \texttt{{[}{[}\textless{}-}, \texttt{names\textless{}-} \\
+tidyverse & \texttt{dplyr\_row\_slice}, \texttt{dplyr\_col\_modify}, \texttt{dplyr\_reconstruct}, \texttt{select}, \texttt{mutate}, \texttt{arrange}, \texttt{filter}, \texttt{group\_by}, \texttt{ungroup}, \texttt{summarise}, \texttt{select}, \texttt{slice}, \texttt{rowwise}, \texttt{rename}, \texttt{bind\_rows}, \texttt{bind\_cols}, \texttt{relocate}, \texttt{type\_sum}, the slice family (\texttt{slice\_head}, \texttt{slice\_tail}, \texttt{slice\_max}, \texttt{slice\_min}, \texttt{slice\_sample}) and the join family (\texttt{left\_join}, \texttt{right\_join}, \texttt{inner\_join}, \texttt{full\_join}, \texttt{anti\_join}, \texttt{semi\_join}) \\
+cubble & \texttt{as\_cubble}, \texttt{cubble}, \texttt{make\_cubble}, \texttt{check\_key} \texttt{face\_temporal}, \texttt{face\_spatial}, \texttt{unfold}, \texttt{key}, \texttt{key\_vars}, \texttt{key\_data}, \texttt{index}, \texttt{index\_var}, \texttt{coords}, \texttt{spatial}, \texttt{match\_sites}, \texttt{match\_spatial}, \texttt{match\_temporal}, \texttt{geom\_glyph}, \texttt{geom\_glyph\_box}, \texttt{geom\_glyph\_line}, \texttt{make\_spatial\_sf}, \texttt{make\_temporal\_tsibble}, \texttt{fill\_gaps}, \texttt{scan\_gaps} \\
 \bottomrule()
 \end{longtable}
 
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.2381}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.7619}}@{}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.7500}}@{}}
 \caption{\label{tab:methods} Methods implemented for the three \code{cubble} classes: \code{cubble\_df}, \code{spatial\_cubble\_df}, and \code{temporal\_cubble\_df}}\tabularnewline
 \toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
@@ -366,14 +350,14 @@ Methods
 \end{minipage} \\
 \midrule()
 \endhead
-\texttt{cubble\_df} & \texttt{{[},\ dplyr\_col\_modify,\ key\_data,\ key\_vars,\ key,\ names\textless{}-,\ print,\ tbl\_sum} \\
-\texttt{spatial\_cubble\_df} & \texttt{dplyr\_reconstruct,\ dplyr\_row\_slice,\ face\_spatial,\ face\_temporal,\ arrange,\ rename,\ rowwise,\ group\_by,\ ungroup,\ select,\ spatial,\ summarise,\ tbl\_sum,\ unfold,\ update\_cubble} \\
-\texttt{temporal\_cubble\_df} & \texttt{arrange,\ dplyr\_reconstruct,\ dplyr\_row\_slice,\ face\_spatial,\ face\_temporal,\ fill\_gaps,\ group\_by,\ ungroup,\ \ rename,\ rowwise,\ scan\_gaps,\ select,\ spatial,\ summarise,\ tbl\_sum,\ unfold,\ update\_cubble} \\
+\texttt{cubble\_df} & \texttt{{[}{[}\textless{}-,\ dplyr\_col\_modify,\ key\_data,\ key\_vars,\ key,\ print} \\
+\texttt{spatial\_cubble\_df} & \texttt{{[},\ names\textless{}-,\ \ tbl\_sum,\ dplyr\_reconstruct,\ dplyr\_row\_slice,\ face\_spatial,\ face\_temporal,\ unfold,\ arrange,\ rename,\ rowwise,\ group\_by,\ ungroup,\ select,\ spatial,\ summarise,\ unfold,\ update\_cubble} \\
+\texttt{temporal\_cubble\_df} & \texttt{{[},\ names\textless{}-,\ tbl\_sum,\ arrange,\ dplyr\_reconstruct,\ dplyr\_row\_slice,\ face\_spatial,\ face\_temporal,\ unfold,\ fill\_gaps,\ group\_by,\ ungroup,\ \ rename,\ rowwise,\ scan\_gaps,\ select,\ spatial,\ summarise,\ tbl\_sum,\ bind\_rows,\ bind\_cols,\ update\_cubble} \\
 \bottomrule()
 \end{longtable}
 
-\hypertarget{dplyr-and-tidyr}{%
-\subsubsection{dplyr and tidyr}\label{dplyr-and-tidyr}}
+\hypertarget{dplyr}{%
+\subsubsection{dplyr}\label{dplyr}}
 
 The \pkg{dplyr} package has many tools for wrangling tidy data, many of which are useful in the spatio-temporal analysis. The \pkg{cubble} package provides methods that support the use of the following operations in the \pkg{dplyr} package on both the nested and long forms: \texttt{mutate}, \texttt{filter}, \texttt{summarise}, \texttt{select}, \texttt{arrange}, \texttt{rename}, \texttt{left\_join}, and the slice family (\texttt{slice\_*}).
 
@@ -431,7 +415,7 @@ R> identical(face_temporal(face_spatial(cb_long)), cb_long)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.002} 
+{\centering \includegraphics[width=1\linewidth]{../figures/diagram-keynotes/diagram-keynotes.001} 
 
 }
 
@@ -599,40 +583,26 @@ The \pkg{sftime} package \citep{sftime} also builds from a tibble object, with a
 \hypertarget{others}{%
 \section{Other features and considerations}\label{others}}
 
-\hypertarget{hierarchical-structure}{%
-\subsection{Hierarchical structure}\label{hierarchical-structure}}
-
-Spatial locations can have grouping structures either inherent to the data e.g., state within country or obtained during the analysis e.g., cluster id. In this case, it can be useful to summarize variables at various levels of the hierarchy. The function \code{switch_key()} can be used to change the grouping level of spatial locations. The diagram in Figure \ref{fig:illu-hier} shows how this function can be used to switch the grouping from station ids to cluster ids. The result can also be stretched into long form. By specifying \code{cluster_nested <- station_nested \%>\% switch_key(key = cluster)}, the \code{cubble} object redefines its \code{key} from the \code{id} column in \code{station_nested} to the \code{cluster} column in \code{cluster_nested}. All the spatial variables belonging to the \code{cluster} column are now nested into a \code{.val} column which allows for summarizing based on cluster.
-
 \hypertarget{matching}{%
 \subsection{Data fusion and matching}\label{matching}}
 
-One task that may interest spatio-temporal analysts is combining data collected at nearby but not exactly the same sites, for example, weather station measured rainfall and river levels. This can be considered to be a matching problem \citep{stuart2010matching, mcintosh2018using} to pair similar time series from nearby locations, or even a data fusion exercise that merges data collected from different sources \citep{cocchi2019data}. The function \code{match_sites()} in the \pkg{cubble} package provides a simple algorithm for this task. The algorithm first matches spatially by computing the pairwise distance on latitude and longitude. Then it matches temporally by computing the number of matched peaks within a fixed length moving window. Figure \ref{fig:illu-matching} illustrates this temporal matching. In the two series, \emph{A} and \emph{a}, three peaks have been identified in each. An interval, of fixed length, is constructed for each peak in series \emph{A}, while the peaks in series \emph{a} are tested against whether they fall into any of the intervals. Here two out of three peaks match. Options for \code{match_sites()} are:
+One task that may interest spatio-temporal analysts is combining data collected at nearby but not exactly the same sites, for example, weather station measured rainfall and river levels. This can be considered to be a matching problem \citep{stuart2010matching, mcintosh2018using} to pair similar time series from nearby locations, or even a data fusion exercise that merges data collected from different sources \citep{cocchi2019data}. The function \code{match_sites()} in the \pkg{cubble} package provides a simple algorithm for this task.
 
-\begin{CodeChunk}
-\begin{figure}
+Spatial matching based on distance.
 
-{\centering \includegraphics[width=1\linewidth]{../figures/illu-matching} 
+\begin{verbatim}
+match_spatial(df1, df2, ...)
+\end{verbatim}
 
-}
+Allow one-to-many output, control the number of group and number of match within each group with arguments:
 
-\caption{An illustration of temporal matching in the \pkg{cubble} package. Three highest peaks are identified in each series and intervals are constructed on series \code{A}. Two peaks in series \code{a} fall into the intervals and hence the two series are considered to have two matches.}\label{fig:illu-matching}
-\end{figure}
-\end{CodeChunk}
+Temporal matching, apply on spatially matched group
 
-\begin{itemize}
-\tightlist
-\item
-  \code{spatial_n_keep}: the number of spatial match for each site to keep;
-\item
-  \code{spatial_dist_max}: the maximum distance allowed for a matched pair;
-\item
-  \code{temporal_n_highest}: the number of peaks used - 3 in the example above;
-\item
-  \code{temporal_window}: the length of the interval - 5 in the example above; and
-\item
-  \code{temporal_min_match}: the minimum number of matched peaks for a valid matched pair.
-\end{itemize}
+\begin{verbatim}
+match_temporal(<SPATIAL_RES>, group_id, match_id, temporal_by = c("xxx" = "xxx"))
+\end{verbatim}
+
+Different matching functions can be tuned with \texttt{temporal\_match\_fn}, which takes a list of matched time series and additional arguments. By Default, the matching function calculates the number of peaks one series falls into another within a temporal window: \texttt{match\_peak}
 
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}
@@ -644,7 +614,7 @@ Linking is also available starting from the time series plot, by selecting point
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{../figures/diagram-keynotes/diagram-keynotes.004} 
+{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{../figures/diagram-keynotes/diagram-keynotes.002} 
 
 }
 
@@ -655,35 +625,29 @@ Linking is also available starting from the time series plot, by selecting point
 \hypertarget{st_transformation}{%
 \subsection{Spatio-temporal transformations}\label{st_transformation}}
 
-Spatio-temporal data lends itself to a range of transformations. Glyph maps \citep{Wickham2012-yr} transform the measured variable and time coordinates into microplots at the spatial locations. Calendar plots \citep{wang2020calendar} deconstruct time to produce plots of variables in a calendar format. Summarizing multiple variables is commonly done using projections, or linear combinations. Here we elaborate on the transformations made to produce a glyph map.
-
-The package \pkg{GGally} \citep{ggally} has implemented glyph maps through the \code{glyphs()} function. The function constructs a \code{data.frame} with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equations 1 and 2 in \citet{Wickham2012-yr}). The data can then be piped into ggplot to create the glyph map as:
+Spatio-temporal data lends itself to a range of transformations. Glyph maps \citep{Wickham2012-yr} transform the measured variable and time coordinates into microplots at the spatial locations. Calendar plots \citep{wang2020calendar} deconstruct time to produce plots of variables in a calendar format. Summarizing multiple variables is commonly done using projections, or linear combinations. Here we elaborate on the transformations made to produce a glyph map. The package \pkg{GGally} \citep{ggally} has implemented glyph maps through the \code{glyphs()} function. The function constructs a \code{data.frame} with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equations 1 and 2 in \citet{Wickham2012-yr}). A new implementation of the glyph map as a ggproto, \code{GeomGlyph}, has been made in the \pkg{cubble} package so that a glyph map can be created with \code{geom_glyph()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> library("ggplot2")
-R> gly <- glyphs(data,
-+               x_major = ..., x_minor = ...,
-+               y_major = ..., y_minor = ..., ...)
-R> 
-R> ggplot(gly, aes(gx, gy, group = gid)) +
-+   geom_path()
-\end{CodeInput}
-\end{CodeChunk}
-
-A new implementation of the glyph map as a ggproto, \code{GeomGlyph}, has been made in the \pkg{cubble} package so that a glyph map can be created with \code{geom_glyph()}:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> ggplot(data = data) +
+R> data |>
++   ggplot() +
 +   geom_glyph(aes(x_major = ..., x_minor = ...,
 +                  y_major = ..., y_minor = ...))
 \end{CodeInput}
 \end{CodeChunk}
 
-An example using a glyph map is shown in Section \ref{historicaltmax}.
+Some useful controls over the glyph map are also available in the \code{geom_glyph()} implementation
 
-Some useful controls over the glyph map are also available in the \code{geom_glyph()} implementation. Polar coordinate glyph maps are specified using \code{polar = TRUE}, and arguments \code{width} and \code{height} can be specified in either absolute or relative value. Global and local scale is specified with \code{global_rescale}, which defaults to \code{TRUE}. Reference boxes and lines can be added with separate \code{geom_glyph_box()} and \code{geom_glyph_line()} lines.
+\begin{itemize}
+\tightlist
+\item
+  polar coordinate glyph maps are specified using \code{polar = TRUE},
+\item
+  arguments \code{width} and \code{height} can be specified in either absolute or relative value,
+\item
+  global and local scale is specified with \code{global_rescale}, which defaults to \code{TRUE}, and
+  *reference boxes and lines can be added with geoms: \code{geom_glyph_box()} and \code{geom_glyph_line()}.
+\end{itemize}
 
 \hypertarget{examples}{%
 \section{Applications}\label{examples}}
@@ -880,38 +844,39 @@ R> (res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10))
 
 \begin{CodeChunk}
 \begin{CodeOutput}
-# cubble:   key: id [16], index: date, nested form
-# spatial:  [144.5203, -38.144913, 148.4667, -36.128657], Missing CRS!
+# cubble:   key: id [16], index: date, nested form, [sf]
+# spatial:  [144.5203, -38.144913, 148.4667, -36.128657], WGS 84
 # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
-  id           long   lat  elev name           wmo_id ts       type   dist group
-  <chr>       <dbl> <dbl> <dbl> <chr>           <dbl> <list>   <chr>   [m] <int>
-1 ASN00080015  145. -36.2  96   echuca  aerod~  94861 <tibble> clim~ 4034.     4
-2 ASN00080091  145. -36.3 105   kyabram dpi     95833 <tibble> clim~ 7460.    10
-3 ASN00082042  146. -36.8 502   strathbogie     95843 <tibble> clim~ 6153.     6
-4 ASN00084145  148. -37.7  62.7 orbost          95918 <tibble> clim~ 2185.     2
-5 ASN00085072  147. -38.1   4.6 east sale air~  94907 <tibble> clim~ 3282.     3
+  id      long   lat  elev name  wmo_id ts       type              geometry
+  <chr>  <dbl> <dbl> <dbl> <chr>  <dbl> <list>   <chr>          <POINT [°]>
+1 ASN00~  145. -37.0 290   rede~  94859 <tibble> clim~  (144.5203 -37.0194)
+2 406213  145. -37.0  NA   CAMP~     NA <tibble> river (144.5403 -37.01512)
+3 ASN00~  148. -37.7  62.7 orbo~  95918 <tibble> clim~  (148.4667 -37.6922)
+4 222201  148. -37.7  NA   SNOW~     NA <tibble> river  (148.451 -37.70739)
+5 ASN00~  147. -38.1   4.6 east~  94907 <tibble> clim~  (147.1322 -38.1156)
 # i 11 more rows
+# i 2 more variables: group <int>, dist [m]
 \end{CodeOutput}
 \end{CodeChunk}
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> (res_tm <- res_sp %>% 
+R> (res_tm <- res_sp2 %>% 
 +   match_temporal(
-+     match_id = group,
++     match_id = group, data_id = type,
 +     temporal_by = c("prcp" = "Water_course_level"),
 +     temporal_n_highest = 30,
 +     temporal_min_match = 15))
 \end{CodeInput}
 \begin{CodeOutput}
 # A tibble: 8 x 2
-  group n_matches
+  group match_res
   <int>     <dbl>
 1     1        30
-2     7        26
-3     6        23
-4     9        21
-5     4        20
+2     2         5
+3     3        14
+4     4        20
+5     6        23
 # i 3 more rows
 \end{CodeOutput}
 \end{CodeChunk}
@@ -920,17 +885,18 @@ Or use \code{return_cubble = TRUE} to return a cubble object:
 
 \begin{CodeChunk}
 \begin{CodeOutput}
-# cubble:   key: id [16], index: date, nested form
-# spatial:  [144.5203, -38.144913, 148.4667, -36.128657], Missing CRS!
+# cubble:   key: id [16], index: date, nested form, [sf]
+# spatial:  [144.5203, -38.144913, 148.4667, -36.128657], WGS 84
 # temporal: date [date], matched [dbl]
-  id          long   lat  elev name  wmo_id type   dist group ts       n_matches
-  <chr>      <dbl> <dbl> <dbl> <chr>  <dbl> <chr>   [m] <int> <list>       <dbl>
-1 ASN000880~  145. -37.0 290   rede~  94859 clim~ 1838.     1 <tibble>        30
-2 406213      145. -37.0  NA   CAMP~     NA river 1838.     1 <tibble>        30
-3 ASN000841~  148. -37.7  62.7 orbo~  95918 clim~ 2185.     2 <tibble>         5
-4 222201      148. -37.7  NA   SNOW~     NA river 2185.     2 <tibble>         5
-5 ASN000850~  147. -38.1   4.6 east~  94907 clim~ 3282.     3 <tibble>        14
+  id         long   lat  elev name  wmo_id type              geometry group
+  <chr>     <dbl> <dbl> <dbl> <chr>  <dbl> <chr>          <POINT [°]> <int>
+1 ASN00088~  145. -37.0 290   rede~  94859 clim~  (144.5203 -37.0194)     1
+2 406213     145. -37.0  NA   CAMP~     NA river (144.5403 -37.01512)     1
+3 ASN00084~  148. -37.7  62.7 orbo~  95918 clim~  (148.4667 -37.6922)     2
+4 222201     148. -37.7  NA   SNOW~     NA river  (148.451 -37.70739)     2
+5 ASN00085~  147. -38.1   4.6 east~  94907 clim~  (147.1322 -38.1156)     3
 # i 11 more rows
+# i 3 more variables: dist [m], ts <list>, match_res <dbl>
 \end{CodeOutput}
 \end{CodeChunk}
 
