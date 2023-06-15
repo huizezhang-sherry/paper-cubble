@@ -7,25 +7,26 @@ output: pdf_document
 
 ## Data fusion and matching {#matching}
 
-One task that may interest spatio-temporal analysts is combining data collected at nearby but not exactly the same sites, for example, weather station measured rainfall and river levels. This can be considered to be a matching problem [@stuart2010matching; @mcintosh2018using] to pair similar time series from nearby locations, or even a data fusion exercise that merges data collected from different sources [@cocchi2019data]. The function \code{match_sites()} in the \pkg{cubble} package provides a simple algorithm for this task. 
+One task that may interest spatio-temporal analysts is combining data collected at nearby but not exactly the same sites, for example, weather station measured rainfall and river levels. This can be considered to be a matching problem [@stuart2010matching; @mcintosh2018using] to pair similar time series from nearby locations, or even a data fusion exercise that merges data collected from different sources [@cocchi2019data]. 
 
-Spatial matching based on distance.
 
+In cubble, data can be matched spatially or temporarily with `match_spatial()` and `match_temporal()`. The function `match_spatial()` calculates the spatial distance between observations in two cubbles. Different distances are available with projected or unprojected coordinate reference system. Analysts can subset the number of matched group to output with argument `spatial_n_group` (by default 4 groups) and the number of match per group with argument `spatial_n_group` (by default 1, that is, one-to-one matching). The syntax to use `match_spatial()` is:
+  
 ````
-match_spatial(df1, df2, ...)
-````
-
-Allow one-to-many output, control the number of group and number of match within each group with arguments: 
-
-Temporal matching, apply on spatially matched group
-
-````
-match_temporal(<SPATIAL_RES>, group_id, match_id, temporal_by = c("xxx" = "xxx"))
+match_spatial(<cubble_obj1>, <cubble_obj2>, ...)
 ````
 
-Different matching functions can be tuned with `temporal_match_fn`, which takes a list of matched time series and additional arguments. By Default, the matching function calculates the number of peaks one series falls into another within a temporal window: `match_peak`
-
-<!-- The algorithm first matches spatially by computing the pairwise distance on latitude and longitude. Then it matches temporally by computing the number of matched peaks within a fixed length moving window. Figure \ref{fig:illu-matching} illustrates this temporal matching. In the two series, *A* and *a*, three peaks have been identified in each. An interval, of fixed length, is constructed for each peak in series *A*, while the peaks in series *a* are tested against whether they fall into any of the intervals. Here two out of three peaks match. Options for \code{match_sites()} are: -->
+The function `match_temporal()` calculates the time series similarity between spatially matched groups. Two identifiers needs to be specified on the variable separates the each matched group (`match_id`) and the variable separates the two sources (`data_id`). The argument `temporal_by` uses the `by` syntax from dplyr `*_join` to specify the temporal matching variable. 
+  
+  The similarity score between two time series in the spatially matched group is calculated by a matching function, which analysts can customise. The matching function should take two time series in a list and output a single numerical score, which allows for interfacing with existing time series distance calculation implementation. By default, cubble implements a simple peak matching algorithm (`match_peak`) that counts the number of peaks in two time series that fall within a specified temporal window. The syntax to use `match_temporal()` is:
+  
+````
+match_temporal(
+  <cubble_obj_from_match_spatial>, 
+  data_id = ... , match_id = ..., 
+  temporal_by = c("..." = "...")
+)
+````
 
 ## Interactive graphics
 

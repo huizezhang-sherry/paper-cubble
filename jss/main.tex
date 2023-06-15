@@ -586,23 +586,25 @@ The \pkg{sftime} package \citep{sftime} also builds from a tibble object, with a
 \hypertarget{matching}{%
 \subsection{Data fusion and matching}\label{matching}}
 
-One task that may interest spatio-temporal analysts is combining data collected at nearby but not exactly the same sites, for example, weather station measured rainfall and river levels. This can be considered to be a matching problem \citep{stuart2010matching, mcintosh2018using} to pair similar time series from nearby locations, or even a data fusion exercise that merges data collected from different sources \citep{cocchi2019data}. The function \code{match_sites()} in the \pkg{cubble} package provides a simple algorithm for this task.
+One task that may interest spatio-temporal analysts is combining data collected at nearby but not exactly the same sites, for example, weather station measured rainfall and river levels. This can be considered to be a matching problem \citep{stuart2010matching, mcintosh2018using} to pair similar time series from nearby locations, or even a data fusion exercise that merges data collected from different sources \citep{cocchi2019data}.
 
-Spatial matching based on distance.
-
-\begin{verbatim}
-match_spatial(df1, df2, ...)
-\end{verbatim}
-
-Allow one-to-many output, control the number of group and number of match within each group with arguments:
-
-Temporal matching, apply on spatially matched group
+In cubble, data can be matched spatially or temporarily with \texttt{match\_spatial()} and \texttt{match\_temporal()}. The function \texttt{match\_spatial()} calculates the spatial distance between observations in two cubbles. Different distances are available with projected or unprojected coordinate reference system. Analysts can subset the number of matched group to output with argument \texttt{spatial\_n\_group} (by default 4 groups) and the number of match per group with argument \texttt{spatial\_n\_group} (by default 1, that is, one-to-one matching). The syntax to use \texttt{match\_spatial()} is:
 
 \begin{verbatim}
-match_temporal(<SPATIAL_RES>, group_id, match_id, temporal_by = c("xxx" = "xxx"))
+match_spatial(<cubble_obj1>, <cubble_obj2>, ...)
 \end{verbatim}
 
-Different matching functions can be tuned with \texttt{temporal\_match\_fn}, which takes a list of matched time series and additional arguments. By Default, the matching function calculates the number of peaks one series falls into another within a temporal window: \texttt{match\_peak}
+The function \texttt{match\_temporal()} calculates the time series similarity between spatially matched groups. Two identifiers needs to be specified on the variable separates the each matched group (\texttt{match\_id}) and the variable separates the two sources (\texttt{data\_id}). The argument \texttt{temporal\_by} uses the \texttt{by} syntax from dplyr \texttt{*\_join} to specify the temporal matching variable.
+
+The similarity score between two time series in the spatially matched group is calculated by a matching function, which analysts can customise. The matching function should take two time series in a list and output a single numerical score, which allows for interfacing with existing time series distance calculation implementation. By default, cubble implements a simple peak matching algorithm (\texttt{match\_peak}) that counts the number of peaks in two time series that fall within a specified temporal window. The syntax to use \texttt{match\_temporal()} is:
+
+\begin{verbatim}
+match_temporal(
+  <cubble_obj_from_match_spatial>, 
+  data_id = ... , match_id = ..., 
+  temporal_by = c("..." = "...")
+)
+\end{verbatim}
 
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}
@@ -821,28 +823,45 @@ Glyph maps work well to explore temporal patterns across spatial locations, part
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
 
-River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology \citep{bom} in relation to weather station rainfall from NOAA's climate data (\code{climate}). The goal is to match water gauges with nearby weather stations, spatially and temporally, using the \code{match_sites()} function.
-
-This function requires passing the major and minor data sets used for matching, in this case those are \code{river} and \code{climate}. The variables used for the temporal matching are \code{Water_course_level} from the \code{river} data set and \code{prcp} in the climate data set. The rest of the arguments, as explained in Section \ref{matching}, correspond to the maximum and minimum number of peaks in the time series to be matched. In this example those are set to be a maximum of 30 and a minimum of 15 (approximately 2 and 1 per month).
+Bureau of Meteorology collects \href{http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full}{water data} from river gauges and this includes variables: electrical conductivity, turbidity, water course discharge, water course level, and water temperature. In particular, water level will interactive with precipitation from the climate data since rainfall will raise the water level in the river. Both \texttt{climate\_vic} and \texttt{river} are cubble objects and we can get a summary of the 10 closest pairs:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> (res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10))
+R> res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10)
+R> print(res_sp, n = 20)
 \end{CodeInput}
 \begin{CodeOutput}
 # A tibble: 10 x 4
-  from        to      dist group
-  <chr>       <chr>    [m] <int>
-1 ASN00088051 406213 1838.     1
-2 ASN00084145 222201 2185.     2
-3 ASN00085072 226027 3282.     3
-4 ASN00080015 406704 4034.     4
-5 ASN00085298 226027 4207.     5
-# i 5 more rows
+   from        to      dist group
+   <chr>       <chr>    [m] <int>
+ 1 ASN00088051 406213 1838.     1
+ 2 ASN00084145 222201 2185.     2
+ 3 ASN00085072 226027 3282.     3
+ 4 ASN00080015 406704 4034.     4
+ 5 ASN00085298 226027 4207.     5
+ 6 ASN00082042 405234 6153.     6
+ 7 ASN00086038 230200 6167.     7
+ 8 ASN00086282 230200 6928.     8
+ 9 ASN00085279 224217 7431.     9
+10 ASN00080091 406756 7460.    10
 \end{CodeOutput}
 \end{CodeChunk}
 
+The result can also be returned as cubble objects with argument \texttt{return\_cubble\ =\ TRUE}. The output is a list where each element is a paired cubble object and you may consider combining all the results into a single cubble with \texttt{bind\_rows()}. Care needs to be taken on in the case when a site is close to two stations since by construction, cubble require unique rows in the nested form. From the summary table above, river station \texttt{226027} is matched to more than one weather station: \texttt{ASN00085072} (group 3) and \texttt{ASN00085298} (group 5). (Similarly river station \texttt{230200} is matched in group 7 and 8). One can either deselect one pair before binding the results, or take the list and work with the \texttt{purrr::map} syntax:
+
 \begin{CodeChunk}
+\begin{CodeInput}
+R> res_sp <- match_spatial(
++   climate_vic, river, 
++   spatial_n_group = 10, return_cubble = TRUE)
+R> str(res_sp, max.level = 0)
+\end{CodeInput}
+\begin{CodeOutput}
+List of 10
+\end{CodeOutput}
+\begin{CodeInput}
+R> (res_sp <- res_sp[-c(5, 8)] %>% bind_rows())
+\end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [16], index: date, nested form, [sf]
 # spatial:  [144.5203, -38.144913, 148.4667, -36.128657], WGS 84
@@ -859,50 +878,34 @@ R> (res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10))
 \end{CodeOutput}
 \end{CodeChunk}
 
+For temporal matching, the variable water level (\texttt{Water\_course\_level}) from the river data will be matched to precipitation (\texttt{prcp}) in the weather station data. The variable identifying each matched group is \texttt{group} and the variable identifying the two datasets is \texttt{type}, and similarly, the cubble output can be returned with the argument \texttt{return\_cubble\ =\ TRUE}. Here we select the four pairs with the highest number of matching peaks:
+
 \begin{CodeChunk}
 \begin{CodeInput}
-R> (res_tm <- res_sp2 %>% 
+R> res_tm <- res_sp %>% 
 +   match_temporal(
-+     match_id = group, data_id = type,
++     data_id = type, match_id = group,
 +     temporal_by = c("prcp" = "Water_course_level"),
-+     temporal_n_highest = 30,
-+     temporal_min_match = 15))
++     return_cubble = TRUE)
+R> (res_tm <- res_tm %>% bind_rows() %>% filter(group %in% c(1, 7, 6, 9)))
 \end{CodeInput}
 \begin{CodeOutput}
-# A tibble: 8 x 2
-  group match_res
-  <int>     <dbl>
-1     1        30
-2     2         5
-3     3        14
-4     4        20
-5     6        23
-# i 3 more rows
-\end{CodeOutput}
-\end{CodeChunk}
-
-Or use \code{return_cubble = TRUE} to return a cubble object:
-
-\begin{CodeChunk}
-\begin{CodeOutput}
-# cubble:   key: id [16], index: date, nested form, [sf]
-# spatial:  [144.5203, -38.144913, 148.4667, -36.128657], WGS 84
+# cubble:   key: id [8], index: date, nested form, [sf]
+# spatial:  [144.5203, -37.8817, 147.572223, -36.8472], WGS 84
 # temporal: date [date], matched [dbl]
   id         long   lat  elev name  wmo_id type              geometry group
   <chr>     <dbl> <dbl> <dbl> <chr>  <dbl> <chr>          <POINT [°]> <int>
 1 ASN00088~  145. -37.0 290   rede~  94859 clim~  (144.5203 -37.0194)     1
 2 406213     145. -37.0  NA   CAMP~     NA river (144.5403 -37.01512)     1
-3 ASN00084~  148. -37.7  62.7 orbo~  95918 clim~  (148.4667 -37.6922)     2
-4 222201     148. -37.7  NA   SNOW~     NA river  (148.451 -37.70739)     2
-5 ASN00085~  147. -38.1   4.6 east~  94907 clim~  (147.1322 -38.1156)     3
-# i 11 more rows
+3 ASN00082~  146. -36.8 502   stra~  95843 clim~  (145.7308 -36.8472)     6
+4 405234     146. -36.9  NA   SEVE~     NA river (145.6828 -36.88701)     6
+5 ASN00086~  145. -37.7  78.4 esse~  95866 clim~  (144.9066 -37.7276)     7
+# i 3 more rows
 # i 3 more variables: dist [m], ts <list>, match_res <dbl>
 \end{CodeOutput}
 \end{CodeChunk}
 
-This function returns a \code{cubble} object, with additional columns: \code{dist} storing the distance between matched stations, \code{group} summarizing spatial matching, and \code{n_match} showing the temporal matching.
-
-Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardized data as time series (b). The expected concurrent increase in precipitation and water level can be seen clearly.
+Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardized data as time series (b) with concurrent increasing.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -911,7 +914,7 @@ Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardiz
 
 }
 
-\caption[Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b)]{Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here.}\label{fig:matching}
+\caption[Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b)]{Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 7, 6, 9) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here.}\label{fig:matching}
 \end{figure}
 \end{CodeChunk}
 

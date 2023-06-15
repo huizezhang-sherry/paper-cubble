@@ -5,66 +5,55 @@ output: html_document
 
 ## River levels and rainfall in Victoria
 
-River level and rainfall data for the same areas should have some similarity. Here we examine the river gauge data (\code{Water_course_level}) from the Bureau of Meteorology [@bom] in relation to weather station rainfall from NOAA's climate data (\code{climate}). The goal is to match water gauges with nearby weather stations, spatially and temporally, using the \code{match_sites()} function.
-<!--The Bureau of Meteorology collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges. The collected variables include: electrical conductivity, turbidity, watercourse discharge, watercourse level, and water temperature. We expect that the water level should be related to the precipitation available from climate data, since rainfall will raise the water level in the river. Figure \ref{fig:matching-map} shows the location of available weather stations and water gauges in Victoria, and we will try to match water gauges with nearby weather stations, taking into account both spatial and temporal information from 2020.-->
+Bureau of Meteorology collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges and this includes variables: electrical conductivity, turbidity, water course discharge, water course level, and water temperature. In particular, water level will interactive with precipitation from the climate data since rainfall will raise the water level in the river. Both `climate_vic` and `river` are cubble objects and we can get a summary of the 10 closest pairs:
+
 
 ```{r}
 climate_vic <- climate_aus |>
   filter(between(as.numeric(stringr::str_sub(id, 7, 8)), 76, 90)) |>
   mutate(type = "climate")
 river <- cubble::river %>% mutate(type = "river") 
-vic_map <- ozmaps::abs_ste %>%  filter(NAME == "Victoria")
 ```
 
-This function requires passing the major and minor data sets used for matching, in this case those are \code{river} and \code{climate}.  The variables used for the temporal matching  are \code{Water_course_level} from the \code{river} data set and \code{prcp} in the climate data set. The rest of the arguments, as explained in Section \@ref(matching), correspond to the maximum and minimum number of peaks in the time series to be matched. In this example those are set to be a maximum of 30 and a minimum of 15 (approximately 2 and 1 per month).  
-
-```{r echo = TRUE,  tibble.print_max = 10,   tibble.print_min = 10}
-(res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10))
-```
-
-```{r echo = FALSE}
-res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10, return_cubble = TRUE)
-(res_sp2 <- res_sp[-c(5, 8)] %>% bind_rows())
-```
 
 ```{r echo = TRUE}
-(res_tm <- res_sp2 %>% 
-  match_temporal(
-    match_id = group, data_id = type,
-    temporal_by = c("prcp" = "Water_course_level"),
-    temporal_n_highest = 30,
-    temporal_min_match = 15))
+res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10)
+print(res_sp, n = 20)
 ```
 
+The result can also be returned as cubble objects with argument `return_cubble = TRUE`. The output is a list where each element is a paired cubble object and you may consider combining all the results into a single cubble with `bind_rows()`. Care needs to be taken on in the case when a site is close to two stations since by construction, cubble require unique rows in the nested form. From the summary table above, river station `226027` is matched to more than one weather station: `ASN00085072` (group 3) and `ASN00085298` (group 5). (Similarly river station `230200` is matched in group 7 and 8). One can either deselect one pair before binding the results, or take the list and work with the `purrr::map` syntax:
 
-Or use \code{return_cubble = TRUE} to return a cubble object: 
 
-```{r}
-(res_tm <- res_sp2 %>% 
-  match_temporal(
-    match_id = group, data_id = type,
-    temporal_by = c("prcp" = "Water_course_level"),
-    return_cubble = TRUE, 
-    temporal_n_highest = 30,
-    temporal_min_match = 15) %>% 
-   bind_rows())
+```{r echo = TRUE}
+res_sp <- match_spatial(
+  climate_vic, river, 
+  spatial_n_group = 10, return_cubble = TRUE)
+str(res_sp, max.level = 0)
+(res_sp <- res_sp[-c(5, 8)] %>% bind_rows())
 ```
 
+For temporal matching, the variable water level (`Water_course_level`) from the river data will be matched to precipitation (`prcp`) in the weather station data. The variable identifying each matched group is `group` and the variable identifying the two datasets is `type`, and similarly, the cubble output can be returned with the argument `return_cubble = TRUE`. Here we select the four pairs with the highest number of matching peaks:
 
-<!--We first pass in the two datasets, followed by the variables used for the temporal matching, specified in \code{temporal_by} (using the \code{by} syntax from \code{dplyr::join}). With \code{temporal_independent} we select precipitation (\code{prcp}) as the independent variable, and the goal is to see if the water level in the river reflects what is observed in precipitation (for nearby stations). Since we consider a full year of data, we set the number of peaks considered (\code{temporal_n_highest}) to 30 (slightly above the default value of 20), and \code{temporal_min_match} is raised accordingly.-->
+```{r echo = TRUE}
+res_tm <- res_sp %>% 
+  match_temporal(
+    data_id = type, match_id = group,
+    temporal_by = c("prcp" = "Water_course_level"),
+    return_cubble = TRUE)
+(res_tm <- res_tm %>% bind_rows() %>% filter(group %in% c(1, 7, 6, 9)))
+```
 
-This function returns a \code{cubble} object, with additional columns: \code{dist} storing the distance between matched stations, \code{group} summarizing spatial matching, and \code{n_match} showing the temporal matching.
+Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardized data as time series (b) with concurrent increasing.
 
-Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardized data as time series (b). The expected concurrent increase in precipitation and water level can be seen clearly.
-
-```{r matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 5, 6, 10) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here."}
+```{r matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 7, 6, 9) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here."}
 res_tm <- res_tm %>%  filter(group %in% c(1, 7, 6, 9))
 
 res_tm_long <- res_tm %>%  
   face_temporal() %>%  
   unfold(group, type) %>%  
   group_by(group, type) %>%
-  mutate(matched = (matched - min(matched, na.rm = TRUE))/ (max(matched, na.rm = TRUE) - min(matched, na.rm = TRUE))) 
+  mutate(matched = (matched - min(matched, na.rm = TRUE))/ 
+           (max(matched, na.rm = TRUE) - min(matched, na.rm = TRUE))) 
 
 vic_map <- ozmaps::abs_ste |> 
   filter(NAME == "Victoria") |> 
