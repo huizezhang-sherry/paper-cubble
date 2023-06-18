@@ -7,28 +7,47 @@ output: pdf_document
 
 ## The cubble object {#object}
 
-<!-- Spatio-temporal data -->
+Spatio-temporal data can encompass data with various spatial and temporal characteristics and different data require different structures for wrangling and analysis: climate weather stations record data at fixed point location but may suffer from potential temporal data quality issue such as missing data for certain days. GPS data tracks unique point locations at different timestamps and is represented as trajectories. Satellite imageries capture snapshots of landscapes at selected time and is commonly structured as raster data. The spatio-temporal data cubble address are those collected at unique fixed locations while allowing for irregularity in the temporal dimension, such as the weather station data. This corresponds to the full space-time and sparse space-time layouts described in the spacetime paper [@spacetime] and reproduced in Figure  \ref{fig:layout}.
 
-<!-- remote sensing, spatio-temporal cube: longitude, latitude, and time -->
+```{r layout, echo = FALSE, fig.cap="The full space-time and sparse space-time layouts handled by the cubble package. Reproduced from Figure 1 in the spacetime paper \\citep{spacetime}.", fig.width = 8, fig.height=4, fig.align='center'}
+library(tidyverse)
+library(patchwork)
+p1 <- tibble(
+  id = 1:12,
+  x = rep(1:4, each = 3),
+  y = rep(1:3, 4)
+) %>% 
+  ggplot(aes(x = as.factor(x) ,y = as.factor(y))) + 
+  geom_point() + 
+  geom_text(aes(y = y - 0.2, label = id)) + 
+  theme_bw() + 
+  theme(aspect.ratio = 1) + 
+  scale_x_discrete(labels = c("1st", "2nd", "3rd", "4th")) + 
+  scale_y_discrete(labels = c("1st", "2nd", "3rd", "4th")) + 
+  labs(x = "Time points", y = "Spatial features", title = "STF: full grid layout") 
 
-<!-- trajectory: each observation has unique coordinate (spatial) and temporal information -->
+p2 <- tibble(
+  id = 1:7,
+  x = c(1, 1, 1, 2, 2, 3, 4),
+  y = c(1, 2, 3, 2, 3, 1, 2),
+  label = c("1[1,1]", "2[1,2]", "3[1,3]", "4[2,2]", "5[3,2]", "6[1,3]", "7[2,4]")
+) %>% 
+  ggplot(aes(x = as.factor(x) ,y = as.factor(y))) + 
+  geom_point() + 
+  geom_text(aes(y = y - 0.2, label = label)) + 
+  theme_bw() + 
+  theme(aspect.ratio = 1) + 
+  scale_x_discrete(labels = c("1st", "2nd", "3rd", "4th")) + 
+  scale_y_discrete(labels = c("1st", "2nd", "3rd", "4th")) + 
+  labs(x = "Time points", y = "Spatial features", title = "STS: sparse grid layout") 
 
-<!-- the spacetime paper classifies spatio-temporal data into four different categories based on different spatial and temporal characteristics.  -->
-
-<!-- Analysts to be clear about the spatio-temporal layouts and choose the corresponding data structure for analysis. -->
-
-<!-- Spatio-temporal data can be conceptualized using a cubical data model with three axes which typically are, time, latitude and longitude. This abstraction can be useful for generalizing operations and visualization purposes: @lu_multidimensional_2018 shows how array operations (select, scale, reduce, rearrange, and compute) can be mapped onto the cube; @bach_review_2014 reviews the temporal data visualization based on space-time cube operations. Notice that the term space-time cube in their article "does not need to involve spatial data", but refers to "an abstract 2D substrate that is used to visualize data at a specific time". Despite its main focus being on temporal data, the mindset of abstracting out data representation to construct visualizations, still applies to our spatio-temporal data manipulation and visualization approaches. -->
-
-<!-- The most common space-time cube uses the three axes, time, latitude, longitude, and can be considered stacking space across time. Ours is a multivariate spatio-temporal cube with the three axes defined to be time, site and variables, as illustrated in the leftmost column of Figure \ref{fig:cube-def}. The time axis is the same in both versions, while the site axis now captures both latitude and longitude. Finally, variables are stacked on this space-time canvas, with one observation per site and time point. This notion is adopted to avoid using hyper-cubes when describing multivariate spatio-temporal data and is the conceptual framework behind the \code{cubble} class. With this conceptual model, operations on spatio-temporal data can be mapped to operations on the cube and the rest of Figure \ref{fig:cube-def} show examples of slicing on site, time, and variable.  -->
-
-[conceptual framework] 
-
-Spatio-temporal data can encompass data with various spatial and temporal characteristics and different data require different structures for wrangling and analysis: climate weather stations record data at fixed point location but may suffer from potential temporal data quality issue such as missing data for certain days. GPS data tracks unique point locations at different timestamps and is represented as trajectories. Satellite imageries capture snapshots of landscapes at selected time and is commonly structured as raster data. The spatio-temporal data cubble address are those collected at unique fixed locations while allowing for irregularity in the temporal dimension, such as the weather station data. This corresponds to the full space-time and sparse space-time layouts in the spacetime paper [@spacetime].
+p1 | p2
+```
 
 The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms:  a nested/ spatialform and a long/temporal form. It consists of two subclasses:
 
--   a nested/ spatial cubble is represented by the class `c("spatial_cubble_df", "cubble_df")`
--   a long/ temporal cubble is represented by the class `c("temporal_cubble_df", "cubble_df")`
+-   a nested/ spatial cubble with class `c("spatial_cubble_df", "cubble_df")`
+-   a long/ temporal cubble with class `c("temporal_cubble_df", "cubble_df")`
 
 In a nested cubble, spaital variables are organised as columns and temporal variables are nested within a specialised `ts` column. The nested cubble object printed below contains weather records in three airport stations (the creation of a cubble object will be explained in Section \@ref(create)). This toy data is a subset of a larger data \code{climate_aus} collected from Global Historical Climatology Network Daily (GHCND). It records three airport stations located in Melbourne, Australia and includes spatial variables such as station ID, longitude, latitude, elevation, station name, World Meteorology Organisation ID. The dataset contains temporal variables including precipitation, maximum and minimum temperature, which can be read from the cubble header:
 
@@ -58,15 +77,9 @@ cb_long
 #knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
 
-A cubble object inherits the attributes from tibble (and its subclasses): `class`, `row.names`, and `names`. Additionally, it has three specialised attributes:
+A cubble object inherits the attributes from tibble (and its subclasses): `class`, `row.names`, and `names`. Additionally, it has three specialised attributes: `key`, `index`, and `coords`. Readers who are familiar with the `key` and `index` attributes from the `tsibble` package would already understand the two arguments. In cubble, the `key` attribute identifies the row in the nested cubble (given the use of `tidyr::nest()` for nesting), and when combined with the `index` argument, it identifies the row in the long cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for index includes the base R classes `Date`, `POSIXlt`, `POSIXct`, as well as tsibble's `yearmonth`, `yearweek`, and `yearquarter` classes.
 
--   `key`: the spatial identifier
--   `index`: the temporal identifier
--   `coords`: a pair of ordered coordinates associated with the location
-
-Readers who are familiar with the `key` and `index` attributes from the `tsibble` package would already understand the two arguments. In cubble, the `key` attribute identifies the row in the nested cubble, and when combined with the `index` argument, it identifies the row in the long cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for index includes the base R classes `Date`, `POSIXlt`, `POSIXct`, as well as tsibble's `yearmonth`, `yearweek`, and `yearquarter` classes.
-
-The `coords` attribute represents an ordered pair of coordinates. It can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The `sf` package is used under teh hood to calculate the bounding box, displayed in the header of a nested cubble.
+The `coords` attribute represents an ordered pair of coordinates. It can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The `sf` package is used under the hood to calculate the bounding box, displayed in the header of a nested cubble.
 
 The long cubble has a special attribute called `spatial` to store the spatial variables, which includes all the variables from the nested cubble, except for the `ts` column. Shortcut functions are available to extract attributes, for example, \code{spatial()} for extracting spatial variables from the long cubble: 
 
