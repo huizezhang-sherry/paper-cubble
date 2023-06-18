@@ -24,14 +24,18 @@ Other sections of the paper have been edited for conciseness and they match with
 
 ## The Package:
 
-The cubble class has been refactored as suggested by reviewer 1. Now the cubble class has two sub-classes:
+The cubble class has been re-factored as suggested by reviewer 1. Now the cubble class has two sub-classes:
 
   * nested/ spatial cubble: `c("spatial_cubble_df", "cubble_df")`, and
   * long/ temporal cubble: `c("temporal_cubble_df", "cubble_df")`.
 
-All the S3 methods have been modified accordingly. Methods behave consistently in the nested and long cubble are implemented in the `cubble_df` class, otherwise, separately in the `spatial_cubble_df` and `temporal_cubble_df` class. 
+All the S3 methods have been modified accordingly. Methods behave consistently in the nested and long cubble are implemented in the `cubble_df` class, otherwise, separately in the `spatial_cubble_df` and `temporal_cubble_df` class.
 
-The package documentation have been substantially improved, specifically, [...]. A new version of the package (v0.3.0) is now available on CRAN. 
+Other noticeable changes made to the package include: 
+
+  - The syntax for creating a cubble from separate spatial and temporal component has been changed from `as_cubble(list(spatial = ..., temporal = ...), ...)` to `make_cubble(spatial = ..., temporal = ..., ...)`. 
+  - The new added toy data for demonstration: `stations` and `stations_sf` (the spatial component of three airport weather stations and it as an sf object), `meteo` and `meteo_ts` (the temporal component of the three weather stations and it as a tsibble object).
+  - A new version of the package (v0.3.0) is now available on CRAN. 
 
 In the point-by-point response to reviewers' comments below, the original comments are in black and our responses are in red. 
 
@@ -60,7 +64,7 @@ Given the small size of the package, the paper feels a bit on the heavy side. Mo
 
 More fundamentally, the design of the package has an immediately apparent drawback. The cubble class is used to represent two incompatible data types - long and nested. Internally, the two data types are distinguished by the internal attribute “form”. In other words, the authors use an attribute of an object to mimic the functionality of a sub-class. A more natural implementation would be start with two distinct data structures, both sub-classes of the abstract cubble_df class, c("spatial_cubble_df", "cubble_df") and c("spatial_temporal_df", "cubble_df"). Such a generic implementation would allow for natural extension of the functionality through dedicated methods. Currently an ever-present check on “form” attribute is necessary throughout the code base. To make matters worse, as_cubble currently produces yet another data structure - a list of paired matches, as can be seen from example 5.1 in the paper.
 
-**\textcolor{purple}{The suggested class implemented has been adopted, see The Package section in the Summary of Main Changes. The codes on checking key values from multiple tables have been moved to a separate function check\_key() and reflected in the example 5.1 now. The function as\_cubble() now returns nested cubbles.}**
+**\textcolor{purple}{The suggested class implemented has been adopted, see The Package section in the Summary of Main Changes in this reponse. The codes on checking key values from multiple tables have been moved to a separate function check\_key() and reflected in the example 5.1 now. The function as\_cubble() now returns nested cubbles.}**
 
 Relatedly, the rationale for the parallel naming convention long/nested and temporal/spatial is not entirely clear. It seems to me that the semantically unambiguous temporal/spatial could be used throughout without ambiguity, thus resolving the terminological redundancy.
 
@@ -91,7 +95,7 @@ The package is generally badly documented. The meaning of the arguments is almos
   * What is the accepted data type of key, index and coords? 
 
 The user would need to visit the documentation of tsibble in order to understand the meaning of the key and index. But the relationship to tsibble is not even mentioned in the docs.
-The documentation of the key and index is not perfect in tsible either, but sheds some more light on their role:
+The documentation of the key and index is not perfect in tsibble either, but sheds some more light on their role:
 
 ````
      key: Variable(s) that uniquely determine time indices. ‘NULL’ for
@@ -100,16 +104,15 @@ The documentation of the key and index is not perfect in tsible either, but shed
    index: A variable to specify the time index variable.
    
 ````
-
 The doc states:
 
 ````
-    The constructor for the cubble class
+   The constructor for the cubble class
 ````
 
 If it’s the constructor then the convention is to name it cubble(). as_xyz is the converter which translates between different data types. For example, if the proper sub-classing would be used, as_spatial_cubble and as_temporal_cubble would be more standard names rather than the face_spatial and face_temporal respectively.
 
-**\textcolor{purple}{Documentation of the package has been substantially improved with a focus on clarifying the input arguemnt types. For the specific example of as\_cubble(), the mentioned arguments now state:  }**
+**\textcolor{purple}{Documentation of the package has been substantially improved with a focus on clarifying the input arguemnt types. For the specific example of as\_cubble(), the documentation now states:}**
 
 ````
     data: an object to be converted into an cubble object. 
@@ -125,7 +128,7 @@ If it’s the constructor then the convention is to name it cubble(). as_xyz is 
 
 ````
 
-**\textcolor{purple}{TODO: more here}**
+**\textcolor{purple}{cubble() is the class constructor and the documentation now states "Create a cubble object". as\_cubble() is the coercion function and documented as "Coerce foreign objects into a cubble object".}**
 
 ## Further suggestion
 
@@ -146,11 +149,11 @@ invisible(face_spatial(climate_mel))
 
 It would be useful to print a few rows of the spatial attribute of the “long” object.
 
-**\textcolor{purple}{the spatial attribute can be checked with function spaital(<cubbble\_obj>)}**
+**\textcolor{purple}{The spatial attribute can be checked with function spaital(<cubbble\_obj>).}**
 
 Section 3.6 is missing `tidyr` package which is especially relevant here given its nesting and unnesting operations https://tidyr.tidyverse.org/articles/nest.html
 
-**\textcolor{purple}{TODO}**
+**\textcolor{purple}{Cubble internally uses tidyr::nest() in the construction of a nested/spatial cubble (hence the name). We now mention the tidyr::nest() under the cubble attributes in Section 2.1 as an implication of rows being uniquely identified in the nested cubble.}**
 
 More comments inlined in the pdf.
 
@@ -165,7 +168,7 @@ and how the package relates to existing packages for spatial and temporal data a
 
   - on p6 section 3.2, I think it would be a good idea to clearly describe the two data structures in an earlier section. By this point it's still not clear what those are and what the meaning of key and index is. **\textcolor{purple}{The description of the two data structures is now at section 2.1}**
 
-  - on p6, section 3.2, yet another reason to call this data structure "cubble_temporal" instead of the semantically unobvious "long". **\textcolor{purple}{see paragraph 4 under section The paper in this response.}**
+  - on p6, section 3.2, yet another reason to call this data structure "cubble_temporal" instead of the semantically obvious "long". **\textcolor{purple}{see paragraph 4 under section The paper in this response.}**
 
   - on p8 section 3.5, Isn't the root reason the memory efficiency? That is, the spatial component cannot be represented as part of the nested tibble without repetition. **\textcolor{purple}{this has now been incorporated in section 2.5.}**
 
