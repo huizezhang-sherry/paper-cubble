@@ -5,7 +5,10 @@ output: html_document
 
 ## River levels and rainfall in Victoria
 
-Bureau of Meteorology collects [water data](http://www.bom.gov.au/metadata/catalogue/19115/ANZCW0503900528?template=full) from river gauges and this includes variables: electrical conductivity, turbidity, water course discharge, water course level, and water temperature. In particular, water level will interactive with precipitation from the climate data since rainfall will raise the water level in the river. Both `climate_vic` and `river` are cubble objects and we can get a summary of the 10 closest pairs:
+One common task when working with spatio-temporal data is to match nearby sites. For example, we may want to verify the location of an old list of stations with current stations, or we may want to match the data from different data sources. In this example, we will introduce the spatial and temporal matching in cubble using an example on matching river level data with precipitation in Victoria, Australia.
+
+The water level data collected by the Bureau of Meteorology, can be compared with the precipitation since rainfall can directly impact water level in river. Both `climate_vic` and `river` are cubble objects, and we can obtain a summary of the 10 closest pairs between them:
+
 
 
 ```{r}
@@ -21,7 +24,7 @@ res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10)
 print(res_sp, n = 20)
 ```
 
-The result can also be returned as cubble objects with argument `return_cubble = TRUE`. The output is a list where each element is a paired cubble object and you may consider combining all the results into a single cubble with `bind_rows()`. Care needs to be taken on in the case when a site is close to two stations since by construction, cubble require unique rows in the nested form. From the summary table above, river station `226027` is matched to more than one weather station: `ASN00085072` (group 3) and `ASN00085298` (group 5). (Similarly river station `230200` is matched in group 7 and 8). One can either deselect one pair before binding the results, or take the list and work with the `purrr::map` syntax:
+The result can also be returned as cubble objects by setting the argument `return_cubble = TRUE`. The output is be a list where each element is a paired cubble object. To combine all the results into a single cubble, you can use `bind_rows()`. In the case when a site in the second cubble (the `river` data here) is matched to two stations in the first cubble (`climate_vic` here), the binding may not be successful since cubble requires unique rows in the nested form. In the summary table above, the river station `226027` is matched to more than one weather station: `ASN00085072` (group 3) and `ASN00085298` (group 5). Similarly, the river station `230200` is matched in group 7 and 8). In such cases, you can either deselect one pair before combining, or work with the list output with the `purrr::map` syntax:
 
 
 ```{r echo = TRUE}
@@ -32,7 +35,16 @@ str(res_sp, max.level = 0)
 (res_sp <- res_sp[-c(5, 8)] %>% bind_rows())
 ```
 
-For temporal matching, the variable water level (`Water_course_level`) from the river data will be matched to precipitation (`prcp`) in the weather station data. The variable identifying each matched group is `group` and the variable identifying the two datasets is `type`, and similarly, the cubble output can be returned with the argument `return_cubble = TRUE`. Here we select the four pairs with the highest number of matching peaks:
+For temporal matching, we match the variable `Water_course_level` from the river data to `prcp` in the weather station data. The variable `group` and `types` identify the matching group and the two datasets:
+
+```{r echo = TRUE}
+(res_tm <- res_sp %>% 
+  match_temporal(
+    data_id = type, match_id = group,
+    temporal_by = c("prcp" = "Water_course_level")))
+```
+
+Similarly, the cubble output can be returned using the argument `return_cubble = TRUE`. Here we select the four pairs with the highest number of matching peaks:
 
 ```{r echo = TRUE}
 res_tm <- res_sp %>% 

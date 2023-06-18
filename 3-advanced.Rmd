@@ -7,23 +7,21 @@ output: pdf_document
 
 ## Data fusion and matching {#matching}
 
-One task that may interest spatio-temporal analysts is combining data collected at nearby but not exactly the same sites, for example, weather station measured rainfall and river levels. This can be considered to be a matching problem [@stuart2010matching; @mcintosh2018using] to pair similar time series from nearby locations, or even a data fusion exercise that merges data collected from different sources [@cocchi2019data]. 
 
-
-In cubble, data can be matched spatially or temporarily with `match_spatial()` and `match_temporal()`. The function `match_spatial()` calculates the spatial distance between observations in two cubbles. Different distances are available with projected or unprojected coordinate reference system. Analysts can subset the number of matched group to output with argument `spatial_n_group` (by default 4 groups) and the number of match per group with argument `spatial_n_group` (by default 1, that is, one-to-one matching). The syntax to use `match_spatial()` is:
+One common task when working with spatio-temporal data is to match nearby sites. For example, we may want to verify the location of an old list of stations with current stations, or we may want to match the data from different data sources. In cubble, spatial and temporal matching are performed using the functions `match_spatial()` and `match_temporal()`. The `match_spatial()` function calculates the spatial distance between observations in two cubble objects. Various distance measures are available (check `sf::st_distance`). Analysts can specify the number of matched groups to output using the `spatial_n_group` argument (default to 4 groups) and the number of matches per group using the `spatial_n_group` argument (default to 1, one-to-one matching). The syntax to use `match_spatial()` is:
   
 ````
 match_spatial(<cubble_obj1>, <cubble_obj2>, ...)
 ````
 
-The function `match_temporal()` calculates the time series similarity between spatially matched groups. Two identifiers needs to be specified on the variable separates the each matched group (`match_id`) and the variable separates the two sources (`data_id`). The argument `temporal_by` uses the `by` syntax from dplyr `*_join` to specify the temporal matching variable. 
+The function `match_temporal()` calculates the similarity between time series within spatially matched groups. Two identifiers are required: one for separating each matched group (`match_id`) and one for separating the two data sources (`data_id`). The argument `temporal_by` uses the `by` syntax from dplyr's `*_join` to specify the temporal variables to match.
   
-  The similarity score between two time series in the spatially matched group is calculated by a matching function, which analysts can customise. The matching function should take two time series in a list and output a single numerical score, which allows for interfacing with existing time series distance calculation implementation. By default, cubble implements a simple peak matching algorithm (`match_peak`) that counts the number of peaks in two time series that fall within a specified temporal window. The syntax to use `match_temporal()` is:
+The similarity score between two time series is calculated using a matching function, which can be customised by the analysts. The matching function takes two time series as a list and returns a single numerical score. This allows for flexibility in using existing time series distance calculation implementation. By default, cubble implements a simple peak matching algorithm (`match_peak`) that counts the number of peaks in two time series that fall within a specified temporal window. The syntax to use `match_temporal()` is
   
 ````
 match_temporal(
   <cubble_obj_from_match_spatial>, 
-  data_id = ... , match_id = ..., 
+  data_id = , match_id = , 
   temporal_by = c("..." = "...")
 )
 ````
@@ -40,19 +38,21 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Spatio-temporal transformations {#st_transformation}
 
-Spatio-temporal data lends itself to a range of transformations. Glyph maps [@Wickham2012-yr] transform the measured variable and time coordinates into microplots at the spatial locations. Calendar plots [@wang2020calendar] deconstruct time to produce plots of variables in a calendar format. Summarizing multiple variables is commonly done using projections, or linear combinations. Here we elaborate on the transformations made to produce a glyph map. The package \pkg{GGally} [@ggally] has implemented glyph maps through the \code{glyphs()} function. The function constructs a \code{data.frame} with calculated position (\code{gx}, \code{gy}, \code{gid}) of each point on the time series using linear algebra (Equations 1 and 2 in @Wickham2012-yr). A new implementation of the glyph map as a ggproto, \code{GeomGlyph}, has been made in the \pkg{cubble} package so that a glyph map can be created with \code{geom_glyph()}:
+Sometimes, we wish to communicate spatial and temporal information collectively through visualisation. This can be achieved through several graphical displays: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. The concept of glyph maps was initially proposed in @Wickham2012-yr. The underlying idea is to transform the temporal coordinates into spatial coordinates so that time series plot can be displayed on the map. 
 
-```{r eval = FALSE, echo = TRUE}
-data |>
+The package `GGally` initially implement the glyph map. It uses `glyphs()` to calculate the axis transformation and then uses `geom_polygon()` to draw the map. In cubble, a ggproto implementation `geom_glyph()` performs the linear algebra internally as data transformation . The `geom_glyph()` requires four aesthetics: `x_major`, `y_major`, `x_minor`, and `y_minor`. The major axes are the outer spatial coordinates and the minor axes are the inner/ temporal coordinates: 
+
+```
+data |> 
   ggplot() +
-  geom_glyph(aes(x_major = ..., x_minor = ...,
+  geom_glyph(aes(x_major = ..., x_minor = ..., 
                  y_major = ..., y_minor = ...))
 ```
 
-Some useful controls over the glyph map are also available in the \code{geom_glyph()} implementation
+Some useful controls over the glyph map includes:
   
-  * polar coordinate glyph maps are specified using \code{polar = TRUE}, 
-  * arguments \code{width} and \code{height} can be specified in either absolute or relative value, 
-  * global and local scale is specified with \code{global_rescale}, which defaults to \code{TRUE}, and 
-  *reference boxes and lines can be added with geoms: \code{geom_glyph_box()} and \code{geom_glyph_line()}.
+  * polar coordinate glyph maps with \code{polar = TRUE}, 
+  * adjust glyph size with arguments \code{width} and \code{height},
+  * glyph scale to fixed (\code{global_rescale} defaults to \code{TRUE}) or free, and 
+  * reference boxes and lines with \code{geom_glyph_box()} and \code{geom_glyph_line()}.
   
