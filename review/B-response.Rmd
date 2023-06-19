@@ -1,5 +1,5 @@
 ---
-title: "Response to reviewers article 4780"
+title: "Response to Reviewers - Article 4780"
 subtitle: "cubble: An R Package for Organizing and Wrangling Multivariate Spatio-temporal Data"
 author: "H. Sherry Zhang, Dianne Cook, Ursula Laa, Nicolas Langrené, Patricia Menéndez"
 date: "`r Sys.Date()`"
@@ -10,11 +10,11 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-We provide an overall summary of the changes made to the paper and the package before addressing reviewers' comments point-by-point.
+We provide an overall summary of the changes made to the paper and the package and then we make a point-by-point explanation of how we addressed the reviewers' comments.
 
-# Summary of Main Changes
+# Summary of the changes
 
-## The Paper:
+## Paper
 
 Section 2 have been reworked to combine the original section 2 and 3. It now focuses more on the inner work of the package: the cubble class and its attributes, object creation and coercion, functions and methods implemented, compatibility with `tsibble` and `sf`, and comparison with other existing spatio-temporal packages (`stars` and `sftime`). 
 
@@ -22,7 +22,7 @@ In the comparison section (Section 2.5), we compare `cubble` with `stars` and `s
 
 Other sections of the paper have been edited for conciseness and they match with the package vignettes.
 
-## The Package:
+## Software
 
 The cubble class has been re-factored as suggested by reviewer 1. Now the cubble class has two sub-classes:
 
@@ -37,12 +37,21 @@ Other noticeable changes made to the package include:
   - The new added toy data for demonstration: `stations` and `stations_sf` (the spatial component of three airport weather stations and it as an sf object), `meteo` and `meteo_ts` (the temporal component of the three weather stations and it as a tsibble object).
   - A new version of the package (v0.3.0) is now available on CRAN. 
 
-In the point-by-point response to reviewers' comments below, the original comments are in black and our responses are in red. 
+\bigskip
+\bigskip
+\hrule
+
+
+\bigskip
+\bigskip
+
+Reviewers' comments are in black and \textcolor{purple}{our responses are in red}. 
 
 
 # Response to B-review_1_1
 
-## The Paper
+
+## Paper
 
 The paper describes a new data structure cubble and associated workflows. In a nutshell cubble subsumes two data structures:
   
@@ -78,7 +87,7 @@ As cubble is a new package and no reverse dependencies yet exist, I would sugges
   * Rework section 4 by making it more concise and provide links to sections in supplementary material or dedicated vignettes. **\textcolor{purple}{Reworked. Text has been edited for conciseness}**
   * Rework examples section 5 into “Applications”. Briefly describe the applications and provide and refer to dedicated and self-contained vignettes. **\textcolor{purple}{Adopted, see the last point.}**
 
-## The Package
+## Software
 
 The package is generally badly documented. The meaning of the arguments is almost never clear from the documentation alone. For example the documentation of as_cubble states:
 
@@ -130,7 +139,7 @@ If it’s the constructor then the convention is to name it cubble(). as_xyz is 
 
 **\textcolor{purple}{cubble() is the class constructor and the documentation now states "Create a cubble object". as\_cubble() is the coercion function and documented as "Coerce foreign objects into a cubble object".}**
 
-## Further suggestion
+## Further suggestions
 
 Consider not throwing an error when face_spatial is applied to the spatial object. This would allow for generic code where the “form” of the input the data is not known or does not matter.
 
@@ -176,7 +185,7 @@ and how the package relates to existing packages for spatial and temporal data a
 
 # Response to B-review_2_1
 
-## The Manuscript
+## Paper
 
 The manuscript is in general clearly structured. However, an important reference to the R-package sftime is missing that also deals with the representation of spatiotemporal data. It might be beneficial to provide illustrative examples in the manuscript that clearly compare between a cubble representation and representations of existing packages. Which data sets/structures cannot (or with a greater effort) be represented with existing R-packages such as e.g. stars and sftime? 
 
@@ -211,7 +220,7 @@ Additionally, several typos and language issues arise and limit the readability 
   - The polar vortex, signalled by the high *speicfic* humidity, splits into two on 2002-09-26 and *further-s- split_s_* into four on 2002-10-04. **\textcolor{purple}{to "specific", "further splits"}**
   - the data in *-a- multiple -of-* ways on-the-fly. **\textcolor{purple}{ to "multiple ways"}** 
  
-## The package
+## Software
 
 I have been a bit puzzled by the “print” of a nested cubble in its temporal face. The row # temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl] appears at first sight (also in comparison with the print of the spatial face), as if the temporal domain is given by all those variables. To me, a notion such as
 
