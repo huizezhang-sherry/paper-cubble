@@ -237,9 +237,6 @@ R> spatial(cb_long)
 \hypertarget{create}{%
 \subsection{Creation and coercion}\label{create}}
 
-\hypertarget{creating-from-separate-spatial-and-temporal-tables}{%
-\subsubsection{Creating from separate spatial and temporal tables}\label{creating-from-separate-spatial-and-temporal-tables}}
-
 In many cases, spatio-temporal data arrive in separate tables for analysis. For example, in climate data, analysts may initially receive station data containing geographic location information, recorded variables and their recording periods. They can then query the temporal variables using the stations of interest to obtain the relevant temporal data. Alternatively, analyses may begin as purely spatial or temporal, and analysts may obtain additional temporal or spatial data to expand the result to spatio-temporal.
 
 The function \code{make_cubble()} composes a \code{cubble} object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}), along with three attributes introduced in the subsection \ref{object}: \code{key}, \code{index}, and \code{coords}. The following code creates the spatial \code{cubble} object shown previously:
@@ -251,47 +248,22 @@ R> make_cubble(spatial = stations, temporal = meteo,
 \end{CodeInput}
 \end{CodeChunk}
 
-\hypertarget{coercing-from-foreign-objects}{%
-\subsubsection{Coercing from foreign objects}\label{coercing-from-foreign-objects}}
-
 Spatio-temporal data in other foreign objects can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes casting from a \code{tibble} or \code{data.frame} with both spatial and temporal information, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. The two examples below show the casting from a tibble and a NetCDF object. The dataset \code{climate_flat} combines the spatial data, \code{stations}, with the temporal data, \code{meteo}, into a single tibble object. It can be coerced into a cubble using:
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 \end{CodeInput}
-\end{CodeChunk}
-
-In \proglang{R}, there are several packages available for wrangling NetCDF data, including \code{ncdf4}, \code{RNetCDF}, and \code{tidync}. The code below converts a NetCDF object of class \code{ncdf4} into a cubble object:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> path <- system.file("ncdf/era5-pressure.nc", package = "cubble")
-R> raw <- ncdf4::nc_open(path)
-R> as_cubble(raw)
-\end{CodeInput}
 \begin{CodeOutput}
-# cubble:   key: id [26565], index: time, nested form
-# spatial:  [113, -53, 153, -12], Missing CRS!
-# temporal: time [dttm], q [dbl], z [dbl]
-     id  long   lat ts              
-  <int> <dbl> <dbl> <list>          
-1     1  113    -12 <tibble [6 x 3]>
-2     2  113.   -12 <tibble [6 x 3]>
-3     3  114.   -12 <tibble [6 x 3]>
-4     4  114.   -12 <tibble [6 x 3]>
-5     5  114    -12 <tibble [6 x 3]>
-# i 26,560 more rows
+# cubble:   key: id [3], index: date, nested form
+# spatial:  [144.8321, -37.98, 145.0964, -37.6655], Missing CRS!
+# temporal: date [date], prcp [dbl], tmax [dbl], tmin [dbl]
+  id           long   lat  elev name              wmo_id ts               
+  <chr>       <dbl> <dbl> <dbl> <chr>              <dbl> <list>           
+1 ASN00086038  145. -37.7  78.4 essendon airport   95866 <tibble [10 x 4]>
+2 ASN00086077  145. -38.0  12.1 moorabbin airport  94870 <tibble [10 x 4]>
+3 ASN00086282  145. -37.7 113.  melbourne airport  94866 <tibble [10 x 4]>
 \end{CodeOutput}
-\end{CodeChunk}
-
-Sometimes, analysts may choose to read onlny a subset of the NetCDF data. In such cases, the arguments \code{vars}, \code{long_range} and \code{lat_range} can be used to subset the data based on variable and the grid resolution:
-
-\begin{CodeChunk}
-\begin{CodeInput}
-R> as_cubble(raw, vars = "q",
-+           long_range = seq(-180, 180, 1), lat_range = seq(-90, 90, 1))
-\end{CodeInput}
 \end{CodeChunk}
 
 \hypertarget{functions-and-methods}{%
@@ -632,7 +604,8 @@ Warning: st_centroid assumes attributes are constant over geometries
 \end{CodeOutput}
 \begin{CodeOutput}
 ! Use `check_key()` to check on the unmatched key
-The cubble is created only with sites having both spatial and temporal information
+The cubble is created only with sites having both spatial and
+temporal information
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -899,19 +872,39 @@ Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardiz
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis data}\label{era5-climate-reanalysis-data}}
 
-The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF) and can be downloaded from Copernicus Climate Data Store (CDS) \citep{cds} website or via the \pkg{ecmwfr} package \citep{ecwmfr}. This example reproduces the ERA5 data row of Figure 19 in \citet{hersbach2020era5} to show the southern polar vortex splitting into two on 2002-09-26 and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in \citet{simmons2020global} and \citet{simmons2005ecmwf}.
+The ERA5 reanalysis \citep{hersbach2020era5} provides hourly estimates of atmospheric, land and oceanic climate variables on a global scale. The hourly pressure level data in the NetCDF format can be downloaded from Copernicus Climate Data Store (CDS) \citep{cds} or via the \pkg{ecmwfr} package \citep{ecwmfr}. This example reproduces the row created from ERA5 reanalysis data shown in Figure 19 by \citet{hersbach2020era5}. The plot shows the southern polar vortex splitting into two on 2002-09-26, and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in \citet{simmons2020global} and \citet{simmons2005ecmwf}.
 
-For the reproduction, we focus on the \code{era5-pressure} data, hourly pressure levels from 1970 to present, with the \emph{specific humidity} and \emph{geopotential}. The downloaded NetCDF data (\texttt{raw}) is first converted to a \code{cubble} object:
+To work with NetCDF data in R, several packages are available, including \code{ncdf4}, \code{RNetCDF}, and \code{tidync}. The following code converts a NetCDF object of class \code{ncdf4} into a cubble object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> dt <- as_cubble(
-+   raw, vars = c("q", "z"),
-+   long_range = seq(-180, 180, 1), lat_range = seq(-88, 88, 1))
+R> raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
 \end{CodeInput}
 \end{CodeChunk}
 
-Creating the plot requires making transformations on time, unfolding the data for computing the statistic of interest, which is plotted directly as a contour plot with ggplot.
+Analysts can extract a subset of the NetCDF data with the arguments \code{vars}, \code{long_range} and \code{lat_range}. In this example, the variables q (specific humidity) and z (geopotential) are selected and the coordinates are subsetted to every degree in longitude and latitude:
+
+\begin{CodeChunk}
+\begin{CodeInput}
+R> (dt <- as_cubble(raw, vars = c("q", "z"),
++                  long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
+\end{CodeInput}
+\begin{CodeOutput}
+# cubble:   key: id [26640], index: time, nested form
+# spatial:  [-180, -88, 179, -15], Missing CRS!
+# temporal: time [date], q [dbl], z [dbl]
+     id  long   lat ts              
+  <int> <dbl> <dbl> <list>          
+1     1  -180   -15 <tibble [8 x 3]>
+2     2  -179   -15 <tibble [8 x 3]>
+3     3  -178   -15 <tibble [8 x 3]>
+4     4  -177   -15 <tibble [8 x 3]>
+5     5  -176   -15 <tibble [8 x 3]>
+# i 26,635 more rows
+\end{CodeOutput}
+\end{CodeChunk}
+
+Once the NetCDF data is coerced into a cubble object, subsequent analysis can be conducted to filter on the date of interest, scale the variable specific humidity and create visualisation in ggplot as in Figure \ref{fig:netcdf}.
 
 \begin{CodeChunk}
 \begin{figure}
