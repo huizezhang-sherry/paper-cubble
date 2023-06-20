@@ -82,20 +82,19 @@ tmax <- tmax |> unfold(long, lat)
 box_df <- tmax |> face_spatial() |> filter(id == "ASN00048027")
 nsw_vic <- ozmaps::abs_ste |> filter(NAME %in% c("Victoria","New South Wales"))
 
-p1 <- ggplot() + 
+p1 <- tmax %>% 
+  ggplot(aes(x_major = long, x_minor = month, 
+             y_major = lat, y_minor = tmax,
+             group = interaction(id, group))) + 
   geom_sf(data = nsw_vic, fill = "grey95", 
-          color = "white") + 
-  geom_glyph(
-    data = tmax, 
-    aes(x_major = long, x_minor = month, 
-        y_major = lat, y_minor = tmax,
-        group = interaction(id, group), color = group),
-    width = 1.2, height = 0.8) +
-    geom_rect(
-      data = box_df,
-      aes(xmin = long - 0.6, xmax = long + 0.6,
-          ymin = lat - 0.12, ymax = lat + 0.35),
-      fill = "transparent", color = "black") +
+          color = "white", inherit.aes = FALSE) + 
+  geom_glyph_box(data = tmax, width = 0.8, height = 0.3) +
+  geom_glyph(data = tmax, aes(color = group), width = 0.8, height = 0.3) +
+    # geom_rect(
+    #   data = box_df,
+    #   aes(xmin = long - 0.6, xmax = long + 0.6,
+    #       ymin = lat - 0.12, ymax = lat + 0.35),
+    #   fill = "transparent", color = "black") +
   scale_color_brewer("", palette = "Dark2") + 
   coord_sf(xlim = c(141, 154), ylim = c(-39, -28.5)) + 
   ggthemes::theme_map() +
@@ -108,4 +107,4 @@ p1 <- ggplot() +
 
 ```
 
-Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are gridded. In this example, they are irregularly spaced, which can result in overlapping glyphs obscuring each other. To fix this, one could aggregate data from nearby stations. An example of this use is included in the Appendix. 
+Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are gridded. In this example, they are irregularly spaced, which can result in overlapping glyphs obscuring each other.

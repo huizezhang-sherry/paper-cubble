@@ -5,19 +5,20 @@ output: html_document
 
 # Applications {#examples}
 
-The five examples here are chosen to illustrate these aspects of the \pkg{cubble} package: creating a \code{cubble} object from two Coronavirus (COVID) data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, matching river level data and weather station records for analysis of water supply, reading NetCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots.
+Five examples are chosen to illustrate different aspects of the \pkg{cubble} package: creating a \code{cubble} object from two Coronavirus (COVID) data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes, matching river level data and weather station records for analysis of water supply, reading NetCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots.
 
 ## Victoria COVID spatio-temporal incidence and spread {#covid}
 
-Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualize COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Both the COVID count data (\code{covid}) and the LGA information (\code{lga}) are available in the \pkg{cubble} package with the \code{covid} data stored as a \code{tsibble} object, the \code{lga} data as an \code{sf} object.
+Since the start of the pandemic, the Victoria State Government in Australia has been providing daily COVID counts per Logal Government Area (LGA). This data can be combined with map polygon data, available from the Australian Bureau of Statistics (ABS), to visualize COVID incidence and spread. In the \pkg{cubble} package, the COVID count data (\code{covid}) and the LGA information (\code{lga}) are available as a \code{tsibble} object and an \code{sf} object respectively.
 
-The \code{make_cubble()} function is used to create a \code{cubble} object from the two spatial and temporal tables as described in Section \@ref(create). The \code{by} argument allows for mismatch of key names from the two tables in the \code{*_join()} \code{by} syntax: 
+A cubble object can be created from separate spatial and temporal component using the \code{make_cubble()} function, introduced in Section \@ref(create). The \code{by} argument
+is used to specify the joining variable from the two component using the \code{*_join()} \code{by} syntax: 
 
 ```{r covid-4, echo = TRUE, warning = TRUE, message= TRUE}
 cb <- make_cubble(lga, covid, by = c("lga_name_2018" = "lga"))
 ```
 
-The warning message reports on the mismatches of location from both sides: there are LGAs in the COVID data that do not match with LGAs names in the spatial polygon data, and vice versa. The \code{make_cubble()} function prompts the use of \code{check_key()} to identify the mismatches:
+The warning message suggests the slight difference of LGA encoding used by Victoria government and ABS and prompts analysts to use the function \code{check_key()} to identify the mismatches:
 
 ```{r covid-5, echo = TRUE}
 (check_res <- check_key(
@@ -26,7 +27,7 @@ The warning message reports on the mismatches of location from both sides: there
 ))
 ```
 
-The check result is a list with three elements: 1) matched pairs from both tables, 2) those pairs that can be potentially paired, and 3) others. Here the main mismatch comes from different encodings of two LGAs: Kingston and Latrobe. Analysts can then modify the input spatial and temporal data accordingly and create the cubble again: 
+The result of the \code{check_key()} function is a list containing three elements: 1) matched keys from both tables, 2) potentially pairable keys, and 3) others. Here, the main mismatch arises from the two LGAs: Kingston and Latrobe (Kingston is a LGA in both Victoria and South Australia and Latrobe is a LGA in both Victoria and Tasmania). Analysts can modify the input spatial and temporal data accordingly and recreate the cubble object: 
 
 ```{r covid-6, echo = TRUE}
 lga2 <- lga |>

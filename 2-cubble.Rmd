@@ -44,7 +44,7 @@ p2 <- tibble(
 p1 | p2
 ```
 
-The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms:  a nested/ spatialform and a long/temporal form. It consists of two subclasses:
+The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms:  a nested/ spatial form and a long/temporal form. It consists of two subclasses:
 
 -   a nested/ spatial cubble with class `c("spatial_cubble_df", "cubble_df")`
 -   a long/ temporal cubble with class `c("temporal_cubble_df", "cubble_df")`

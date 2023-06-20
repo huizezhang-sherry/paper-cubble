@@ -162,7 +162,7 @@ Spatio-temporal data can encompass data with various spatial and temporal charac
 \end{figure}
 \end{CodeChunk}
 
-The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms: a nested/ spatialform and a long/temporal form. It consists of two subclasses:
+The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms: a nested/ spatial form and a long/temporal form. It consists of two subclasses:
 
 \begin{itemize}
 \tightlist
@@ -607,14 +607,15 @@ Some useful controls over the glyph map includes:
 \hypertarget{examples}{%
 \section{Applications}\label{examples}}
 
-The five examples here are chosen to illustrate these aspects of the \pkg{cubble} package: creating a \code{cubble} object from two Coronavirus (COVID) data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes over years, matching river level data and weather station records for analysis of water supply, reading NetCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots.
+Five examples are chosen to illustrate different aspects of the \pkg{cubble} package: creating a \code{cubble} object from two Coronavirus (COVID) data tables with the complication of differing location names, using spatial transformations to make a glyph map of seasonal temperature changes, matching river level data and weather station records for analysis of water supply, reading NetCDF format data to reproduce a climate reanalysis plot, and the workflow to create complex interactive linked plots.
 
 \hypertarget{covid}{%
 \subsection{Victoria COVID spatio-temporal incidence and spread}\label{covid}}
 
-Since the start of the pandemic, the Victoria State Government in Australia has provided daily COVID counts by local government area (LGA). This data can be used to visualize COVID incidence and spread spatially, when combined with map polygon data available from the Australian Bureau of Statistics. These different sources need to be combined for the analysis, by matching the LGA names. Both the COVID count data (\code{covid}) and the LGA information (\code{lga}) are available in the \pkg{cubble} package with the \code{covid} data stored as a \code{tsibble} object, the \code{lga} data as an \code{sf} object.
+Since the start of the pandemic, the Victoria State Government in Australia has been providing daily COVID counts per Logal Government Area (LGA). This data can be combined with map polygon data, available from the Australian Bureau of Statistics (ABS), to visualize COVID incidence and spread. In the \pkg{cubble} package, the COVID count data (\code{covid}) and the LGA information (\code{lga}) are available as a \code{tsibble} object and an \code{sf} object respectively.
 
-The \code{make_cubble()} function is used to create a \code{cubble} object from the two spatial and temporal tables as described in Section \ref{create}. The \code{by} argument allows for mismatch of key names from the two tables in the \code{*_join()} \code{by} syntax:
+A cubble object can be created from separate spatial and temporal component using the \code{make_cubble()} function, introduced in Section \ref{create}. The \code{by} argument
+is used to specify the joining variable from the two component using the \code{*_join()} \code{by} syntax:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -635,7 +636,7 @@ The cubble is created only with sites having both spatial and temporal informati
 \end{CodeOutput}
 \end{CodeChunk}
 
-The warning message reports on the mismatches of location from both sides: there are LGAs in the COVID data that do not match with LGAs names in the spatial polygon data, and vice versa. The \code{make_cubble()} function prompts the use of \code{check_key()} to identify the mismatches:
+The warning message suggests the slight difference of LGA encoding used by Victoria government and ABS and prompts analysts to use the function \code{check_key()} to identify the mismatches:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -673,7 +674,7 @@ $others$temporal
 \end{CodeOutput}
 \end{CodeChunk}
 
-The check result is a list with three elements: 1) matched pairs from both tables, 2) those pairs that can be potentially paired, and 3) others. Here the main mismatch comes from different encodings of two LGAs: Kingston and Latrobe. Analysts can then modify the input spatial and temporal data accordingly and create the cubble again:
+The result of the \code{check_key()} function is a list containing three elements: 1) matched keys from both tables, 2) potentially pairable keys, and 3) others. Here, the main mismatch arises from the two LGAs: Kingston and Latrobe (Kingston is a LGA in both Victoria and South Australia and Latrobe is a LGA in both Victoria and Tasmania). Analysts can modify the input spatial and temporal data accordingly and recreate the cubble object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -771,7 +772,7 @@ R> ggplot() +
 \end{figure}
 \end{CodeChunk}
 
-Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are gridded. In this example, they are irregularly spaced, which can result in overlapping glyphs obscuring each other. To fix this, one could aggregate data from nearby stations. An example of this use is included in the Appendix.
+Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are gridded. In this example, they are irregularly spaced, which can result in overlapping glyphs obscuring each other.
 
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
@@ -898,9 +899,9 @@ Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardiz
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis data}\label{era5-climate-reanalysis-data}}
 
-Figure \ref{fig:netcdf} reproduces the ERA5 data row of Figure 19 in \citet{hersbach2020era5}. Here we explain how this would be done using in the \pkg{cubble} package. The plots show that the southern polar vortex splits into two on 2002-09-26 and further splits into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in \citet{simmons2020global} and \citet{simmons2005ecmwf}.
+The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF) and can be downloaded from Copernicus Climate Data Store (CDS) \citep{cds} website or via the \pkg{ecmwfr} package \citep{ecwmfr}. This example reproduces the ERA5 data row of Figure 19 in \citet{hersbach2020era5} to show the southern polar vortex splitting into two on 2002-09-26 and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in \citet{simmons2020global} and \citet{simmons2005ecmwf}.
 
-The ERA5 data \citep{hersbach2020era5} provides hourly estimates across the Earth for atmospheric, land and oceanic climate variables. The data is available in the NetCDF format from the European Centre for Medium-Range Weather Forecasts (ECMWF). It can be directly downloaded from Copernicus Climate Data Store (CDS) \citep{cds} website or via the \pkg{ecmwfr} package \citep{ecwmfr}. For the reproduction, we focus on the \code{era5-pressure} data, hourly pressure levels from 1970 to present, with the \emph{specific humidity} and \emph{geopotential}. The downloaded NetCDF data (\texttt{raw}) is first converted to a \code{cubble} object:
+For the reproduction, we focus on the \code{era5-pressure} data, hourly pressure levels from 1970 to present, with the \emph{specific humidity} and \emph{geopotential}. The downloaded NetCDF data (\texttt{raw}) is first converted to a \code{cubble} object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -910,7 +911,7 @@ R> dt <- as_cubble(
 \end{CodeInput}
 \end{CodeChunk}
 
-Creating the plot requires making transformations on time, unfolding the data for computing the statistic of interest, which is plotted directly as a contour plot with ggplot. Code is provided to accomplish this in the supplementary material.
+Creating the plot requires making transformations on time, unfolding the data for computing the statistic of interest, which is plotted directly as a contour plot with ggplot.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -923,8 +924,8 @@ Creating the plot requires making transformations on time, unfolding the data fo
 \end{figure}
 \end{CodeChunk}
 
-\hypertarget{interactive-graphics-1}{%
-\subsection{Interactive graphics}\label{interactive-graphics-1}}
+\hypertarget{australian-temperature-range}{%
+\subsection{Australian temperature range}\label{australian-temperature-range}}
 
 Interactive graphics can be useful because they make it possible to look at the data in multiple ways on-the-fly. This is especially important for spatio-temporal data, where we would like to interactively connect spatial and temporal displays. This example describes the process of using the \pkg{cubble} package with the \pkg{crosstalk} package to build an interactive display connecting a map of Australia, with ribbon plots of temperature range observed at the stations. The purpose is to explore the variation of monthly temperature range over the country. Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity.
 
