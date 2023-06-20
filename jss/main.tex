@@ -162,17 +162,17 @@ Spatio-temporal data can encompass data with various spatial and temporal charac
 \end{figure}
 \end{CodeChunk}
 
-The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms: a nested/ spatial form and a long/temporal form. It consists of two subclasses:
+The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms: a nested form (spatial cubble) and a long form (temporal cubble). It consists of two subclasses:
 
 \begin{itemize}
 \tightlist
 \item
-  a nested/ spatial cubble with class \texttt{c("spatial\_cubble\_df",\ "cubble\_df")}
+  a spatial cubble with class \texttt{c("spatial\_cubble\_df",\ "cubble\_df")}
 \item
-  a long/ temporal cubble with class \texttt{c("temporal\_cubble\_df",\ "cubble\_df")}
+  a emporal cubble with class \texttt{c("temporal\_cubble\_df",\ "cubble\_df")}
 \end{itemize}
 
-In a nested cubble, spaital variables are organised as columns and temporal variables are nested within a specialised \texttt{ts} column. The nested cubble object printed below contains weather records in three airport stations (the creation of a cubble object will be explained in Section \ref{create}). This toy data is a subset of a larger data \code{climate_aus} collected from Global Historical Climatology Network Daily (GHCND). It records three airport stations located in Melbourne, Australia and includes spatial variables such as station ID, longitude, latitude, elevation, station name, World Meteorology Organisation ID. The dataset contains temporal variables including precipitation, maximum and minimum temperature, which can be read from the cubble header:
+In a spatial cubble, spaital variables are organised as columns and temporal variables are nested within a specialised \texttt{ts} column. The cubble object printed below contains weather records in three airport stations (the creation of a cubble object will be explained in Section \ref{create}). This toy data is a subset of a larger data \code{climate_aus} collected from Global Historical Climatology Network Daily (GHCND). It records three airport stations located in Melbourne, Australia and includes spatial variables such as station ID, longitude, latitude, elevation, station name, World Meteorology Organisation ID. The dataset contains temporal variables including precipitation, maximum and minimum temperature, which can be read from the cubble header:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -190,7 +190,7 @@ R> cb_nested
 \end{CodeOutput}
 \end{CodeChunk}
 
-In a long cubble, temporal variables are expanded in the long form and spatial variables are stored as a data attribute:
+In a temporal cubble, temporal variables are expanded in the long form and spatial variables are stored as a data attribute:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -214,11 +214,11 @@ R> cb_long
 \hypertarget{the-cubble-attributes}{%
 \subsubsection{The cubble attributes}\label{the-cubble-attributes}}
 
-A cubble object inherits the attributes from tibble (and its subclasses): \texttt{class}, \texttt{row.names}, and \texttt{names}. Additionally, it has three specialised attributes: \texttt{key}, \texttt{index}, and \texttt{coords}. Readers who are familiar with the \texttt{key} and \texttt{index} attributes from the \texttt{tsibble} package would already understand the two arguments. In cubble, the \texttt{key} attribute identifies the row in the nested cubble (given the use of \texttt{tidyr::nest()} for nesting), and when combined with the \texttt{index} argument, it identifies the row in the long cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for index includes the base R classes \texttt{Date}, \texttt{POSIXlt}, \texttt{POSIXct}, as well as tsibble's \texttt{yearmonth}, \texttt{yearweek}, and \texttt{yearquarter} classes.
+A cubble object inherits the attributes from tibble (and its subclasses): \texttt{class}, \texttt{row.names}, and \texttt{names}. Additionally, it has three specialised attributes: \texttt{key}, \texttt{index}, and \texttt{coords}. Readers who are familiar with the \texttt{key} and \texttt{index} attributes from the \texttt{tsibble} package would already understand the two arguments. In cubble, the \texttt{key} attribute identifies the row in the spatial cubble (given the use of \texttt{tidyr::nest()} for nesting), and when combined with the \texttt{index} argument, it identifies the row in the temporal cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for index includes the base R classes \texttt{Date}, \texttt{POSIXlt}, \texttt{POSIXct}, as well as tsibble's \texttt{yearmonth}, \texttt{yearweek}, and \texttt{yearquarter} classes.
 
-The \texttt{coords} attribute represents an ordered pair of coordinates. It can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The \texttt{sf} package is used under the hood to calculate the bounding box, displayed in the header of a nested cubble.
+The \texttt{coords} attribute represents an ordered pair of coordinates. It can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The \texttt{sf} package is used under the hood to calculate the bounding box, displayed in the header of a spatial cubble.
 
-The long cubble has a special attribute called \texttt{spatial} to store the spatial variables, which includes all the variables from the nested cubble, except for the \texttt{ts} column. Shortcut functions are available to extract attributes, for example, \code{spatial()} for extracting spatial variables from the long cubble:
+The temporal cubble has a special attribute called \texttt{spatial} to store the spatial variables. Shortcut functions are available to extract attributes, for example, \code{spatial()} for extracting spatial variables from the temporal cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -242,7 +242,7 @@ R> spatial(cb_long)
 
 In many cases, spatio-temporal data arrive in separate tables for analysis. For example, in climate data, analysts may initially receive station data containing geographic location information, recorded variables and their recording periods. They can then query the temporal variables using the stations of interest to obtain the relevant temporal data. Alternatively, analyses may begin as purely spatial or temporal, and analysts may obtain additional temporal or spatial data to expand the result to spatio-temporal.
 
-The function \code{make_cubble()} composes a \code{cubble} object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}), along with three attributes introduced in the subsection \ref{object}: \code{key}, \code{index}, and \code{coords}. The following code creates the nested \code{cubble} object shown previously:
+The function \code{make_cubble()} composes a \code{cubble} object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}), along with three attributes introduced in the subsection \ref{object}: \code{key}, \code{index}, and \code{coords}. The following code creates the spatial \code{cubble} object shown previously:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -297,7 +297,7 @@ R> as_cubble(raw, vars = "q",
 \hypertarget{functions-and-methods}{%
 \subsection{Functions and methods}\label{functions-and-methods}}
 
-Table \ref{tab:funs} summarises the functions implemented in the \pkg{cubble} package and Table \ref{tab:methods} details the methods implemented for each of the three cubble classes. The \code{cubble_df} class handles methods that behave consistently in both nested (\code{spatial_cubble_df}) and long cubble (\code{temproal_cubble_df}). When the method has distinct behavior for the nested cubble and temporal cubble, it is implemented separately for each subclass.
+Table \ref{tab:funs} summarises the functions implemented in the \pkg{cubble} package and Table \ref{tab:methods} details the methods implemented for each of the three cubble classes. The \code{cubble_df} class handles methods that behave consistently in both spatial (\code{spatial_cubble_df}) and temporal cubble (\code{temporal_cubble_df}). When the method has distinct behavior for the spatial cubble and temporal cubble, it is implemented separately for each subclass.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1250}}
@@ -351,7 +351,7 @@ Methods
 \bottomrule()
 \end{longtable}
 
-Specifically, the pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the cubble object between the spatial and temporal face of the multivariate spatio-temporal cube, as illustrated in Figure \ref{fig:face}. The code below uses the function \code{face_temporal()} and \code{face_spatial()} to transform between a nested cubble (\code{cb_nested}) and a long one (\code{cb_long}), introduced earlier in subsection \ref{object}:
+Specifically, the pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the cubble object between the spatial and temporal face of the multivariate spatio-temporal cube, as illustrated in Figure \ref{fig:face}. The code below uses the function \code{face_temporal()} and \code{face_spatial()} to transform between a spatial cubble (\code{cb_nested}) and a temporal one (\code{cb_long}), introduced earlier in subsection \ref{object}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -434,7 +434,7 @@ R> class(ts_long)
 \end{CodeOutput}
 \end{CodeChunk}
 
-The long cubble shows \code{[tsibble]} in the header to indicate the object also being in a \code{tbl_ts} class (\code{tsibble}). Methods applies to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
+The temporal cubble shows \code{[tsibble]} in the header to indicate the object also being in a \code{tbl_ts} class (\code{tsibble}). Methods applies to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -563,7 +563,7 @@ match_temporal(
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}
 
-The workflow with the \code{cubble} class works well with an interactive graphics pipeline (e.g., \citet{buja1988elements}; \citet{buja1996interactive}; \citet{sutherland2000orca}; \citet{xie2014reactive}; \citet{cheng2016enabling}) that is available in \proglang{R} with the package \pkg{crosstalk} \citep{crosstalk}. Figure \ref{fig:illu-interactive} illustrates the linking between a map and multiple time series in a \code{cubble} object. Both the map, generated from the nested cubble, and the time series plot, generated from the long cubble, are shared crosstalk objects. When a user selects a location on the map (a), the corresponding site is highlighted. This selection activates a row in the nested \code{cubble}, which is then communicated to the long \code{cubble}, resulting in teh selection of all observations with the same ID in (b). Consequently the long \code{cubble} highlights the corresponding series in the time series plot (c). Linking can also be initiated from the time series plot, by selecting points on the time series. This action activates rows with the same ID in the long \code{cubble} and the row in the nested \code{cubble}, which will be highlighted on the map. Please refer to the appendix for the corresponding illustration.
+The workflow with the \code{cubble} class works well with an interactive graphics pipeline (e.g., \citet{buja1988elements}; \citet{buja1996interactive}; \citet{sutherland2000orca}; \citet{xie2014reactive}; \citet{cheng2016enabling}) that is available in \proglang{R} with the package \pkg{crosstalk} \citep{crosstalk}. Figure \ref{fig:illu-interactive} illustrates the linking between a map and multiple time series in a \code{cubble} object. Both the map, generated from the spatial cubble, and the time series plot, generated from the temporal cubble, are shared crosstalk objects. When a user selects a location on the map (a), the corresponding site is highlighted. This selection activates a row in the spatial \code{cubble}, which is then communicated to the temporal \code{cubble}, resulting in the selection of all observations with the same ID in (b). Consequently the temporal \code{cubble} highlights the corresponding series in the time series plot (c). Linking can also be initiated from the time series plot, by selecting points on the time series. This action activates rows with the same ID in the temporal \code{cubble} and the row in the spatial \code{cubble}, which will be highlighted on the map. Please refer to the appendix for the corresponding illustration.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -572,7 +572,7 @@ The workflow with the \code{cubble} class works well with an interactive graphic
 
 }
 
-\caption{Linking between multiple plots. The line plots and the map are constructed from shared \code{crosstalk} objects (long and nested \code{cubble}). When a station is selected on the map (a), the corresponding row in the nested \code{cubble} will be activated. This will link to all the rows with the same id in the long \code{cubble} (b) and update the line plot (c).}\label{fig:illu-interactive}
+\caption{Linking between multiple plots. The line plots and the map are constructed from shared \code{crosstalk} objects. When a station is selected on the map (a), the corresponding row in the spatial \code{cubble} will be activated. This will link to all the rows with the same id in the temporal \code{cubble} (b) and update the line plot (c).}\label{fig:illu-interactive}
 \end{figure}
 \end{CodeChunk}
 
@@ -708,7 +708,7 @@ R> (cb <- make_cubble(spatial = lga2, temporal = covid2))
 
 The GHCN provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the package \pkg{rnoaa} \citep{rnoaa}, containing the records of maximum temperature for 237 Australian stations from \ensuremath{\infty{}} through \ensuremath{-\infty{}} and provides information also on the latitude, longitude and elevation of each of the stations. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales (NSW), using a glyph map.
 
-First, the stations need to be filtered to those in Victoria and NSW by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the Australian Bureau of Meteorology (BOM) \citep{bom} coding protocols. The NSW stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and NSW stations is a \emph{spatial operation} and hence uses the nested \code{cubble}:
+First, the stations need to be filtered to those in Victoria and NSW by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the Australian Bureau of Meteorology (BOM) \citep{bom} coding protocols. The NSW stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and NSW stations is a \emph{spatial operation} and hence uses the spatial \code{cubble}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -717,7 +717,7 @@ R> tmax <- historical_tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-Next, the monthly maximum average temperature is calculated for both periods. This is a \emph{temporal operation} requiring a switch into the long \code{cubble} using the \code{face_temporal()} function. In addition, a new indicator for the two time periods of interest is created before the calculation of monthly averages:
+Next, the monthly maximum average temperature is calculated for both periods. This is a \emph{temporal operation} requiring a switch into the temporal \code{cubble} using the \code{face_temporal()} function. In addition, a new indicator for the two time periods of interest is created before the calculation of monthly averages:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -734,7 +734,7 @@ R> tmax <- tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-A quick check on the number of observations for each location is made, revealing that there are several with less than 24 observations -- these stations lack temperature values for some months. In this example, those stations are removed by switching to the nested \code{cubble} to operate on the spatial component over time, and then, move back into the long \code{cubble} (to make the glyph map):
+A quick check on the number of observations for each location is made, revealing that there are several with less than 24 observations -- these stations lack temperature values for some months. In this example, those stations are removed by switching to the spatial \code{cubble} to operate on the spatial component over time, and then, move back into the temporal \code{cubble} (to make the glyph map):
 
 \begin{CodeChunk}
 \begin{CodeInput}

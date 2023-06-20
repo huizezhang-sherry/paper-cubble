@@ -44,12 +44,12 @@ p2 <- tibble(
 p1 | p2
 ```
 
-The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms:  a nested/ spatial form and a long/temporal form. It consists of two subclasses:
+The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms:  a nested form (spatial cubble) and a long form (temporal cubble). It consists of two subclasses:
 
--   a nested/ spatial cubble with class `c("spatial_cubble_df", "cubble_df")`
--   a long/ temporal cubble with class `c("temporal_cubble_df", "cubble_df")`
+-   a spatial cubble with class `c("spatial_cubble_df", "cubble_df")`
+-   a emporal cubble with class `c("temporal_cubble_df", "cubble_df")`
 
-In a nested cubble, spaital variables are organised as columns and temporal variables are nested within a specialised `ts` column. The nested cubble object printed below contains weather records in three airport stations (the creation of a cubble object will be explained in Section \@ref(create)). This toy data is a subset of a larger data \code{climate_aus} collected from Global Historical Climatology Network Daily (GHCND). It records three airport stations located in Melbourne, Australia and includes spatial variables such as station ID, longitude, latitude, elevation, station name, World Meteorology Organisation ID. The dataset contains temporal variables including precipitation, maximum and minimum temperature, which can be read from the cubble header:
+In a spatial cubble, spaital variables are organised as columns and temporal variables are nested within a specialised `ts` column. The cubble object printed below contains weather records in three airport stations (the creation of a cubble object will be explained in Section \@ref(create)). This toy data is a subset of a larger data \code{climate_aus} collected from Global Historical Climatology Network Daily (GHCND). It records three airport stations located in Melbourne, Australia and includes spatial variables such as station ID, longitude, latitude, elevation, station name, World Meteorology Organisation ID. The dataset contains temporal variables including precipitation, maximum and minimum temperature, which can be read from the cubble header:
 
 ```{r}
 cb_nested <- climate_mel
@@ -61,7 +61,7 @@ cb_nested
 
 <!-- A nested cubble header prints the key and index variable name and its form. The spatial extent is given by the bounding box with CRS information (missing here). The nested cubble header also shows the name of temporal variables nested in the \code{ts} column and their variable types: \code{prcp [dbl], tmax [dbl], tmin [dbl]}. -->
 
-In a long cubble, temporal variables are expanded in the long form and spatial variables are stored as a data attribute:
+In a temporal cubble, temporal variables are expanded in the long form and spatial variables are stored as a data attribute:
 
 ```{r}
 cb_long <- face_temporal(climate_mel)
@@ -77,11 +77,11 @@ cb_long
 #knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
 
-A cubble object inherits the attributes from tibble (and its subclasses): `class`, `row.names`, and `names`. Additionally, it has three specialised attributes: `key`, `index`, and `coords`. Readers who are familiar with the `key` and `index` attributes from the `tsibble` package would already understand the two arguments. In cubble, the `key` attribute identifies the row in the nested cubble (given the use of `tidyr::nest()` for nesting), and when combined with the `index` argument, it identifies the row in the long cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for index includes the base R classes `Date`, `POSIXlt`, `POSIXct`, as well as tsibble's `yearmonth`, `yearweek`, and `yearquarter` classes.
+A cubble object inherits the attributes from tibble (and its subclasses): `class`, `row.names`, and `names`. Additionally, it has three specialised attributes: `key`, `index`, and `coords`. Readers who are familiar with the `key` and `index` attributes from the `tsibble` package would already understand the two arguments. In cubble, the `key` attribute identifies the row in the spatial cubble (given the use of `tidyr::nest()` for nesting), and when combined with the `index` argument, it identifies the row in the temporal cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for index includes the base R classes `Date`, `POSIXlt`, `POSIXct`, as well as tsibble's `yearmonth`, `yearweek`, and `yearquarter` classes.
 
-The `coords` attribute represents an ordered pair of coordinates. It can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The `sf` package is used under the hood to calculate the bounding box, displayed in the header of a nested cubble.
+The `coords` attribute represents an ordered pair of coordinates. It can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The `sf` package is used under the hood to calculate the bounding box, displayed in the header of a spatial cubble.
 
-The long cubble has a special attribute called `spatial` to store the spatial variables, which includes all the variables from the nested cubble, except for the `ts` column. Shortcut functions are available to extract attributes, for example, \code{spatial()} for extracting spatial variables from the long cubble: 
+The temporal cubble has a special attribute called `spatial` to store the spatial variables. Shortcut functions are available to extract attributes, for example, \code{spatial()} for extracting spatial variables from the temporal cubble: 
 
 ```{r echo = TRUE}
 spatial(cb_long)
@@ -93,7 +93,7 @@ spatial(cb_long)
 
 In many cases, spatio-temporal data arrive in separate tables for analysis. For example, in climate data, analysts may initially receive station data containing geographic location information, recorded variables and their recording periods. They can then query the temporal variables using the stations of interest to obtain the relevant temporal data. Alternatively, analyses may begin as purely spatial or temporal, and analysts may obtain additional temporal or spatial data to expand the result to spatio-temporal.
 
-The function \code{make_cubble()} composes a \code{cubble} object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}), along with three attributes introduced in the subsection \@ref(object): \code{key}, \code{index}, and \code{coords}. The following code creates the nested \code{cubble} object shown previously:
+The function \code{make_cubble()} composes a \code{cubble} object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}), along with three attributes introduced in the subsection \@ref(object): \code{key}, \code{index}, and \code{coords}. The following code creates the spatial \code{cubble} object shown previously:
 
 ```{r echo = TRUE, eval = FALSE}
 make_cubble(spatial = stations, temporal = meteo,
@@ -125,7 +125,7 @@ as_cubble(raw, vars = "q",
 
 ## Functions and methods
 
-Table \@ref(tab:funs) summarises the functions implemented in the \pkg{cubble} package and Table \@ref(tab:methods) details the methods implemented for each of the three cubble classes. The \code{cubble_df} class handles methods that behave consistently in both nested (\code{spatial_cubble_df}) and long cubble (\code{temproal_cubble_df}). When the method has distinct behavior for the nested cubble  and temporal cubble, it is implemented separately for each subclass.
+Table \@ref(tab:funs) summarises the functions implemented in the \pkg{cubble} package and Table \@ref(tab:methods) details the methods implemented for each of the three cubble classes. The \code{cubble_df} class handles methods that behave consistently in both spatial (\code{spatial_cubble_df}) and temporal cubble (\code{temporal_cubble_df}). When the method has distinct behavior for the spatial cubble and temporal cubble, it is implemented separately for each subclass.
 
 | Category  | Functions |
 |--------|--------------------------------------------------------|
@@ -143,7 +143,7 @@ Table \@ref(tab:funs) summarises the functions implemented in the \pkg{cubble} p
 
 : (#tab:methods) Methods implemented for the three \code{cubble} classes.
 
-Specifically, the pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the cubble object between the spatial and temporal face of the multivariate spatio-temporal cube, as illustrated in Figure \ref{fig:face}. The code below uses the function \code{face_temporal()} and \code{face_spatial()} to transform between a nested cubble (\code{cb_nested}) and a long one (\code{cb_long}), introduced earlier in subsection \@ref(object):
+Specifically, the pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the cubble object between the spatial and temporal face of the multivariate spatio-temporal cube, as illustrated in Figure \ref{fig:face}. The code below uses the function \code{face_temporal()} and \code{face_spatial()} to transform between a spatial cubble (\code{cb_nested}) and a temporal one (\code{cb_long}), introduced earlier in subsection \@ref(object):
 
 ```{r cubble-fun, echo = TRUE}
 identical(face_temporal(cb_nested), cb_long)
@@ -176,7 +176,7 @@ ts_nested <- make_cubble(
 class(ts_long)
 ```
 
-The long cubble shows \code{[tsibble]} in the header to indicate the object also being in a \code{tbl_ts} class (\code{tsibble}). Methods applies to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
+The temporal cubble shows \code{[tsibble]} in the header to indicate the object also being in a \code{tbl_ts} class (\code{tsibble}). Methods applies to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
 
 ```{r echo = TRUE}
 ts_long %>% has_gaps()
