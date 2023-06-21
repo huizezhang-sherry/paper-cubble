@@ -10,11 +10,11 @@ author:
     address: 21 Chancellors Walk, Clayton VIC 3800 Australia
     email: dicook@monash.edu
   - name: Ursula Laa
-    affiliation: 'Universität für Bodenkultur Wiens \AND'
+    affiliation: 'University of  Natural `\\`{=latex} Resources and Life Sciences \AND'
     address: Gregor-Mendel-Straße 33, 1180 Wien, Austria
     email:  ursula.laa@boku.ac.at
   - name: Nicolas Langrené
-    affiliation: BNU-HKBU United International College
+    affiliation: 'BNU-HKBU `\\`{=latex} United International College'
     address: 2000 Jintong Road, Tangjiawan, Zhuhai, Guangdong Province, China
     email: nicolaslangrene@uic.edu.cn
   - name: Patricia Menéndez
@@ -36,10 +36,12 @@ keywords:
 preamble: >
   \usepackage{amsmath}
   \usepackage{array}
-output: rticles::jss_article
+output: 
+  bookdown::pdf_book:
+    base_format: rticles::jss_article
 bibliography: references.bib
 ---
-
+<!-- Universität für Bodenkultur Wiens \AND -->
 ```{r setup, echo = FALSE}
 knitr::opts_chunk$set(
   echo = FALSE,
@@ -778,11 +780,11 @@ knitr::include_graphics(here::here("figures/linking-lower.png"))
 
 # Conclusion {#conclude}
 
-This paper presents an \proglang{R} package \pkg{cubble} for organizing, manipulating and visualizing spatio-temporal data. The package introduces a new data class for spatio-temporal data, \code{cubble}, that connects the time invariant and varying variables and that allows the user to work with a nested and long form of the data. This work adds capabilities into the spatio-temporal practitioners toolbox to integrate it with a tidy data framework. The data structure and functions introduced in this package can be used and combined with existing spatial data analysis packages such as \pkg{sf}, data wrangling packages such as \pkg{dplyr}, and visualization packages such as \pkg{ggplot2}, \pkg{plotly} and \pkg{leaflet}.
 
-Numerous examples are provided in the main text, appendix and package vignettes. These include creating and coercing data with mismatched names, handling hierarchical data, matching time series spatially and temporally, reproducing ERA5 plots from NetCDF data. Visualization of the \code{cubble} objects can be done with interactive graphic pipelines using \pkg{crosstalk}, \pkg{plotly} and \pkg{leaflet}.
 
-There are several possible future directions for the work. The data structure only described fixed spatial sites, and it could be useful to provide tools to accommodate moving coordinates as might be encountered in animal movement data. That could be achieved with a list-column for the location coordinates, and an additional form that these locations can be pivoted into, like the long form for temporal variables. For multiple measured variables, the \pkg{cubble} package could be integrated with dimension reduction methods, and dynamic graphics for multiple dimensions such as a tour [@wickham_tourr_2011].
+This paper presents the \proglang{R} package \pkg{cubble} for organizing, wrangling and visualizing spatio-temporal data. The package introduces a new data class, \code{cubble}, consisting of two subclass, spatial cubble and a temporal cubble, to organise spatio-temporal data in two different formats within the tidy data framework. The data structure and functions introduced in this package can be used and combined with existing spatial and temporal data analysis packages such as \pkg{sf} and \pkg{tsibble}, data wrangling packages such as \pkg{dplyr}, and visualization packages such as \pkg{ggplot2}, \pkg{plotly}, and \pkg{leaflet}.
+
+The paper includes numerous examples to illustrate the utility of \pkg{cubble} as a data structure for spatio-temporal analysis. These examples cover different tasks of a typical analysis workflow: handling data with spatial and temporal misalignment, matching data from multiple sources, and creating both static and interactive spatio-temporal visualisation. For future directions, other commonly-used spatial or temporal data structures can be integrated into \pkg{cubble} to extend analysts' familiar spatial and temporal toolkit to spatio-temporal.
 
 # Acknowledgement
 
