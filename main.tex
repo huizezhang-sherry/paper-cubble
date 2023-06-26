@@ -664,32 +664,62 @@ R> (cb <- make_cubble(spatial = lga2, temporal = covid2))
 \hypertarget{historicaltmax}{%
 \subsection{Australian historical maximum temperature}\label{historicaltmax}}
 
-The GHCN provides daily climate measures from stations across the world. The data used here (\code{historical_tmax}) is a subset extracted using the package \pkg{rnoaa} \citep{rnoaa}, containing the records of maximum temperature for 237 Australian stations from \ensuremath{\infty{}} through \ensuremath{-\infty{}} and provides information also on the latitude, longitude and elevation of each of the stations. The goal of this example is to compare the monthly average maximum temperature between two periods, 1971-1975 and 2016-2020, for stations in Victoria and New South Wales (NSW), using a glyph map.
+The Global Historical Climatology Network (GHCN) provides daily climate measures for stations worldwide. In the \pkg{cubble} package, the dataset \code{historical_tmax} contains daily maximum temperature data for 75 stations in Australia, covering two periods: 1971-1975 and 2016-2020. The objective of this example is to compare the changes in maximum temperature between these two periods using a glyph map.
 
-First, the stations need to be filtered to those in Victoria and NSW by using the station identifiers, stored within the 11 digits of the \code{id} variable entries. The country code is in the first 5 digits (Australia is represented by ``ASN00'') and the next 6 digits encode the station following the Australian Bureau of Meteorology (BOM) \citep{bom} coding protocols. The NSW stations correspond to entries in the range 46-75 and the Victorian stations to 76-90. Filtering Victoria and NSW stations is a \emph{spatial operation} and hence uses the spatial \code{cubble}:
+To prevent overlapping of weather stations on teh map, we subset the stations based on minimum distance of 50km between them. This can be done by first promoting the spatial cubble to also be an sf object with \code{make_spatial_sf()}, calculating the distance matrix using the sf function \code{st_distance()}, and filtering the stations with dplyr's \code{filter()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- historical_tmax |>
-+   filter(between(as.numeric(stringr::str_sub(id, 7, 8)), 46, 90))
+R> a <- historical_tmax %>% make_spatial_sf() %>% st_distance()
+R> a[upper.tri(a, diag = TRUE)] <- 1e6
+R> 
+R> (tmax <- historical_tmax |> 
++   filter(rowSums(a < units::as_units(50, "km")) == 0))
 \end{CodeInput}
+\begin{CodeOutput}
+# cubble:   key: id [54], index: date, nested form
+# spatial:  [141.2652, -39.1297, 153.3633, -28.9786], Missing CRS!
+# temporal: date [date], tmax [dbl]
+  id           long   lat  elev name                     wmo_id ts      
+  <chr>       <dbl> <dbl> <dbl> <chr>                     <dbl> <list>  
+1 ASN00047016  141. -34.0    43 lake victoria storage     94692 <tibble>
+2 ASN00047019  142. -32.4    61 menindee post office      94694 <tibble>
+3 ASN00048015  147. -30.0   115 brewarrina hospital       95512 <tibble>
+4 ASN00048027  146. -31.5   260 cobar mo                  94711 <tibble>
+5 ASN00048031  149. -29.5   145 collarenebri (albert st)  95520 <tibble>
+# i 49 more rows
+\end{CodeOutput}
 \end{CodeChunk}
 
-Next, the monthly maximum average temperature is calculated for both periods. This is a \emph{temporal operation} requiring a switch into the temporal \code{cubble} using the \code{face_temporal()} function. In addition, a new indicator for the two time periods of interest is created before the calculation of monthly averages:
+Next, daily maximum temperature is averaged into monthly series for each periods in the temporal cubble. The last step with \code{unfold()} moves the two coordinate columns \code{long, lat} into the temporal cubble, preparing the data for the glyph map:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> tmax <- tmax |>
+R> (tmax <- tmax |>
 +   face_temporal() |> 
 +   group_by(
 +     yearmonth = tsibble::make_yearmonth(
 +       year = ifelse(lubridate::year(date) > 2015, 2016, 1971),
 +       month = lubridate::month(date))
-+       )|>
++   )|>
 +   summarise(tmax = mean(tmax, na.rm = TRUE)) %>% 
 +   mutate(group = as.factor(lubridate::year(yearmonth)),
-+          month = lubridate::month(yearmonth))
++          month = lubridate::month(yearmonth)) %>% 
++   unfold(long, lat))
 \end{CodeInput}
+\begin{CodeOutput}
+# cubble:   key: id [54], index: yearmonth, long form
+# temporal: 1971 Jan -- 2016 Dec [1M], has gaps!
+# spatial:  long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id [dbl]
+  yearmonth id           tmax group month  long   lat
+      <mth> <chr>       <dbl> <fct> <dbl> <dbl> <dbl>
+1  1971 Jan ASN00047016  31.1 1971      1  141. -34.0
+2  1971 Jan ASN00047019  33.1 1971      1  142. -32.4
+3  1971 Jan ASN00048015  33.9 1971      1  147. -30.0
+4  1971 Jan ASN00048027  32.5 1971      1  146. -31.5
+5  1971 Jan ASN00048031  33.3 1971      1  149. -29.5
+# i 1,276 more rows
+\end{CodeOutput}
 \end{CodeChunk}
 
 A quick check on the number of observations for each location is made, revealing that there are several with less than 24 observations -- these stations lack temperature values for some months. In this example, those stations are removed by switching to the spatial \code{cubble} to operate on the spatial component over time, and then, move back into the temporal \code{cubble} (to make the glyph map):
@@ -698,23 +728,26 @@ A quick check on the number of observations for each location is made, revealing
 \begin{CodeInput}
 R> tmax <- tmax |> 
 +   face_spatial() |> 
-+   rowwise() %>% 
++   rowwise() |>
 +   filter(nrow(ts) == 24) |>
 +   face_temporal()
 \end{CodeInput}
 \end{CodeChunk}
 
-In order to create a glyph map displaying the monthly series (Figure \ref{fig:basic-manip}), the spatial variables need to be unfolded with the temporal variables. The reason being that the major (\code{long}, \code{lat}) and minor (\code{month}, \code{tmax}) coordinates need to be on the same table to create the glyph map. The \code{geom_glyph()} function does both the transformation and the plotting.
+The following code creates the glyph map (a) in Figure \ref{fig:basic-manip} with additional ggplot2 code for highlighting the single station, Cobar and styling:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> ggplot() +
-+   geom_sf(data = MAP_DATA, ...) +
-+   geom_glyph(data = tmax,
-+              aes(x_major = long, x_minor = month,
-+                  y_major = lat, y_minor = tmax,
-+                  group = interaction(id, group), color = group),
-+              width = 1, height = 0.5) + 
+R> nsw_vic <- ozmaps::abs_ste |> 
++   filter(NAME %in% c("Victoria","New South Wales"))
+R> 
+R> tmax %>% 
++   ggplot(aes(x_major = long, x_minor = month, 
++              y_major = lat, y_minor = tmax,
++              group = interaction(id, group))) + 
++   geom_sf(data =  nsw_vic, ...,  inherit.aes = FALSE) + 
++   geom_glyph_box(width = 0.8, height = 0.3) + 
++   geom_glyph(aes(color = group), width = 0.8, height = 0.3) +
 +   ...
 \end{CodeInput}
 \end{CodeChunk}
@@ -722,15 +755,13 @@ R> ggplot() +
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/basic-manip-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/glyphmap-1} 
 
 }
 
-\caption[A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales (NSW) for the periods (1971-1975, 2016-2020)]{A glyph map of the monthly maximum average temperature for weather stations in  Victoria and New South Wales (NSW) for the periods (1971-1975, 2016-2020). The corresponding average time series for the cobar station are display on the top left corner. From the glyph map we can observe that the monthly trend is similar for all locations (low in the winter, high in the summer), and small increased temperatures, particularly in late summer can be seen at most stations in NSW.}\label{fig:basic-manip}
+\caption[Comparison of Average maximum temperature between 1971-1975 and 2016-2020 for 54 stations in Victoria and New South Wales, Australia]{Comparison of Average maximum temperature between 1971-1975 and 2016-2020 for 54 stations in Victoria and New South Wales, Australia. (a) and (b): the monthly temperature series for the two periods in a glyph map and for a single station Cobar, highlighted in orange in the glyph map. (c) and (d): the difference series between the two periods (2016s minus 1971s) in a glyph map and for station Cobar. The grey horizontal line marks zero difference. The glyph map displaying the difference series (c) reveals more pronounced changes between the two periods, with many inland locations in New South Wales show an increased temperature in late summer (Jan-Feb) in recent years.}\label{fig:glyphmap}
 \end{figure}
 \end{CodeChunk}
-
-Glyph maps work well to explore temporal patterns across spatial locations, particularly when the spatial locations are grided. In this example, they are irregularly spaced, which can result in overlapping glyphs obscuring each other.
 
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
