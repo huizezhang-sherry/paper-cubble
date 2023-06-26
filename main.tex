@@ -666,7 +666,7 @@ R> (cb <- make_cubble(spatial = lga2, temporal = covid2))
 
 The Global Historical Climatology Network (GHCN) provides daily climate measures for stations worldwide. In the \pkg{cubble} package, the dataset \code{historical_tmax} contains daily maximum temperature data for 75 stations in Australia, covering two periods: 1971-1975 and 2016-2020. The objective of this example is to compare the changes in maximum temperature between these two periods using a glyph map.
 
-To prevent overlapping of weather stations on teh map, we subset the stations based on minimum distance of 50km between them. This can be done by first promoting the spatial cubble to also be an sf object with \code{make_spatial_sf()}, calculating the distance matrix using the sf function \code{st_distance()}, and filtering the stations with dplyr's \code{filter()}:
+To prevent overlapping of weather stations on the map, we subset the stations based on minimum distance of 50km between them. This can be done by first promoting the spatial cubble to also be an sf object with \code{make_spatial_sf()}, calculating the distance matrix using the sf function \code{st_distance()}, and filtering the stations with dplyr's \code{filter()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -734,23 +734,21 @@ R> tmax <- tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-The following code creates the glyph map (a) in Figure \ref{fig:basic-manip} with additional ggplot2 code for highlighting the single station, Cobar and styling:
+The following code creates the glyph map (a) in Figure \ref{fig:glyphmap} with additional ggplot2 code for highlighting the single station, Cobar and styling:
 
-\begin{CodeChunk}
-\begin{CodeInput}
-R> nsw_vic <- ozmaps::abs_ste |> 
-+   filter(NAME %in% c("Victoria","New South Wales"))
-R> 
-R> tmax %>% 
-+   ggplot(aes(x_major = long, x_minor = month, 
-+              y_major = lat, y_minor = tmax,
-+              group = interaction(id, group))) + 
-+   geom_sf(data =  nsw_vic, ...,  inherit.aes = FALSE) + 
-+   geom_glyph_box(width = 0.8, height = 0.3) + 
-+   geom_glyph(aes(color = group), width = 0.8, height = 0.3) +
-+   ...
-\end{CodeInput}
-\end{CodeChunk}
+\begin{verbatim}
+nsw_vic <- ozmaps::abs_ste |> 
+  filter(NAME %in% c("Victoria","New South Wales"))
+
+tmax %>% 
+  ggplot(aes(x_major = long, x_minor = month, 
+             y_major = lat, y_minor = tmax,
+             group = interaction(id, group))) + 
+  geom_sf(data =  nsw_vic, ...,  inherit.aes = FALSE) + 
+  geom_glyph_box(width = 0.8, height = 0.3) + 
+  geom_glyph(aes(color = group), width = 0.8, height = 0.3) +
+  ...
+\end{verbatim}
 
 \begin{CodeChunk}
 \begin{figure}
@@ -759,7 +757,7 @@ R> tmax %>%
 
 }
 
-\caption[Comparison of Average maximum temperature between 1971-1975 and 2016-2020 for 54 stations in Victoria and New South Wales, Australia]{Comparison of Average maximum temperature between 1971-1975 and 2016-2020 for 54 stations in Victoria and New South Wales, Australia. (a) and (b): the monthly temperature series for the two periods in a glyph map and for a single station Cobar, highlighted in orange in the glyph map. (c) and (d): the difference series between the two periods (2016s minus 1971s) in a glyph map and for station Cobar. The grey horizontal line marks zero difference. The glyph map displaying the difference series (c) reveals more pronounced changes between the two periods, with many inland locations in New South Wales show an increased temperature in late summer (Jan-Feb) in recent years.}\label{fig:glyphmap}
+\caption[Comparison of average maximum temperature between 1971-1975 and 2016-2020 for 54 stations in Victoria and New South Wales, Australia]{Comparison of average maximum temperature between 1971-1975 and 2016-2020 for 54 stations in Victoria and New South Wales, Australia. (a) and (b): the monthly temperature series for the two periods in a glyph map and for a single station Cobar, highlighted in orange in the glyph map. (c) and (d): the difference series between the two periods (2016s minus 1971s) in a glyph map and for station Cobar. The grey horizontal line marks zero difference. The glyph map displaying the difference series (c) reveals more pronounced changes between the two periods, with many inland locations in New South Wales show an increased temperature in late summer (Jan-Feb) in recent years.}\label{fig:glyphmap}
 \end{figure}
 \end{CodeChunk}
 
