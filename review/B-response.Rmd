@@ -197,6 +197,6 @@ would have been more intuitive. Possibly also including the temporal range (as f
 
 In the manuscript and in the reproducible-script.R, a data set `historical_tmax` is introduced. In the package, the corresponding data set seems to be `tmax_hist`.
 
-**\textcolor{purple}{The data historical\_tmax contains daily weather station data for the two periods: 1971-1975 and 2016-2020 and amounts to 3.2MB, which is not suitable to include in the package given its size. The tmax\_hist data, which was included in the package, is now removed, given its similarity to the climate\_aus data, which is more useful. The scripts to generate historical\_tmax are provided with the paper.}**
+**\textcolor{purple}{The data historical\_tmax used in the paper now replaces the tmax\_hist data in the package.}**
 
 The manuscript cannot be reproduced, as the reproducible-script.R (part of the submission to JSS) only uses a subset, but does not provide a separate result file that would allow to compare the reproduced outputs with the desired output for the subset. **\textcolor{purple}{A result file in HTML is submitted along with the reproducible-script.R file.}**
