@@ -3,11 +3,8 @@
 .RData
 .Ruserdata
 .DS_Store
-main_files
-main.log
-main_cache
 lib
 arxiv/cubble-arxiv_cache
-jss/cubble-jss_cache
 figures/diagram-keynotes.key
 cache
+cubble_cache
