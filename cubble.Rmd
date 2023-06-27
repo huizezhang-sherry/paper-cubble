@@ -155,7 +155,8 @@ Table \@ref(tab:funs) summarises the functions implemented in the \pkg{cubble} p
 | tidyverse | `dplyr_row_slice`, `dplyr_col_modify`, `dplyr_reconstruct`, `select`, `mutate`, `arrange`, `filter`, `group_by`, `ungroup`, `summarise`, `select`, `slice`, `rowwise`, `rename`, `bind_rows`, `bind_cols`, `relocate`, `type_sum`, the slice family (`slice_head`, `slice_tail`, `slice_max`, `slice_min`, `slice_sample`) and the join family (`left_join`, `right_join`, `inner_join`, `full_join`, `anti_join`, `semi_join`) |
 | cubble    | `as_cubble`, `cubble`, `make_cubble`, `check_key` `face_temporal`, `face_spatial`, `unfold`, `key`, `key_vars`, `key_data`, `index`, `index_var`, `coords`, `spatial`, `match_sites`, `match_spatial`, `match_temporal`, `geom_glyph`, `geom_glyph_box`, `geom_glyph_line`, `make_spatial_sf`, `make_temporal_tsibble`, `fill_gaps`, and `scan_gaps`                                                                                |
 
-: (#tab:funs) Functions implemented in the \pkg{cubble} package
+: (#tab:funs) An overview of functions implemented in the \pkg{cubble} package, categorised into base R, tidyverse, and cubble functions.
+
 
 | Class                | Methods|
 |------------------|------------------------------------------------------|
@@ -163,7 +164,7 @@ Table \@ref(tab:funs) summarises the functions implemented in the \pkg{cubble} p
 | `spatial_cubble_df`  | `[, names<-,  tbl_sum, dplyr_reconstruct, dplyr_row_slice, face_spatial, face_temporal, unfold, arrange, rename, rowwise, group_by, ungroup, select, spatial, summarise, unfold, update_cubble`                                              |
 | `temporal_cubble_df` | `[, names<-, tbl_sum, arrange, dplyr_reconstruct, dplyr_row_slice, face_spatial, face_temporal, unfold, fill_gaps, group_by, ungroup,  rename, rowwise, scan_gaps, select, spatial, summarise, tbl_sum, bind_rows, bind_cols, update_cubble` |
 
-: (#tab:methods) Methods implemented for the three \code{cubble} classes.
+: (#tab:methods) An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistent across the two subclasses; otherwise, they are implemented separately in each subclass.
 
 Specifically, the pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the cubble object between the spatial and temporal face of the multivariate spatio-temporal cube, as illustrated in Figure \ref{fig:face}. The code below uses the function \code{face_temporal()} and \code{face_spatial()} to transform between a spatial cubble (\code{cb_nested}) and a temporal one (\code{cb_long}), introduced earlier in subsection \@ref(object):
 
@@ -322,8 +323,7 @@ The result of the \code{check_key()} function is a list containing three element
 lga2 <- lga |>
   rename(lga = lga_name_2018) |> 
   mutate(lga = ifelse(lga == "Kingston (C) (Vic.)", "Kingston (C)", lga),
-         lga = ifelse(lga == "Latrobe (C) (Vic.)", "Latrobe (C)", lga)) |>
-  filter(!lga %in% check_res$others$spatial) 
+         lga = ifelse(lga == "Latrobe (C) (Vic.)", "Latrobe (C)", lga))
   
 covid2 <- covid |> filter(!lga %in% check_res$others$temporal)
 

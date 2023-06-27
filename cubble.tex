@@ -259,7 +259,7 @@ Table \ref{tab:funs} summarises the functions implemented in the \pkg{cubble} pa
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1250}}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.8750}}@{}}
-\caption{\label{tab:funs} Functions implemented in the \pkg{cubble} package}\tabularnewline
+\caption{\label{tab:funs} An overview of functions implemented in the \pkg{cubble} package, categorised into base R, tidyverse, and cubble functions.}\tabularnewline
 \toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Category
@@ -285,7 +285,7 @@ cubble & \texttt{as\_cubble}, \texttt{cubble}, \texttt{make\_cubble}, \texttt{ch
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.7500}}@{}}
-\caption{\label{tab:methods} Methods implemented for the three \code{cubble} classes.}\tabularnewline
+\caption{\label{tab:methods} An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistent across the two subclasses; otherwise, they are implemented separately in each subclass.}\tabularnewline
 \toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Class
@@ -638,8 +638,7 @@ The result of the \code{check_key()} function is a list containing three element
 R> lga2 <- lga |>
 +   rename(lga = lga_name_2018) |> 
 +   mutate(lga = ifelse(lga == "Kingston (C) (Vic.)", "Kingston (C)", lga),
-+          lga = ifelse(lga == "Latrobe (C) (Vic.)", "Latrobe (C)", lga)) |>
-+   filter(!lga %in% check_res$others$spatial) 
++          lga = ifelse(lga == "Latrobe (C) (Vic.)", "Latrobe (C)", lga))
 R>   
 R> covid2 <- covid |> filter(!lga %in% check_res$others$temporal)
 R> 
