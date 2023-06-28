@@ -584,10 +584,7 @@ Five examples are chosen to illustrate different aspects of the \pkg{cubble} pac
 \hypertarget{covid}{%
 \subsection{Victoria COVID spatio-temporal incidence and spread}\label{covid}}
 
-Since the start of the pandemic, the Victoria State Government in Australia has been providing daily COVID counts per Local Government Area (LGA). This data can be combined with map polygon data, available from the Australian Bureau of Statistics (ABS), to visualize COVID incidence and spread. In the \pkg{cubble} package, the COVID count data (\code{covid}) and the LGA information (\code{lga}) are available as a \code{tsibble} object and an \code{sf} object respectively.
-
-A cubble object can be created from separate spatial and temporal component using the \code{make_cubble()} function, introduced in Section \ref{create}. The \code{by} argument
-is used to specify the joining variable from the two component using the \code{*_join()} \code{by} syntax:
+Since the start of the pandemic, the Victoria State Government in Australia has been providing daily COVID counts per Local Government Area (LGA). This data can be combined with map polygon data, available from the Australian Bureau of Statistics (ABS), to visualize COVID incidence and spread. In the \pkg{cubble} package, the COVID count data (\code{covid}) and the LGA information (\code{lga}) are available as a \code{tsibble} object and an \code{sf} object, respectively. A cubble object can be created from these two component using \code{make_cubble()}. The \code{id} column containing LGA information has different names in the two data and can be specified with using the \code{by} argument:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -609,7 +606,7 @@ temporal information
 \end{CodeOutput}
 \end{CodeChunk}
 
-The warning message suggests the slight difference of LGA encoding used by Victoria government and ABS and prompts analysts to use the function \code{check_key()} to identify the mismatches:
+The warning message suggests the slight difference of LGA encoding used by Victoria government and ABS and prompts analysts to check the mismatch using \code{check_key()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -646,7 +643,7 @@ $others$temporal
 \end{CodeOutput}
 \end{CodeChunk}
 
-The result of the \code{check_key()} function is a list containing three elements: 1) matched keys from both tables, 2) potentially paired keys, and 3) others. Here, the main mismatch arises from the two LGAs: Kingston and Latrobe (Kingston is a LGA in both Victoria and South Australia and Latrobe is a LGA in both Victoria and Tasmania). Analysts can modify the input spatial and temporal data accordingly and recreate the cubble object:
+The result of the \code{check_key()} function is a list containing three elements: 1) matched keys from both tables, 2) potentially paired keys, and 3) others. Here, the main mismatch arises from the two LGAs: Kingston and Latrobe (Kingston is a LGA in both Victoria and South Australia and Latrobe is a LGA in both Victoria and Tasmania). Analysts can then reconcile the spatial and temporal data based on this check summary and recreate the cubble object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -677,9 +674,9 @@ R> (cb <- make_cubble(spatial = lga2, temporal = covid2))
 \hypertarget{historicaltmax}{%
 \subsection{Australian historical maximum temperature}\label{historicaltmax}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures for stations worldwide. In the \pkg{cubble} package, the dataset \code{historical_tmax} contains daily maximum temperature data for 75 stations in Australia, covering two periods: 1971-1975 and 2016-2020. The objective of this example is to compare the changes in maximum temperature between these two periods using a glyph map.
+The Global Historical Climatology Network (GHCN) provides daily climate measures for stations worldwide. In the \pkg{cubble} package, the cubble object \code{historical_tmax} contains daily maximum temperature data for 75 stations in Australia, covering two periods: 1971-1975 and 2016-2020. This example uses glyph maps to compare the changes in temperature between these two periods.
 
-To prevent overlapping of weather stations on the map, we subset the stations based on minimum distance of 50km between them. This can be done by first promoting the spatial cubble to also be an sf object with \code{make_spatial_sf()}, calculating the distance matrix using the sf function \code{st_distance()}, and filtering the stations with dplyr's \code{filter()}:
+To prevent overlapping of weather stations on the map, stations are selected to ensure a minimum distance of 50km. Distance between stations can be calcualted with \code{sf::st_distance()} after turning the spatial cubble to also be an sf object with \code{make_spatial_sf()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -704,7 +701,7 @@ R> (tmax <- historical_tmax |>
 \end{CodeOutput}
 \end{CodeChunk}
 
-Next, daily maximum temperature is averaged into monthly series for each periods in the temporal cubble. The last step with \code{unfold()} moves the two coordinate columns \code{long, lat} into the temporal cubble, preparing the data for the glyph map:
+Daily maximum temperature is then averaged into monthly series for each periods in the temporal cubble. The last step with \code{unfold()} moves the two coordinate columns (\code{long, lat}) into the temporal cubble, preparing the data for the glyph map:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -747,7 +744,7 @@ R> tmax <- tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-The following code creates the glyph map (a) in Figure \ref{fig:glyphmap} with additional ggplot2 code for highlighting the single station, Cobar and styling:
+The following code creates the glyph map (a) in Figure \ref{fig:glyphmap} (additional codes are needed for highlighting the single station, Cobar and styling) and the glyph map (c) is produced similarly with the difference series, rather than the two original series, being plotted.
 
 \begin{verbatim}
 nsw_vic <- ozmaps::abs_ste |> 
@@ -777,7 +774,7 @@ tmax |>
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
 
-One common task when working with spatio-temporal data is to match nearby sites. For example, we may want to verify the location of an old list of stations with current stations, or we may want to match the data from different data sources. In this example, we will introduce the spatial and temporal matching in cubble using an example on matching river level data with precipitation in Victoria, Australia.
+In this example, we will introduce the spatial and temporal matching in cubble using an example on matching river level data with precipitation in Victoria, Australia.
 
 The water level data collected by the Bureau of Meteorology, can be compared with the precipitation since rainfall can directly impact water level in river. Both \texttt{climate\_vic} and \texttt{river} are cubble objects, and we can obtain a summary of the 10 closest pairs between them:
 
