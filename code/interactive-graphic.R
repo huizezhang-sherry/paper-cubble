@@ -2,7 +2,7 @@
 library("crosstalk")
 library("plotly")
 
-clean <- climate_full |>
+clean <- climate_aus |>
   filter(!id %in% c("ASN00067033", "ASN00072091", "ASN00059040", 
                     "ASN00097053", "ASN00040856", "ASN00015548")) |>
   face_temporal() |> 
@@ -13,7 +13,6 @@ clean <- climate_full |>
     tmin = mean(tmin, na.rm = TRUE),
     diff = mean(tmax - tmin, na.rm = TRUE)
   ) |> 
-  ungroup(month) |>
   mutate(dummy_date = as.Date(glue::glue("2021-{month}-01"))) |> 
   face_spatial() |> 
   mutate(temp_diff_var = ts |> pull(diff) |> var(na.rm = TRUE))

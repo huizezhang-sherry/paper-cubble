@@ -1,4 +1,4 @@
-## ----setup, echo = FALSE------------------------------------------------------
+## ----setup, echo = FALSE--------------------------------------------------------
 knitr::opts_chunk$set(
   echo = FALSE,
   warning = FALSE,
@@ -12,9 +12,10 @@ options(prompt = "R> ", continue = "+ ",
         width = 80, styler.cache_root = "styler-perm")
 
 
-## ----echo = FALSE-------------------------------------------------------------
+## ----echo = FALSE---------------------------------------------------------------
 library("cubble")
 library("dplyr")
+library("tidyr")
 library("ggplot2")
 library("patchwork")
 library("tsibble")
@@ -29,19 +30,19 @@ library("colorspace")
 library("units")
 
 
-## -----------------------------------------------------------------------------
+## -------------------------------------------------------------------------------
 cb_nested <- climate_mel
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 cb_nested
 
 
-## -----------------------------------------------------------------------------
+## -------------------------------------------------------------------------------
 cb_long <- face_temporal(climate_mel)
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 cb_long
 
 
@@ -49,80 +50,79 @@ cb_long
 #knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 spatial(cb_long)
 
 
-## ----echo = TRUE, eval = FALSE------------------------------------------------
-## make_cubble(spatial = stations, temporal = meteo,
-##             key = id, index = date, coords = c(long, lat))
+## ----echo = TRUE----------------------------------------------------------------
+make_cubble(spatial = stations, temporal = meteo,
+            key = id, index = date, coords = c(long, lat))
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 
 
-## ----cubble-fun, echo = TRUE--------------------------------------------------
+## ----cubble-fun, echo = TRUE----------------------------------------------------
 identical(face_temporal(cb_nested), cb_long)
 identical(face_spatial(cb_long), cb_nested)
 
 
-## ----cubble-fun2, echo = TRUE-------------------------------------------------
+## ----cubble-fun2, echo = TRUE---------------------------------------------------
 identical(face_spatial(face_temporal(cb_nested)), cb_nested)
 identical(face_temporal(face_spatial(cb_long)), cb_long)
 
 
-## ----face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the function \\code{face\\_temporal()} and \\code{face\\_spatial()}: \\code{face\\_temporal()} converts a spatial cubble (neseted form) into a temporal cubble (long form) to focus on the temporal variables. Conversely, \\code{face\\_spatial()} transforms a temporal cubble into a spatial one to emphasize spatial variables."----
+## ----face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the function \\code{face\\_temporal()} and \\code{face\\_spatial()}: \\code{face\\_temporal()} converts a spatial cubble into a temporal cubbl to focus on the temporal variables. Conversely, \\code{face\\_spatial()} transforms a temporal cubble into a spatial one to for focus on the spatial variables."----
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 ts_nested <- make_cubble(
   spatial = stations, temporal = meteo_ts, coords = c(long, lat))
 (ts_long <- face_temporal(ts_nested))
 class(ts_long)
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 ts_long |> has_gaps()
 
 
-## ----echo = TRUE--------------------------------------------------------------
-ts_long2 <- cb_long |> make_temporal_tsibble() 
-identical(ts_long2, ts_long)
+## ----echo = TRUE----------------------------------------------------------------
+cb_long |> make_temporal_tsibble() 
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 (sf_nested <- make_cubble(
   spatial = stations_sf, temporal = meteo, 
   key = id, index = date))
 class(sf_nested)
 
 
-## ----echo =TRUE, message=FALSE------------------------------------------------
+## ----echo =TRUE, message=FALSE--------------------------------------------------
 sf_nested |> sf::st_transform(crs = "EPSG:3857")
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 cb_nested |> make_spatial_sf() 
 
 
 ## ----illu-interactive, echo = FALSE, fig.align="center", out.height = "35%", out.width = "100%", fig.cap = "Linking between multiple plots. The line plots and the map are constructed from shared \\code{crosstalk} objects. When a station is selected on the map (a), the corresponding row in the spatial \\code{cubble} will be activated. This will link to all the rows with the same id in the temporal \\code{cubble} (b) and update the line plot (c)."----
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.002.png"))
+knitr::include_graphics(here::here("figures/diagram-keynotes/‎diagram-keynotes.‎002.png")) 
 
 
-## ----covid-4, echo = TRUE, warning = TRUE, message= TRUE----------------------
+## ----covid-4, echo = TRUE, warning = TRUE, message= TRUE------------------------
 cb <- make_cubble(lga, covid, by = c("lga_name_2018" = "lga"))
 
 
-## ----covid-5, echo = TRUE-----------------------------------------------------
+## ----covid-5, echo = TRUE-------------------------------------------------------
 (check_res <- check_key(
   spatial = lga, temporal = covid, 
   by = c("lga_name_2018" = "lga")
 ))
 
 
-## ----covid-6, echo = TRUE-----------------------------------------------------
+## ----covid-6, echo = TRUE-------------------------------------------------------
 lga2 <- lga |>
   rename(lga = lga_name_2018) |> 
   mutate(lga = ifelse(lga == "Kingston (C) (Vic.)", "Kingston (C)", lga),
@@ -133,7 +133,7 @@ covid2 <- covid |> filter(!lga %in% check_res$others$temporal)
 (cb <- make_cubble(spatial = lga2, temporal = covid2))
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 a <- historical_tmax |> make_spatial_sf() |> st_distance()
 a[upper.tri(a, diag = TRUE)] <- 1e6
 
@@ -141,7 +141,7 @@ a[upper.tri(a, diag = TRUE)] <- 1e6
   filter(rowSums(a < units::as_units(50, "km")) == 0))
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 (tmax <- tmax |>
   face_temporal() |> 
   group_by(
@@ -155,7 +155,7 @@ a[upper.tri(a, diag = TRUE)] <- 1e6
   unfold(long, lat))
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 tmax <- tmax |> 
   face_spatial() |> 
   rowwise() |>
@@ -243,34 +243,33 @@ p2 <- tmax2 |>
   theme(legend.position='bottom')
 
 
-## -----------------------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 climate_vic <- climate_aus |>
   filter(between(as.numeric(substr(id, 7, 8)), 76, 90)) |>
   mutate(type = "climate")
 river <- cubble::river |> mutate(type = "river") 
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10)
 print(res_sp, n = 20)
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 res_sp <- match_spatial(
   climate_vic, river, 
   spatial_n_group = 10, return_cubble = TRUE)
-str(res_sp, max.level = 0)
 (res_sp <- res_sp[-c(5, 8)] |> bind_rows())
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 (res_tm <- res_sp |> 
   match_temporal(
     data_id = type, match_id = group,
     temporal_by = c("prcp" = "Water_course_level")))
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 res_tm <- res_sp |> 
   match_temporal(
     data_id = type, match_id = group,
@@ -279,7 +278,7 @@ res_tm <- res_sp |>
 (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 
 
-## ----matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 7, 6, 9) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here."----
+## ----matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Matched weather stations and river gauges on the map (a) and across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed in the same scale in (b). The water level reflects the increase in precipitation."----
 res_tm <- res_tm |>  filter(group %in% c(1, 7, 6, 9))
 
 res_tm_long <- res_tm |>  
@@ -327,27 +326,27 @@ p2 <- res_tm_long |>
   theme(legend.position = "bottom") 
 
 
-## ----echo = TRUE--------------------------------------------------------------
+## ----echo = TRUE----------------------------------------------------------------
 raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
+(dt <- as_cubble(
+  raw, vars = c("q", "z"),
+  long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
 
 
-## ----echo = TRUE--------------------------------------------------------------
-(dt <- as_cubble(raw, vars = c("q", "z"),
-                 long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
-
-
-## ----netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04."----
-date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") |> as.Date()
+## ----netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04.", dev = "png"----
 res <- dt |> 
   face_temporal() |> 
-  filter(lubridate::date(time) %in% date) |>
+  filter(lubridate::date(time) %in% 
+           as.Date(c("2002-09-22", "2002-09-26",
+                     "2002-09-30", "2002-10-04"))) |>
   unfold(long, lat) |> 
   mutate(q = q* 10^6)
 
 con <- rnaturalearth::ne_coastline("small", returnclass = "sf")
 box <- st_bbox(c(xmin = -180, ymin = -90, xmax = 180, ymax = -15), crs = st_crs(con)) 
 sf_use_s2(FALSE)
-country <- con |> st_geometry() |> 
+country <- con |> 
+  st_geometry() |> 
   st_crop(box) |> 
   st_cast("MULTILINESTRING")
 

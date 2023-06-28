@@ -58,47 +58,6 @@ Multivariate spatio-temporal data refers to multiple measurements taken across s
   
   }
 
-% Pandoc syntax highlighting
-\usepackage{color}
-\usepackage{fancyvrb}
-\newcommand{\VerbBar}{|}
-\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
-% Add ',fontsize=\small' for more characters per line
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{248,248,248}
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\BuiltInTok}[1]{#1}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
-\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
-\newcommand{\ExtensionTok}[1]{#1}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ImportTok}[1]{#1}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\NormalTok}[1]{#1}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\RegionMarkerTok}[1]{#1}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 
 % tightlist command for lists without linebreak
 \providecommand{\tightlist}{%
@@ -774,9 +733,18 @@ tmax |>
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
 
-In this example, we will introduce the spatial and temporal matching in cubble using an example on matching river level data with precipitation in Victoria, Australia.
+The Bureau of Meteorology collects water level data and they can be matched with the precipitation data from the climate weather stations. The data \texttt{river} from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be subsetted from the \texttt{climate\_aus} data in \pkg{cubble}.
 
-The water level data collected by the Bureau of Meteorology, can be compared with the precipitation since rainfall can directly impact water level in river. Both \texttt{climate\_vic} and \texttt{river} are cubble objects, and we can obtain a summary of the 10 closest pairs between them:
+\begin{CodeChunk}
+\begin{CodeInput}
+R> climate_vic <- climate_aus |>
++   filter(between(as.numeric(substr(id, 7, 8)), 76, 90)) |>
++   mutate(type = "climate")
+R> river <- cubble::river |> mutate(type = "river") 
+\end{CodeInput}
+\end{CodeChunk}
+
+Spatial match on the site location is first performed since rainfall can directly impact water level in the nearby river. With \code{match_spatial()}, we can obtain a summary of the 10 closest pairs:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -800,19 +768,13 @@ R> print(res_sp, n = 20)
 \end{CodeOutput}
 \end{CodeChunk}
 
-The result can also be returned as cubble objects by setting the argument \texttt{return\_cubble\ =\ TRUE}. The output is be a list where each element is a paired cubble object. To combine all the results into a single cubble, you can use \texttt{bind\_rows()}. In the case when a site in the second cubble (the \texttt{river} data here) is matched to two stations in the first cubble (\texttt{climate\_vic} here), the binding may not be successful since cubble requires unique rows in the nested form. In the summary table above, the river station \texttt{226027} is matched to more than one weather station: \texttt{ASN00085072} (group 3) and \texttt{ASN00085298} (group 5). Similarly, the river station \texttt{230200} is matched in group 7 and 8). In such cases, you can either deselect one pair before combining, or work with the list output with the \texttt{purrr::map} syntax:
+The result can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. All the results can be combined into a single cubble using \code{bind_rows()}, after excluding the two pairs where a river station is matched to more than one weather stations (river station \texttt{226027} is matched twice in group 3 and 5 and similarly for station \texttt{230200} in group 7 and 8).
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> res_sp <- match_spatial(
 +   climate_vic, river, 
 +   spatial_n_group = 10, return_cubble = TRUE)
-R> str(res_sp, max.level = 0)
-\end{CodeInput}
-\begin{CodeOutput}
-List of 10
-\end{CodeOutput}
-\begin{CodeInput}
 R> (res_sp <- res_sp[-c(5, 8)] |> bind_rows())
 \end{CodeInput}
 \begin{CodeOutput}
@@ -831,7 +793,7 @@ R> (res_sp <- res_sp[-c(5, 8)] |> bind_rows())
 \end{CodeOutput}
 \end{CodeChunk}
 
-For temporal matching, we match the variable \texttt{Water\_course\_level} from the river data to \texttt{prcp} in the weather station data. The variable \texttt{group} and \texttt{types} identify the matching group and the two datasets:
+To match the water level series with precipitation, the function \code{match_temporal()} is used with the variable \code{group} and \code{types} identifying the matching group and the two data sources:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -853,7 +815,7 @@ R> (res_tm <- res_sp |>
 \end{CodeOutput}
 \end{CodeChunk}
 
-Similarly, the cubble output can be returned using the argument \texttt{return\_cubble\ =\ TRUE}. Here we select the four pairs with the highest number of matching peaks:
+Similarly, the cubble output can be returned using the argument \texttt{return\_cubble\ =\ TRUE}. Here we select the four pairs with the highest number of matching peaks and show them on the map (a) and as standardized series (b) in Figure \ref{fig:matching}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -880,8 +842,6 @@ R> (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 \end{CodeOutput}
 \end{CodeChunk}
 
-Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardized data as time series (b) with concurrent increasing.
-
 \begin{CodeChunk}
 \begin{figure}
 
@@ -889,27 +849,20 @@ Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardiz
 
 }
 
-\caption[Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b)]{Weather stations and river gauges with matched pairs labelled on the map (a) and plotted across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed on the same scale. The water level reflects the increase in precipitation. The numbers (1, 7, 6, 9) indicate the group index derived from spatial matching, only those that were selectd by temporal matching are shown here.}\label{fig:matching}
+\caption[Matched weather stations and river gauges on the map (a) and across time (b)]{Matched weather stations and river gauges on the map (a) and across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed in the same scale in (b). The water level reflects the increase in precipitation.}\label{fig:matching}
 \end{figure}
 \end{CodeChunk}
 
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis data}\label{era5-climate-reanalysis-data}}
 
-The ERA5 reanalysis \citep{hersbach2020era5} provides hourly estimates of atmospheric, land and oceanic climate variables on a global scale. The hourly pressure level data in the NetCDF format can be downloaded from Copernicus Climate Data Store (CDS) or via the \pkg{ecmwfr} package \citep{ecwmfr}. This example reproduces the row created from ERA5 reanalysis data shown in Figure 19 by \citet{hersbach2020era5}. The plot shows the southern polar vortex splitting into two on 2002-09-26, and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in \citet{simmons2020global} and \citet{simmons2005ecmwf}.
+The ERA5 reanalysis \citep{hersbach2020era5} provides hourly estimates of atmospheric, land and oceanic climate variables on a global scale and is available in the NetCDF format from Copernicus Climate Data Store (CDS). This example reproduces Figure 19 in the \citet{hersbach2020era5} paper with cubble, in Figure \ref{fig:netcdf}. The plot shows the southern polar vortex splitting into two on 2002-09-26, and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in \citet{simmons2020global} and \citet{simmons2005ecmwf}.
 
-The following code converts a NetCDF object of class \code{ncdf4} \citep{ncdf4} into a cubble object:
+A \code{ncdf4} object \citep{ncdf4} can be converted into a cubble using \code{as_cubble()} and the NetCDF data can be subsetted with arguments \code{vars}, \code{long_range} and \code{lat_range}. In this example, the variables q (specific humidity) and z (geopotential) are read in and the coordinates are subsetted to every degree in longitude and latitude:
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
-\end{CodeInput}
-\end{CodeChunk}
-
-Analysts can extract a subset of the NetCDF data with the arguments \code{vars}, \code{long_range} and \code{lat_range}. In this example, the variables q (specific humidity) and z (geopotential) are selected and the coordinates are subsetted to every degree in longitude and latitude:
-
-\begin{CodeChunk}
-\begin{CodeInput}
 R> (dt <- as_cubble(
 +   raw, vars = c("q", "z"),
 +   long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
@@ -929,7 +882,31 @@ R> (dt <- as_cubble(
 \end{CodeOutput}
 \end{CodeChunk}
 
-Once the NetCDF data is coerced into a cubble object, subsequent analysis can be conducted to filter on the date of interest, scale the variable specific humidity and create visualisation in ggplot as in Figure \ref{fig:netcdf}.
+Once the NetCDF data is coerced into a cubble object, subsequent analysis can be conducted to filter on the date of interest, scale the variable specific humidity and create visualisation in ggplot to reproduce the ERA5 plot. A shnippet of code to create Figure \ref{fig:netcdf} is provided below with additional codes needed to style the plot
+
+\begin{verbatim}
+res <- dt |> 
+  face_temporal() |> 
+  filter(lubridate::date(time) %in% 
+           as.Date(c("2002-09-22", "2002-09-26",
+                     "2002-09-30", "2002-10-04"))) |>
+  unfold(long, lat) |> 
+  mutate(q = q* 10^6)
+
+con <- rnaturalearth::ne_coastline("small", returnclass = "sf")
+box <- st_bbox(c(xmin = -180, ymin = -90, xmax = 180, ymax = -15), crs = st_crs(con)) 
+country <- con |> 
+  st_geometry() |> 
+  st_crop(box) |> 
+  st_cast("MULTILINESTRING")
+
+res |> 
+  ggplot() +
+  geom_point(aes(x = long, y = lat, color = q)) + 
+  geom_contour(data = res, aes(x = long, y = lat, z = z), ...) +
+  geom_sf(data = country, ...) +
+  ...
+\end{verbatim}
 
 \begin{CodeChunk}
 \begin{figure}
@@ -945,25 +922,40 @@ Once the NetCDF data is coerced into a cubble object, subsequent analysis can be
 \hypertarget{australian-temperature-range}{%
 \subsection{Australian temperature range}\label{australian-temperature-range}}
 
-Interactive graphics can be useful because they make it possible to look at the data in multiple ways on-the-fly. This is especially important for spatio-temporal data, where we would like to interactively connect spatial and temporal displays. This example describes the process of using the \pkg{cubble} package with the \pkg{crosstalk} package to build an interactive display connecting a map of Australia, with ribbon plots of temperature range observed at the stations. The purpose is to explore the variation of monthly temperature range over the country. Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity.
+Interactive graphics can be especially useful for spatio-temporal data because they make it possible to look at the data in multiple ways on-the-fly. The last example describes the process of using cubble with the \pkg{crosstalk} package to build an interactive display connecting a map of Australia, with ribbon plots of temperature range observed at the stations in 2020. The purpose is to explore the variation of monthly temperature range over the country.
 
-The key steps are to convert both the nested and long forms of the data into shared \code{crosstalk} objects, and to plot these side-by-side. The two are linked by the station identifier.
+We will first summarise the daily data in \code{climate_aus} into monthly average and calculate the variance of the temperature difference, which will be used to color the temperature band later.
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{clean }\OtherTok{\textless{}{-}}\NormalTok{ climate\_full }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
+\begin{verbatim}
+clean <- climate_aus |>
+  face_temporal() |> 
+  mutate(month = lubridate::month(date)) |>
+  group_by(month) |>
+  summarise(
+    tmax = mean(tmax, na.rm = TRUE),
+    tmin = mean(tmin, na.rm = TRUE),
+    diff = mean(tmax - tmin, na.rm = TRUE)
+  ) |> 
+  face_spatial() |> 
+  rowwise() |>
+  mutate(temp_diff_var = var(ts$diff, na.rm =TRUE))
+\end{verbatim}
 
-\NormalTok{nested }\OtherTok{\textless{}{-}}\NormalTok{ clean }\SpecialCharTok{|\textgreater{}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
-\NormalTok{long }\OtherTok{\textless{}{-}} \FunctionTok{face\_temporal}\NormalTok{(clean) }\SpecialCharTok{|\textgreater{}}\NormalTok{ SharedData}\SpecialCharTok{$}\FunctionTok{new}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{id, }\AttributeTok{group =} \StringTok{"cubble"}\NormalTok{)}
+The spatial and temporal cubble are then created into shared \code{crosstalk} objects, plotted as ggplots, and combined together using \code{crosstalk::bscols()}:
 
-\NormalTok{p1 }\OtherTok{\textless{}{-}}\NormalTok{ nested }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
-\NormalTok{p2 }\OtherTok{\textless{}{-}}\NormalTok{ long }\SpecialCharTok{|\textgreater{}}\NormalTok{ ...}
+\begin{verbatim}
+nested <- clean |> SharedData$new(~id, group = "cubble")
 
-\NormalTok{crosstalk}\SpecialCharTok{::}\FunctionTok{bscols}\NormalTok{(plotly}\SpecialCharTok{::}\FunctionTok{ggplotly}\NormalTok{(p1), plotly}\SpecialCharTok{::}\FunctionTok{ggplotly}\NormalTok{(p2), ...)}
-\end{Highlighting}
-\end{Shaded}
+long <- clean |> 
+  face_temporal() |> 
+  SharedData$new(~id, group = "cubble")
+  
+p1 <- nested |> ggplot() + ...
+p2 <- long |> ggplot() + ...
+crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
+\end{verbatim}
 
-Plot (a) shows the initial state of the interactive display: all locations are shown as dots on the map, coloured by temperature range, and the right plot shows the ribbons representing maximum to minimum for all stations. In plot (b) the ``Mount Elizabeth'' station, which shows a high variance colour on the initial map, is selected on the map and this produces the ribbon on the right. In plot (c) the lowest temperature in August is selected, which is ``Thredbo'' station on the left map. It was surprising to us that this was not a station in Tasmania, so for comparison a station in Tasmania is selected on the map to show in relation to Thredbo. We can see that Thredbo has a bigger winter dip in temperature, and although Tasmania is cold generally, it's temperatures are more constant.
+Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity. Plot (a) shows the initial state of the interactive display: all locations are shown as dots on the map, coloured by the temperature range, and the right plot shows the ribbons representing maximum to minimum for all stations. In plot (b) the station shows a high variance on the initial map, the ``Mount Elizabeth'' station, is selected and this produces the ribbon on the right. In plot (c) the lowest temperature in August is selected on the left map and this corresponds to the ``Thredbo'' station in the mountain area in Victoria and New South Wales. This station is compared to a station in the Tasmania island, the southernmost island of the country, selected on the map.
 
 \begin{CodeChunk}
 \begin{figure}
@@ -979,9 +971,9 @@ Plot (a) shows the initial state of the interactive display: all locations are s
 \hypertarget{conclude}{%
 \section{Conclusion}\label{conclude}}
 
-This paper presents the \proglang{R} package \pkg{cubble} for organizing, wrangling and visualizing spatio-temporal data. The package introduces a new data class, \code{cubble}, consisting of two subclass, spatial cubble and a temporal cubble, to organise spatio-temporal data in two different formats within the tidy data framework. The data structure and functions introduced in this package can be used and combined with existing spatial and temporal data analysis packages such as \pkg{sf} and \pkg{tsibble}, data wrangling packages such as \pkg{dplyr}, and visualization packages such as \pkg{ggplot2}, \pkg{plotly}, and \pkg{leaflet}.
+This paper presents the \proglang{R} package \pkg{cubble} for organizing, wrangling and visualizing spatio-temporal data. The package introduces a new data structure, \code{cubble}, consisting of two subclass, spatial cubble and a temporal cubble, to organise spatio-temporal data in two different formats within the tidy data framework. The data structure and functions introduced in the package can be used and combined with existing tools for data wrangling, spatial and temporal data analysis, and visualization.
 
-The paper includes numerous examples to illustrate the utility of \pkg{cubble} as a data structure for spatio-temporal analysis. These examples cover different tasks of a typical analysis workflow: handling data with spatial and temporal misalignment, matching data from multiple sources, and creating both static and interactive spatio-temporal visualisation. For future directions, other commonly-used spatial or temporal data structures can be integrated into \pkg{cubble} to extend analysts' familiar spatial and temporal toolkit to spatio-temporal.
+The paper includes plenty examples to illustrate the utility of \pkg{cubble} as a data structure for spatio-temporal analysis. These examples cover different tasks of a typical analysis workflow: handling data with spatial and temporal misalignment, matching data from multiple sources, and creating both static and interactive spatio-temporal visualisation. For future directions, other commonly-used spatial or temporal data structures can be integrated into the \pkg{cubble} package to extend analysts' familiar spatial and temporal toolkit to spatio-temporal.
 
 \hypertarget{acknowledgement}{%
 \section{Acknowledgement}\label{acknowledgement}}
