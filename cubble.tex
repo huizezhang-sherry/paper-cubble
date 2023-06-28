@@ -220,7 +220,7 @@ R> spatial(cb_long)
 \hypertarget{create}{%
 \subsection{Creation and coercion}\label{create}}
 
-The function \code{make_cubble()} composes a spatial cubble object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}), along with three attributes introduced in the subsection \ref{object}: \code{key}, \code{index}, and \code{coords}. The following code creates the spatial cubble, \code{cb_nested}, from its spatial component, \code{stations} and temporal component \code{meteo}:
+The function \code{make_cubble()} composes a spatial cubble object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}), along with three attributes introduced in the subsection \ref{object}: \code{key}, \code{index}, and \code{coords}. The following code creates a spatial cubble from its spatial component, \code{stations} and temporal component \code{meteo}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -239,7 +239,7 @@ R> make_cubble(spatial = stations, temporal = meteo,
 \end{CodeOutput}
 \end{CodeChunk}
 
-Spatio-temporal data in other foreign objects can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes casting from a joined \code{tibble} or \code{data.frame}, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. In the example below, the spatial cubble object is created from \code{climate_flat}, which combines the spatial data, \code{stations}, with the temporal data, \code{meteo}, into a single tibble object:
+Other foreign spatio-temporal objects in \proglang{R} can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes a joined \code{tibble} or \code{data.frame}, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. In the example below, the spatial cubble object is created from \code{climate_flat}, which combines the previous \code{stations} and \code{meteo} into a single tibble object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -260,7 +260,7 @@ R> climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 \hypertarget{functions-and-methods}{%
 \subsection{Functions and methods}\label{functions-and-methods}}
 
-Table \ref{tab:funs} summarises the functions implemented in the \pkg{cubble} package and Table \ref{tab:methods} details the methods implemented for each of the three cubble classes. The \code{cubble_df} class handles methods that behave consistently in both spatial (\code{spatial_cubble_df}) and temporal cubble (\code{temporal_cubble_df}). When the method has distinct behavior for the spatial cubble and temporal cubble, it is implemented separately for each subclass.
+Table \ref{tab:funs} summarises the functions implemented in the \pkg{cubble} package and Table \ref{tab:methods} details the methods implemented for each of the three cubble classes. The \code{cubble_df} class handles methods that behave consistently in both spatial and temporal cubble. When the method has distinct behavior, it is implemented separately in \code{spatial_cubble_df} and \code{temporal_cubble_df}.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1250}}
@@ -284,14 +284,14 @@ Functions
 \endhead
 base R & \texttt{{[}}, \texttt{{[}{[}\textless{}-}, \texttt{names\textless{}-} \\
 tidyverse & \texttt{dplyr\_row\_slice}, \texttt{dplyr\_col\_modify}, \texttt{dplyr\_reconstruct}, \texttt{select}, \texttt{mutate}, \texttt{arrange}, \texttt{filter}, \texttt{group\_by}, \texttt{ungroup}, \texttt{summarise}, \texttt{select}, \texttt{slice}, \texttt{rowwise}, \texttt{rename}, \texttt{bind\_rows}, \texttt{bind\_cols}, \texttt{relocate}, \texttt{type\_sum}, the slice family (\texttt{slice\_head}, \texttt{slice\_tail}, \texttt{slice\_max}, \texttt{slice\_min}, \texttt{slice\_sample}) and the join family (\texttt{left\_join}, \texttt{right\_join}, \texttt{inner\_join}, \texttt{full\_join}, \texttt{anti\_join}, \texttt{semi\_join}) \\
-cubble & \texttt{as\_cubble}, \texttt{cubble}, \texttt{make\_cubble}, \texttt{check\_key} \texttt{face\_temporal}, \texttt{face\_spatial}, \texttt{unfold}, \texttt{key}, \texttt{key\_vars}, \texttt{key\_data}, \texttt{index}, \texttt{index\_var}, \texttt{coords}, \texttt{spatial}, \texttt{match\_sites}, \texttt{match\_spatial}, \texttt{match\_temporal}, \texttt{geom\_glyph}, \texttt{geom\_glyph\_box}, \texttt{geom\_glyph\_line}, \texttt{make\_spatial\_sf}, \texttt{make\_temporal\_tsibble}, \texttt{fill\_gaps}, and \texttt{scan\_gaps} \\
+cubble & \texttt{as\_cubble}, \texttt{cubble}, \texttt{make\_cubble}, \texttt{check\_key}, \texttt{face\_temporal}, \texttt{face\_spatial}, \texttt{unfold}, \texttt{key}, \texttt{key\_vars}, \texttt{key\_data}, \texttt{index}, \texttt{index\_var}, \texttt{coords}, \texttt{spatial}, \texttt{match\_sites}, \texttt{match\_spatial}, \texttt{match\_temporal}, \texttt{geom\_glyph}, \texttt{geom\_glyph\_box}, \texttt{geom\_glyph\_line}, \texttt{make\_spatial\_sf}, \texttt{make\_temporal\_tsibble}, \texttt{fill\_gaps}, and \texttt{scan\_gaps} \\
 \bottomrule()
 \end{longtable}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.7500}}@{}}
-\caption{\label{tab:methods} An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistent across the two subclasses; otherwise, they are implemented separately in each subclass.}\tabularnewline
+\caption{\label{tab:methods} An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistent across the spatial and temporal cubble; otherwise, they are implemented separately.}\tabularnewline
 \toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Class
@@ -314,7 +314,7 @@ Methods
 \bottomrule()
 \end{longtable}
 
-Specifically, the pair of verbs, \code{face_temporal()} and \code{face_spatial()}, pivot the cubble object between the spatial and temporal face of the multivariate spatio-temporal cube, as illustrated in Figure \ref{fig:face}. The code below uses the function \code{face_temporal()} and \code{face_spatial()} to transform between a spatial cubble (\code{cb_nested}) and a temporal one (\code{cb_long}), introduced earlier in subsection \ref{object}:
+The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms, as illustrated in Figure \ref{fig:face}. The code below connects the a spatial cubble (\code{cb_nested}) and a temporal temporal (\code{cb_long}) introduced in Section \ref{object} with \code{face_temporal()} and \code{face_spatial()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -331,7 +331,7 @@ R> identical(face_spatial(cb_long), cb_nested)
 \end{CodeOutput}
 \end{CodeChunk}
 
-The pair of verbs are exact inverse and apply both functions on a cubble object will result in the object itself:
+Both verbs are the exact inverse of each other and apply both functions on a cubble object will result in the object itself:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -355,19 +355,19 @@ R> identical(face_temporal(face_spatial(cb_long)), cb_long)
 
 }
 
-\caption{An illustration of the function \code{face\_temporal()} and \code{face\_spatial()}: \code{face\_temporal()} converts a spatial cubble (neseted form) into a temporal cubble (long form) to focus on the temporal variables. Conversely, \code{face\_spatial()} transforms a temporal cubble into a spatial one to emphasize spatial variables.}\label{fig:face}
+\caption{An illustration of the function \code{face\_temporal()} and \code{face\_spatial()}: \code{face\_temporal()} converts a spatial cubble into a temporal cubbl to focus on the temporal variables. Conversely, \code{face\_spatial()} transforms a temporal cubble into a spatial one to for focus on the spatial variables.}\label{fig:face}
 \end{figure}
 \end{CodeChunk}
 
 \hypertarget{compatibility-with-tsibble-and-sf}{%
 \subsection{Compatibility with tsibble and sf}\label{compatibility-with-tsibble-and-sf}}
 
-Analysts often have their preferred spatial or temporal data structure that they prefer to use for spatio-temporal analysis. For example, the \code{tbl_ts} class from the \code{tsibble} package \citep{tsibble} is commonly used in time series forecasting and similarly, the \code{sf} class \citep{sf} is frequently used in spatial data science. In \code{cubble}, analysts have the flexibility to combine these two structures together by allowing the spatial component to also be an \code{sf} object and the temporal component to also be a \code{tsibble} object.
+Analysts often have their preferred spatial or temporal data structure for spatial or temporal analysis, which they may wish to continue using for spatio-temporal analysis. With \code{cubble}, analysts can incorporate the \code{tsibble} class in a temporal cubble and the \code{sf} class in a spatial cubble.
 
 \hypertarget{using-a-tsibble-object-as-the-temporal-component}{%
 \subsubsection{Using a tsibble object as the temporal component}\label{using-a-tsibble-object-as-the-temporal-component}}
 
-The \code{key} and \code{index} arguments in a \code{cubble} object corresponds to the \code{tsibble} counterparts and they can be safely omitted, if the temporal component is a \code{tsibble} object, i.e.~\code{meteo_ts} in the example below. The \code{tsibble} class from the input will be carried over to the \code{cubble} object:
+The \code{key} and \code{index} arguments in a \code{cubble} object corresponds to the \code{tsibble} counterparts and they can be safely omitted, if the temporal component is a \code{tsibble} object, i.e.~\code{meteo_ts} in the example below. The \code{tsibble} class (\code{tbl_ts}) from the input will be carried over to the temporal cubble, indicated by the \code{[tsibble]} in the header and in the object class:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -397,7 +397,7 @@ R> class(ts_long)
 \end{CodeOutput}
 \end{CodeChunk}
 
-The temporal cubble shows \code{[tsibble]} in the header to indicate the object also being in a \code{tbl_ts} class (\code{tsibble}). Methods applies to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
+Methods applies to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -413,22 +413,31 @@ R> ts_long |> has_gaps()
 \end{CodeOutput}
 \end{CodeChunk}
 
-An existing \code{cubble} object can promote its temporal component to a \code{tsibble} object by applying \code{make_temporal_tsibble()}. The following code illustrates this with the object \code{cb_long} created in section \ref{create} and the promoted cubble object is equal to the cubble object originally created from a \code{tsibble} object:
+A created temporal cubble can promote its temporal component to a \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_long} object created in Section \ref{create}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> ts_long2 <- cb_long |> make_temporal_tsibble() 
-R> identical(ts_long2, ts_long)
+R> cb_long |> make_temporal_tsibble() 
 \end{CodeInput}
 \begin{CodeOutput}
-[1] TRUE
+# cubble:   key: id [3], index: date, long form, [tsibble]
+# temporal: 2020-01-01 -- 2020-01-10 [1D], no gaps
+# spatial:  long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id [dbl]
+  id          date        prcp  tmax  tmin
+  <chr>       <date>     <dbl> <dbl> <dbl>
+1 ASN00086038 2020-01-01     0  26.8  11  
+2 ASN00086038 2020-01-02     0  26.3  12.2
+3 ASN00086038 2020-01-03     0  34.5  12.7
+4 ASN00086038 2020-01-04     0  29.3  18.8
+5 ASN00086038 2020-01-05    18  16.1  12.5
+# i 25 more rows
 \end{CodeOutput}
 \end{CodeChunk}
 
 \hypertarget{using-an-sf-object-as-the-spatial-component}{%
 \subsubsection{Using an sf object as the spatial component}\label{using-an-sf-object-as-the-spatial-component}}
 
-Similarly, an \code{sf} object can be supplied as the spatial component to create a \code{cubble} object, with the \code{coords} argument being omitted. This opens up the possibility to represent fixed area with polygons or multipolygons (see Applications \ref{covid}) and the \code{coords} argument will be calculated as the centroids of the (multi)polygons. The \code{[sf]} print in the cubble header suggest an spatial component being also a \code{sf} object:
+Similarly, the spatial component of a cubble object can be an \code{sf} object and if the \code{coords} argument is omitted, it will be calculated from the sf geometry. The sf status is signalled by the \code{[sf]} label in the cubble header:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -455,7 +464,7 @@ R> class(sf_nested)
 \end{CodeOutput}
 \end{CodeChunk}
 
-The \code{sf} functions applicable to a \code{cubble} object have been listed in Table \ref{tab:funs} and the following code shows how to perform coordinate transformation with \code{st_transform} on a cubble object:
+This allows applying functions from the \code{sf} package to a cubble object, for example, to handle coordinate transformation with \code{st_transform}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -474,7 +483,7 @@ R> sf_nested |> sf::st_transform(crs = "EPSG:3857")
 \end{CodeOutput}
 \end{CodeChunk}
 
-The counterpart to promote the spatial component in an existing \code{cubble} to be an \code{sf} object is \code{make_spatial_sf()}:
+The spatial component of a created \code{cubble} can also be promoted into an \code{sf} object with \code{make_spatial_sf()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
