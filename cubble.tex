@@ -514,33 +514,35 @@ The \pkg{sftime} package \citep{sftime} also builds from a tibble object and its
 \hypertarget{matching}{%
 \subsection{Data fusion and matching}\label{matching}}
 
-One common task when working with spatio-temporal data is to match nearby sites. For example, we may want to verify the location of an old list of stations with current stations, or we may want to match the data from different data sources. In cubble, spatial and temporal matching are performed using the functions \texttt{match\_spatial()} and \texttt{match\_temporal()}. The \texttt{match\_spatial()} function calculates the spatial distance between observations in two cubble objects. Various distance measures are available (check \texttt{sf::st\_distance}). Analysts can specify the number of matched groups to output using the \texttt{spatial\_n\_group} argument (default to 4 groups) and the number of matches per group using the \texttt{spatial\_n\_group} argument (default to 1, one-to-one matching). The syntax to use \texttt{match\_spatial()} is:
+Matching time series from an old list of stations to a new list is a common task in spatio-temporal data analysis. In cubble, matching based on distance and time series feature can be performed using the functions \texttt{match\_spatial()} and \texttt{match\_temporal()}. The \texttt{match\_spatial()} function finds the matched pairs in two cubble objects based on distance between sites:
 
 \begin{verbatim}
 match_spatial(<cubble_obj1>, <cubble_obj2>, ...)
 \end{verbatim}
 
-The function \texttt{match\_temporal()} calculates the similarity between time series within spatially matched groups. Two identifiers are required: one for separating each matched group (\texttt{match\_id}) and one for separating the two data sources (\texttt{data\_id}). The argument \texttt{temporal\_by} uses the \texttt{by} syntax from dplyr's \texttt{*\_join} to specify the temporal variables to match.
+Two arguments are available to control the outputs: the argument \texttt{spatial\_n\_group} specifies the number of paired groups to output and the argument \texttt{spatial\_n\_each} specifies the number of each for each item in the first cubble object (default to 1 for one-to-one matching).
 
-The similarity score between two time series is calculated using a matching function, which can be customised by the analysts. The matching function takes two time series as a list and returns a single numerical score. This allows for flexibility in using existing time series distance calculation implementation. By default, cubble implements a simple peak matching algorithm (\texttt{match\_peak}) that counts the number of peaks in two time series that fall within a specified temporal window. The syntax to use \texttt{match\_temporal()} is
+The function \texttt{match\_temporal()} takes the outputs from spatial matching and calculates a similarity score of the time series between spatially matched pairs. The temporal matching requires two identifiers: one for separating each spatially matched group: \texttt{match\_id} and one for separating the two data sources: \texttt{data\_id}. Matching between different variables can be specified using the \texttt{temporal\_by} argument, similar to the \texttt{by} syntax from dplyr's \texttt{*\_join}.
 
 \begin{verbatim}
 match_temporal(
-  <cubble_obj_from_match_spatial>, 
-  data_id = , match_id = , 
+  <obj_from_match_spatial>, 
+  data_id = ... , match_id = ..., 
   temporal_by = c("..." = "...")
 )
 \end{verbatim}
 
+The similarity score between two time series is calculated using a matching function, which can be customised by the analysts based on the time series feature relevant to match. The matching function takes two time series as a list and returns a single numerical score. By default, cubble uses a simple peak matching algorithm (\texttt{match\_peak}) to count the number of peaks in two time series that fall within a specified temporal window.
+
 \hypertarget{interactive-graphics}{%
 \subsection{Interactive graphics}\label{interactive-graphics}}
 
-The workflow with the \code{cubble} class works well with an interactive graphics pipeline (e.g., \citet{buja1988elements}; \citet{buja1996interactive}; \citet{sutherland2000orca}; \citet{xie2014reactive}; \citet{cheng2016enabling}) that is available in \proglang{R} with the package \pkg{crosstalk} \citep{crosstalk}. Figure \ref{fig:illu-interactive} illustrates the linking between a map and multiple time series in a \code{cubble} object. Both the map, generated from the spatial cubble, and the time series plot, generated from the temporal cubble, are shared crosstalk objects. When a user selects a location on the map (a), the corresponding site is highlighted. This selection activates a row in the spatial \code{cubble}, which is then communicated to the temporal \code{cubble}, resulting in the selection of all observations with the same ID in (b). Consequently the temporal \code{cubble} highlights the corresponding series in the time series plot (c). Linking can also be initiated from the time series plot, by selecting points on the time series. This action activates rows with the same ID in the temporal \code{cubble} and the row in the spatial \code{cubble}, which will be highlighted on the map. Please refer to the appendix for the corresponding illustration.
+The cubble workflow works well with an interactive graphics pipeline (e.g., \citet{buja1988elements}; \citet{buja1996interactive}; \citet{sutherland2000orca}; \citet{xie2014reactive}; \citet{cheng2016enabling}). This section describes the linking between a map and multiple time series in a \code{cubble} object using the package \pkg{crosstalk} \citep{crosstalk}, as illustrated in Figure \ref{fig:illu-interactive}. The spatial and temporal cubble can be constructed into a shared crosstalk object to create linking between a map and a time series plot. When a user selects a location on the map (a), the corresponding site is highlighted. This selection activates a row in the spatial cubble, which is then communicated to the temporal cubble, resulting in the selection of all observations with the same ID in (b). Consequently the temporal cubble highlights the corresponding series in the time series plot (c). Linking can also be initiated from the time series plot, by selecting points on the time series, which activates rows with the same ID in the temporal cubble and the corresponding row in the spatial cubble to highlight on the map.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{figures/diagram-keynotes/diagram-keynotes.002} 
+{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{figures/diagram-keynotes/‎diagram-keynotes.‎002} 
 
 }
 
@@ -551,9 +553,7 @@ The workflow with the \code{cubble} class works well with an interactive graphic
 \hypertarget{st_transformation}{%
 \subsection{Spatio-temporal transformations}\label{st_transformation}}
 
-Sometimes, we wish to communicate spatial and temporal information collectively through visualisation. This can be achieved through several graphical displays: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. The concept of glyph maps was initially proposed in \citet{Wickham2012-yr}. The underlying idea is to transform the temporal coordinates into spatial coordinates so that time series plot can be displayed on the map.
-
-The package \texttt{GGally} \citep{ggally} initially implements the glyph map, using \texttt{glyphs()} to calculate the axis transformation and then \texttt{geom\_polygon()} to draw the map. In cubble, a ggproto implementation \texttt{geom\_glyph()} performs the linear algebra internally as data transformation . The \texttt{geom\_glyph()} requires four aesthetics: \texttt{x\_major}, \texttt{y\_major}, \texttt{x\_minor}, and \texttt{y\_minor}. The major axes are the outer spatial coordinates and the minor axes are the inner/ temporal coordinates:
+To communicate spatial and temporal information collectively in display, a few visualisation options are available: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. Faceted maps and animation, while commonly used, may not be helpful for comparing across time since eyes need to jump across multiple facets or frames to locate the space before preceiving the changes in time. The glyph map \citep{Wickham2012-yr} resolves this issue by imposing the time series onto the map as a glyph through coordinate transformation. The transformation uses linear algebra to convert the temporal coordinates (minor coordinates) into the spatial coordinates (major coordinates) and is implemented in the package \texttt{GGally} \citep{ggally} package. The \pkg{cubble} package provides a ggproto implementation, \texttt{geom\_glyph()}, for glyph maps and it takes four required aesthetics: \texttt{x\_major}, \texttt{y\_major}, \texttt{x\_minor}, and \texttt{y\_minor}:
 
 \begin{verbatim}
 data |> 
@@ -562,7 +562,7 @@ data |>
                  y_major = ..., y_minor = ...))
 \end{verbatim}
 
-Some useful controls over the glyph map includes:
+Other useful controls over the glyph map includes:
 
 \begin{itemize}
 \tightlist
@@ -571,7 +571,7 @@ Some useful controls over the glyph map includes:
 \item
   adjust glyph size with arguments \code{width} and \code{height},
 \item
-  glyph scale to fixed (\code{global_rescale} defaults to \code{TRUE}) or free, and
+  transformation relative to the all series (\code{global_rescale} defaults to \code{TRUE}) or each single series, and
 \item
   reference boxes and lines with \code{geom_glyph_box()} and \code{geom_glyph_line()}.
 \end{itemize}
