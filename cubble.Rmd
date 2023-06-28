@@ -60,6 +60,7 @@ options(prompt = "R> ", continue = "+ ",
 ```{r echo = FALSE}
 library("cubble")
 library("dplyr")
+library("tidyr")
 library("ggplot2")
 library("patchwork")
 library("tsibble")
@@ -191,7 +192,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Compatibility with tsibble and sf
 
-Analysts often have their preferred spatial or temporal data structure for spatial or temporal analysis, which they may wish to continue using for spatio-temporal analysis. With \code{cubble}, analysts can incorporate the \code{tsibble} class in a temporal cubble and the \code{sf} class in a spatial cubble.
+Analysts often have their preferred spatial or temporal data structure for spatial or temporal analysis, which they may wish to continue using for spatio-temporal analysis. With \code{cubble}, analysts can incorporate the \code{tsibble} class [@tsibble] in a temporal cubble and the \code{sf} class [@sf] in a spatial cubble.
 
 ### Using a tsibble object as the temporal component
 
@@ -281,7 +282,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 Sometimes, we wish to communicate spatial and temporal information collectively through visualisation. This can be achieved through several graphical displays: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. The concept of glyph maps was initially proposed in @Wickham2012-yr. The underlying idea is to transform the temporal coordinates into spatial coordinates so that time series plot can be displayed on the map. 
 
-The package `GGally` initially implement the glyph map. It uses `glyphs()` to calculate the axis transformation and then uses `geom_polygon()` to draw the map. In cubble, a ggproto implementation `geom_glyph()` performs the linear algebra internally as data transformation . The `geom_glyph()` requires four aesthetics: `x_major`, `y_major`, `x_minor`, and `y_minor`. The major axes are the outer spatial coordinates and the minor axes are the inner/ temporal coordinates: 
+The package `GGally` [@ggally] initially implements the glyph map, using `glyphs()` to calculate the axis transformation and then `geom_polygon()` to draw the map. In cubble, a ggproto implementation `geom_glyph()` performs the linear algebra internally as data transformation . The `geom_glyph()` requires four aesthetics: `x_major`, `y_major`, `x_minor`, and `y_minor`. The major axes are the outer spatial coordinates and the minor axes are the inner/ temporal coordinates: 
 
 ```
 data |> 
@@ -574,9 +575,9 @@ p2 <- res_tm_long |>
 
 ## ERA5: climate reanalysis data
 
-The ERA5 reanalysis [@hersbach2020era5] provides hourly estimates of atmospheric, land and oceanic climate variables on a global scale. The hourly pressure level data in the NetCDF format can be downloaded from Copernicus Climate Data Store (CDS) [@cds] or via the \pkg{ecmwfr} package [@ecwmfr]. This example reproduces the row created from ERA5 reanalysis data shown in Figure 19 by @hersbach2020era5. The plot shows the southern polar vortex splitting into two on 2002-09-26, and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in @simmons2020global and @simmons2005ecmwf.
+The ERA5 reanalysis [@hersbach2020era5] provides hourly estimates of atmospheric, land and oceanic climate variables on a global scale. The hourly pressure level data in the NetCDF format can be downloaded from Copernicus Climate Data Store (CDS) or via the \pkg{ecmwfr} package [@ecwmfr]. This example reproduces the row created from ERA5 reanalysis data shown in Figure 19 by @hersbach2020era5. The plot shows the southern polar vortex splitting into two on 2002-09-26, and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in @simmons2020global and @simmons2005ecmwf.
 
-To work with NetCDF data in R, several packages are available, including \code{ncdf4}, \code{RNetCDF}, and \code{tidync}. The following code converts a NetCDF object of class \code{ncdf4} into a cubble object:
+ The following code converts a NetCDF object of class \code{ncdf4} [@ncdf4] into a cubble object:
 
 ```{r echo = TRUE}
 raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
@@ -585,13 +586,14 @@ raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
 Analysts can extract a subset of the NetCDF data with the arguments \code{vars}, \code{long_range} and \code{lat_range}. In this example, the variables q (specific humidity) and z (geopotential) are selected and the coordinates are subsetted to every degree in longitude and latitude: 
 
 ```{r echo = TRUE}
-(dt <- as_cubble(raw, vars = c("q", "z"),
-                 long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
+(dt <- as_cubble(
+  raw, vars = c("q", "z"),
+  long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
 ```
 
 Once the NetCDF data is coerced into a cubble object, subsequent analysis can be conducted to filter on the date of interest, scale the variable specific humidity and create visualisation in ggplot as in Figure \ref{fig:netcdf}.
 
-```{r netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04."}
+```{r netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04.", dev = "png"}
 date <- c("2002-09-22", "2002-09-26", "2002-09-30", "2002-10-04") |> as.Date()
 res <- dt |> 
   face_temporal() |> 

@@ -362,7 +362,7 @@ R> identical(face_temporal(face_spatial(cb_long)), cb_long)
 \hypertarget{compatibility-with-tsibble-and-sf}{%
 \subsection{Compatibility with tsibble and sf}\label{compatibility-with-tsibble-and-sf}}
 
-Analysts often have their preferred spatial or temporal data structure for spatial or temporal analysis, which they may wish to continue using for spatio-temporal analysis. With \code{cubble}, analysts can incorporate the \code{tsibble} class in a temporal cubble and the \code{sf} class in a spatial cubble.
+Analysts often have their preferred spatial or temporal data structure for spatial or temporal analysis, which they may wish to continue using for spatio-temporal analysis. With \code{cubble}, analysts can incorporate the \code{tsibble} class \citep{tsibble} in a temporal cubble and the \code{sf} class \citep{sf} in a spatial cubble.
 
 \hypertarget{using-a-tsibble-object-as-the-temporal-component}{%
 \subsubsection{Using a tsibble object as the temporal component}\label{using-a-tsibble-object-as-the-temporal-component}}
@@ -553,7 +553,7 @@ The workflow with the \code{cubble} class works well with an interactive graphic
 
 Sometimes, we wish to communicate spatial and temporal information collectively through visualisation. This can be achieved through several graphical displays: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. The concept of glyph maps was initially proposed in \citet{Wickham2012-yr}. The underlying idea is to transform the temporal coordinates into spatial coordinates so that time series plot can be displayed on the map.
 
-The package \texttt{GGally} initially implement the glyph map. It uses \texttt{glyphs()} to calculate the axis transformation and then uses \texttt{geom\_polygon()} to draw the map. In cubble, a ggproto implementation \texttt{geom\_glyph()} performs the linear algebra internally as data transformation . The \texttt{geom\_glyph()} requires four aesthetics: \texttt{x\_major}, \texttt{y\_major}, \texttt{x\_minor}, and \texttt{y\_minor}. The major axes are the outer spatial coordinates and the minor axes are the inner/ temporal coordinates:
+The package \texttt{GGally} \citep{ggally} initially implements the glyph map, using \texttt{glyphs()} to calculate the axis transformation and then \texttt{geom\_polygon()} to draw the map. In cubble, a ggproto implementation \texttt{geom\_glyph()} performs the linear algebra internally as data transformation . The \texttt{geom\_glyph()} requires four aesthetics: \texttt{x\_major}, \texttt{y\_major}, \texttt{x\_minor}, and \texttt{y\_minor}. The major axes are the outer spatial coordinates and the minor axes are the inner/ temporal coordinates:
 
 \begin{verbatim}
 data |> 
@@ -899,9 +899,9 @@ Figure \ref{fig:matching} shows four matched pairs on the map (a) and standardiz
 \hypertarget{era5-climate-reanalysis-data}{%
 \subsection{ERA5: climate reanalysis data}\label{era5-climate-reanalysis-data}}
 
-The ERA5 reanalysis \citep{hersbach2020era5} provides hourly estimates of atmospheric, land and oceanic climate variables on a global scale. The hourly pressure level data in the NetCDF format can be downloaded from Copernicus Climate Data Store (CDS) \citep{cds} or via the \pkg{ecmwfr} package \citep{ecwmfr}. This example reproduces the row created from ERA5 reanalysis data shown in Figure 19 by \citet{hersbach2020era5}. The plot shows the southern polar vortex splitting into two on 2002-09-26, and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in \citet{simmons2020global} and \citet{simmons2005ecmwf}.
+The ERA5 reanalysis \citep{hersbach2020era5} provides hourly estimates of atmospheric, land and oceanic climate variables on a global scale. The hourly pressure level data in the NetCDF format can be downloaded from Copernicus Climate Data Store (CDS) or via the \pkg{ecmwfr} package \citep{ecwmfr}. This example reproduces the row created from ERA5 reanalysis data shown in Figure 19 by \citet{hersbach2020era5}. The plot shows the southern polar vortex splitting into two on 2002-09-26, and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in \citet{simmons2020global} and \citet{simmons2005ecmwf}.
 
-To work with NetCDF data in R, several packages are available, including \code{ncdf4}, \code{RNetCDF}, and \code{tidync}. The following code converts a NetCDF object of class \code{ncdf4} into a cubble object:
+The following code converts a NetCDF object of class \code{ncdf4} \citep{ncdf4} into a cubble object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -913,8 +913,9 @@ Analysts can extract a subset of the NetCDF data with the arguments \code{vars},
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> (dt <- as_cubble(raw, vars = c("q", "z"),
-+                  long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
+R> (dt <- as_cubble(
++   raw, vars = c("q", "z"),
++   long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [26640], index: time, nested form
