@@ -186,7 +186,7 @@ identical(face_spatial(face_temporal(cb_nested)), cb_nested)
 identical(face_temporal(face_spatial(cb_long)), cb_long)
 ```
 
-```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the function \\code{face\\_temporal()} and \\code{face\\_spatial()}: \\code{face\\_temporal()} converts a spatial cubble into a temporal cubbl to focus on the temporal variables. Conversely, \\code{face\\_spatial()} transforms a temporal cubble into a spatial one to for focus on the spatial variables."}
+```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the functions \\code{face\\_temporal()} and \\code{face\\_spatial()}: \\code{face\\_temporal()} converts a spatial cubble into a temporal cubble to focus on the temporal variables. Conversely, \\code{face\\_spatial()} transforms a temporal cubble into a spatial one to focus on the spatial variables."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
 ```
 
@@ -205,7 +205,7 @@ ts_nested <- make_cubble(
 class(ts_long)
 ```
 
-Methods applies to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
+Methods applied to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
 
 ```{r echo = TRUE}
 ts_long |> has_gaps()
