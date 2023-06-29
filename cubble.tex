@@ -225,54 +225,52 @@ Table \ref{tab:funs} summarises the functions implemented in the \pkg{cubble} pa
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1250}}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.8750}}@{}}
 \caption{\label{tab:funs} An overview of functions implemented in the \pkg{cubble} package, categorised into base R, tidyverse, and cubble functions.}\tabularnewline
-\toprule\noalign{}
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Category
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Functions
 \end{minipage} \\
-\midrule\noalign{}
+\midrule()
 \endfirsthead
-\toprule\noalign{}
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Category
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Functions
 \end{minipage} \\
-\midrule\noalign{}
+\midrule()
 \endhead
-\bottomrule\noalign{}
-\endlastfoot
 base R & \texttt{{[}}, \texttt{{[}{[}\textless{}-}, \texttt{names\textless{}-} \\
 tidyverse & \texttt{dplyr\_row\_slice}, \texttt{dplyr\_col\_modify}, \texttt{dplyr\_reconstruct}, \texttt{select}, \texttt{mutate}, \texttt{arrange}, \texttt{filter}, \texttt{group\_by}, \texttt{ungroup}, \texttt{summarise}, \texttt{select}, \texttt{slice}, \texttt{rowwise}, \texttt{rename}, \texttt{bind\_rows}, \texttt{bind\_cols}, \texttt{relocate}, \texttt{type\_sum}, the slice family (\texttt{slice\_head}, \texttt{slice\_tail}, \texttt{slice\_max}, \texttt{slice\_min}, \texttt{slice\_sample}) and the join family (\texttt{left\_join}, \texttt{right\_join}, \texttt{inner\_join}, \texttt{full\_join}, \texttt{anti\_join}, \texttt{semi\_join}) \\
 cubble & \texttt{as\_cubble}, \texttt{cubble}, \texttt{make\_cubble}, \texttt{check\_key}, \texttt{face\_temporal}, \texttt{face\_spatial}, \texttt{unfold}, \texttt{key}, \texttt{key\_vars}, \texttt{key\_data}, \texttt{index}, \texttt{index\_var}, \texttt{coords}, \texttt{spatial}, \texttt{match\_sites}, \texttt{match\_spatial}, \texttt{match\_temporal}, \texttt{geom\_glyph}, \texttt{geom\_glyph\_box}, \texttt{geom\_glyph\_line}, \texttt{make\_spatial\_sf}, \texttt{make\_temporal\_tsibble}, \texttt{fill\_gaps}, and \texttt{scan\_gaps} \\
+\bottomrule()
 \end{longtable}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.7500}}@{}}
 \caption{\label{tab:methods} An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistent across the spatial and temporal cubble; otherwise, they are implemented separately.}\tabularnewline
-\toprule\noalign{}
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Class
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Methods
 \end{minipage} \\
-\midrule\noalign{}
+\midrule()
 \endfirsthead
-\toprule\noalign{}
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Class
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Methods
 \end{minipage} \\
-\midrule\noalign{}
+\midrule()
 \endhead
-\bottomrule\noalign{}
-\endlastfoot
 \texttt{cubble\_df} & \texttt{{[}{[}\textless{}-,\ dplyr\_col\_modify,\ key\_data,\ key\_vars,\ key,\ print} \\
 \texttt{spatial\_cubble\_df} & \texttt{{[},\ names\textless{}-,\ \ tbl\_sum,\ dplyr\_reconstruct,\ dplyr\_row\_slice,\ face\_spatial,\ face\_temporal,\ unfold,\ arrange,\ rename,\ rowwise,\ group\_by,\ ungroup,\ select,\ spatial,\ summarise,\ unfold,\ update\_cubble} \\
 \texttt{temporal\_cubble\_df} & \texttt{{[},\ names\textless{}-,\ tbl\_sum,\ arrange,\ dplyr\_reconstruct,\ dplyr\_row\_slice,\ face\_spatial,\ face\_temporal,\ unfold,\ fill\_gaps,\ group\_by,\ ungroup,\ \ rename,\ rowwise,\ scan\_gaps,\ select,\ spatial,\ summarise,\ tbl\_sum,\ bind\_rows,\ bind\_cols,\ update\_cubble} \\
+\bottomrule()
 \end{longtable}
 
 The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms, as illustrated in Figure \ref{fig:face}. The code below connects the a spatial cubble (\code{cb_nested}) and a temporal temporal (\code{cb_long}) introduced in Section \ref{object} with \code{face_temporal()} and \code{face_spatial()}:
@@ -312,7 +310,7 @@ R> identical(face_temporal(face_spatial(cb_long)), cb_long)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{figures/diagram-keynotes/diagram-keynotes.001} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
 
 }
 
@@ -503,7 +501,7 @@ The cubble workflow works well with an interactive graphics pipeline (e.g., \cit
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{figures/diagram-keynotes/‎diagram-keynotes.‎002} 
+{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/diagram-keynotes/‎diagram-keynotes.‎002} 
 
 }
 
@@ -514,7 +512,7 @@ The cubble workflow works well with an interactive graphics pipeline (e.g., \cit
 \hypertarget{st_transformation}{%
 \subsection{Spatio-temporal transformations}\label{st_transformation}}
 
-To communicate spatial and temporal information collectively in display, a few visualisation options are available: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. Faceted maps and animation, while commonly used, may not be helpful for comparing across time since eyes need to jump across multiple facets or frames to locate the space before preceiving the changes in time. The glyph map \citep{Wickham2012-yr} resolves this issue by imposing the time series onto the map as a glyph through coordinate transformation. The transformation uses linear algebra to convert the temporal coordinates (minor coordinates) into the spatial coordinates (major coordinates) and is implemented in the package \texttt{GGally} \citep{ggally} package. The \pkg{cubble} package provides a ggproto implementation, \texttt{geom\_glyph()}, for glyph maps and it takes four required aesthetics: \texttt{x\_major}, \texttt{y\_major}, \texttt{x\_minor}, and \texttt{y\_minor}:
+To communicate spatial and temporal information collectively in display, a few visualisation options are available: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. Faceted maps and animation, while commonly used, may not be helpful for comparing across time since eyes need to jump across multiple facets or frames to locate the space before perceiving the changes in time. The glyph map \citep{Wickham2012-yr} resolves this issue by imposing the time series onto the map as a glyph through coordinate transformation. The transformation uses linear algebra to convert the temporal coordinates (minor coordinates) into the spatial coordinates (major coordinates) and is implemented in the package \texttt{GGally} \citep{ggally} package. The \pkg{cubble} package provides a ggproto implementation, \texttt{geom\_glyph()}, for glyph maps and it takes four required aesthetics: \texttt{x\_major}, \texttt{y\_major}, \texttt{x\_minor}, and \texttt{y\_minor}:
 
 \begin{verbatim}
 data |> 
@@ -637,7 +635,7 @@ R> (cb <- make_cubble(spatial = lga2, temporal = covid2))
 
 The Global Historical Climatology Network (GHCN) provides daily climate measures for stations worldwide. In the \pkg{cubble} package, the cubble object \code{historical_tmax} contains daily maximum temperature data for 75 stations in Australia, covering two periods: 1971-1975 and 2016-2020. This example uses glyph maps to compare the changes in temperature between these two periods.
 
-To prevent overlapping of weather stations on the map, stations are selected to ensure a minimum distance of 50km. Distance between stations can be calcualted with \code{sf::st_distance()} after turning the spatial cubble to also be an sf object with \code{make_spatial_sf()}:
+To prevent overlapping of weather stations on the map, stations are selected to ensure a minimum distance of 50km. Distance between stations can be calculated with \code{sf::st_distance()} after turning the spatial cubble to also be an sf object with \code{make_spatial_sf()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -724,7 +722,7 @@ tmax |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/glyphmap-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/glyphmap-1} 
 
 }
 
@@ -847,7 +845,7 @@ R> (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/matching-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/matching-1} 
 
 }
 
@@ -884,7 +882,7 @@ R> (dt <- as_cubble(
 \end{CodeOutput}
 \end{CodeChunk}
 
-Once the NetCDF data is coerced into a cubble object, subsequent analysis can be conducted to filter on the date of interest, scale the variable specific humidity and create visualisation in ggplot to reproduce the ERA5 plot. A shnippet of code to create Figure \ref{fig:netcdf} is provided below with additional codes needed to style the plot
+Once the NetCDF data is coerced into a cubble object, subsequent analysis can be conducted to filter on the date of interest, scale the variable specific humidity and create visualisation in ggplot to reproduce the ERA5 plot. A snippet of code to create Figure \ref{fig:netcdf} is provided below with additional codes needed to style the plot
 
 \begin{verbatim}
 res <- dt |> 
@@ -913,7 +911,7 @@ res |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/netcdf-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/netcdf-1} 
 
 }
 
@@ -962,7 +960,7 @@ Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{figures/linking-lower} 
+{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/linking-lower} 
 
 }
 

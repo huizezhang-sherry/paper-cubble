@@ -286,7 +286,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/‎diagram-keynotes
 
 ## Spatio-temporal transformations {#st_transformation}
 
-To communicate spatial and temporal information collectively in display,  a few visualisation options are available: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. Faceted maps and animation, while commonly used, may not be helpful for comparing across time since eyes need to jump across multiple facets or frames to locate the space before preceiving the changes in time. The glyph map [@Wickham2012-yr] resolves this issue by imposing the time series onto the map as a glyph through coordinate transformation. The transformation uses linear algebra to convert the temporal coordinates (minor coordinates) into the spatial coordinates (major coordinates) and is implemented in the package `GGally` [@ggally] package. The \pkg{cubble} package provides a ggproto implementation, `geom_glyph()`, for glyph maps and it takes four required aesthetics: `x_major`, `y_major`, `x_minor`, and `y_minor`:
+To communicate spatial and temporal information collectively in display,  a few visualisation options are available: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. Faceted maps and animation, while commonly used, may not be helpful for comparing across time since eyes need to jump across multiple facets or frames to locate the space before perceiving the changes in time. The glyph map [@Wickham2012-yr] resolves this issue by imposing the time series onto the map as a glyph through coordinate transformation. The transformation uses linear algebra to convert the temporal coordinates (minor coordinates) into the spatial coordinates (major coordinates) and is implemented in the package `GGally` [@ggally] package. The \pkg{cubble} package provides a ggproto implementation, `geom_glyph()`, for glyph maps and it takes four required aesthetics: `x_major`, `y_major`, `x_minor`, and `y_minor`:
 
 ```
 data |> 
@@ -341,7 +341,7 @@ covid2 <- covid |> filter(!lga %in% check_res$others$temporal)
 
 The Global Historical Climatology Network (GHCN) provides daily climate measures for stations worldwide. In the \pkg{cubble} package, the cubble object \code{historical_tmax} contains daily maximum temperature data for `r nrow(historical_tmax)` stations in Australia, covering two periods: 1971-1975 and 2016-2020. This example uses glyph maps to compare the changes in temperature between these two periods.
 
-To prevent overlapping of weather stations on the map, stations are selected to ensure a minimum distance of 50km. Distance between stations can be calcualted with \code{sf::st_distance()} after turning the spatial cubble to also be an sf object with \code{make_spatial_sf()}:
+To prevent overlapping of weather stations on the map, stations are selected to ensure a minimum distance of 50km. Distance between stations can be calculated with \code{sf::st_distance()} after turning the spatial cubble to also be an sf object with \code{make_spatial_sf()}:
 
 ```{r echo = TRUE}
 a <- historical_tmax |> make_spatial_sf() |> st_distance()
@@ -582,7 +582,7 @@ raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
   long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
 ```
 
-Once the NetCDF data is coerced into a cubble object, subsequent analysis can be conducted to filter on the date of interest, scale the variable specific humidity and create visualisation in ggplot to reproduce the ERA5 plot. A shnippet of code to create Figure \ref{fig:netcdf} is provided below with additional codes needed to style the plot
+Once the NetCDF data is coerced into a cubble object, subsequent analysis can be conducted to filter on the date of interest, scale the variable specific humidity and create visualisation in ggplot to reproduce the ERA5 plot. A snippet of code to create Figure \ref{fig:netcdf} is provided below with additional codes needed to style the plot
 
 ````
 res <- dt |> 
