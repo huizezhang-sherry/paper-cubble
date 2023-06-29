@@ -219,7 +219,7 @@ R> climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 \hypertarget{functions-and-methods}{%
 \subsection{Functions and methods}\label{functions-and-methods}}
 
-Table \ref{tab:funs} summarises the functions implemented in the \pkg{cubble} package and Table \ref{tab:methods} details the methods implemented for each of the three cubble classes. The \code{cubble_df} class handles methods that behave consistently in both spatial and temporal cubble. When the method has distinct behavior, it is implemented separately in \code{spatial_cubble_df} and \code{temporal_cubble_df}.
+The \pkg{cubble} package has several functions implemented for data wrangling and to facilitate data analysis as summarized in Table \ref{tab:funs}. In addition, for each of the three cubble classes there are number of methods implemented that facilitates the handling of the data as shown in Table \ref{tab:methods}. In particular, the \code{cubble_df} class handles methods that behave consistently in both spatial and temporal cubble. When the method has a distinct behavior on the spatial and temporal cubble, it is implemented separately in \code{spatial_cubble_df} and \code{temporal_cubble_df}.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1250}}
@@ -273,7 +273,7 @@ Methods
 \bottomrule()
 \end{longtable}
 
-The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms, as illustrated in Figure \ref{fig:face}. The code below connects the a spatial cubble (\code{cb_nested}) and a temporal temporal (\code{cb_long}) introduced in Section \ref{object} with \code{face_temporal()} and \code{face_spatial()}:
+The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code below connects a spatial cubble (\code{cb_nested}) and a temporal cubble (\code{cb_long}), introduced in Section \ref{object}, with \code{face_temporal()} and \code{face_spatial()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
