@@ -93,14 +93,14 @@ The rest of the paper is organized as follows: Section \@ref(cubble) presents th
 
 ## The cubble object {#object}
 
-Spatio-temporal data can encompass data with various spatial and temporal characteristics, requiring different structures for wrangling and analysis. For example, climate weather stations typically store station metadata in one table and the climate time series in another. GPS data tracks unique point locations at different timestamps and is represented as trajectories. Satellite imageries capture snapshots of landscapes at selected time and is commonly structured as raster data. In this paper, we propose the \pkg{cubble} package to organise spatio-temporal data collected at unique fixed locations while allowing for irregularities in the temporal dimension, such as weather station data. 
+Spatio-temporal data can encompass data with various spatial and temporal characteristics, requiring different structures for wrangling and analysis. For example, climate weather stations typically store station metadata in one table and the climate time series in another. GPS data tracks unique point locations at different timestamps and is represented as trajectories. Satellite imageries capture snapshots of landscapes at selected times and is commonly structured as raster data. In this paper, we propose the \pkg{cubble} package to organise spatio-temporal data collected at unique fixed locations while allowing for irregularities in the temporal dimension, such as weather station data. 
 
 The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms (subclasses):
 
 -   a spatial cubble with class `c("spatial_cubble_df", "cubble_df")`
 -   a temporal cubble with class `c("temporal_cubble_df", "cubble_df")`
 
-In a spatial cubble, spatial variables are organised as columns and temporal variables are nested within a specialised `ts` column. The spatial cubble object, \code{cb_nested}, printed below contains weather records of three airport stations from Global Historical Climatology Network Daily (GHCND). The spatial cubble is convenient for wrangling the spatial variables:
+In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised `ts` column. For example, the spatial cubble object, \code{cb_nested} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database. In this case, the spatial cubble is convenient for wrangling the spatial variables:
 
 ```{r}
 cb_nested <- climate_mel
@@ -126,9 +126,9 @@ cb_long
 #knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
 
-A cubble object inherits the attributes from tibble (and its subclasses): `class`, `row.names`, and `names`. Additionally, it has three specialised attributes: `key`, `index`, and `coords`. Readers who are familiar with the `key` and `index` attributes from the `tsibble` package would already understand the two arguments. In cubble, the `key` attribute identifies the row in the spatial cubble (given the internal use of `tidyr::nest()` for nesting), and when combined with the `index` argument, it identifies the row in the temporal cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for index includes the base R classes `Date`, `POSIXlt`, `POSIXct`, as well as tsibble's `yearmonth`, `yearweek`, and `yearquarter` classes. The `coords` attribute represents an ordered pair of coordinates. It can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The `sf` package is used under the hood to calculate the bounding box, displayed in the header of a spatial cubble.
+A cubble object inherits the attributes from tibble (and its subclasses): `class`, `row.names`, and `names`. Additionally, it has three specialised attributes: `key`, `index`, and `coords`. Readers who are familiar with the `key` and `index` attributes from the `tsibble` package would already understand the two arguments. In cubble, the `key` attribute identifies the row in the spatial cubble (given the internal use of `tidyr::nest()` for nesting), and when combined with the `index` argument, it identifies the row in the temporal cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for `index` includes the base R classes `Date`, `POSIXlt`, `POSIXct`, as well as tsibble's `yearmonth`, `yearweek`, and `yearquarter` classes. The `coords` attribute represents an ordered pair of coordinates that can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The `sf` package is used under the hood to calculate the spatial bounding box, displayed in the header of a spatial cubble.
 
-The temporal cubble has a special attribute called `spatial` to store the spatial variables. Shortcut functions are available to extract attributes, for example, \code{spatial()} for extracting spatial variables from the temporal cubble: 
+The temporal cubble has a special attribute called `spatial` to store the spatial variables. Shortcut functions are available to extract attributes from the temporal cubble object, for example, \code{spatial()} for extracting spatial variables: 
 
 ```{r echo = TRUE}
 spatial(cb_long)
