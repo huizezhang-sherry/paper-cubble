@@ -32,8 +32,8 @@ abstract: >
      Multivariate spatio-temporal data refers to multiple measurements taken across space and time. For many analyses, spatial and time components can be separately studied: for example, to explore the temporal trend of one variable for a single spatial location, or to model the spatial distribution of one variable at a given time. However for some studies, it is important to analyze different aspects of the spatio-temporal data simultaneously, like for instance, temporal trends of multiple variables across locations. In order to facilitate the study of different portions or combinations of spatio-temporal data, we introduce a new class, \code{cubble}, with a suite of functions enabling easy slicing and dicing on different spatio-temporal components.  The proposed \code{cubble} class ensures that all the components of the data are easy to access and manipulate while providing flexibility for data analysis. In addition, the \pkg{cubble} package facilitates visual and numerical explorations of the data while easing data wrangling and modelling. The \code{cubble} class and the tools implemented in the package are illustrated with different examples of Australian climate data.
 keywords:
   # at least one keyword must be supplied
-  formatted: [spatial, temporal, spatio temporal, "\\proglang{R}", environmental data, exploratory data analysis]
-  plain:     [spatial, temporal, spatio temporal, R, environmental data, exploratory data analysis]
+  formatted: [spatial, temporal, spatio-temporal, "\\proglang{R}", environmental data, exploratory data analysis]
+  plain:     [spatial, temporal, spatio-temporal, R, environmental data, exploratory data analysis]
 preamble: >
   \usepackage{amsmath}
   \usepackage{array}
