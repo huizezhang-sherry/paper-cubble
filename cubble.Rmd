@@ -286,7 +286,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/‎diagram-keynotes
 
 ## Spatio-temporal transformations {#st_transformation}
 
-To communicate spatial and temporal information collectively in display,  a few visualisation options are available: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. Faceted maps and animation, while commonly used, may not be helpful for comparing across time since eyes need to jump across multiple facets or frames to locate the space before perceiving the changes in time. The glyph map [@Wickham2012-yr] resolves this issue by imposing the time series onto the map as a glyph through coordinate transformation. The transformation uses linear algebra to convert the temporal coordinates (minor coordinates) into the spatial coordinates (major coordinates) and is implemented in the package `GGally` [@ggally] package. The \pkg{cubble} package provides a ggproto implementation, `geom_glyph()`, for glyph maps and it takes four required aesthetics: `x_major`, `y_major`, `x_minor`, and `y_minor`:
+Visualizing spatio-temporal data is important for exploring and understanding the data at hand, aiding in decision-making, and facilitating effective communication. To collectively visualize spatial and temporal information, several options are available such as:  faceted maps across time, map animations, or interactive graphics that link maps and time series plots among others. Faceted maps and spatio-temporal animations, while commonly used, may be difficult to compare across time and space since users need to inspect multiple facets or frames to find changes in time or space. The glyph map [@Wickham2012-yr] resolves this issue by imposing the time series onto the map as a glyph through a coordinate transformation. The transformation uses linear algebra to convert the temporal coordinates (minor coordinates) into the spatial coordinates (major coordinates) and is implemented in the package `GGally` [@ggally]. The \pkg{cubble} package provides a ggproto implementation to create glyph maps, `geom_glyph()`  and it takes four required aestheticsf : `x_major`, `y_major`, `x_minor`, and `y_minor`:
 
 ```
 data |> 
@@ -295,12 +295,12 @@ data |>
                  y_major = ..., y_minor = ...))
 ```
 
-Other useful controls over the glyph map includes:
+Other useful controls to modify the glyph map that can be include are:
   
-  * polar coordinate glyph maps with \code{polar = TRUE}, 
-  * adjust glyph size with arguments \code{width} and \code{height},
-  * transformation relative to the all series (\code{global_rescale} defaults to \code{TRUE}) or each single series, and 
-  * reference boxes and lines with \code{geom_glyph_box()} and \code{geom_glyph_line()}.
+  * the implementation of a polar coordinate glyph maps with \code{polar = TRUE}, 
+  * the adjustment of the glyph size arguments using \code{width} and \code{height},
+  * a transformation relative to the all series (\code{global_rescale} defaults to \code{TRUE}) or each single series, and 
+  * the XX of the reference boxes and lines with \code{geom_glyph_box()} and \code{geom_glyph_line()}.
   
   
 # Applications {#examples}

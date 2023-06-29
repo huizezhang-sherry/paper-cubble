@@ -512,7 +512,7 @@ The cubble workflow can be easily incorporated into an interactive graphics pipe
 \hypertarget{st_transformation}{%
 \subsection{Spatio-temporal transformations}\label{st_transformation}}
 
-To communicate spatial and temporal information collectively in display, a few visualisation options are available: one can make faceted maps across time, creating map animations, or constructing interactive graphics to link between map and time series plot. Faceted maps and animation, while commonly used, may not be helpful for comparing across time since eyes need to jump across multiple facets or frames to locate the space before perceiving the changes in time. The glyph map \citep{Wickham2012-yr} resolves this issue by imposing the time series onto the map as a glyph through coordinate transformation. The transformation uses linear algebra to convert the temporal coordinates (minor coordinates) into the spatial coordinates (major coordinates) and is implemented in the package \texttt{GGally} \citep{ggally} package. The \pkg{cubble} package provides a ggproto implementation, \texttt{geom\_glyph()}, for glyph maps and it takes four required aesthetics: \texttt{x\_major}, \texttt{y\_major}, \texttt{x\_minor}, and \texttt{y\_minor}:
+Visualizing spatio-temporal data is important for exploring and understanding the data at hand, aiding in decision-making, and facilitating effective communication. To collectively visualize spatial and temporal information, several options are available such as: faceted maps across time, map animations, or interactive graphics that link maps and time series plots among others. Faceted maps and spatio-temporal animations, while commonly used, may be difficult to compare across time and space since users need to inspect multiple facets or frames to find changes in time or space. The glyph map \citep{Wickham2012-yr} resolves this issue by imposing the time series onto the map as a glyph through a coordinate transformation. The transformation uses linear algebra to convert the temporal coordinates (minor coordinates) into the spatial coordinates (major coordinates) and is implemented in the package \texttt{GGally} \citep{ggally}. The \pkg{cubble} package provides a ggproto implementation to create glyph maps, \texttt{geom\_glyph()} and it takes four required aestheticsf : \texttt{x\_major}, \texttt{y\_major}, \texttt{x\_minor}, and \texttt{y\_minor}:
 
 \begin{verbatim}
 data |> 
@@ -521,18 +521,18 @@ data |>
                  y_major = ..., y_minor = ...))
 \end{verbatim}
 
-Other useful controls over the glyph map includes:
+Other useful controls to modify the glyph map that can be include are:
 
 \begin{itemize}
 \tightlist
 \item
-  polar coordinate glyph maps with \code{polar = TRUE},
+  the implementation of a polar coordinate glyph maps with \code{polar = TRUE},
 \item
-  adjust glyph size with arguments \code{width} and \code{height},
+  the adjustment of the glyph size arguments using \code{width} and \code{height},
 \item
-  transformation relative to the all series (\code{global_rescale} defaults to \code{TRUE}) or each single series, and
+  a transformation relative to the all series (\code{global_rescale} defaults to \code{TRUE}) or each single series, and
 \item
-  reference boxes and lines with \code{geom_glyph_box()} and \code{geom_glyph_line()}.
+  the XX of the reference boxes and lines with \code{geom_glyph_box()} and \code{geom_glyph_line()}.
 \end{itemize}
 
 \hypertarget{examples}{%
