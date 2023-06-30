@@ -116,7 +116,7 @@ The cubble class is an S3 class built on tibble that allows the spatio-temporal 
   a temporal cubble with class \texttt{c("temporal\_cubble\_df",\ "cubble\_df")}
 \end{itemize}
 
-In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised \texttt{ts} column. For example, the spatial cubble object, \code{cb_nested} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database. In this case, the spatial cubble is convenient for wrangling the spatial variables:
+In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised \texttt{ts} column. For example, the spatial cubble object, \code{cb_nested} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database \citep{menne2012overview}. In this case, the spatial cubble is convenient for wrangling the spatial variables:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -158,9 +158,9 @@ R> cb_long
 \hypertarget{the-cubble-attributes}{%
 \subsubsection{The cubble attributes}\label{the-cubble-attributes}}
 
-A cubble object inherits the attributes from tibble (and its subclasses): \texttt{class}, \texttt{row.names}, and \texttt{names}. Additionally, it has three specialised attributes: \texttt{key}, \texttt{index}, and \texttt{coords}. Readers who are familiar with the \texttt{key} and \texttt{index} attributes from the \texttt{tsibble} package would already understand the two arguments. In cubble, the \texttt{key} attribute identifies the row in the spatial cubble (given the internal use of \texttt{tidyr::nest()} for nesting), and when combined with the \texttt{index} argument, it identifies the row in the temporal cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for \texttt{index} includes the base R classes \texttt{Date}, \texttt{POSIXlt}, \texttt{POSIXct}, as well as tsibble's \texttt{yearmonth}, \texttt{yearweek}, and \texttt{yearquarter} classes. The \texttt{coords} attribute represents an ordered pair of coordinates that can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The \texttt{sf} package is used under the hood to calculate the spatial bounding box, displayed in the header of a spatial cubble.
+A cubble object inherits the attributes from tibble (and its subclasses): \code{class}, \code{row.names}, and \code{names}. Additionally, it has three specialised attributes: \code{key}, \code{index}, and \code{coords}. \code{key} and \code{index} are used as introduced in the \pkg{tsibble} package \citep{tsibble}. In cubble, the \code{key} attribute identifies the row in the spatial cubble (given the internal use of \code{tidyr::nest()} for nesting), and when combined with the \code{index} argument, it identifies the row in the temporal cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for \code{index} includes the base R classes \code{Date}, \code{POSIXlt}, \code{POSIXct}, as well as tsibble's \code{yearmonth}, \code{yearweek}, and \code{yearquarter} classes. The \code{coords} attribute represents an ordered pair of coordinates that can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The \pkg{sf} package \citep{sf} is used under the hood to calculate the spatial bounding box, displayed in the header of a spatial cubble.
 
-The temporal cubble has a special attribute called \texttt{spatial} to store the spatial variables. Shortcut functions are available to extract attributes from the temporal cubble object, for example, \code{spatial()} for extracting spatial variables:
+The temporal cubble has a special attribute called \code{spatial} to store the spatial variables. Shortcut functions are available to extract attributes from the temporal cubble object, for example, \code{spatial()} for extracting spatial variables:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -198,7 +198,7 @@ R> make_cubble(spatial = stations, temporal = meteo,
 \end{CodeOutput}
 \end{CodeChunk}
 
-Other foreign spatio-temporal objects in \proglang{R} can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes a joined \code{tibble} or \code{data.frame}, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. In the example below, the spatial cubble object is created from \code{climate_flat}, which combines the previous \code{stations} and \code{meteo} into a single tibble object:
+Other \proglang{R} spatio-temporal objects can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes a joined \code{tibble} or \code{data.frame}, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. In the example below, the spatial cubble object is created from \code{climate_flat}, which combines the previous \code{stations} and \code{meteo} into a single tibble object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -219,7 +219,7 @@ R> climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 \hypertarget{functions-and-methods}{%
 \subsection{Functions and methods}\label{functions-and-methods}}
 
-The \pkg{cubble} package has several functions implemented for data wrangling and to facilitate data analysis as summarized in Table \ref{tab:funs}. In addition, for each of the three cubble classes there are number of methods implemented that facilitates the handling of the data as shown in Table \ref{tab:methods}. In particular, the \code{cubble_df} class handles methods that behave consistently in both spatial and temporal cubble. When the method has a distinct behavior on the spatial and temporal cubble, it is implemented separately in \code{spatial_cubble_df} and \code{temporal_cubble_df}.
+The \pkg{cubble} package has several functions implemented for data wrangling and to facilitate data analysis as summarized in Table \ref{tab:funs}. In addition, for each of the three cubble classes there are number of methods implemented that facilitates the handling of the data as shown in Table \ref{tab:methods}. In particular, the \code{cubble_df} class handles methods that behave consistently in both spatial and temporal cubble. When the method works differently internally on the spatial and temporal cubble, it is implemented separately in \code{spatial_cubble_df} and \code{temporal_cubble_df}.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1250}}
@@ -273,20 +273,24 @@ Methods
 \bottomrule()
 \end{longtable}
 
-The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code below connects a spatial cubble (\code{cb_nested}) and a temporal cubble (\code{cb_long}), introduced in Section \ref{object}, with \code{face_temporal()} and \code{face_spatial()}:
+The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble (\code{cb_nested}) introduced in Section \ref{object} to get a temporal cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> identical(face_temporal(cb_nested), cb_long)
+R> face_temporal(cb_nested)
 \end{CodeInput}
 \begin{CodeOutput}
-[1] TRUE
-\end{CodeOutput}
-\begin{CodeInput}
-R> identical(face_spatial(cb_long), cb_nested)
-\end{CodeInput}
-\begin{CodeOutput}
-[1] TRUE
+# cubble:   key: id [3], index: date, long form
+# temporal: 2020-01-01 -- 2020-01-10 [1D], no gaps
+# spatial:  long [dbl], lat [dbl], elev [dbl], name [chr], wmo_id [dbl]
+  id          date        prcp  tmax  tmin
+  <chr>       <date>     <dbl> <dbl> <dbl>
+1 ASN00086038 2020-01-01     0  26.8  11  
+2 ASN00086038 2020-01-02     0  26.3  12.2
+3 ASN00086038 2020-01-03     0  34.5  12.7
+4 ASN00086038 2020-01-04     0  29.3  18.8
+5 ASN00086038 2020-01-05    18  16.1  12.5
+# i 25 more rows
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -310,7 +314,7 @@ R> identical(face_temporal(face_spatial(cb_long)), cb_long)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
+{\centering \includegraphics[width=1\linewidth]{figures/diagram-keynotes/diagram-keynotes.001} 
 
 }
 
@@ -321,7 +325,7 @@ R> identical(face_temporal(face_spatial(cb_long)), cb_long)
 \hypertarget{compatibility-with-tsibble-and-sf}{%
 \subsection{Compatibility with tsibble and sf}\label{compatibility-with-tsibble-and-sf}}
 
-Analysts often have their preferred spatial or temporal data structure for spatial or temporal analysis, which they may wish to continue using for spatio-temporal analysis. With \code{cubble}, analysts can incorporate the \code{tsibble} class \citep{tsibble} in a temporal cubble and the \code{sf} class \citep{sf} in a spatial cubble.
+Analysts often have their preferred spatial or temporal data structure for spatial or temporal analysis, which they may wish to continue using for spatio-temporal analysis. With \code{cubble}, analysts can incorporate the \code{tsibble} class in a temporal cubble and the \code{sf} class in a spatial cubble.
 
 \hypertarget{using-a-tsibble-object-as-the-temporal-component}{%
 \subsubsection{Using a tsibble object as the temporal component}\label{using-a-tsibble-object-as-the-temporal-component}}
@@ -372,7 +376,7 @@ R> ts_long |> has_gaps()
 \end{CodeOutput}
 \end{CodeChunk}
 
-A created temporal cubble can promote its temporal component to a \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_long} object created in Section \ref{create}:
+The temporal component of a created temporal cubble can be turned to a \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_long} object, created in Section \ref{create}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -473,13 +477,13 @@ The \pkg{sftime} package \citep{sftime} also builds from a tibble object and its
 \hypertarget{matching}{%
 \subsection{Data fusion and matching}\label{matching}}
 
-Matching time series from an old list of stations to a new list is a common task in spatio-temporal data analysis. In cubble, matching based on distance and time series features can be performed using the functions \texttt{match\_spatial()} and \texttt{match\_temporal()}. The \texttt{match\_spatial()} function finds the matched pairs in two cubble objects based on distance between sites:
+Matching time series from two lists is a common task in spatio-temporal data analysis. In cubble, matching based on distance and time series features can be performed using the functions \texttt{match\_spatial()} and \texttt{match\_temporal()}. The \texttt{match\_spatial()} function finds the matched pairs in two cubble objects based on distance between sites:
 
 \begin{verbatim}
 match_spatial(<cubble_obj1>, <cubble_obj2>, ...)
 \end{verbatim}
 
-Two arguments are available to control the outputs: the argument \texttt{spatial\_n\_group} specifies the number of paired groups to output and the argument \texttt{spatial\_n\_each} specifies the number of each for each item in the first cubble object (default to 1 for one-to-one matching).
+Two arguments are available to control the matching: the argument \texttt{spatial\_n\_group} specifies the number of paired groups to return and the argument \texttt{spatial\_n\_each} specifies the number of matches for each item in the first cubble object (default to 1 for one-to-one matching).
 
 The function \texttt{match\_temporal()} takes the outputs from spatial matching and calculates a similarity score of the time series between spatially matched pairs. The temporal matching requires two identifiers: one for separating each spatially matched group: \texttt{match\_id} and one for separating the two data sources: \texttt{data\_id}. Matching between different variables can be specified using the \texttt{temporal\_by} argument, similar to the \texttt{by} syntax from dplyr's \texttt{*\_join}.
 
@@ -501,7 +505,7 @@ The cubble workflow can be easily incorporated into an interactive graphics pipe
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/diagram-keynotes/‎diagram-keynotes.‎002} 
+{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{figures/diagram-keynotes/‎diagram-keynotes.‎002} 
 
 }
 
@@ -722,7 +726,7 @@ tmax |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/glyphmap-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/glyphmap-1} 
 
 }
 
@@ -733,7 +737,7 @@ tmax |>
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
 
-The Bureau of Meteorology collects water level data and they can be matched with the precipitation data from the climate weather stations. The data \texttt{river} from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be subsetted from the \texttt{climate\_aus} data in \pkg{cubble}.
+The Bureau of Meteorology collects water level data and they can be matched with the precipitation data from the climate weather stations. The data \code{river} from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be subsetted from the \code{climate_aus} data in \pkg{cubble}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -768,7 +772,7 @@ R> print(res_sp, n = 20)
 \end{CodeOutput}
 \end{CodeChunk}
 
-The result can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. All the results can be combined into a single cubble using \code{bind_rows()}, after excluding the two pairs where a river station is matched to more than one weather stations (river station \texttt{226027} is matched twice in group 3 and 5 and similarly for station \texttt{230200} in group 7 and 8).
+The result can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. All the results can be combined into a single cubble using \code{bind_rows()}, after excluding the two pairs where a river station is matched to more than one weather stations (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8).
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -815,7 +819,7 @@ R> (res_tm <- res_sp |>
 \end{CodeOutput}
 \end{CodeChunk}
 
-Similarly, the cubble output can be returned using the argument \texttt{return\_cubble\ =\ TRUE}. Here we select the four pairs with the highest number of matching peaks and show them on the map (a) and as standardized series (b) in Figure \ref{fig:matching}.
+Similarly, the cubble output can be returned using the argument \code{return_cubble = TRUE}. Here we select the four pairs with the highest number of matching peaks and show them on the map (a) and as standardized series (b) in Figure \ref{fig:matching}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -845,7 +849,7 @@ R> (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/matching-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/matching-1} 
 
 }
 
@@ -911,7 +915,7 @@ res |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/netcdf-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/netcdf-1} 
 
 }
 
@@ -960,7 +964,7 @@ Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/linking-lower} 
+{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{figures/linking-lower} 
 
 }
 

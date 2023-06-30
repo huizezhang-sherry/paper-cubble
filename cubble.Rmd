@@ -100,7 +100,7 @@ The cubble class is an S3 class built on tibble that allows the spatio-temporal 
 -   a spatial cubble with class `c("spatial_cubble_df", "cubble_df")`
 -   a temporal cubble with class `c("temporal_cubble_df", "cubble_df")`
 
-In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised `ts` column. For example, the spatial cubble object, \code{cb_nested} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database. In this case, the spatial cubble is convenient for wrangling the spatial variables:
+In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised `ts` column. For example, the spatial cubble object, \code{cb_nested} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database [@menne2012overview]. In this case, the spatial cubble is convenient for wrangling the spatial variables:
 
 ```{r}
 cb_nested <- climate_mel
@@ -126,9 +126,9 @@ cb_long
 #knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
 ```
 
-A cubble object inherits the attributes from tibble (and its subclasses): `class`, `row.names`, and `names`. Additionally, it has three specialised attributes: `key`, `index`, and `coords`. Readers who are familiar with the `key` and `index` attributes from the `tsibble` package would already understand the two arguments. In cubble, the `key` attribute identifies the row in the spatial cubble (given the internal use of `tidyr::nest()` for nesting), and when combined with the `index` argument, it identifies the row in the temporal cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for `index` includes the base R classes `Date`, `POSIXlt`, `POSIXct`, as well as tsibble's `yearmonth`, `yearweek`, and `yearquarter` classes. The `coords` attribute represents an ordered pair of coordinates that can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The `sf` package is used under the hood to calculate the spatial bounding box, displayed in the header of a spatial cubble.
+A cubble object inherits the attributes from tibble (and its subclasses): \code{class}, \code{row.names}, and \code{names}. Additionally, it has three specialised attributes: \code{key}, \code{index}, and \code{coords}. \code{key} and \code{index} are used as introduced in the \pkg{tsibble} package [@tsibble]. In cubble, the \code{key} attribute identifies the row in the spatial cubble (given the internal use of \code{tidyr::nest()} for nesting), and when combined with the \code{index} argument, it identifies the row in the temporal cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for \code{index} includes the base R classes \code{Date}, \code{POSIXlt}, \code{POSIXct}, as well as tsibble's \code{yearmonth}, \code{yearweek}, and \code{yearquarter} classes. The \code{coords} attribute represents an ordered pair of coordinates that can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The \pkg{sf} package [@sf] is used under the hood to calculate the spatial bounding box, displayed in the header of a spatial cubble.
 
-The temporal cubble has a special attribute called `spatial` to store the spatial variables. Shortcut functions are available to extract attributes from the temporal cubble object, for example, \code{spatial()} for extracting spatial variables: 
+The temporal cubble has a special attribute called \code{spatial} to store the spatial variables. Shortcut functions are available to extract attributes from the temporal cubble object, for example, \code{spatial()} for extracting spatial variables: 
 
 ```{r echo = TRUE}
 spatial(cb_long)
@@ -145,7 +145,7 @@ make_cubble(spatial = stations, temporal = meteo,
             key = id, index = date, coords = c(long, lat))
 ```
 
-Other foreign spatio-temporal objects in \proglang{R} can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes a joined \code{tibble} or \code{data.frame}, a NetCDF object, a \code{stars} object [@stars], and a \code{sftime} object [@sftime]. In the example below, the spatial cubble object is created from \code{climate_flat}, which combines the previous \code{stations} and \code{meteo} into a single tibble object: 
+Other \proglang{R} spatio-temporal objects can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes a joined \code{tibble} or \code{data.frame}, a NetCDF object, a \code{stars} object [@stars], and a \code{sftime} object [@sftime]. In the example below, the spatial cubble object is created from \code{climate_flat}, which combines the previous \code{stations} and \code{meteo} into a single tibble object: 
 
 ```{r echo = TRUE}
 climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
@@ -153,7 +153,7 @@ climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 
 ## Functions and methods
 
-The \pkg{cubble} package has several functions implemented for data wrangling and to facilitate data analysis as summarized in Table \@ref(tab:funs). In addition, for each of the three cubble classes there are number of methods implemented that facilitates the handling of the data as shown in Table \@ref(tab:methods). In particular, the \code{cubble_df} class handles methods that behave consistently in both spatial and temporal cubble. When the method has a distinct behavior on the spatial and temporal cubble, it is implemented separately in \code{spatial_cubble_df} and \code{temporal_cubble_df}.
+The \pkg{cubble} package has several functions implemented for data wrangling and to facilitate data analysis as summarized in Table \@ref(tab:funs). In addition, for each of the three cubble classes there are number of methods implemented that facilitates the handling of the data as shown in Table \@ref(tab:methods). In particular, the \code{cubble_df} class handles methods that behave consistently in both spatial and temporal cubble. When the method works differently internally on the spatial and temporal cubble, it is implemented separately in \code{spatial_cubble_df} and \code{temporal_cubble_df}.
 
 | Category  | Functions |
 |--------|--------------------------------------------------------|
@@ -172,11 +172,10 @@ The \pkg{cubble} package has several functions implemented for data wrangling an
 
 : (#tab:methods) An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistent across the spatial and temporal cubble; otherwise, they are implemented separately.
 
-The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code below connects a spatial cubble (\code{cb_nested}) and a temporal cubble (\code{cb_long}), introduced in Section \@ref(object), with \code{face_temporal()} and \code{face_spatial()}: 
+The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble (\code{cb_nested}) introduced in Section \@ref(object) to get a temporal cubble: 
 
 ```{r cubble-fun, echo = TRUE}
-identical(face_temporal(cb_nested), cb_long)
-identical(face_spatial(cb_long), cb_nested)
+face_temporal(cb_nested)
 ```
 
 Both verbs are the exact inverse of each other and apply both functions on a cubble object will result in the object itself:
@@ -192,7 +191,7 @@ knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.00
 
 ## Compatibility with tsibble and sf
 
-Analysts often have their preferred spatial or temporal data structure for spatial or temporal analysis, which they may wish to continue using for spatio-temporal analysis. With \code{cubble}, analysts can incorporate the \code{tsibble} class [@tsibble] in a temporal cubble and the \code{sf} class [@sf] in a spatial cubble.
+Analysts often have their preferred spatial or temporal data structure for spatial or temporal analysis, which they may wish to continue using for spatio-temporal analysis. With \code{cubble}, analysts can incorporate the \code{tsibble} class in a temporal cubble and the \code{sf} class in a spatial cubble.
 
 ### Using a tsibble object as the temporal component
 
@@ -211,8 +210,7 @@ Methods applied to the \code{tbl_ts} class can also be applied to the temporal c
 ts_long |> has_gaps()
 ```
 
-
-A created temporal cubble can promote its temporal component to a \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_long} object created in Section \@ref(create): 
+The temporal component of a created temporal cubble can be turned to a \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_long} object, created in Section \@ref(create): 
 
 ```{r echo = TRUE}
 cb_long |> make_temporal_tsibble() 
@@ -256,13 +254,13 @@ The \pkg{sftime} package [@sftime] also builds from a tibble object and its focu
 
 ## Data fusion and matching {#matching}
 
-Matching time series from an old list of stations to a new list is a common task in spatio-temporal data analysis. In cubble, matching based on distance and time series features can be performed using the functions `match_spatial()` and `match_temporal()`. The `match_spatial()` function finds the matched pairs in two cubble objects based on distance between sites:
+Matching time series from two lists is a common task in spatio-temporal data analysis. In cubble, matching based on distance and time series features can be performed using the functions `match_spatial()` and `match_temporal()`. The `match_spatial()` function finds the matched pairs in two cubble objects based on distance between sites:
 
 ````
 match_spatial(<cubble_obj1>, <cubble_obj2>, ...)
 ````
 
-Two arguments are available to control the outputs: the argument `spatial_n_group` specifies the number of paired groups to output and the argument `spatial_n_each` specifies the number of each for each item in the first cubble object (default to 1 for one-to-one matching). 
+Two arguments are available to control the matching: the argument `spatial_n_group` specifies the number of paired groups to return and the argument `spatial_n_each` specifies the number of matches for each item in the first cubble object (default to 1 for one-to-one matching). 
 
 The function `match_temporal()` takes the outputs from spatial matching and calculates a similarity score of the time series between spatially matched pairs. The temporal matching requires two identifiers: one for separating each spatially matched group: `match_id` and one for separating the two data sources: `data_id`. Matching between different variables can be specified using the `temporal_by` argument, similar to the `by` syntax from dplyr's `*_join`.
   
@@ -475,7 +473,7 @@ p2 <- tmax2 |>
 
 ## River levels and rainfall in Victoria
 
-The Bureau of Meteorology collects water level data and they can be matched with the precipitation data from the climate weather stations. The data `river` from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be subsetted from the `climate_aus` data in \pkg{cubble}.
+The Bureau of Meteorology collects water level data and they can be matched with the precipitation data from the climate weather stations. The data \code{river} from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be subsetted from the \code{climate_aus} data in \pkg{cubble}.
 
 ```{r echo = TRUE}
 climate_vic <- climate_aus |>
@@ -491,7 +489,7 @@ res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10)
 print(res_sp, n = 20)
 ```
 
-The result can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. All the results can be combined into a single cubble using \code{bind_rows()}, after excluding the two pairs where a river station is matched to more than one weather stations (river station `226027` is matched twice in group 3 and 5 and similarly for station `230200` in group 7 and 8). 
+The result can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. All the results can be combined into a single cubble using \code{bind_rows()}, after excluding the two pairs where a river station is matched to more than one weather stations (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8). 
 
 ```{r echo = TRUE}
 res_sp <- match_spatial(
@@ -509,7 +507,7 @@ To match the water level series with precipitation, the function \code{match_tem
     temporal_by = c("prcp" = "Water_course_level")))
 ```
 
-Similarly, the cubble output can be returned using the argument `return_cubble = TRUE`. Here we select the four pairs with the highest number of matching peaks and show them on the map (a) and as standardized series (b) in Figure \ref{fig:matching}.
+Similarly, the cubble output can be returned using the argument \code{return_cubble = TRUE}. Here we select the four pairs with the highest number of matching peaks and show them on the map (a) and as standardized series (b) in Figure \ref{fig:matching}.
 
 ```{r echo = TRUE}
 res_tm <- res_sp |> 
