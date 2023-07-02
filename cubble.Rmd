@@ -181,12 +181,17 @@ face_temporal(cb_spatial)
 Both verbs are the exact inverse of each other and apply both functions on a cubble object will result in the object itself:
 
 ```{r cubble-fun2, echo = TRUE}
-identical(face_spatial(face_temporal(cb_spatial)), cb_spatial)
-identical(face_temporal(face_spatial(cb_temporal)), cb_temporal)
+face_spatial(face_temporal(cb_spatial))
 ```
 
 ```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the functions \\code{face\\_temporal()} and \\code{face\\_spatial()}: \\code{face\\_temporal()} converts a spatial cubble into a temporal cubble to focus on the temporal variables. Conversely, \\code{face\\_spatial()} transforms a temporal cubble into a spatial one to focus on the spatial variables."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
+```
+
+To enable operations involve both spatial and temporal variables, the function \code{unfold} incorporates spatial variables into the temporal cubble. Below is an example to include the coordinate columns (\code{long} and \code{lat}) into \code{cb_temporal} to prepare the data for a glyph map transformation, which will be discussed in Section \ref{st_transformation}.
+
+```{r echo = TRUE}
+cb_temporal |> unfold(long, lat)
 ```
 
 ## Compatibility with tsibble and sf
@@ -313,7 +318,7 @@ Since the start of the COVID-19 pandemic, the Victoria State Government in Austr
 cb <- make_cubble(lga, covid, by = c("lga_name_2018" = "lga"))
 ```
 
-The difference in LGA naming between both data sets triggers cubble to issue a warning, alerting the user to this discrepancy.  The warning message suggests there are some differences between the LGA encoding used by Victoria government and ABS and prompts analysts to check the mismatch using \code{check_key()}:
+The difference in LGA naming between both data sets triggers cubble to issue a warning, alerting the user to this discrepancy.  The warning message suggests there are some differences between the LGA encoding used by Victoria government and ABS and prompts analysts to check the mismatch using \code{check_key()}, which takes the same inputs as \code{make_cubble}, but returns a summary of key matches between the spatial and temporal input data. 
 
 ```{r covid-5, echo = TRUE}
 (check_res <- check_key(
@@ -485,7 +490,8 @@ river <- cubble::river |> mutate(type = "river")
 Spatial match on the site location is first performed since rainfall can directly impact water level in the nearby river. With \code{match_spatial()}, we can obtain a summary of the 10 closest pairs:
 
 ```{r echo = TRUE}
-res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10)
+res_sp <- match_spatial(df1 = climate_vic, df2 = river, 
+                        spatial_n_group = 10)
 print(res_sp, n = 20)
 ```
 
@@ -493,7 +499,7 @@ The result can also be returned as a list of matched cubbles, by setting the arg
 
 ```{r echo = TRUE}
 res_sp <- match_spatial(
-  climate_vic, river, 
+  df1 = climate_vic, df2 = river, 
   spatial_n_group = 10, return_cubble = TRUE)
 (res_sp <- res_sp[-c(5, 8)] |> bind_rows())
 ```
@@ -501,20 +507,18 @@ res_sp <- match_spatial(
 To match the water level series with precipitation, the function \code{match_temporal()} is used with the variable \code{group} and \code{types} identifying the matching group and the two data sources:
 
 ```{r echo = TRUE}
-(res_tm <- res_sp |> 
-  match_temporal(
-    data_id = type, match_id = group,
-    temporal_by = c("prcp" = "Water_course_level")))
+(res_tm <- match_temporal(data = res_sp,
+                          data_id = type, match_id = group,
+                          temporal_by = c("prcp" = "Water_course_level")))
 ```
 
 Similarly, the cubble output can be returned using the argument \code{return_cubble = TRUE}. Here we select the four pairs with the highest number of matching peaks and show them on the map (a) and as standardized series (b) in Figure \ref{fig:matching}.
 
 ```{r echo = TRUE}
-res_tm <- res_sp |> 
-  match_temporal(
-    data_id = type, match_id = group,
-    temporal_by = c("prcp" = "Water_course_level"),
-    return_cubble = TRUE)
+res_tm <- match_temporal(data =  res_sp,
+                         data_id = type, match_id = group,
+                         temporal_by = c("prcp" = "Water_course_level"),
+                         return_cubble = TRUE)
 (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 ```
 
