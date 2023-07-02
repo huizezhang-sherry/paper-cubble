@@ -196,7 +196,7 @@ R> make_cubble(spatial = stations, temporal = meteo,
 \end{CodeOutput}
 \end{CodeChunk}
 
-Other \proglang{R} spatio-temporal objects can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes a joined \code{tibble} or \code{data.frame}, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. In the example below, the spatial cubble object is created from \code{climate_flat}, which combines the previous \code{stations} and \code{meteo} into a single tibble object:
+Other \proglang{R} spatio-temporal objects can be coerced into a \code{cubble} object with the function \code{as_cubble()}. This includes a joined \code{tibble} or \code{data.frame} object, a NetCDF object, a \code{stars} object \citep{stars}, and a \code{sftime} object \citep{sftime}. In the example below, the spatial cubble object is created from \code{climate_flat}, which combines the previous \code{stations} and \code{meteo} into a single tibble object:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -271,7 +271,7 @@ Methods
 \bottomrule()
 \end{longtable}
 
-The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble (\code{cb_spatial}) introduced in Section \ref{object} to get a temporal cubble:
+The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble, \code{cb_spatial}, introduced in Section \ref{object} to get a temporal cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -350,9 +350,15 @@ Analysts often have their preferred spatial or temporal data structure for spati
 \hypertarget{using-a-tsibble-object-as-the-temporal-component}{%
 \subsubsection{Using a tsibble object as the temporal component}\label{using-a-tsibble-object-as-the-temporal-component}}
 
-The \code{key} and \code{index} arguments in a \code{cubble} object corresponds to the \code{tsibble} counterparts and they can be safely omitted, if the temporal component is a \code{tsibble} object, i.e.~\code{meteo_ts} in the example below. The \code{tsibble} class (\code{tbl_ts}) from the input will be carried over to the temporal cubble, indicated by the \code{[tsibble]} in the header and in the object class:
+The \code{key} and \code{index} arguments in a \code{cubble} object corresponds to the tsibble counterparts and they can be safely omitted, if the temporal component is a tsibble object (\code{tbl_ts}). The \code{tsibble} class (\code{tbl_ts}) from the input will be carried over to the temporal cubble, indicated by the \code{[tsibble]} in the header and in the object class:
 
 \begin{CodeChunk}
+\begin{CodeInput}
+R> class(meteo_ts)
+\end{CodeInput}
+\begin{CodeOutput}
+[1] "tbl_ts"     "tbl_df"     "tbl"        "data.frame"
+\end{CodeOutput}
 \begin{CodeInput}
 R> ts_spatial <- make_cubble(
 +   spatial = stations, temporal = meteo_ts, coords = c(long, lat))
@@ -380,7 +386,7 @@ R> class(ts_temporal)
 \end{CodeOutput}
 \end{CodeChunk}
 
-Methods applied to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
+Methods applied to tsibble objects (\code{tbl_ts}) can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -396,7 +402,7 @@ R> ts_temporal |> has_gaps()
 \end{CodeOutput}
 \end{CodeChunk}
 
-The temporal component of a created temporal cubble can be turned to a \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_temporal} object, created in Section \ref{create}:
+The temporal component of a created temporal cubble can include class \code{tbl_ts} to also be a tsibble object \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_temporal} object, created in Section \ref{create}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -420,7 +426,7 @@ R> cb_temporal |> make_temporal_tsibble()
 \hypertarget{using-an-sf-object-as-the-spatial-component}{%
 \subsubsection{Using an sf object as the spatial component}\label{using-an-sf-object-as-the-spatial-component}}
 
-Similarly, the spatial component of a cubble object can be an \code{sf} object and if the \code{coords} argument is omitted, it will be calculated from the sf geometry. The sf status is signalled by the \code{[sf]} label in the cubble header:
+Similarly, the spatial component of a cubble object can be an \code{sf} object and if the \code{coords} argument is omitted, it will be calculated from the \code{sf} geometry. The sf status is signalled by the \code{[sf]} label in the cubble header:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -447,7 +453,7 @@ R> class(sf_spatial)
 \end{CodeOutput}
 \end{CodeChunk}
 
-This allows applying functions from the \code{sf} package to a cubble object, for example, to handle coordinate transformation with \code{st_transform}:
+This allows applying functions from the \code{sf} package to a cubble object, for example, to handle coordinate transformation with \code{st_transform()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -466,7 +472,7 @@ R> sf_spatial |> sf::st_transform(crs = "EPSG:3857")
 \end{CodeOutput}
 \end{CodeChunk}
 
-The spatial component of a created \code{cubble} can also be promoted into an \code{sf} object with \code{make_spatial_sf()}:
+The spatial component of a created cubble can also be an \code{sf} object using \code{make_spatial_sf()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -487,7 +493,7 @@ R> cb_spatial |> make_spatial_sf()
 \hypertarget{tidyverse}{%
 \subsection{Comparison to other spatio-temporal classes}\label{tidyverse}}
 
-In \proglang{R}, there are other existing spatio-temporal data structure and this section compares and contrasts \pkg{cubble} with other existing alternatives, specifically \pkg{stars} and \pkg{sftime}. The \pkg{stars} package \citep{stars} uses an array structure, as oppose to tibble, to represent multivariate spatio-temporal data. While both \pkg{stars} and \pkg{cubble} support vector and raster data, it is a matter of choice on which structure to use given the application. Analysts working on satellite imageries may prefer the array structure in \pkg{stars}, while others originally working with spatio-temporal data in 2D data frames may find \pkg{cubble} easier to adopt from their existing computing workflow.
+In \proglang{R}, there are other existing spatio-temporal data structures and this section compares and contrasts \pkg{cubble} with other existing alternatives, specifically \pkg{stars} and \pkg{sftime}. The \pkg{stars} package \citep{stars} uses an array structure, as oppose to tibble, to represent multivariate spatio-temporal data. While both \pkg{stars} and \pkg{cubble} support vector and raster data, it is a matter of choice on which structure to use given the application. Analysts working on satellite imageries may prefer the array structure in \pkg{stars}, while others originally working with spatio-temporal data in 2D data frames may find \pkg{cubble} easier to adopt from their existing computing workflow.
 
 The \pkg{sftime} package \citep{sftime} also builds from a tibble object and its focus is on handling irregular spatio-temporal data. This means \pkg{sftime} can also handle full space-time grids and sparse space-time layouts represented in \pkg{cubble}. However, \pkg{cubble} uses nesting to avoid storing spatial variables repetitively at each timestamp. This provides memory efficiency when data is observed frequent, i.e.~daily or sub-daily, or the spatial geometry is computationally expensive to store repeatedly, i.e.~polygons or multipolygons. Consider the \code{climate_aus} data in the \pkg{cubble} package with 639 stations observed daily throughout the year 2020. In that case, the \code{sftime} object is approximately 14 times larger than the corresponding \code{cubble} object (118 MB vs.~8.5 MB).
 
@@ -591,7 +597,7 @@ temporal information
 \end{CodeOutput}
 \end{CodeChunk}
 
-The difference in LGA naming between both data sets triggers cubble to issue a warning, alerting the user to this discrepancy. The warning message suggests there are some differences between the LGA encoding used by Victoria government and ABS and prompts analysts to check the mismatch using \code{check_key()}, which takes the same inputs as \code{make_cubble}, but returns a summary of key matches between the spatial and temporal input data.
+The difference in LGA naming between both data sets triggers cubble to issue a warning, alerting the user to this discrepancy. The warning message suggests there are some differences between the LGA encoding used by Victoria government and ABS and prompts analysts to check the mismatch using \code{check_key()}, which takes the same inputs as \code{make_cubble()}, but returns a summary of key matches between the spatial and temporal input data.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -717,7 +723,7 @@ R> (tmax <- tmax |>
 \end{CodeOutput}
 \end{CodeChunk}
 
-A quick check on the number of observations for each location is made, revealing that there are several with less than 24 observations -- these stations lack temperature values for some months. In this example, those stations are removed by switching to the spatial \code{cubble} to operate on the spatial component over time, and then, move back into the temporal \code{cubble} (to make the glyph map):
+A quick check on the number of observations for each location is made, revealing that there are several with less than 24 observations -- these stations lack temperature values for some months. In this example, those stations are removed by switching to the spatial cubble to operate on the spatial component over time, and then, move back into the temporal cubble (to make the glyph map):
 
 \begin{CodeChunk}
 \begin{CodeInput}
