@@ -312,7 +312,9 @@ Five examples are chosen to illustrate different aspects of the \pkg{cubble} pac
 
 ## Victoria COVID spatio-temporal incidence and spread {#covid}
 
-Since the start of the COVID-19 pandemic, the Victoria State Government in Australia has been providing daily COVID-19 case counts per Local Government Area (LGA). This data can be combined with map polygon data, available from the Australian Bureau of Statistics (ABS), to visualize COVID-19 incidence and spread. In the \pkg{cubble} package, the COVID-19 count data (\code{covid}) and the LGA information (\code{lga}) are available as a \code{tsibble} object and an \code{sf} object respectively. A cubble object can be created from these two component using \code{make_cubble()}. The \code{id} column containing LGA information has different names in the two data sets and that can be specified via the \code{by} argument: 
+Since the start of the COVID-19 pandemic, the Victoria State Government in Australia has been providing daily COVID-19 case counts per Local Government Area (LGA). This data can be combined with map polygon data, available from the Australian Bureau of Statistics (ABS), to visualize COVID-19 incidence and spread. The COVID-19 count data (\code{covid}) and the LGA information (\code{lga}) are available in the \pkg{cubble} package as a \code{tsibble} object and an \code{sf} object, respectively. This example illustrates the creation of a cubble object using real-world data, where analysts may deal with slightly varied encoding of the spatial units used across different institutes. Cubble can flag this discrepancies when creating the object and guide analysts to further investigate this issue.
+
+The function \code{make_cubble()} is used to create a cubble object from separate spatial and temporal components. When the spatial identifier in the two data has different names, they can be handled by the \code{by} argument: 
 
 ```{r covid-4, echo = TRUE, warning = TRUE, message= TRUE}
 cb <- make_cubble(lga, covid, by = c("lga_name_2018" = "lga"))
@@ -327,7 +329,7 @@ The difference in LGA naming between both data sets triggers cubble to issue a w
 ))
 ```
 
-The result of the \code{check_key()} function is a list containing three elements: 1) matched keys from both tables, 2) potentially paired keys, and 3) others (XXX what is others exactly?). Here, the main mismatch arises from the two LGAs: Kingston and Latrobe (Kingston is a LGA in both Victoria and South Australia and Latrobe is a LGA in both Victoria and Tasmania). Analysts can then reconcile the spatial and temporal data based on this check summary and recreate the cubble object: 
+The result of the \code{check_key()} function is a list containing three elements: 1) matched keys from both tables, 2) potentially paired keys, and 3) others keys that can't be matched. Here, the main mismatch arises from the two LGAs: Kingston and Latrobe (Kingston is a LGA in both Victoria and South Australia and Latrobe is a LGA in both Victoria and Tasmania). Analysts can then reconcile the spatial and temporal data based on this check summary and recreate the cubble object: 
 
 ```{r covid-6, echo = TRUE}
 lga2 <- lga |>
@@ -342,7 +344,7 @@ covid2 <- covid |> filter(!lga %in% check_res$others$temporal)
 
 ## Australian historical maximum temperature {#historicaltmax}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures for stations worldwide. In the \pkg{cubble} package, the cubble object \code{historical_tmax} contains daily maximum temperature data for `r nrow(historical_tmax)` stations in Australia, covering two periods: 1971-1975 and 2016-2020. This example uses glyph maps to compare the changes in temperature between these two periods.
+The Global Historical Climatology Network (GHCN) provides daily climate measures for stations worldwide. In the \pkg{cubble} package, the cubble object \code{historical_tmax} contains daily maximum temperature data for `r nrow(historical_tmax)` stations in Australia, covering two periods: 1971-1975 and 2016-2020. This example uses dplyr verbs to wrangle a cubble object, which is pivoted between the spatial and temporal form during the analysis. Glyph maps are then created with ggplot2 to compare the changes in temperature between these two periods. 
 
 To prevent overlapping of weather stations on the map, stations are selected to ensure a minimum distance of 50km. Distance between stations can be calculated with \code{sf::st_distance()} after turning the spatial cubble to also be an sf object with \code{make_spatial_sf()}:
 
@@ -478,7 +480,7 @@ p2 <- tmax2 |>
 
 ## River levels and rainfall in Victoria
 
-The Bureau of Meteorology collects water level data and they can be matched with the precipitation data from the climate weather stations. The data \code{river} from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be subsetted from the \code{climate_aus} data in \pkg{cubble}.
+The Bureau of Meteorology collects water level data and they can be matched with the precipitation data from the climate weather stations. The data \code{river} from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be subsetted from the \code{climate_aus} data in the \pkg{cubble} package. The example demonstrates the use of matching function introduced in Section \ref{matching} to detect river gauges that can reflects precipitation in Victoria. 
 
 ```{r echo = TRUE}
 climate_vic <- climate_aus |>
@@ -573,7 +575,7 @@ p2 <- res_tm_long |>
 
 ## ERA5: climate reanalysis data
 
-The ERA5 reanalysis [@hersbach2020era5] provides hourly estimates of atmospheric, land and oceanic climate variables on a global scale and is available in the NetCDF format from Copernicus Climate Data Store (CDS). This example reproduces Figure 19 in the @hersbach2020era5 paper with cubble, in Figure \ref{fig:netcdf}. The plot shows the southern polar vortex splitting into two on 2002-09-26, and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in @simmons2020global and @simmons2005ecmwf.
+The ERA5 reanalysis [@hersbach2020era5] provides hourly estimates of atmospheric, land and oceanic climate variables on a global scale and is available in the NetCDF format from Copernicus Climate Data Store (CDS). This example demonstrates a case of analysing raster spatio-temporal data using cubble, replicating Figure 19 from the @hersbach2020era5 paper. The plot shows the southern polar vortex splitting into two on 2002-09-26, and further splitting into four on 2002-10-04. Further explanation of why this is interesting can be found in the figure source, and also in @simmons2020global and @simmons2005ecmwf.
 
 A \code{ncdf4} object [@ncdf4] can be converted into a cubble using \code{as_cubble()} and the NetCDF data can be subsetted with arguments \code{vars}, \code{long_range} and \code{lat_range}. In this example, the variables q (specific humidity) and z (geopotential) are read in and the coordinates are subsetted to every degree in longitude and latitude: 
 
@@ -596,7 +598,8 @@ res <- dt |>
   mutate(q = q* 10^6)
 
 con <- rnaturalearth::ne_coastline("small", returnclass = "sf")
-box <- st_bbox(c(xmin = -180, ymin = -90, xmax = 180, ymax = -15), crs = st_crs(con)) 
+box <- st_bbox(c(xmin = -180, ymin = -90, xmax = 180, ymax = -15), 
+               crs = st_crs(con)) 
 country <- con |> 
   st_geometry() |> 
   st_crop(box) |> 
