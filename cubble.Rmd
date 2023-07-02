@@ -104,24 +104,24 @@ The cubble class is an S3 class built on tibble that allows the spatio-temporal 
 -   a spatial cubble with class `c("spatial_cubble_df", "cubble_df")`
 -   a temporal cubble with class `c("temporal_cubble_df", "cubble_df")`
 
-In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised `ts` column. For example, the spatial cubble object, \code{cb_nested} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database [@menne2012overview]. In this case, the spatial cubble is convenient for wrangling the spatial variables:
+In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised `ts` column. For example, the spatial cubble object, \code{cb_spatial} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database [@menne2012overview]. In this case, the spatial cubble is convenient for wrangling the spatial variables:
 
 ```{r}
-cb_nested <- climate_mel
+cb_spatial <- climate_mel
 ```
 
 ```{r echo = TRUE}
-cb_nested
+cb_spatial
 ```
 
-In a temporal cubble, temporal variables are expanded in the long form and spatial variables are stored as a data attribute. The temporal cubble object, \code{cb_long}, contains the same spatio-temporal data as the spatial cubble object, \code{cb_nested}, but in a structure that is easier for temporal analysis: 
+In a temporal cubble, temporal variables are expanded in the long form and spatial variables are stored as a data attribute. The temporal cubble object, \code{cb_temporal}, contains the same spatio-temporal data as the spatial cubble object, \code{cb_spatial}, but in a structure that is easier for temporal analysis: 
 
 ```{r}
-cb_long <- face_temporal(climate_mel)
+cb_temporal <- face_temporal(climate_mel)
 ```
 
 ```{r echo = TRUE}
-cb_long
+cb_temporal
 ```
 
 ### The cubble attributes
@@ -135,7 +135,7 @@ A cubble object inherits the attributes from tibble (and its subclasses): \code{
 The temporal cubble has a special attribute called \code{spatial} to store the spatial variables. Shortcut functions are available to extract attributes from the temporal cubble object, for example, \code{spatial()} for extracting spatial variables: 
 
 ```{r echo = TRUE}
-spatial(cb_long)
+spatial(cb_temporal)
 ```
 
 ## Creation and coercion {#create}
@@ -176,17 +176,17 @@ The \pkg{cubble} package has several functions implemented for data wrangling an
 
 : (#tab:methods) An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistent across the spatial and temporal cubble; otherwise, they are implemented separately.
 
-The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble (\code{cb_nested}) introduced in Section \@ref(object) to get a temporal cubble: 
+The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble (\code{cb_spatial}) introduced in Section \@ref(object) to get a temporal cubble: 
 
 ```{r cubble-fun, echo = TRUE}
-face_temporal(cb_nested)
+face_temporal(cb_spatial)
 ```
 
 Both verbs are the exact inverse of each other and apply both functions on a cubble object will result in the object itself:
 
 ```{r cubble-fun2, echo = TRUE}
-identical(face_spatial(face_temporal(cb_nested)), cb_nested)
-identical(face_temporal(face_spatial(cb_long)), cb_long)
+identical(face_spatial(face_temporal(cb_spatial)), cb_spatial)
+identical(face_temporal(face_spatial(cb_temporal)), cb_temporal)
 ```
 
 ```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the functions \\code{face\\_temporal()} and \\code{face\\_spatial()}: \\code{face\\_temporal()} converts a spatial cubble into a temporal cubble to focus on the temporal variables. Conversely, \\code{face\\_spatial()} transforms a temporal cubble into a spatial one to focus on the spatial variables."}
@@ -202,22 +202,22 @@ Analysts often have their preferred spatial or temporal data structure for spati
 The \code{key} and \code{index} arguments in a \code{cubble} object corresponds to the \code{tsibble} counterparts and they can be safely omitted, if the temporal component is a \code{tsibble} object, i.e. \code{meteo_ts} in the example below. The \code{tsibble} class (\code{tbl_ts}) from the input will be carried over to the temporal cubble, indicated by the \code{[tsibble]} in the header and in the object class:
 
 ```{r echo = TRUE}
-ts_nested <- make_cubble(
+ts_spatial <- make_cubble(
   spatial = stations, temporal = meteo_ts, coords = c(long, lat))
-(ts_long <- face_temporal(ts_nested))
-class(ts_long)
+(ts_temporal <- face_temporal(ts_spatial))
+class(ts_temporal)
 ```
 
 Methods applied to the \code{tbl_ts} class can also be applied to the temporal cubble objects, for example, checking whether the data contain temporal gaps:
 
 ```{r echo = TRUE}
-ts_long |> has_gaps()
+ts_temporal |> has_gaps()
 ```
 
-The temporal component of a created temporal cubble can be turned to a \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_long} object, created in Section \@ref(create): 
+The temporal component of a created temporal cubble can be turned to a \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_temporal} object, created in Section \@ref(create): 
 
 ```{r echo = TRUE}
-cb_long |> make_temporal_tsibble() 
+cb_temporal |> make_temporal_tsibble() 
 ```
 
 ### Using an sf object as the spatial component
@@ -225,22 +225,22 @@ cb_long |> make_temporal_tsibble()
 Similarly, the spatial component  of a cubble object can be an \code{sf} object and if the \code{coords} argument is omitted, it will be calculated from the sf geometry. The sf status is signalled by the \code{[sf]} label in the cubble header:
 
 ```{r echo = TRUE}
-(sf_nested <- make_cubble(
+(sf_spatial <- make_cubble(
   spatial = stations_sf, temporal = meteo, 
   key = id, index = date))
-class(sf_nested)
+class(sf_spatial)
 ```
 
 This allows applying functions from the \code{sf} package to a cubble object, for example, to handle coordinate transformation with \code{st_transform}:
 
 ```{r echo =TRUE, message=FALSE}
-sf_nested |> sf::st_transform(crs = "EPSG:3857")
+sf_spatial |> sf::st_transform(crs = "EPSG:3857")
 ```
 
 The spatial component of a created \code{cubble} can also be promoted into an \code{sf} object with \code{make_spatial_sf()}:
 
 ```{r echo = TRUE}
-cb_nested |> make_spatial_sf() 
+cb_spatial |> make_spatial_sf() 
 ```
 
 
@@ -676,14 +676,14 @@ clean <- climate_aus |>
 The spatial and temporal cubble are then created into shared \code{crosstalk} objects, plotted as ggplots, and combined together using \code{crosstalk::bscols()}:
 
 ````
-nested <- clean |> SharedData$new(~id, group = "cubble")
+sd_spatial <- clean |> SharedData$new(~id, group = "cubble")
 
-long <- clean |> 
+sd_temporal <- clean |> 
   face_temporal() |> 
   SharedData$new(~id, group = "cubble")
   
-p1 <- nested |> ggplot() + ...
-p2 <- long |> ggplot() + ...
+p1 <- sd_spatial |> ggplot() + ...
+p2 <- sd_temporal |> ggplot() + ...
 crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 ````
 
