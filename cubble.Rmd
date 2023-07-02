@@ -87,13 +87,17 @@ However, the data representation implemented in those packages might present cer
 
 This paper presents a new \proglang{R} package, \pkg{cubble}, which implements a new cubble class to organize spatial and temporal variables as two forms of a single data object so that they can be wrangled separately or combined, while being kept synchronized. Among the four spacetime layouts in @spacetime, the \code{cubble} class can handle the full grid layout and the sparse grid layout.  The software is available from the Comprehensive \proglang{R} Archive Network (CRAN) at https://CRAN.R-project.org/package=cubble. 
 
+<!-- In this paper, we propose the \pkg{cubble} package to organise spatio-temporal data collected at unique fixed locations while allowing for irregularities in the temporal dimension, such as weather station data.  -->
+
+<!-- Spatio-temporal data can encompass data with various spatial and temporal characteristics, requiring different structures for wrangling and analysis. For example, climate weather stations typically store station metadata in one table and the climate time series in another. GPS data tracks unique point locations at different timestamps and is represented as trajectories. Satellite imageries capture snapshots of landscapes at selected times and is commonly structured as raster data.  -->
+
 The rest of the paper is organized as follows: Section \@ref(cubble) presents the main design and functionality of the \pkg{cubble} package. Section \@ref(others) explains how the \pkg{cubble} package deals with more advanced considerations, including data matching and how the package fits with existing static and interactive visualization tools. Moreover we also illustrate how the \pkg{cubble} package deals with spatio-temporal data transformations. Section \@ref(examples) uses primarily Australian weather station data as examples to demonstrate the use of the package. An example of how the \pkg{cubble} package handles Network Common Data Form (NetCDF) data is also provided. Section \@ref(conclude) discuss the paper contributions and future directions.
 
 # The cubble package {#cubble}
 
-## The cubble object {#object}
+The cubble class includes two subclasses: the spatial cubble and the temporal cubble, which can be pivoted back and forth to focus on the two aspects of the spatio-temporal data, as illustrated in Figure \ref{fig:face}. This section provides an overview of the \pkg{cubble} package, including the cubble class and its attributes, class creation and coercion, a summary of implemented functionality, the compatibility with other spatial and temporal packages (\pkg{sf} and \pkg{tsibble}), and a comparison with other spatio-temporal packages (\pkg{stars} and \pkg{sftime}).
 
-Spatio-temporal data can encompass data with various spatial and temporal characteristics, requiring different structures for wrangling and analysis. For example, climate weather stations typically store station metadata in one table and the climate time series in another. GPS data tracks unique point locations at different timestamps and is represented as trajectories. Satellite imageries capture snapshots of landscapes at selected times and is commonly structured as raster data. In this paper, we propose the \pkg{cubble} package to organise spatio-temporal data collected at unique fixed locations while allowing for irregularities in the temporal dimension, such as weather station data. 
+## The cubble class {#object}
 
 The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms (subclasses):
 

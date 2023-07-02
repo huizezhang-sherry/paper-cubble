@@ -101,10 +101,10 @@ The rest of the paper is organized as follows: Section \ref{cubble} presents the
 \hypertarget{cubble}{%
 \section{The cubble package}\label{cubble}}
 
-\hypertarget{object}{%
-\subsection{The cubble object}\label{object}}
+The cubble class includes two subclasses: the spatial cubble and the temporal cubble, which can be pivoted back and forth to focus on the two aspects of the spatio-temporal data, as illustrated in Figure \ref{fig:face}. This section provides an overview of the \pkg{cubble} package, including the cubble class and its attributes, class creation and coercion, a summary of implemented functionality, the compatibility with other spatial and temporal packages (\pkg{sf} and \pkg{tsibble}), and a comparison with other spatio-temporal packages (\pkg{stars} and \pkg{sftime}).
 
-Spatio-temporal data can encompass data with various spatial and temporal characteristics, requiring different structures for wrangling and analysis. For example, climate weather stations typically store station metadata in one table and the climate time series in another. GPS data tracks unique point locations at different timestamps and is represented as trajectories. Satellite imageries capture snapshots of landscapes at selected times and is commonly structured as raster data. In this paper, we propose the \pkg{cubble} package to organise spatio-temporal data collected at unique fixed locations while allowing for irregularities in the temporal dimension, such as weather station data.
+\hypertarget{object}{%
+\subsection{The cubble class}\label{object}}
 
 The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms (subclasses):
 
