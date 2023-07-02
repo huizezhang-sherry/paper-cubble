@@ -116,11 +116,11 @@ The cubble class is an S3 class built on tibble that allows the spatio-temporal 
   a temporal cubble with class \texttt{c("temporal\_cubble\_df",\ "cubble\_df")}
 \end{itemize}
 
-In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised \texttt{ts} column. For example, the spatial cubble object, \code{cb_nested} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database \citep{menne2012overview}. In this case, the spatial cubble is convenient for wrangling the spatial variables:
+In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised \texttt{ts} column. For example, the spatial cubble object, \code{cb_spatial} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database \citep{menne2012overview}. In this case, the spatial cubble is convenient for wrangling the spatial variables:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cb_nested
+R> cb_spatial
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [3], index: date, nested form
@@ -134,11 +134,11 @@ R> cb_nested
 \end{CodeOutput}
 \end{CodeChunk}
 
-In a temporal cubble, temporal variables are expanded in the long form and spatial variables are stored as a data attribute. The temporal cubble object, \code{cb_long}, contains the same spatio-temporal data as the spatial cubble object, \code{cb_nested}, but in a structure that is easier for temporal analysis:
+In a temporal cubble, temporal variables are expanded in the long form and spatial variables are stored as a data attribute. The temporal cubble object, \code{cb_temporal}, contains the same spatio-temporal data as the spatial cubble object, \code{cb_spatial}, but in a structure that is easier for temporal analysis:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cb_long
+R> cb_temporal
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [3], index: date, long form
@@ -158,13 +158,11 @@ R> cb_long
 \hypertarget{the-cubble-attributes}{%
 \subsubsection{The cubble attributes}\label{the-cubble-attributes}}
 
-A cubble object inherits the attributes from tibble (and its subclasses): \code{class}, \code{row.names}, and \code{names}. Additionally, it has three specialised attributes: \code{key}, \code{index}, and \code{coords}. \code{key} and \code{index} are used as introduced in the \pkg{tsibble} package \citep{tsibble}. In cubble, the \code{key} attribute identifies the row in the spatial cubble (given the internal use of \code{tidyr::nest()} for nesting), and when combined with the \code{index} argument, it identifies the row in the temporal cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for \code{index} includes the base R classes \code{Date}, \code{POSIXlt}, \code{POSIXct}, as well as tsibble's \code{yearmonth}, \code{yearweek}, and \code{yearquarter} classes. The \code{coords} attribute represents an ordered pair of coordinates that can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. The \pkg{sf} package \citep{sf} is used under the hood to calculate the spatial bounding box, displayed in the header of a spatial cubble.
-
-The temporal cubble has a special attribute called \code{spatial} to store the spatial variables. Shortcut functions are available to extract attributes from the temporal cubble object, for example, \code{spatial()} for extracting spatial variables:
+Both cubble objects inherit tibble's attributes (which originates from data frames): \code{class}, \code{row.names}, and \code{names}. Additionally, both have three specialised attributes: \code{key}, \code{index}, and \code{coords}. \code{key} and \code{index} are used as introduced in the \pkg{tsibble} package \citep{tsibble}. In cubble, the \code{key} attribute identifies the row in the spatial cubble (given the internal use of \code{tidyr::nest()} for nesting), and when combined with the \code{index} argument, it identifies the row in the temporal cubble. Currently, cubble only supports one variable as the key, and the accepted temporal classes for \code{index} includes the base R classes \code{Date}, \code{POSIXlt}, \code{POSIXct}, as well as tsibble's \code{yearmonth}, \code{yearweek}, and \code{yearquarter} classes. The \code{coords} attribute represents an ordered pair of coordinates that can be either an unprojected pair of longitude and latitude, or a projected easting and northing value. Moreover, temporal cubbles have a special attribute called \code{spatial} to store the spatial variables. Shortcut functions are available to extract attributes from the temporal cubble object, for example, \code{spatial()} for extracting spatial variables:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> spatial(cb_long)
+R> spatial(cb_temporal)
 \end{CodeInput}
 \begin{CodeOutput}
 # A tibble: 3 x 6
@@ -179,7 +177,7 @@ R> spatial(cb_long)
 \hypertarget{create}{%
 \subsection{Creation and coercion}\label{create}}
 
-The function \code{make_cubble()} composes a spatial cubble object from a spatial table (\code{spatial}) and a temporal table (\code{temporal}), along with three attributes introduced in the subsection \ref{object}: \code{key}, \code{index}, and \code{coords}. The following code creates a spatial cubble from its spatial component, \code{stations} and temporal component \code{meteo}:
+The spatial and temporal aspect of spatio-temporal data are often stored separately in the database. For climate data, analysts may initially receive station metadata and then query the time series based on the metadata. A (spatial) cubble object can be constructed from separate spatial and temporal tables using the function \code{make_cubble()}. The three attributes \code{key}, \code{index}, and \code{coords} need to be specified in creation. The following code creates a spatial cubble from its spatial component, \code{stations} and temporal component \code{meteo}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -273,11 +271,11 @@ Methods
 \bottomrule()
 \end{longtable}
 
-The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble (\code{cb_nested}) introduced in Section \ref{object} to get a temporal cubble:
+The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble (\code{cb_spatial}) introduced in Section \ref{object} to get a temporal cubble:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> face_temporal(cb_nested)
+R> face_temporal(cb_spatial)
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [3], index: date, long form
@@ -298,13 +296,13 @@ Both verbs are the exact inverse of each other and apply both functions on a cub
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> identical(face_spatial(face_temporal(cb_nested)), cb_nested)
+R> identical(face_spatial(face_temporal(cb_spatial)), cb_spatial)
 \end{CodeInput}
 \begin{CodeOutput}
 [1] TRUE
 \end{CodeOutput}
 \begin{CodeInput}
-R> identical(face_temporal(face_spatial(cb_long)), cb_long)
+R> identical(face_temporal(face_spatial(cb_temporal)), cb_temporal)
 \end{CodeInput}
 \begin{CodeOutput}
 [1] TRUE
@@ -334,9 +332,9 @@ The \code{key} and \code{index} arguments in a \code{cubble} object corresponds 
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> ts_nested <- make_cubble(
+R> ts_spatial <- make_cubble(
 +   spatial = stations, temporal = meteo_ts, coords = c(long, lat))
-R> (ts_long <- face_temporal(ts_nested))
+R> (ts_temporal <- face_temporal(ts_spatial))
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [3], index: date, long form, [tsibble]
@@ -352,7 +350,7 @@ R> (ts_long <- face_temporal(ts_nested))
 # i 25 more rows
 \end{CodeOutput}
 \begin{CodeInput}
-R> class(ts_long)
+R> class(ts_temporal)
 \end{CodeInput}
 \begin{CodeOutput}
 [1] "temporal_cubble_df" "cubble_df"          "tbl_ts"            
@@ -364,7 +362,7 @@ Methods applied to the \code{tbl_ts} class can also be applied to the temporal c
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> ts_long |> has_gaps()
+R> ts_temporal |> has_gaps()
 \end{CodeInput}
 \begin{CodeOutput}
 # A tibble: 3 x 2
@@ -376,11 +374,11 @@ R> ts_long |> has_gaps()
 \end{CodeOutput}
 \end{CodeChunk}
 
-The temporal component of a created temporal cubble can be turned to a \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_long} object, created in Section \ref{create}:
+The temporal component of a created temporal cubble can be turned to a \code{tsibble} object using \code{make_temporal_tsibble()}. See the code example below using the \code{cb_temporal} object, created in Section \ref{create}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cb_long |> make_temporal_tsibble() 
+R> cb_temporal |> make_temporal_tsibble() 
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [3], index: date, long form, [tsibble]
@@ -404,7 +402,7 @@ Similarly, the spatial component of a cubble object can be an \code{sf} object a
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> (sf_nested <- make_cubble(
+R> (sf_spatial <- make_cubble(
 +   spatial = stations_sf, temporal = meteo, 
 +   key = id, index = date))
 \end{CodeInput}
@@ -419,7 +417,7 @@ R> (sf_nested <- make_cubble(
 3 ASN00086282 113.  melbo~  94866  145. -37.7 (144.8321 -37.6655) <tibble>
 \end{CodeOutput}
 \begin{CodeInput}
-R> class(sf_nested)
+R> class(sf_spatial)
 \end{CodeInput}
 \begin{CodeOutput}
 [1] "spatial_cubble_df" "cubble_df"         "sf"               
@@ -431,7 +429,7 @@ This allows applying functions from the \code{sf} package to a cubble object, fo
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> sf_nested |> sf::st_transform(crs = "EPSG:3857")
+R> sf_spatial |> sf::st_transform(crs = "EPSG:3857")
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [3], index: date, nested form, [sf]
@@ -450,7 +448,7 @@ The spatial component of a created \code{cubble} can also be promoted into an \c
 
 \begin{CodeChunk}
 \begin{CodeInput}
-R> cb_nested |> make_spatial_sf() 
+R> cb_spatial |> make_spatial_sf() 
 \end{CodeInput}
 \begin{CodeOutput}
 # cubble:   key: id [3], index: date, nested form, [sf]
@@ -948,14 +946,14 @@ clean <- climate_aus |>
 The spatial and temporal cubble are then created into shared \code{crosstalk} objects, plotted as ggplots, and combined together using \code{crosstalk::bscols()}:
 
 \begin{verbatim}
-nested <- clean |> SharedData$new(~id, group = "cubble")
+sd_spatial <- clean |> SharedData$new(~id, group = "cubble")
 
-long <- clean |> 
+sd_temporal <- clean |> 
   face_temporal() |> 
   SharedData$new(~id, group = "cubble")
   
-p1 <- nested |> ggplot() + ...
-p2 <- long |> ggplot() + ...
+p1 <- sd_spatial |> ggplot() + ...
+p2 <- sd_temporal |> ggplot() + ...
 crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 \end{verbatim}
 
