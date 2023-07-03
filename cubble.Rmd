@@ -170,7 +170,7 @@ The \pkg{cubble} package has several functions implemented for data wrangling an
 | `spatial_cubble_df`  | `[, names<-,  tbl_sum, dplyr_reconstruct, dplyr_row_slice, face_spatial, face_temporal, unfold, arrange, rename, rowwise, group_by, ungroup, select, spatial, summarise, unfold, update_cubble`                                              |
 | `temporal_cubble_df` | `[, names<-, tbl_sum, arrange, dplyr_reconstruct, dplyr_row_slice, face_spatial, face_temporal, unfold, fill_gaps, group_by, ungroup,  rename, rowwise, scan_gaps, select, spatial, summarise, tbl_sum, bind_rows, bind_cols, update_cubble` |
 
-: (#tab:methods) An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistent across the spatial and temporal cubble; otherwise, they are implemented separately.
+: (#tab:methods) An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistently across the spatial and temporal cubble; otherwise, they are implemented separately.
 
 The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble, \code{cb_spatial}, introduced in Section \@ref(object) to get a temporal cubble: 
 
@@ -184,7 +184,7 @@ Both verbs are the exact inverse of each other and apply both functions on a cub
 face_spatial(face_temporal(cb_spatial))
 ```
 
-```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the functions \\code{face\\_temporal()} and \\code{face\\_spatial()}: \\code{face\\_temporal()} converts a spatial cubble into a temporal cubble to focus on the temporal variables. Conversely, \\code{face\\_spatial()} transforms a temporal cubble into a spatial one to focus on the spatial variables."}
+```{r face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "Illustration of main functions. To focus on he temporal variables \\code{face\\_temporal()} converts a spatial cubble into a temporal cubble. To focus on the spatial variables \\code{face\\_spatial()} transforms a temporal cubble into a spatial cubble. This pivoting makes it easy to separately do spatial or temporal analysis."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
 ```
 
@@ -284,7 +284,7 @@ The similarity score between two time series is calculated using a matching func
 
 The cubble workflow can be easily incorporated into an interactive graphics pipeline (e.g., @buja1988elements; @buja1996interactive;  @sutherland2000orca; @xie2014reactive; @cheng2016enabling). This section describes the linking between a map and multiple time series in a \code{cubble} object using the package \pkg{crosstalk} [@crosstalk], as illustrated in Figure \ref{fig:illu-interactive}. The spatial and temporal cubble can be constructed as a shared crosstalk object to create a link between a map and a time series plot. For instance, when a user selects a location on the map as shown on panel (a), the corresponding site is highlighted. This selection activates a row in the spatial cubble, which is then connected to the temporal cubble, resulting in the selection of all observations with the same ID as depicted in panel (b). Consequently the temporal cubble highlights the corresponding series in the time series plot displayed in panel (c). The linking can also be initiated from the time series plot by selecting points on the time series graph. This action selects rows with the same ID in the temporal cubble and the corresponding row in the spatial cubble so that points can be highlight on the map. 
 
-```{r illu-interactive, echo = FALSE, fig.align="center", out.height = "35%", out.width = "100%", fig.cap = "Linking between multiple plots. The line plots and the map are constructed from shared \\code{crosstalk} objects. When a station is selected on the map (a), the corresponding row in the spatial \\code{cubble} will be activated. This will link to all the rows with the same id in the temporal \\code{cubble} (b) and update the line plot (c)."}
+```{r illu-interactive, echo = FALSE, fig.align="center", out.height = "35%", out.width = "100%", fig.cap = "Linking between multiple plots is made possible by shared \\code{crosstalk} objects. When a station is selected on the map (a), the corresponding row in the spatial \\code{cubble} will be activated. This will activate the row with the same id in the temporal \\code{cubble} (b) to trigger an update of the line plot (c). The cubble package makes linking between spatial and temporal plots easy."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/‎diagram-keynotes.‎002.png")) 
 ```
 
@@ -399,7 +399,7 @@ tmax |>
   ...
 ````
 
-```{r glyphmap, out.width="100%", fig.width=15, fig.height=10, fig.cap="Comparison of average maximum temperature between 1971-1975 and 2016-2020 for 54 stations in Victoria and New South Wales, Australia. (a) and (b): the monthly temperature series for the two periods in a glyph map and for a single station Cobar, highlighted in orange in the glyph map. (c) and (d): the difference series between the two periods (2016s minus 1971s) in a glyph map and for station Cobar. The grey horizontal line marks zero difference. The glyph map displaying the difference series (c) reveals more pronounced changes between the two periods, with many inland locations in New South Wales show an increased temperature in late summer (Jan-Feb) in recent years."}
+```{r glyphmap, out.width="100%", fig.width=15, fig.height=10, fig.cap="Glyph maps comparing temperature change between 1971-1975 and 2016-2020 for 54 stations in Victoria and New South Wales, Australia. Overlaid line plots show monthly temperature (a) where a hint of late summer warming can be seen. Transforming to temperature differences (c) shows pronounced changes between the two periods. The horizontal guideline marks zero difference. One station, Cobar, is highlighted in the glyph maps and shown separately (b, d). Here the late summer (Jan-Feb) warming pattern, which is more prevalent at inland locations, is clear."}
 tmax2 <- tmax |> 
   pivot_wider(id_cols = -yearmonth, names_from = group, values_from = tmax) |> 
   mutate(diff = `2016` - `1971`) |> 
@@ -439,6 +439,8 @@ cobar2 <- tmax2 |> filter(id == "ASN00048027") |>
   theme(aspect.ratio = 0.3,panel.grid.minor = element_blank())
 
 p1 <- tmax |> 
+  mutate(group = factor(group, levels = c("1971", "2016"), 
+     labels = c("1971-1975", "2016-2020"))) |>
   ggplot(aes(x_major = long, x_minor = month, 
              y_major = lat, y_minor = tmax,
              group = interaction(id, group))) + 
@@ -525,7 +527,7 @@ res_tm <- match_temporal(data =  res_sp,
 (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 ```
 
-```{r matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Matched weather stations and river gauges on the map (a) and across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed in the same scale in (b). The water level reflects the increase in precipitation."}
+```{r matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Example of matching weather stations and river gauges. These four stations show on the map (a) and time (b) would be considered to be matching. Precipitation and water level have been standardised between 0 and 1 to be displayed in the same scale in (b). The peaks in the time series roughly match, and would reflect percipitation increasing water levels."}
 res_tm <- res_tm |>  filter(group %in% c(1, 7, 6, 9))
 
 res_tm_long <- res_tm |>  
@@ -587,7 +589,7 @@ raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
   long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
 ```
 
-Once the NetCDF data is coerced into a cubble object, subsequent analysis can be conducted to filter on the date of interest, scale the variable specific humidity and create visualisation in ggplot to reproduce the ERA5 plot. A snippet of code to create Figure \ref{fig:netcdf} is provided below with additional codes needed to style the plot
+Once the NetCDF data is coerced into a cubble object, subsequent analysis can be conducted to filter on the date of interest, scale the variable specific humidity and create visualisation in ggplot to reproduce the ERA5 plot. A snippet of code to create Figure \ref{fig:netcdf} is provided below with additional codes needed to style the plot.
 
 ````
 res <- dt |> 
@@ -615,7 +617,7 @@ res |>
 
 ````
 
-```{r netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04.", dev = "png"}
+```{r netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "An example illustrating that cubble can be used to readily reproduce common spatiotemporal analyses. This plot of ERA5 reanalysis (Fig. 19, Hersbach et al, 2020) shows the break-up of the southern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04.", dev = "png", fig.retina=4}
 res <- dt |> 
   face_temporal() |> 
   filter(lubridate::date(time) %in% 
@@ -693,7 +695,7 @@ crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 
 Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity. Plot (a) shows the initial state of the interactive display: all locations are shown as dots on the map, coloured by the temperature range, and the right plot shows the ribbons representing maximum to minimum for all stations. In plot (b) the station shows a high variance on the initial map, the "Mount Elizabeth" station, is selected and this produces the ribbon on the right. In plot (c) the lowest temperature in August is selected on the left map and this corresponds to the "Thredbo" station in the mountain area in Victoria and New South Wales. This station is compared to a station in the Tasmania island, the southernmost island of the country, selected on the map.
 
-```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a particular location on the map (here Mount Elizabeth) produces the plot in the second row. The maximum and minimum temperatures are shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display, which highlights the corresponding station on the map (Thredbo). Another  station, located in the Tasmania Island, is then selected to compare its temperature variation with the Thredbo station.", fig.show='hold'}
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Illustration of using cubble for interactive graphics. Here we explore temperature variation by linking a map and a seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a particular location on the map (here Mount Elizabeth) produces the plot in the second row. The maximum and minimum temperatures are shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display, which highlights the corresponding station on the map (Thredbo). Another  station, located in the Tasmania Island, is then selected to compare its temperature variation with the Thredbo station.", fig.show='hold'}
 knitr::include_graphics(here::here("figures/linking.png"))
 knitr::include_graphics(here::here("figures/linking-north.png"))
 knitr::include_graphics(here::here("figures/linking-lower.png"))
