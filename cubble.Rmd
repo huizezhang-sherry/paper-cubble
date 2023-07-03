@@ -259,7 +259,9 @@ The \pkg{sftime} package [@sftime] also builds from a tibble object and its focu
 
 ## Spatial and temporal matching {#matching}
 
-A common task in spatio-temporal data analysis is to identify related temporal series from geographically proximate locations. For example, we may want to associate weather stations with nearby river sensors to find the water level series that reflect changes in precipitation. This problem can be generalised by first matching locations across two datasets and then calculating the temporal features of the series. In cubble, locations from two datasets can be matched using the function `match_spatial()`. The function calculates the distance matrix of the two datasets and returns `spatial_n_group` groups with the smallest distances. For each group, analysts can include more location with the argument `spatial_n_each` (default to 1 for one-on-one matching).
+A useful task in spatio-temporal data analysis is to combine related temporal series within a close geographic neighborhood. For example, we may want to examine data from weather stations with water flow records in nearby river sensors to understand how precipitation relates to water supply. This might be useful for better predicting potential for drought and flood. 
+
+This problem can be tackled by first matching spatial locations across two datasets and then calculating the temporal features of the multiple series. In cubble, locations from two datasets can be matched using the function `match_spatial()`. The function calculates the distance matrix of the two datasets and returns `spatial_n_group` groups with the smallest distances. For each group, analysts can include more locations with the argument `spatial_n_each` (default to 1 for one-on-one matching).
 
 The temporal matching then calculates a similarity score between the time series of spatially matched pairs using the function `match_temporal()`. The temporal matching requires two identifiers: one for separating each spatially matched group: `match_id` and one for separating the two data sources: `data_id`. Matching between different variables can be specified using the `temporal_by` argument, similar to the `by` syntax from dplyr's `*_join`.
   
@@ -271,7 +273,7 @@ match_temporal(
 )
 ````
 
-The similarity score between two time series is calculated using a matching function, which can be customised by the analysts based on the time series feature relevant to match. The matching function takes two time series as a list and returns a single numerical score. By default, cubble uses a simple peak matching algorithm (`match_peak`) to count the number of peaks in two time series that fall within a specified temporal window. 
+The similarity score is computed by a matching function which can be customized to any desired time series feature. The matching function takes two time series as a list and returns a single numerical value. By default, cubble uses a simple peak matching algorithm (`match_peak`) to count the number of peaks in two time series that fall within a specified time window. 
 
 ## Interactive graphics
 
