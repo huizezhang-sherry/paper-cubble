@@ -259,32 +259,9 @@ The \pkg{sftime} package [@sftime] also builds from a tibble object and its focu
 
 ## Spatial and temporal matching {#matching}
 
-Finding nearby locations across two spatio-temporal data sets measuring different processes is a common task in spatio-temporal data analysis. For example, we might want to related measurements obtained from weather stations and river gauge levels recorded at different locations and the goal is to find nearby river sensors that reflect the change in precipitation recorded by the weather station.
+A common task in spatio-temporal data analysis is to identify related temporal series from geographically proximate locations. For example, we may want to associate weather stations with nearby river sensors to find the water level series that reflect changes in precipitation. This problem can be generalised by first matching locations across two datasets and then calculating the temporal features of the series. In cubble, locations from two datasets can be matched using the function `match_spatial()`. The function calculates the distance matrix of the two datasets and returns `spatial_n_group` groups with the smallest distances. For each group, analysts can include more location with the argument `spatial_n_each` (default to 1 for one-on-one matching).
 
-
-This type of problem can be generalize to matched pairs of locations accross different data sets or more generality groups of locations
-
-
-or groups with a number of locations selected depending on the problem at hand. For example, we might want to find for a given weather station the closest river gauges to compare levels
-
- 
-
-
-
-For example, we might want to find a group of close stations and then use score functions to describe time series features between the series. In cubble, matching locations based on distance can be performed using the function `match_spatial()` which finds  matched groups in two cubble objects by first fiding the closests pairs and.
-
-Two arguments are available to control the matching: the argument `spatial_n_group` specifies the number of paired groups to return and the argument `spatial_n_each` specifies the number of matches for each item in the first cubble object (default to 1 for one-to-one matching). 
-
-
-
-and matching time series features for selected locations`match_temporal()`. The `match_spatial()` function :
-
-````
-match_spatial(<cubble_obj1>, <cubble_obj2>, ...)
-````
-
-
-The function `match_temporal()` takes the outputs from spatial matching and calculates a similarity score of the time series between spatially matched pairs. The temporal matching requires two identifiers: one for separating each spatially matched group: `match_id` and one for separating the two data sources: `data_id`. Matching between different variables can be specified using the `temporal_by` argument, similar to the `by` syntax from dplyr's `*_join`.
+The temporal matching then calculates a similarity score between the time series of spatially matched pairs using the function `match_temporal()`. The temporal matching requires two identifiers: one for separating each spatially matched group: `match_id` and one for separating the two data sources: `data_id`. Matching between different variables can be specified using the `temporal_by` argument, similar to the `by` syntax from dplyr's `*_join`.
   
 ````
 match_temporal(

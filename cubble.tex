@@ -222,54 +222,52 @@ The \pkg{cubble} package has several functions implemented for data wrangling an
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1250}}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.8750}}@{}}
 \caption{\label{tab:funs} An overview of functions implemented in the \pkg{cubble} package, categorised into base R, tidyverse, and cubble functions.}\tabularnewline
-\toprule\noalign{}
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Category
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Functions
 \end{minipage} \\
-\midrule\noalign{}
+\midrule()
 \endfirsthead
-\toprule\noalign{}
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Category
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Functions
 \end{minipage} \\
-\midrule\noalign{}
+\midrule()
 \endhead
-\bottomrule\noalign{}
-\endlastfoot
 base R & \texttt{{[}}, \texttt{{[}{[}\textless{}-}, \texttt{names\textless{}-} \\
 tidyverse & \texttt{dplyr\_row\_slice}, \texttt{dplyr\_col\_modify}, \texttt{dplyr\_reconstruct}, \texttt{select}, \texttt{mutate}, \texttt{arrange}, \texttt{filter}, \texttt{group\_by}, \texttt{ungroup}, \texttt{summarise}, \texttt{select}, \texttt{slice}, \texttt{rowwise}, \texttt{rename}, \texttt{bind\_rows}, \texttt{bind\_cols}, \texttt{relocate}, \texttt{type\_sum}, the slice family (\texttt{slice\_head}, \texttt{slice\_tail}, \texttt{slice\_max}, \texttt{slice\_min}, \texttt{slice\_sample}) and the join family (\texttt{left\_join}, \texttt{right\_join}, \texttt{inner\_join}, \texttt{full\_join}, \texttt{anti\_join}, \texttt{semi\_join}) \\
 cubble & \texttt{as\_cubble}, \texttt{cubble}, \texttt{make\_cubble}, \texttt{check\_key}, \texttt{face\_temporal}, \texttt{face\_spatial}, \texttt{unfold}, \texttt{key}, \texttt{key\_vars}, \texttt{key\_data}, \texttt{index}, \texttt{index\_var}, \texttt{coords}, \texttt{spatial}, \texttt{match\_sites}, \texttt{match\_spatial}, \texttt{match\_temporal}, \texttt{geom\_glyph}, \texttt{geom\_glyph\_box}, \texttt{geom\_glyph\_line}, \texttt{make\_spatial\_sf}, \texttt{make\_temporal\_tsibble}, \texttt{fill\_gaps}, and \texttt{scan\_gaps} \\
+\bottomrule()
 \end{longtable}
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.2500}}
   >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.7500}}@{}}
 \caption{\label{tab:methods} An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistently across the spatial and temporal cubble; otherwise, they are implemented separately.}\tabularnewline
-\toprule\noalign{}
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Class
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Methods
 \end{minipage} \\
-\midrule\noalign{}
+\midrule()
 \endfirsthead
-\toprule\noalign{}
+\toprule()
 \begin{minipage}[b]{\linewidth}\raggedright
 Class
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 Methods
 \end{minipage} \\
-\midrule\noalign{}
+\midrule()
 \endhead
-\bottomrule\noalign{}
-\endlastfoot
 \texttt{cubble\_df} & \texttt{{[}{[}\textless{}-,\ dplyr\_col\_modify,\ key\_data,\ key\_vars,\ key,\ print} \\
 \texttt{spatial\_cubble\_df} & \texttt{{[},\ names\textless{}-,\ \ tbl\_sum,\ dplyr\_reconstruct,\ dplyr\_row\_slice,\ face\_spatial,\ face\_temporal,\ unfold,\ arrange,\ rename,\ rowwise,\ group\_by,\ ungroup,\ select,\ spatial,\ summarise,\ unfold,\ update\_cubble} \\
 \texttt{temporal\_cubble\_df} & \texttt{{[},\ names\textless{}-,\ tbl\_sum,\ arrange,\ dplyr\_reconstruct,\ dplyr\_row\_slice,\ face\_spatial,\ face\_temporal,\ unfold,\ fill\_gaps,\ group\_by,\ ungroup,\ \ rename,\ rowwise,\ scan\_gaps,\ select,\ spatial,\ summarise,\ tbl\_sum,\ bind\_rows,\ bind\_cols,\ update\_cubble} \\
+\bottomrule()
 \end{longtable}
 
 The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble, \code{cb_spatial}, introduced in Section \ref{object} to get a temporal cubble:
@@ -504,23 +502,9 @@ The \pkg{sftime} package \citep{sftime} also builds from a tibble object and its
 \hypertarget{matching}{%
 \subsection{Spatial and temporal matching}\label{matching}}
 
-Finding nearby locations across two spatio-temporal data sets measuring different processes is a common task in spatio-temporal data analysis. For example, we might want to related measurements obtained from weather stations and river gauge levels recorded at different locations and the goal is to find nearby river sensors that reflect the change in precipitation recorded by the weather station.
+A common task in spatio-temporal data analysis is to identify related temporal series from geographically proximate locations. For example, we may want to associate weather stations with nearby river sensors to find the water level series that reflect changes in precipitation. This problem can be generalised by first matching locations across two datasets and then calculating the temporal features of the series. In cubble, locations from two datasets can be matched using the function \texttt{match\_spatial()}. The function calculates the distance matrix of the two datasets and returns \texttt{spatial\_n\_group} groups with the smallest distances. For each group, analysts can include more location with the argument \texttt{spatial\_n\_each} (default to 1 for one-on-one matching).
 
-This type of problem can be generalize to matched pairs of locations accross different data sets or more generality groups of locations
-
-or groups with a number of locations selected depending on the problem at hand. For example, we might want to find for a given weather station the closest river gauges to compare levels
-
-For example, we might want to find a group of close stations and then use score functions to describe time series features between the series. In cubble, matching locations based on distance can be performed using the function \texttt{match\_spatial()} which finds matched groups in two cubble objects by first fiding the closests pairs and.
-
-Two arguments are available to control the matching: the argument \texttt{spatial\_n\_group} specifies the number of paired groups to return and the argument \texttt{spatial\_n\_each} specifies the number of matches for each item in the first cubble object (default to 1 for one-to-one matching).
-
-and matching time series features for selected locations\texttt{match\_temporal()}. The \texttt{match\_spatial()} function :
-
-\begin{verbatim}
-match_spatial(<cubble_obj1>, <cubble_obj2>, ...)
-\end{verbatim}
-
-The function \texttt{match\_temporal()} takes the outputs from spatial matching and calculates a similarity score of the time series between spatially matched pairs. The temporal matching requires two identifiers: one for separating each spatially matched group: \texttt{match\_id} and one for separating the two data sources: \texttt{data\_id}. Matching between different variables can be specified using the \texttt{temporal\_by} argument, similar to the \texttt{by} syntax from dplyr's \texttt{*\_join}.
+The temporal matching then calculates a similarity score between the time series of spatially matched pairs using the function \texttt{match\_temporal()}. The temporal matching requires two identifiers: one for separating each spatially matched group: \texttt{match\_id} and one for separating the two data sources: \texttt{data\_id}. Matching between different variables can be specified using the \texttt{temporal\_by} argument, similar to the \texttt{by} syntax from dplyr's \texttt{*\_join}.
 
 \begin{verbatim}
 match_temporal(
@@ -763,7 +747,7 @@ tmax |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/glyphmap-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/glyphmap-1} 
 
 }
 
@@ -885,7 +869,7 @@ R> (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/matching-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/matching-1} 
 
 }
 
@@ -952,7 +936,7 @@ res |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/netcdf-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/netcdf-1} 
 
 }
 
