@@ -16,7 +16,7 @@ H. Sherry Zhang\\Monash University \And Dianne Cook\\Monash University \And Ursu
 
 
 \Abstract{
-Multivariate spatio-temporal data refers to multiple measurements taken across space and time. For many analyses, spatial and time components can be separately studied: for example, to explore the temporal trend of one variable for a single spatial location, or to model the spatial distribution of one variable at a given time. However for some studies, it is important to analyze different aspects of the spatio-temporal data simultaneously, like for instance, temporal trends of multiple variables across locations. In order to facilitate the study of different portions or combinations of spatio-temporal data, we introduce a new class, \code{cubble}, with a suite of functions enabling easy slicing and dicing on different spatio-temporal components. The proposed \code{cubble} class ensures that all the components of the data are easy to access and manipulate while providing flexibility for data analysis. In addition, the \pkg{cubble} package facilitates visual and numerical explorations of the data while easing data wrangling and modelling. The \code{cubble} class and the tools implemented in the package are illustrated with different examples of Australian climate data.
+Multivariate spatio-temporal data refers to multiple measurements taken across space and time. For many analyses, spatial and time components can be separately studied: for example, to explore the temporal trend of one variable for a single spatial location, or to model the spatial distribution of one variable at a given time. However for some studies, it is important to analyze different aspects of the spatio-temporal data simultaneously, for instance, temporal trends of multiple variables across locations. In order to facilitate the study of different portions or combinations of spatio-temporal data, we introduce a new class, \code{cubble}, with a suite of functions enabling easy slicing and dicing on different spatio-temporal components. The proposed \code{cubble} class ensures that all the components of the data are easy to access and manipulate while providing flexibility for data analysis. In addition, the \pkg{cubble} package facilitates visual and numerical explorations of the data while easing data wrangling and modelling. The \code{cubble} class and the tools implemented in the package are illustrated with examples from climate data analysis.
 }
 
 \Keywords{spatial, temporal, spatio-temporal, \proglang{R}, environmental data, exploratory data analysis}
@@ -87,14 +87,13 @@ Multivariate spatio-temporal data refers to multiple measurements taken across s
 \section{Introduction}\label{introduction}}
 
 Spatio-temporal data has a spatial component referring to the location of each observation and a temporal component that is recorded at regular or irregular time intervals. It may also include multiple variables measured at each spatial and temporal values. With spatio-temporal data, one can fix the time to explore the spatial features of the data, fix the spatial location/s to explore temporal aspects, or dynamically explore the space and time simultaneously.
-
-In order to computationally explore the spatial, temporal and spatio-temporal faces of such data, the data needs to be stored and represented under a specific data object that allows the user to query, group and dissect all the data faces.
+In order to computationally explore the spatial, temporal and spatio-temporal and multiple variable aspects of such data, it needs to be stored in a data object that allows the user to query, group and dissect all the different data faces.
 
 The Comprehensive \proglang{R} Archive Network (CRAN) task view SpatioTemporal \citep{ctvspatiotemporal} gathers information about \proglang{R} packages designed for spatio-temporal data and it has a section on \emph{Representing data} that lists existing spatio-temporal data representations used in \proglang{R}. Among them, the \pkg{spacetime} package \citep{spacetime} implements four S4 classes to handle spatio-temporal data with different spatio-temporal layouts (full grid, sparse grid, irregular, and trajectory). The \pkg{stars} package \citep{stars} implements an S3 class built from dense arrays.
 
 However, the data representation implemented in those packages might present certain challenges when applying the principles of tidy data \citep{tidydata} for data analysis. The concept of tidy data is based on three principles regarding how data should be organized in tables to facilitate easier analysis: 1) one observation a row, 2) one variable a column, and 3) one type of observation a table. The third principle of tidy data is particularly relevant for spatio-temporal data since these data are naturally observed at different units: the spatial locations and the temporal units. While the tidyverse suite of R packages implements data wrangling and visualization tools primarily focused on working with single tables, there are not many tools available for handling relational data specifically for spatio-temporal data. This motivates a new design to organise spatio-temporal data in a way that would make data wrangling, visualizing and analyzing easier.
 
-This paper presents a new \proglang{R} package, \pkg{cubble}, which implements a new cubble class to organize spatial and temporal variables as two forms of a single data object so that they can be wrangled separately or combined, while being kept synchronized. Among the four spacetime layouts in \citet{spacetime}, the \code{cubble} class can handle the full grid layout and the sparse grid layout. The software is available from the Comprehensive \proglang{R} Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=cubble}.
+This paper presents the \proglang{R} package, \pkg{cubble}, which implements a new cubble class to organize spatial and temporal variables as two forms of a single data object so that they can be wrangled separately or combined, while being kept synchronized. Among the four spacetime layouts in \citet{spacetime}, the \code{cubble} class can handle the full grid layout and the sparse grid layout. The software is available from the Comprehensive \proglang{R} Archive Network (CRAN) at \url{https://CRAN.R-project.org/package=cubble}.
 
 The rest of the paper is organized as follows: Section \ref{cubble} presents the main design and functionality of the \pkg{cubble} package. Section \ref{others} explains how the \pkg{cubble} package deals with more advanced considerations, including data matching and how the package fits with existing static and interactive visualization tools. Moreover we also illustrate how the \pkg{cubble} package deals with spatio-temporal data transformations. Section \ref{examples} uses primarily Australian weather station data as examples to demonstrate the use of the package. An example of how the \pkg{cubble} package handles Network Common Data Form (NetCDF) data is also provided. Section \ref{conclude} discuss the paper contributions and future directions.
 
@@ -503,15 +502,23 @@ The \pkg{sftime} package \citep{sftime} also builds from a tibble object and its
 \section{Other features and considerations}\label{others}}
 
 \hypertarget{matching}{%
-\subsection{Data fusion and matching}\label{matching}}
+\subsection{Spatial and temporal matching}\label{matching}}
 
-Matching time series from two lists is a common task in spatio-temporal data analysis. In cubble, matching based on distance and time series features can be performed using the functions \texttt{match\_spatial()} and \texttt{match\_temporal()}. The \texttt{match\_spatial()} function finds the matched pairs in two cubble objects based on distance between sites:
+Finding nearby locations across two spatio-temporal data sets measuring different processes is a common task in spatio-temporal data analysis. For example, we might want to related measurements obtained from weather stations and river gauge levels recorded at different locations and the goal is to find nearby river sensors that reflect the change in precipitation recorded by the weather station.
+
+This type of problem can be generalize to matched pairs of locations accross different data sets or more generality groups of locations
+
+or groups with a number of locations selected depending on the problem at hand. For example, we might want to find for a given weather station the closest river gauges to compare levels
+
+For example, we might want to find a group of close stations and then use score functions to describe time series features between the series. In cubble, matching locations based on distance can be performed using the function \texttt{match\_spatial()} which finds matched groups in two cubble objects by first fiding the closests pairs and.
+
+Two arguments are available to control the matching: the argument \texttt{spatial\_n\_group} specifies the number of paired groups to return and the argument \texttt{spatial\_n\_each} specifies the number of matches for each item in the first cubble object (default to 1 for one-to-one matching).
+
+and matching time series features for selected locations\texttt{match\_temporal()}. The \texttt{match\_spatial()} function :
 
 \begin{verbatim}
 match_spatial(<cubble_obj1>, <cubble_obj2>, ...)
 \end{verbatim}
-
-Two arguments are available to control the matching: the argument \texttt{spatial\_n\_group} specifies the number of paired groups to return and the argument \texttt{spatial\_n\_each} specifies the number of matches for each item in the first cubble object (default to 1 for one-to-one matching).
 
 The function \texttt{match\_temporal()} takes the outputs from spatial matching and calculates a similarity score of the time series between spatially matched pairs. The temporal matching requires two identifiers: one for separating each spatially matched group: \texttt{match\_id} and one for separating the two data sources: \texttt{data\_id}. Matching between different variables can be specified using the \texttt{temporal\_by} argument, similar to the \texttt{by} syntax from dplyr's \texttt{*\_join}.
 
