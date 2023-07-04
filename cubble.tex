@@ -953,9 +953,10 @@ res |>
 \hypertarget{australian-temperature-range}{%
 \subsection{Australian temperature range}\label{australian-temperature-range}}
 
-Interactive graphics can be especially useful for spatio-temporal data because they make it possible to look at the data in multiple ways on-the-fly. The last example describes the process of using cubble with the \pkg{crosstalk} package to build an interactive display connecting a map of Australia, with ribbon plots of temperature range observed at the stations in 2020. The purpose is to explore the variation of monthly temperature range over the country.
+Interactive graphics can be especially useful for spatio-temporal data because they make it possible to look at the data in multiple ways on-the-fly. This last example describes the process of using
+\pkg{cubble} with the \pkg{crosstalk} package to build an interactive display connecting a map of Australia, with ribbon plots of temperature range observed at a group of stations in 2020. The purpose is to explore the variation of monthly temperature range over the country.
 
-We will first summarise the daily data in \code{climate_aus} into monthly average and calculate the variance of the temperature difference, which will be used to color the temperature band later.
+Firstly, we summarise the daily data in \code{climate_aus} into monthly averages and calculate the variance of the monthly averages differences between the minimum and maximum temperatures. This variance will be used to color the temperature band later.
 
 \begin{verbatim}
 clean <- climate_aus |>
