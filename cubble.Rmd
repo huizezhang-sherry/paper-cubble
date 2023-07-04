@@ -358,7 +358,7 @@ a[upper.tri(a, diag = TRUE)] <- 1e6
   filter(rowSums(a < units::as_units(50, "km")) == 0))
 ```
 
-Daily maximum temperature is then averaged into monthly series for each periods in the temporal cubble. The last step with \code{unfold()} moves the two coordinate columns (\code{long, lat}) into the temporal cubble, preparing the data for the glyph map:
+The daily maximum temperature is then averaged into monthly series for each period within the temporal cube. In the code above, the last step with \code{unfold()} moves the two coordinate columns (\code{long, lat}) into the temporal cubble, preparing the data for the construction of a glyph map:
 
 ```{r echo = TRUE}
 (tmax <- tmax |>
@@ -374,7 +374,7 @@ Daily maximum temperature is then averaged into monthly series for each periods 
   unfold(long, lat))
 ```
 
-A quick check on the number of observations for each location is made, revealing that there are several with less than 24 observations -- these stations lack temperature values for some months. In this example, those stations are removed by switching to the spatial cubble to operate on the spatial component over time, and then, move back into the temporal cubble (to make the glyph map):
+The code below counts the number of observations for each location, revealing that there are several with less than 24 observations -- these stations lack temperature values for some months. In this example, those stations are removed by switching to the spatial cubble to operate on the spatial component over time, and then, move back into the temporal cubble (to make the glyph map):
 
 ```{r echo = TRUE}
 tmax <- tmax |> 
