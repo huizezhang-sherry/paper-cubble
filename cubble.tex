@@ -764,7 +764,7 @@ tmax |>
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
 
-The Bureau of Meteorology collects water level data and they can be matched with the precipitation data from the climate weather stations. The data \code{river} from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be subsetted from the \code{climate_aus} data in the \pkg{cubble} package. The example demonstrates the use of matching function introduced in Section \ref{matching} to detect river gauges that can reflects precipitation in Victoria.
+The Bureau of Meteorology collects water level data that can be matched with precipitation data from climate weather stations. The data \code{river} from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be subsetted from the \code{climate_aus} data in the \pkg{cubble} package. This example demonstrates the use of the matching function introduced in Section \ref{matching} to find river gauges that mirror changes in precipitation regimes captured in the climate weather stations in Victoria.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -775,7 +775,7 @@ R> river <- cubble::river |> mutate(type = "river")
 \end{CodeInput}
 \end{CodeChunk}
 
-Spatial match on the site location is first performed since rainfall can directly impact water level in the nearby river. With \code{match_spatial()}, we can obtain a summary of the 10 closest pairs:
+The first step is to perform a spatial match on the site locations between both data sets. The rainfall recorded at a particular station can directly impact the water level in nearby rivers, which emphasizes the need to find related or matching locations. With \code{match_spatial()}, we can obtain a summary of the 10 closest pairs of weather stations and river gauges:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -800,7 +800,7 @@ R> print(res_sp, n = 20)
 \end{CodeOutput}
 \end{CodeChunk}
 
-The result can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. All the results can be combined into a single cubble using \code{bind_rows()}, after excluding the two pairs where a river station is matched to more than one weather stations (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8).
+The matching or pairing results can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. After excluding the two pairs where a river station is matched to more than one weather stations (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8), all the results can be combined into a single cubble using \code{bind_rows()},
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -825,7 +825,7 @@ R> (res_sp <- res_sp[-c(5, 8)] |> bind_rows())
 \end{CodeOutput}
 \end{CodeChunk}
 
-To match the water level series with precipitation, the function \code{match_temporal()} is used with the variable \code{group} and \code{types} identifying the matching group and the two data sources:
+To match the water level and precipitation time series across the matched locations, the function \code{match_temporal()} is used with the variables \code{group} and \code{types} identifying the matching group and the two data sources:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -846,7 +846,7 @@ R> (res_tm <- match_temporal(data = res_sp,
 \end{CodeOutput}
 \end{CodeChunk}
 
-Similarly, the cubble output can be returned using the argument \code{return_cubble = TRUE}. Here we select the four pairs with the highest number of matching peaks and show them on the map (a) and as standardized series (b) in Figure \ref{fig:matching}.
+Similarly, the cubble output can be returned using the argument \code{return_cubble = TRUE}. Here, we select the four pairs of time series (precipitation/water level) with the highest number of matching peaks and show them on the map (a). The time series of river levels is standardize for better comparison in Figure \ref{fig:matching} panel (b).
 
 \begin{CodeChunk}
 \begin{CodeInput}
