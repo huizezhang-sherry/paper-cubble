@@ -639,7 +639,7 @@ R> (cb <- make_cubble(spatial = lga2, temporal = covid2))
 \hypertarget{historicaltmax}{%
 \subsection{Australian historical maximum temperature}\label{historicaltmax}}
 
-The Global Historical Climatology Network (GHCN) provides daily climate measures for stations worldwide. In the \pkg{cubble} package, the cubble object \code{historical_tmax} contains daily maximum temperature data for 75 stations in Australia, covering two periods: 1971-1975 and 2016-2020. This example uses dplyr verbs to wrangle a cubble object, which is pivoted between the spatial and temporal form during the analysis. Glyph maps are then created with ggplot2 to compare the changes in temperature between these two periods.
+The Global Historical Climatology Network (GHCN) provides daily climate measures for stations worldwide. In the \pkg{cubble} package, the cubble object \code{historical_tmax} contains daily maximum temperature data for 75 stations in Australia, covering two periods: 1971-1975 and 2016-2020. This example uses \pkg{dplyr} verbs to wrangle a cubble object, and pivot between the spatial and temporal form for different parts of the analysis. The result is glyph maps to compare the changes in temperature between these two periods, created with \pkg{ggplot2}.
 
 To prevent overlapping of weather stations on the map, stations are selected to ensure a minimum distance of 50km. Distance between stations can be calculated with \code{sf::st_distance()} after turning the spatial cubble to also be an sf object with \code{make_spatial_sf()}:
 
@@ -709,7 +709,7 @@ R> tmax <- tmax |>
 \end{CodeInput}
 \end{CodeChunk}
 
-The following code creates the glyph map (a) in Figure \ref{fig:glyphmap} (additional codes are needed for highlighting the single station, Cobar and styling) and the glyph map (c) is produced similarly with the difference series, rather than the two original series, being plotted.
+The following code creates the glyph map (a) in Figure \ref{fig:glyphmap} (additional codes are needed for highlighting the single station, Cobar and styling) and the glyph map (c) is produced similarly after further processing the data.
 
 \begin{verbatim}
 nsw_vic <- ozmaps::abs_ste |> 
@@ -728,7 +728,7 @@ tmax |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/glyphmap-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/glyphmap-1} 
 
 }
 
@@ -850,7 +850,7 @@ R> (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/matching-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/matching-1} 
 
 }
 
@@ -917,7 +917,7 @@ res |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/netcdf-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/netcdf-1} 
 
 }
 
