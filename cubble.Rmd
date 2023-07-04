@@ -100,10 +100,10 @@ The cubble class includes two subclasses: the spatial cubble and the temporal cu
 
 The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms (subclasses):
 
--   a spatial cubble with class `c("spatial_cubble_df", "cubble_df")`
--   a temporal cubble with class `c("temporal_cubble_df", "cubble_df")`
+-   a spatial cubble with class \code{c("spatial_cubble_df", "cubble_df")}
+-   a temporal cubble with class \code{c("temporal_cubble_df", "cubble_df")}
 
-In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised `ts` column. For example, the spatial cubble object, \code{cb_spatial} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database [@menne2012overview]. In this case, the spatial cubble is convenient for wrangling the spatial variables:
+In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised \code{ts} column. For example, the spatial cubble object, \code{cb_spatial} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database [@menne2012overview]. In this case, the spatial cubble is convenient for wrangling the spatial variables:
 
 ```{r}
 cb_spatial <- climate_mel
@@ -261,11 +261,11 @@ The \pkg{sftime} package [@sftime] also builds from a tibble object and its focu
 
 A useful task in spatio-temporal data analysis is to combine related temporal series within a close geographic neighborhood. For example, we may want to examine data from weather stations with water flow records from nearby river sensors to understand how precipitation relates to river levels. This might be useful for predicting potential for droughts and floods. 
 
-Matching temporal data across different locations from different data sources could be done by initially identifying the corresponding spatial locations between the two data sets. Subsequently, a set of temporal features can be calculated for the series at the selected locations that can be used to matched the selected time series across locations. In cubble, locations from two datasets can be matched using the function `match_spatial()`. The functi on calculates the distance matrix of the locations between the two data sets and returns  groups (`spatial_n_group`) with the smallest distances. For a given group, it is possible can include more locations with the argument `spatial_n_each` (default to 1 for one-on-one matching).
+Matching temporal data across different locations from different data sources could be done by initially identifying the corresponding spatial locations between the two data sets. Subsequently, a set of temporal features can be calculated for the series at the selected locations that can be used to matched the selected time series across locations. In cubble, locations from two datasets can be matched using the function \code{match_spatial()}. The functi on calculates the distance matrix of the locations between the two data sets and returns  groups (\code{spatial_n_group}) with the smallest distances. For a given group, it is possible can include more locations with the argument \code{spatial_n_each} (default to 1 for one-on-one matching).
 
-For the temporal matching a similarity score between the time series of spatially matched pairs is computed using the function `match_temporal()`. The similarity score is computed by a matching function which can be customized to any desired time series feature. The function `match_temporal()` takes as argument two time series in the form of a list and returns a single numerical value. By default, cubble uses a simple peak matching algorithm (`match_peak`) to count the number of peaks in two time series that fall within a specified time window. 
+For the temporal matching a similarity score between the time series of spatially matched pairs is computed using the function \code{match_temporal()}. The similarity score is computed by a matching function which can be customized to any desired time series feature. The function \code{match_temporal()} takes as argument two time series in the form of a list and returns a single numerical value. By default, cubble uses a simple peak matching algorithm (\code{match_peak}) to count the number of peaks in two time series that fall within a specified time window. 
 
-The temporal matching requires two identifiers: one for separating each spatially matched group: `match_id` and one for separating the two data sources: `data_id`. Matching between different variables can be specified using the `temporal_by` argument, similar to the `by` syntax from dplyr's `*_join`.
+The temporal matching requires two identifiers: one for separating each spatially matched group: \code{match_id} and one for separating the two data sources: \code{data_id}. Matching between different variables can be specified using the \code{temporal_by} argument, similar to the \code{by} syntax from dplyr's \code{*_join}.
   
 ````
 match_temporal(
