@@ -775,7 +775,7 @@ R> print(res_sp, n = 20)
 \end{CodeOutput}
 \end{CodeChunk}
 
-The matching or pairing results can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. After excluding the two pairs where a river station is matched to more than one weather stations (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8), all the results can be combined into a single cubble using \code{bind_rows()},
+The results can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. After excluding the two pairs where a river station is matched to more than one weather stations (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8), all the results can be combined into a single cubble using \code{bind_rows()},
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -800,7 +800,7 @@ R> (res_sp <- res_sp[-c(5, 8)] |> bind_rows())
 \end{CodeOutput}
 \end{CodeChunk}
 
-To match the water level and precipitation time series across the matched locations, the function \code{match_temporal()} is used with the variables \code{group} and \code{types} identifying the matching group and the two data sources:
+To match the water level and precipitation time series across the matched locations, the function \code{match_temporal()} is used with the variables \code{group} and \code{type} identifying the matching group and the two data sources:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -821,7 +821,7 @@ R> (res_tm <- match_temporal(data = res_sp,
 \end{CodeOutput}
 \end{CodeChunk}
 
-Similarly, the cubble output can be returned using the argument \code{return_cubble = TRUE}. Here, we select the four pairs of time series (precipitation/water level) with the highest number of matching peaks and show them on the map (a). The time series of river levels is standardize for better comparison in Figure \ref{fig:matching} panel (b).
+Similarly, the cubble output can be returned using the argument \code{return_cubble = TRUE}. Here, we select the four pairs of time series (precipitation/water level) with the highest number of matching peaks and show them on the map (Figure \ref{fig:matching} a). The time series of river levels is standardized to make the comparison easier in panel (b).
 
 \begin{CodeChunk}
 \begin{CodeInput}
