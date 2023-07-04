@@ -705,9 +705,9 @@ knitr::include_graphics(here::here("figures/linking-lower.png"))
 
 # Conclusion {#conclude}
 
-This paper presents the \proglang{R} package \pkg{cubble} for organizing, wrangling and visualizing spatio-temporal data. The package introduces a new data structure, \code{cubble}, consisting of two subclass, spatial cubble and a temporal cubble, to organise spatio-temporal data in two different formats within the tidy data framework. The data structure and functions introduced in the package can be used and combined with existing tools for  data wrangling, spatial and temporal data analysis, and visualization. 
+This paper presents the \proglang{R} package \pkg{cubble} for organizing, wrangling and visualizing spatio-temporal data. The package introduces a new data structure, \code{cubble}, consisting of two subclasses, spatial cubble and a temporal cubble, to organise spatio-temporal data in two different formats within the tidy data framework. The data structure and functions introduced in the package can be used and combined with existing tools for  data wrangling, spatial and temporal data analysis, and visualization. 
 
-The paper includes plenty examples to illustrate the utility of \pkg{cubble} as a data structure for spatio-temporal analysis. These examples cover different tasks of a typical analysis workflow: handling data with spatial and temporal misalignment, matching data from multiple sources, and creating both static and interactive spatio-temporal visualisation. For future directions, other commonly-used spatial or temporal data structures can be integrated into the \pkg{cubble} package to extend analysts' familiar spatial and temporal toolkit to spatio-temporal.
+The paper includes several examples to illustrate the utility of \pkg{cubble} as a data structure for spatio-temporal analysis. These examples cover different tasks of a typical data analysis workflow involving spatio-temporal data: handling data with spatial and temporal misalignment, matching data from multiple sources, and creating both static and interactive spatio-temporal visualisation. For future directions, other commonly-used spatial or temporal data structures can be integrated into the \pkg{cubble} package to extend analysts' familiar spatial and temporal toolkit to spatio-temporal.
 
 # Acknowledgement
 
