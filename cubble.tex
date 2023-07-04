@@ -86,8 +86,7 @@ Multivariate spatio-temporal data refers to multiple measurements taken across s
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-Spatio-temporal data has a spatial component referring to the location of each observation and a temporal component that is recorded at regular or irregular time intervals. It may also include multiple variables measured at each spatial and temporal values. With spatio-temporal data, one can fix the time to explore the spatial features of the data, fix the spatial location/s to explore temporal aspects, or dynamically explore the space and time simultaneously.
-In order to computationally explore the spatial, temporal and spatio-temporal and multiple variable aspects of such data, it needs to be stored in a data object that allows the user to query, group and dissect all the different data faces.
+Spatio-temporal data has a spatial component referring to the location of each observation and a temporal component that is recorded at regular or irregular time intervals. It may also include multiple variables measured at each spatial and temporal values. With spatio-temporal data, one can fix the time to explore the spatial features of the data, fix the spatial location/s to explore temporal aspects, or dynamically explore the space and time simultaneously. In order to computationally explore the spatial, temporal and spatio-temporal and multiple variable aspects of such data, it needs to be stored in a data object that allows the user to query, group and dissect all the different data faces.
 
 The Comprehensive \proglang{R} Archive Network (CRAN) task view SpatioTemporal \citep{ctvspatiotemporal} gathers information about \proglang{R} packages designed for spatio-temporal data and it has a section on \emph{Representing data} that lists existing spatio-temporal data representations used in \proglang{R}. Among them, the \pkg{spacetime} package \citep{spacetime} implements four S4 classes to handle spatio-temporal data with different spatio-temporal layouts (full grid, sparse grid, irregular, and trajectory). The \pkg{stars} package \citep{stars} implements an S3 class built from dense arrays.
 
@@ -110,12 +109,12 @@ The cubble class is an S3 class built on tibble that allows the spatio-temporal 
 \begin{itemize}
 \tightlist
 \item
-  a spatial cubble with class \texttt{c("spatial\_cubble\_df",\ "cubble\_df")}
+  a spatial cubble with class \code{c("spatial_cubble_df", "cubble_df")}
 \item
-  a temporal cubble with class \texttt{c("temporal\_cubble\_df",\ "cubble\_df")}
+  a temporal cubble with class \code{c("temporal_cubble_df", "cubble_df")}
 \end{itemize}
 
-In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised \texttt{ts} column. For example, the spatial cubble object, \code{cb_spatial} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database \citep{menne2012overview}. In this case, the spatial cubble is convenient for wrangling the spatial variables:
+In a spatial cubble object, spatial variables are organised as columns and temporal variables are nested within a specialised \code{ts} column. For example, the spatial cubble object, \code{cb_spatial} printed below, contains weather records of three airport stations from the Global Historical Climatology Network Daily (GHCND) database \citep{menne2012overview}. In this case, the spatial cubble is convenient for wrangling the spatial variables:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -218,57 +217,33 @@ R> climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 
 The \pkg{cubble} package has several functions implemented for data wrangling and to facilitate data analysis as summarized in Table \ref{tab:funs}. In addition, for each of the three cubble classes there are number of methods implemented that facilitates the handling of the data as shown in Table \ref{tab:methods}. In particular, the \code{cubble_df} class handles methods that behave consistently in both spatial and temporal cubble. When the method works differently internally on the spatial and temporal cubble, it is implemented separately in \code{spatial_cubble_df} and \code{temporal_cubble_df}.
 
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.1250}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.8750}}@{}}
-\caption{\label{tab:funs} An overview of functions implemented in the \pkg{cubble} package, categorised into base R, tidyverse, and cubble functions.}\tabularnewline
-\toprule()
-\begin{minipage}[b]{\linewidth}\raggedright
-Category
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Functions
-\end{minipage} \\
-\midrule()
-\endfirsthead
-\toprule()
-\begin{minipage}[b]{\linewidth}\raggedright
-Category
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Functions
-\end{minipage} \\
-\midrule()
-\endhead
+\begin{table}
+\begin{tabular}{p{0.1\textwidth}p{0.8\textwidth}}
+\hline
+Category & Functions \\
+\hline
 base R & \texttt{{[}}, \texttt{{[}{[}\textless{}-}, \texttt{names\textless{}-} \\
 tidyverse & \texttt{dplyr\_row\_slice}, \texttt{dplyr\_col\_modify}, \texttt{dplyr\_reconstruct}, \texttt{select}, \texttt{mutate}, \texttt{arrange}, \texttt{filter}, \texttt{group\_by}, \texttt{ungroup}, \texttt{summarise}, \texttt{select}, \texttt{slice}, \texttt{rowwise}, \texttt{rename}, \texttt{bind\_rows}, \texttt{bind\_cols}, \texttt{relocate}, \texttt{type\_sum}, the slice family (\texttt{slice\_head}, \texttt{slice\_tail}, \texttt{slice\_max}, \texttt{slice\_min}, \texttt{slice\_sample}) and the join family (\texttt{left\_join}, \texttt{right\_join}, \texttt{inner\_join}, \texttt{full\_join}, \texttt{anti\_join}, \texttt{semi\_join}) \\
 cubble & \texttt{as\_cubble}, \texttt{cubble}, \texttt{make\_cubble}, \texttt{check\_key}, \texttt{face\_temporal}, \texttt{face\_spatial}, \texttt{unfold}, \texttt{key}, \texttt{key\_vars}, \texttt{key\_data}, \texttt{index}, \texttt{index\_var}, \texttt{coords}, \texttt{spatial}, \texttt{match\_sites}, \texttt{match\_spatial}, \texttt{match\_temporal}, \texttt{geom\_glyph}, \texttt{geom\_glyph\_box}, \texttt{geom\_glyph\_line}, \texttt{make\_spatial\_sf}, \texttt{make\_temporal\_tsibble}, \texttt{fill\_gaps}, and \texttt{scan\_gaps} \\
-\bottomrule()
-\end{longtable}
+\hline
+\end{tabular}
+\caption{An overview of functions implemented in the cubble package, categorised into base R, tidyverse, and cubble functions.}
+\label{tab:funs}
+\end{table}
 
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.7500}}@{}}
-\caption{\label{tab:methods} An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistently across the spatial and temporal cubble; otherwise, they are implemented separately.}\tabularnewline
-\toprule()
-\begin{minipage}[b]{\linewidth}\raggedright
-Class
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Methods
-\end{minipage} \\
-\midrule()
-\endfirsthead
-\toprule()
-\begin{minipage}[b]{\linewidth}\raggedright
-Class
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Methods
-\end{minipage} \\
-\midrule()
-\endhead
+\begin{table}
+\begin{tabular}{p{0.25\textwidth}p{0.65\textwidth}}
+\hline
+Class & Method \\
+\hline
 \texttt{cubble\_df} & \texttt{{[}{[}\textless{}-,\ dplyr\_col\_modify,\ key\_data,\ key\_vars,\ key,\ print} \\
 \texttt{spatial\_cubble\_df} & \texttt{{[},\ names\textless{}-,\ \ tbl\_sum,\ dplyr\_reconstruct,\ dplyr\_row\_slice,\ face\_spatial,\ face\_temporal,\ unfold,\ arrange,\ rename,\ rowwise,\ group\_by,\ ungroup,\ select,\ spatial,\ summarise,\ unfold,\ update\_cubble} \\
 \texttt{temporal\_cubble\_df} & \texttt{{[},\ names\textless{}-,\ tbl\_sum,\ arrange,\ dplyr\_reconstruct,\ dplyr\_row\_slice,\ face\_spatial,\ face\_temporal,\ unfold,\ fill\_gaps,\ group\_by,\ ungroup,\ \ rename,\ rowwise,\ scan\_gaps,\ select,\ spatial,\ summarise,\ tbl\_sum,\ bind\_rows,\ bind\_cols,\ update\_cubble} \\
-\bottomrule()
-\end{longtable}
+\hline
+\end{tabular}
+\caption{An overview of the methods implemented in the three \code{cubble} classes. Methods are implemented in the \code{cubble\_df} class when they behave consistently across the spatial and temporal cubble; otherwise, they are implemented separately.}
+\label{tab:methods} 
+\end{table}
 
 The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble, \code{cb_spatial}, introduced in Section \ref{object} to get a temporal cubble:
 
@@ -312,7 +287,7 @@ R> face_spatial(face_temporal(cb_spatial))
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/diagram-keynotes/diagram-keynotes.001} 
+{\centering \includegraphics[width=1\linewidth]{figures/diagram-keynotes/diagram-keynotes.001} 
 
 }
 
@@ -504,11 +479,11 @@ The \pkg{sftime} package \citep{sftime} also builds from a tibble object and its
 
 A useful task in spatio-temporal data analysis is to combine related temporal series within a close geographic neighborhood. For example, we may want to examine data from weather stations with water flow records from nearby river sensors to understand how precipitation relates to river levels. This might be useful for predicting potential for droughts and floods.
 
-Matching temporal data across different locations from different data sources could be done by initially identifying the corresponding spatial locations between the two data sets. Subsequently, a set of temporal features can be calculated for the series at the selected locations that can be used to matched the selected time series across locations. In cubble, locations from two datasets can be matched using the function \texttt{match\_spatial()}. The functi on calculates the distance matrix of the locations between the two data sets and returns groups (\texttt{spatial\_n\_group}) with the smallest distances. For a given group, it is possible can include more locations with the argument \texttt{spatial\_n\_each} (default to 1 for one-on-one matching).
+Matching temporal data across different locations from different data sources could be done by initially identifying the corresponding spatial locations between the two data sets. Subsequently, a set of temporal features can be calculated for the series at the selected locations that can be used to matched the selected time series across locations. In cubble, locations from two datasets can be matched using the function \code{match_spatial()}. The function on calculates the distance matrix of the locations between the two data sets and returns groups (\code{spatial_n_group}) with the smallest distances. For a given group, it is possible can include more locations with the argument \code{spatial_n_each} (default to 1 for one-on-one matching).
 
-For the temporal matching a similarity score between the time series of spatially matched pairs is computed using the function \texttt{match\_temporal()}. The similarity score is computed by a matching function which can be customized to any desired time series feature. The function \texttt{match\_temporal()} takes as argument two time series in the form of a list and returns a single numerical value. By default, cubble uses a simple peak matching algorithm (\texttt{match\_peak}) to count the number of peaks in two time series that fall within a specified time window.
+For the temporal matching a similarity score between the time series of spatially matched pairs is computed using the function \code{match_temporal()}. The similarity score is computed by a matching function which can be customized to any desired time series feature. The function \code{match_temporal()} takes as argument two time series in the form of a list and returns a single numerical value. By default, cubble uses a simple peak matching algorithm (\code{match_peak}) to count the number of peaks in two time series that fall within a specified time window.
 
-The temporal matching requires two identifiers: one for separating each spatially matched group: \texttt{match\_id} and one for separating the two data sources: \texttt{data\_id}. Matching between different variables can be specified using the \texttt{temporal\_by} argument, similar to the \texttt{by} syntax from dplyr's \texttt{*\_join}.
+The temporal matching requires two identifiers: one for separating each spatially matched group: \code{match_id} and one for separating the two data sources: \code{data_id}. Matching between different variables can be specified using the \code{temporal_by} argument, similar to the \code{by} syntax from dplyr's \code{*_join}.
 
 \begin{verbatim}
 match_temporal(
@@ -528,7 +503,7 @@ Figure \ref{fig:illu-interactive} illustrates the linking mechanism between a ma
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/diagram-keynotes/‎diagram-keynotes.‎002} 
+{\centering \includegraphics[width=1\linewidth,height=0.35\textheight]{figures/diagram-keynotes/‎diagram-keynotes.‎002} 
 
 }
 
@@ -753,7 +728,7 @@ tmax |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/glyphmap-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/glyphmap-1} 
 
 }
 
@@ -875,7 +850,7 @@ R> (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/matching-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/matching-1} 
 
 }
 
@@ -942,7 +917,7 @@ res |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/pmen0008/Desktop/paper-cubble/figures/netcdf-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/netcdf-1} 
 
 }
 
@@ -992,7 +967,7 @@ Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{/Users/pmen0008/Desktop/paper-cubble/figures/linking-lower} 
+{\centering \includegraphics[width=1\linewidth,height=0.23\textheight]{figures/linking} \includegraphics[width=1\linewidth,height=0.23\textheight]{figures/linking-north} \includegraphics[width=1\linewidth,height=0.23\textheight]{figures/linking-lower} 
 
 }
 
