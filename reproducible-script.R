@@ -1,17 +1,3 @@
-## ----setup, echo = FALSE--------------------------------------------------------
-knitr::opts_chunk$set(
-  echo = FALSE,
-  warning = FALSE,
-  message = FALSE,
-  cache = TRUE,
-  fig.path = here::here("figures/")
-)
-
-options(prompt = "R> ", continue = "+ ",
-        tibble.print_max = 5, tibble.print_min = 5,
-        width = 80, styler.cache_root = "styler-perm")
-
-
 ## ----echo = FALSE---------------------------------------------------------------
 library("cubble")
 library("dplyr")
@@ -28,30 +14,27 @@ library("ncdf4")
 library("rnaturalearth")
 library("colorspace")
 library("units")
+library("here")
 
 
 ## -------------------------------------------------------------------------------
-cb_nested <- climate_mel
+cb_spatial <- climate_mel
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-cb_nested
+cb_spatial
 
 
 ## -------------------------------------------------------------------------------
-cb_long <- face_temporal(climate_mel)
+cb_temporal <- face_temporal(climate_mel)
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-cb_long
-
-
-## ----class, fig.align="center", out.width = "100%", fig.cap = "Illustration of a cubble object in the long form and nested form, along with the associated attributes."----
-#knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.004.png"))
+cb_temporal
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-spatial(cb_long)
+spatial(cb_temporal)
 
 
 ## ----echo = TRUE----------------------------------------------------------------
@@ -64,51 +47,50 @@ climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 
 
 ## ----cubble-fun, echo = TRUE----------------------------------------------------
-identical(face_temporal(cb_nested), cb_long)
-identical(face_spatial(cb_long), cb_nested)
+face_temporal(cb_spatial)
 
 
 ## ----cubble-fun2, echo = TRUE---------------------------------------------------
-identical(face_spatial(face_temporal(cb_nested)), cb_nested)
-identical(face_temporal(face_spatial(cb_long)), cb_long)
+face_spatial(face_temporal(cb_spatial))
 
 
-## ----face, echo = FALSE, fig.align="center", out.width = "100%", fig.cap = "An illustration of the function \\code{face\\_temporal()} and \\code{face\\_spatial()}: \\code{face\\_temporal()} converts a spatial cubble into a temporal cubbl to focus on the temporal variables. Conversely, \\code{face\\_spatial()} transforms a temporal cubble into a spatial one to for focus on the spatial variables."----
-knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-ts_nested <- make_cubble(
+cb_temporal |> unfold(long, lat)
+
+
+## ----echo = TRUE----------------------------------------------------------------
+class(meteo_ts)
+ts_spatial <- make_cubble(
   spatial = stations, temporal = meteo_ts, coords = c(long, lat))
-(ts_long <- face_temporal(ts_nested))
-class(ts_long)
+(ts_temporal <- face_temporal(ts_spatial))
+class(ts_temporal)
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-ts_long |> has_gaps()
+ts_temporal |> has_gaps()
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-cb_long |> make_temporal_tsibble() 
+cb_temporal |> make_temporal_tsibble() 
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-(sf_nested <- make_cubble(
+(sf_spatial <- make_cubble(
   spatial = stations_sf, temporal = meteo, 
   key = id, index = date))
-class(sf_nested)
+class(sf_spatial)
 
 
 ## ----echo =TRUE, message=FALSE--------------------------------------------------
-sf_nested |> sf::st_transform(crs = "EPSG:3857")
+sf_spatial |> sf::st_transform(crs = "EPSG:3857")
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-cb_nested |> make_spatial_sf() 
+cb_spatial |> make_spatial_sf() 
 
 
-## ----illu-interactive, echo = FALSE, fig.align="center", out.height = "35%", out.width = "100%", fig.cap = "Linking between multiple plots. The line plots and the map are constructed from shared \\code{crosstalk} objects. When a station is selected on the map (a), the corresponding row in the spatial \\code{cubble} will be activated. This will link to all the rows with the same id in the temporal \\code{cubble} (b) and update the line plot (c)."----
-knitr::include_graphics(here::here("figures/diagram-keynotes/‎diagram-keynotes.‎002.png")) 
 
 
 ## ----covid-4, echo = TRUE, warning = TRUE, message= TRUE------------------------
@@ -163,7 +145,7 @@ tmax <- tmax |>
   face_temporal()
 
 
-## ----glyphmap, out.width="100%", fig.width=15, fig.height=10, fig.cap="Comparison of average maximum temperature between 1971-1975 and 2016-2020 for 54 stations in Victoria and New South Wales, Australia. (a) and (b): the monthly temperature series for the two periods in a glyph map and for a single station Cobar, highlighted in orange in the glyph map. (c) and (d): the difference series between the two periods (2016s minus 1971s) in a glyph map and for station Cobar. The grey horizontal line marks zero difference. The glyph map displaying the difference series (c) reveals more pronounced changes between the two periods, with many inland locations in New South Wales show an increased temperature in late summer (Jan-Feb) in recent years."----
+## ----glyphmap, out.width="100%", fig.width=15, fig.height=10, fig.cap="Glyph maps comparing temperature change between 1971-1975 and 2016-2020 for 54 stations in Victoria and New South Wales, Australia. Overlaid line plots show monthly temperature (a) where a hint of late summer warming can be seen. Transforming to temperature differences (c) shows pronounced changes between the two periods. The horizontal guideline marks zero difference. One station, Cobar, is highlighted in the glyph maps and shown separately (b, d). Here the late summer (Jan-Feb) warming pattern, which is more prevalent at inland locations, is clear."----
 tmax2 <- tmax |> 
   pivot_wider(id_cols = -yearmonth, names_from = group, values_from = tmax) |> 
   mutate(diff = `2016` - `1971`) |> 
@@ -203,6 +185,8 @@ cobar2 <- tmax2 |> filter(id == "ASN00048027") |>
   theme(aspect.ratio = 0.3,panel.grid.minor = element_blank())
 
 p1 <- tmax |> 
+  mutate(group = factor(group, levels = c("1971", "2016"), 
+     labels = c("1971-1975", "2016-2020"))) |>
   ggplot(aes(x_major = long, x_minor = month, 
              y_major = lat, y_minor = tmax,
              group = interaction(id, group))) + 
@@ -251,34 +235,33 @@ river <- cubble::river |> mutate(type = "river")
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-res_sp <- match_spatial(climate_vic, river, spatial_n_group = 10)
+res_sp <- match_spatial(df1 = climate_vic, df2 = river, 
+                        spatial_n_group = 10)
 print(res_sp, n = 20)
 
 
 ## ----echo = TRUE----------------------------------------------------------------
 res_sp <- match_spatial(
-  climate_vic, river, 
+  df1 = climate_vic, df2 = river, 
   spatial_n_group = 10, return_cubble = TRUE)
 (res_sp <- res_sp[-c(5, 8)] |> bind_rows())
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-(res_tm <- res_sp |> 
-  match_temporal(
-    data_id = type, match_id = group,
-    temporal_by = c("prcp" = "Water_course_level")))
+(res_tm <- match_temporal(data = res_sp,
+                          data_id = type, match_id = group,
+                          temporal_by = c("prcp" = "Water_course_level")))
 
 
 ## ----echo = TRUE----------------------------------------------------------------
-res_tm <- res_sp |> 
-  match_temporal(
-    data_id = type, match_id = group,
-    temporal_by = c("prcp" = "Water_course_level"),
-    return_cubble = TRUE)
+res_tm <- match_temporal(data =  res_sp,
+                         data_id = type, match_id = group,
+                         temporal_by = c("prcp" = "Water_course_level"),
+                         return_cubble = TRUE)
 (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 
 
-## ----matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Matched weather stations and river gauges on the map (a) and across time (b). Precipitation and water level have been standardised between 0 and 1 to be displayed in the same scale in (b). The water level reflects the increase in precipitation."----
+## ----matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Example of matching weather stations and river gauges. These four stations show on the map (a) and time (b) would be considered to be matching. Precipitation and water level have been standardised between 0 and 1 to be displayed in the same scale in (b). The peaks in the time series roughly match, and would reflect percipitation increasing water levels."----
 res_tm <- res_tm |>  filter(group %in% c(1, 7, 6, 9))
 
 res_tm_long <- res_tm |>  
@@ -289,8 +272,9 @@ res_tm_long <- res_tm |>
            (max(matched, na.rm = TRUE) - min(matched, na.rm = TRUE))) 
 
 vic_map <- ozmaps::abs_ste |> 
-  filter(NAME == "Victoria") |> 
-  rmapshaper::ms_simplify()  
+  filter(NAME == "Victoria") |>
+  st_transform("EPSG:28356") |> 
+  sf::st_simplify(dTolerance = 3000)
 
 p1 <-ggplot() + 
   geom_sf(data = vic_map, fill = "grey95", color = "white") + 
@@ -303,6 +287,7 @@ p1 <-ggplot() +
     data = res_tm |> filter(type == "river") |> as_tibble(), 
     aes(x = long, y = lat, label = group)) +
   scale_color_brewer(palette = "Dark2")  + 
+  coord_sf(crs = "EPSG:4283") + 
   ggthemes::theme_map() +
   theme(legend.position = "bottom",
         legend.text = element_text(size = 15),
@@ -333,7 +318,7 @@ raw <- ncdf4::nc_open(here::here("data/era5-pressure.nc"))
   long_range = seq(-180, 180, 1), lat_range = seq(-88, -15, 1)))
 
 
-## ----netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "A reproduction of the second row (ERA5 data) of Figure 19 in Hersbach et al (2020) to illustrate the break-up of sourthern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04.", dev = "png"----
+## ----netcdf, out.width="100%", fig.height = 4, fig.width = 10, fig.cap = "An example illustrating that cubble can be used to readily reproduce common spatiotemporal analyses. This plot of ERA5 reanalysis (Fig. 19, Hersbach et al, 2020) shows the break-up of the southern polar vortex in late September and early October 2002. The polar vortex, signalled by the high specific humidity, splits into two on 2002-09-26 and further splits into four on 2002-10-04.", dev = "png", fig.retina=4----
 res <- dt |> 
   face_temporal() |> 
   filter(lubridate::date(time) %in% 
@@ -352,10 +337,7 @@ country <- con |>
 
 res |> 
   ggplot() +
-  # q for specific humidity
   geom_point(aes(x = long, y = lat, color = q)) + 
-  #geom_tile(aes(x = long, y = lat, fill = q), color = "transparent") +
-  # z for geopotential
   geom_contour(data = res, aes(x = long, y = lat, z = z),
                color = "grey20", binwidth = 4000, linewidth = 0.5) +
   geom_sf(data = country , alpha = 0.5, fill = "transparent", color = "lightgreen") +
@@ -372,10 +354,4 @@ res |>
   theme(legend.text = element_text(size = 13),
         legend.title = element_text(size = 13)) + 
   labs(x ="", y = "")
-
-
-## ----interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Exploring temperature variation using linking of a map and seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a particular location on the map (here Mount Elizabeth) produces the plot in the second row. The maximum and minimum temperatures are shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display, which highlights the corresponding station on the map (Thredbo). Another  station, located in the Tasmania Island, is then selected to compare its temperature variation with the Thredbo station.", fig.show='hold'----
-knitr::include_graphics(here::here("figures/linking.png"))
-knitr::include_graphics(here::here("figures/linking-north.png"))
-knitr::include_graphics(here::here("figures/linking-lower.png"))
 
