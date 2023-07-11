@@ -1,0 +1,174 @@
+\begin{thebibliography}{21}
+\newcommand{\enquote}[1]{``#1''}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Buja \emph{et~al.}(1988)Buja, Asimov, and Hurley}]{buja1988elements}
+Buja A, Asimov D, Hurley C (1988).
+\newblock \enquote{Elements of A Viewing Pipeline.}
+\newblock \emph{Dynamic Graphics Statistics}, p. 277.
+
+\bibitem[{Buja \emph{et~al.}(1996)Buja, Cook, and Swayne}]{buja1996interactive}
+Buja A, Cook D, Swayne DF (1996).
+\newblock \enquote{Interactive High-dimensional Data Visualization.}
+\newblock \emph{Journal of Computational and Graphical Statistics},
+  \textbf{5}(1), 78--99.
+\newblock \urlprefix\url{https://doi.org/10.2307/1390754}.
+
+\bibitem[{Cheng and Sievert(2021)}]{crosstalk}
+Cheng J, Sievert C (2021).
+\newblock \emph{\pkg{crosstalk}: Inter-Widget Interactivity for HTML Widgets}.
+\newblock R package version 1.1.1,
+  \urlprefix\url{https://CRAN.R-project.org/package=crosstalk}.
+
+\bibitem[{Cheng \emph{et~al.}(2016)Cheng, Cook, and
+  Hofmann}]{cheng2016enabling}
+Cheng X, Cook D, Hofmann H (2016).
+\newblock \enquote{Enabling Interactivity on Displays of Multivariate Time
+  Series and Longitudinal Data.}
+\newblock \emph{Journal of Computational and Graphical Statistics},
+  \textbf{25}(4), 1057--1076.
+\newblock \urlprefix\url{https://doi.org/10.1080/10618600.2015.1105749}.
+
+\bibitem[{Hersbach \emph{et~al.}(2020)Hersbach, Bell, Berrisford, Hirahara,
+  Hor{á}nyi, Mu{ñ}oz-Sabater, Nicolas, Peubey, Radu, Schepers
+  \emph{et~al.}}]{hersbach2020era5}
+Hersbach H, Bell B, Berrisford P, Hirahara S, Hor{á}nyi A, Mu{ñ}oz-Sabater J,
+  Nicolas J, Peubey C, Radu R, Schepers D, \emph{et~al.} (2020).
+\newblock \enquote{The ERA5 Global Reanalysis.}
+\newblock \emph{Quarterly Journal of the Royal Meteorological Society},
+  \textbf{146}(730), 1999--2049.
+
+\bibitem[{Menne \emph{et~al.}(2012)Menne, Durre, Vose, Gleason, and
+  Houston}]{menne2012overview}
+Menne MJ, Durre I, Vose RS, Gleason BE, Houston TG (2012).
+\newblock \enquote{An overview of the global historical climatology
+  network-daily database.}
+\newblock \emph{Journal of atmospheric and oceanic technology}, \textbf{29}(7),
+  897--910.
+
+\bibitem[{Pebesma(2012)}]{spacetime}
+Pebesma E (2012).
+\newblock \enquote{\pkg{spacetime}: Spatio-Temporal Data in \proglang{R}.}
+\newblock \emph{Journal of Statistical Software}, \textbf{51}(7), 1–30.
+\newblock \urlprefix\url{https://doi.org/10.18637/jss.v051.i07}.
+
+\bibitem[{Pebesma(2021)}]{stars}
+Pebesma E (2021).
+\newblock \emph{\pkg{stars}: Spatiotemporal Arrays, Raster and Vector Data
+  Cubes}.
+\newblock R package version 0.5-2,
+  \urlprefix\url{https://CRAN.R-project.org/package=stars}.
+
+\bibitem[{Pebesma and Bivand(2022)}]{ctvspatiotemporal}
+Pebesma E, Bivand R (2022).
+\newblock \enquote{{CRAN} Task View: Handling and Analyzing Spatio-Temporal
+  Data.}
+\newblock Version~2022-03-07,
+  \urlprefix\url{https://CRAN.R-project.org/view=SpatioTemporal}.
+
+\bibitem[{Pierce(2019)}]{ncdf4}
+Pierce D (2019).
+\newblock \emph{\pkg{ncdf4}: Interface to Unidata netCDF (Version 4 or Earlier)
+  Format Data Files}.
+\newblock R package version 1.17,
+  \urlprefix\url{https://CRAN.R-project.org/package=ncdf4}.
+
+\bibitem[{Schloerke \emph{et~al.}(2021)Schloerke, Cook, Larmarange, Briatte,
+  Marbach, Thoen, Elberg, and Crowley}]{ggally}
+Schloerke B, Cook D, Larmarange J, Briatte F, Marbach M, Thoen E, Elberg A,
+  Crowley J (2021).
+\newblock \emph{\pkg{GGally}: Extension to \pkg{ggplot2}}.
+\newblock R package version 2.1.2,
+  \urlprefix\url{https://CRAN.R-project.org/package=GGally}.
+
+\bibitem[{Simmons \emph{et~al.}(2005)Simmons, Hortal, Kelly, McNally, Untch,
+  and Uppala}]{simmons2005ecmwf}
+Simmons A, Hortal M, Kelly G, McNally A, Untch A, Uppala S (2005).
+\newblock \enquote{ECMWF Analyses and Forecasts of Stratospheric Winter Polar
+  Vortex Breakup: September 2002 in the Southern Hemisphere and Related
+  Events.}
+\newblock \emph{Journal of the Atmospheric Sciences}, \textbf{62}(3), 668 --
+  689.
+\newblock \doi{10.1175/JAS-3322.1}.
+\newblock
+  \urlprefix\url{https://journals.ametsoc.org/view/journals/atsc/62/3/jas-3322.1.xml}.
+
+\bibitem[{Simmons \emph{et~al.}(2020)Simmons, Soci, Nicolas, Bell, Berrisford,
+  Dragani, Flemming, Haimberger, Healy, Hersbach, Hor{\'a}nyi, Inness,
+  Munoz-Sabater, Radu, and Schepers}]{simmons2020global}
+Simmons A, Soci C, Nicolas J, Bell B, Berrisford P, Dragani R, Flemming J,
+  Haimberger L, Healy S, Hersbach H, Hor{\'a}nyi A, Inness A, Munoz-Sabater J,
+  Radu R, Schepers D (2020).
+\newblock \enquote{Global Stratospheric Temperature Bias and Other
+  Stratospheric Aspects of ERA5 and ERA5.1.}
+\newblock (859).
+\newblock \doi{10.21957/rcxqfmg0}.
+\newblock \urlprefix\url{https://www.ecmwf.int/node/19362}.
+
+\bibitem[{Sutherland \emph{et~al.}(2000)Sutherland, Rossini, Lumley, Lewin-Koh,
+  Dickerson, Cox, and Cook}]{sutherland2000orca}
+Sutherland P, Rossini A, Lumley T, Lewin-Koh N, Dickerson J, Cox Z, Cook D
+  (2000).
+\newblock \enquote{\pkg{Orca}: A Visualization Toolkit for High-dimensional
+  Data.}
+\newblock \emph{Journal of Computational and Graphical Statistics},
+  \textbf{9}(3), 509--529.
+\newblock
+  \urlprefix\url{https://www.tandfonline.com/doi/abs/10.1080/10618600.2000.10474896}.
+
+\bibitem[{Teickner \emph{et~al.}(2022)Teickner, Pebesma, and Graeler}]{sftime}
+Teickner H, Pebesma E, Graeler B (2022).
+\newblock \emph{\pkg{sftime}: Classes and Methods for Simple Feature Objects
+  that Have a Time Column}.
+\newblock Https://r-spatial.github.io/sftime/,
+  https://github.com/r-spatial/sftime.
+
+\bibitem[{Wang \emph{et~al.}(2020)Wang, Cook, and Hyndman}]{tsibble}
+Wang E, Cook D, Hyndman RJ (2020).
+\newblock \enquote{A New Tidy Data Structure to Support Exploration and
+  Modeling of Temporal Data.}
+\newblock \emph{Journal of Computational and Graphical Statistics},
+  \textbf{29}(3), 466--478.
+\newblock \urlprefix\url{https://doi.org/10.1080/10618600.2019.1695624}.
+
+\bibitem[{Wickham(2014)}]{tidydata}
+Wickham H (2014).
+\newblock \enquote{Tidy Data.}
+\newblock \emph{Journal of Statistical Software}, \textbf{59}(10), 1–23.
+\newblock \urlprefix\url{https://doi.org/10.18637/jss.v059.i10}.
+
+\bibitem[{Wickham \emph{et~al.}(2012)Wickham, Hofmann, Wickham, and
+  Cook}]{Wickham2012-yr}
+Wickham H, Hofmann H, Wickham C, Cook D (2012).
+\newblock \enquote{Glyph-Maps for Visually Exploring Temporal Patterns in
+  Climate Data and Models.}
+\newblock \emph{Environmetrics}, \textbf{23}(5), 382--393.
+\newblock \doi{10.1002/env.2152}.
+
+\bibitem[{Xie(2015)}]{knitr}
+Xie Y (2015).
+\newblock \emph{Dynamic Documents with \proglang{R} and \pkg{knitr}}.
+\newblock 2nd edition. Chapman and Hall/CRC, Boca Raton, Florida.
+\newblock ISBN 978-1498716963, \urlprefix\url{https://yihui.name/knitr/}.
+
+\bibitem[{Xie \emph{et~al.}(2018)Xie, Allaire, and Grolemund}]{rmarkdown}
+Xie Y, Allaire J, Grolemund G (2018).
+\newblock \emph{\proglang{R} Markdown: The Definitive Guide}.
+\newblock Chapman and Hall/CRC, Boca Raton, Florida.
+\newblock ISBN 978-1138359338,
+  \urlprefix\url{https://bookdown.org/yihui/rmarkdown}.
+
+\bibitem[{Xie \emph{et~al.}(2014)Xie, Hofmann, and Cheng}]{xie2014reactive}
+Xie Y, Hofmann H, Cheng X (2014).
+\newblock \enquote{{Reactive Programming for Interactive Graphics}.}
+\newblock \emph{Statistical Science}, \textbf{29}(2), 201 -- 213.
+\newblock \urlprefix\url{https://doi.org/10.1214/14-STS477}.
+
+\end{thebibliography}
