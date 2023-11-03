@@ -78,7 +78,7 @@ library("here")
 
 # Introduction
 
-Spatio-temporal data has a spatial component referring to the location of each observation and a temporal component that is recorded at regular or irregular time intervals. It may also include multiple variables measured at each spatial and temporal values. With spatio-temporal data, one can fix the time to explore the spatial features of the data, fix the spatial location/s to explore temporal aspects, or dynamically explore the space and time simultaneously. In order to computationally explore the spatial, temporal and spatio-temporal and multiple variable aspects of such data, it needs to be stored in a data object that allows the user to query, group and dissect all the different data faces.
+Spatio-temporal data [@bivand2008applied; @lovelace2019geocomputation; @pebesma2019spatial] has a spatial component referring to the location of each observation and a temporal component that is recorded at regular or irregular time intervals. It may also include multiple variables measured at each spatial and temporal values. With spatio-temporal data, one can fix the time to explore the spatial features of the data, fix the spatial location/s to explore temporal aspects, or dynamically explore the space and time simultaneously. In order to computationally explore the spatial, temporal and spatio-temporal and multiple variable aspects of such data, it needs to be stored in a data object that allows the user to query, group and dissect all the different data faces.
 
 The Comprehensive \proglang{R} Archive Network (CRAN) task view SpatioTemporal [@ctvspatiotemporal] gathers information about \proglang{R} packages designed for spatio-temporal data and it has a section on *Representing data* that lists existing spatio-temporal data representations used in \proglang{R}. Among them, the \pkg{spacetime} package [@spacetime] implements four S4 classes to handle spatio-temporal data with different spatio-temporal layouts (full grid, sparse grid, irregular, and trajectory). The \pkg{stars} package [@stars] implements an S3 class built from dense arrays.
 
@@ -92,7 +92,7 @@ The rest of the paper is organized as follows: Section \@ref(cubble) presents th
 
 The cubble class includes two subclasses: the spatial cubble and the temporal cubble, which can be pivoted back and forth to focus on the two aspects of the spatio-temporal data, as illustrated in Figure \ref{fig:face}. This section provides an overview of the \pkg{cubble} package, including the cubble class and its attributes, class creation and coercion, a summary of implemented functionality, the compatibility with other spatial and temporal packages (\pkg{sf} and \pkg{tsibble}), and a comparison with other spatio-temporal packages (\pkg{stars} and \pkg{sftime}).
 
-## The cubble class {#object}
+## The cubble class {#sec-cb-object}
 
 The cubble class is an S3 class built on tibble that allows the spatio-temporal data to be wrangled in two forms (subclasses):
 
@@ -700,7 +700,7 @@ crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity. Plot (a) shows the initial state of the interactive display: all locations are shown as dots on the map, coloured by the temperature range, and the right plot shows the ribbons representing maximum to minimum for all stations. In plot (b) the station shows a high variance on the initial map, the "Mount Elizabeth" station, is selected and this produces the ribbon on the right. In plot (c) the lowest temperature in August is selected on the left map and this corresponds to the "Thredbo" station in the mountain area in Victoria and New South Wales. This station is compared to a station in the Tasmania island, the southernmost island of the country, selected on the map.
 
 ```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Illustration of using cubble for interactive graphics. Here we explore temperature variation by linking a map and a seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a particular location on the map (here Mount Elizabeth) produces the plot in the second row. The maximum and minimum temperatures are shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display, which highlights the corresponding station on the map (Thredbo). Another  station, located in the Tasmania Island, is then selected to compare its temperature variation with the Thredbo station.", fig.show='hold', purl=FALSE}
-knitr::include_graphics(here::here("figures/linking.png"))
+knitr::include_graphics(here::here("figures/linking-all.png"))
 knitr::include_graphics(here::here("figures/linking-north.png"))
 knitr::include_graphics(here::here("figures/linking-lower.png"))
 ```
