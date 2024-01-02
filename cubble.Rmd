@@ -19,9 +19,10 @@ author:
     address: 2000 Jintong Road, Tangjiawan, Zhuhai, Guangdong Province, China
     email: nicolaslangrene@uic.edu.cn
   - name: Patricia Menéndez
-    affiliation: Monash University
-    address: 21 Chancellors Walk, Clayton VIC 3800 Australia
-    email:  patricia.menendez@monash.edu
+    affiliation: University of Melbourne
+    affiliation2: Monash University
+    address: 813 Swanston Street, Parkville VIC 3052, Australia
+    email:  Patricia.menendez@unimelb.edu.au
 title:
   formatted: "\\pkg{cubble}: An \\proglang{R} Package for Organizing and Wrangling Multivariate Spatio-temporal Data"
   # If you use tex in the formatted title, alsoge supply version without
@@ -86,7 +87,7 @@ However, the data representation implemented in those packages might present cer
 
 This paper presents the \proglang{R} package, \pkg{cubble}, which implements a new cubble class to organize spatial and temporal variables as two forms of a single data object so that they can be wrangled separately or combined, while being kept synchronized. Among the four spacetime layouts in @spacetime, the \code{cubble} class can handle the full grid layout and the sparse grid layout.  The software is available from the Comprehensive \proglang{R} Archive Network (CRAN) at https://CRAN.R-project.org/package=cubble. 
 
-The rest of the paper is organized as follows: Section \@ref(cubble) presents the main design and functionality of the \pkg{cubble} package. Section \@ref(others) explains how the \pkg{cubble} package deals with more advanced considerations, including data matching and how the package fits with existing static and interactive visualization tools. Moreover we also illustrate how the \pkg{cubble} package deals with spatio-temporal data transformations. Section \@ref(examples) uses primarily Australian weather station data as examples to demonstrate the use of the package. An example of how the \pkg{cubble} package handles Network Common Data Form (NetCDF) data is also provided. Section \@ref(conclude) discuss the paper contributions and future directions.
+The rest of the paper is organized as follows: Section \@ref(cubble) presents the main design and functionality of the \pkg{cubble} package. Section \@ref(others) explains how the \pkg{cubble} package deals with more advanced considerations, including data matching and how the package fits with existing static and interactive visualization tools. Moreover we also illustrate how the \pkg{cubble} package deals with spatio-temporal data transformations. Section \@ref(examples) uses primarily Australian weather station data as examples to demonstrate the use of the package. An example of how the \pkg{cubble} package handles Network Common Data Form (NetCDF) data is also provided. Section \@ref(conclude) discusses the paper contributions and future directions.
 
 # The cubble package {#cubble}
 
@@ -132,6 +133,8 @@ spatial(cb_temporal)
 The spatial and temporal aspect of spatio-temporal data are often stored separately in the database. For climate data, analysts may initially receive station metadata and then query the time series based on the metadata. A (spatial) cubble object can be constructed from separate spatial and temporal tables using the function \code{make_cubble()}. The three attributes \code{key}, \code{index}, and \code{coords} need to be specified. The following code creates a spatial cubble from its spatial component, \code{stations} and temporal component \code{meteo}:
 
 ```{r echo = TRUE}
+stations
+meteo
 make_cubble(spatial = stations, temporal = meteo,
             key = id, index = date, coords = c(long, lat))
 ```
@@ -144,7 +147,7 @@ climate_flat |> as_cubble(key = id, index = date, coords = c(long, lat))
 
 ## Functions and methods
 
-The \pkg{cubble} package has several functions implemented for data wrangling and to facilitate data analysis as summarized in Table \@ref(tab:funs). In addition, for each of the three cubble classes there are number of methods implemented that facilitates the handling of the data as shown in Table \@ref(tab:methods). In particular, the \code{cubble_df} class handles methods that behave consistently in both spatial and temporal cubble. When the method works differently internally on the spatial and temporal cubble, it is implemented separately in \code{spatial_cubble_df} and \code{temporal_cubble_df}.
+The \pkg{cubble} package has several functions implemented for data wrangling and to facilitate data analysis as summarized in Table \@ref(tab:funs). In addition, for each of the three cubble classes there are a number of methods implemented that facilitates the handling of the data as shown in Table \@ref(tab:methods). In particular, the \code{cubble_df} class handles methods that behave consistently in both spatial and temporal cubble. When the method works differently internally on the spatial and temporal cubble, it is implemented separately in \code{spatial_cubble_df} and \code{temporal_cubble_df}.
 
 \begin{table}
 \begin{tabular}{p{0.1\textwidth}p{0.8\textwidth}}
@@ -174,7 +177,7 @@ Class & Method \\
 \label{tab:methods} 
 \end{table}
 
-The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble, \code{cb_spatial}, introduced in Section \@ref(object) to get a temporal cubble: 
+The pair of cubble verbs, \code{face_temporal()} and \code{face_spatial()}, pivots the cubble object between its two forms or faces, as illustrated in Figure \ref{fig:face}. The code applies \code{face_temporal()} on the spatial cubble, \code{cb_spatial}, introduced in Section \@ref(cb-object) to get a temporal cubble: 
 
 ```{r cubble-fun, echo = TRUE}
 face_temporal(cb_spatial)
@@ -186,7 +189,7 @@ Both verbs are the exact inverse of each other and apply both functions on a cub
 face_spatial(face_temporal(cb_spatial))
 ```
 
-```{r face, echo = FALSE, purl= FALSE, fig.align="center", out.width = "100%", fig.cap = "Illustration of main functions. To focus on he temporal variables \\code{face\\_temporal()} converts a spatial cubble into a temporal cubble. To focus on the spatial variables \\code{face\\_spatial()} transforms a temporal cubble into a spatial cubble. This pivoting makes it easy to separately do spatial or temporal analysis."}
+```{r face, echo = FALSE, purl= FALSE, fig.align="center", out.width = "100%", fig.cap = "Illustration of main functions. To focus on the temporal variables \\code{face\\_temporal()} converts a spatial cubble into a temporal cubble. To focus on the spatial variables \\code{face\\_spatial()} transforms a temporal cubble into a spatial cubble. This pivoting makes it easy to separately do spatial or temporal analysis."}
 knitr::include_graphics(here::here("figures/diagram-keynotes/diagram-keynotes.001.png"))
 ```
 
@@ -250,7 +253,7 @@ cb_spatial |> make_spatial_sf()
 
 ## Comparison to other spatio-temporal classes {#tidyverse}
 
-In \proglang{R}, there are other existing spatio-temporal data structures and this section compares and contrasts \pkg{cubble} with other existing alternatives, specifically \pkg{stars} and \pkg{sftime}. The \pkg{stars} package [@stars] uses an array structure, as opposed to a tibble, to represent multivariate spatio-temporal data. While both \pkg{stars} and \pkg{cubble} support vector and raster data, it is a matter of choice on which structure to use given the application. Analysts working on satellite imageries may prefer the array structure in \pkg{stars}, while others originally working with spatio-temporal data in 2D data frames may find \pkg{cubble} easier to adopt from their existing computing workflow.
+In \proglang{R}, there are other existing spatio-temporal data structures and this section compares and contrasts \pkg{cubble} with other existing alternatives, specifically \pkg{stars} and \pkg{sftime}. The \pkg{stars} package [@stars] uses an array structure, as opposed to a tibble, to represent multivariate spatio-temporal data. While both \pkg{stars} and \pkg{cubble} support vector and raster data, it is a matter of choice which structure to use given the application. Analysts working on satellite imageries may prefer the array structure in \pkg{stars}, while others originally working with spatio-temporal data in 2D data frames may find \pkg{cubble} easier to adopt from their existing computing workflow.
 
 The \pkg{sftime} package [@sftime] also builds from a tibble object and its focus is on handling irregular spatio-temporal data. This means \pkg{sftime} can also handle full space-time grids and sparse space-time layouts represented in \pkg{cubble}. However, \pkg{cubble} uses nesting to avoid storing spatial variables repetitively at each timestamp. This provides memory efficiency when data is observed frequently, i.e. daily or sub-daily, or the spatial geometry is computationally expensive to store repeatedly, i.e. polygons or multipolygons. Consider the \code{climate_aus} data in the \pkg{cubble} package with `r nrow(cubble::climate_aus)` stations observed daily throughout the year 2020. In that case, the \code{sftime} object is approximately 14 times larger than the corresponding \code{cubble} object (118 MB vs. 8.5 MB).
 
@@ -264,7 +267,7 @@ The \pkg{sftime} package [@sftime] also builds from a tibble object and its focu
 
 A useful task in spatio-temporal data analysis is to combine related temporal series within a close geographic neighborhood. For example, we may want to examine data from weather stations with water flow records from nearby river sensors to understand how precipitation relates to river levels. This might be useful for predicting potential for droughts and floods. 
 
-Matching temporal data across different locations from different data sources could be done by initially identifying the corresponding spatial locations between the two data sets. Subsequently, a set of temporal features can be calculated for the series at the selected locations that can be used to matched the selected time series across locations. In cubble, locations from two datasets can be matched using the function \code{match_spatial()}. The function on calculates the distance matrix of the locations between the two data sets and returns  groups (\code{spatial_n_group}) with the smallest distances. For a given group, it is possible can include more locations with the argument \code{spatial_n_each} (default to 1 for one-on-one matching).
+Matching temporal data across different locations from different data sources could be done by initially identifying the corresponding spatial locations between the two data sets. Subsequently, a set of temporal features can be calculated for the series at the selected locations that can be used to match the selected time series across locations. In cubble, locations from two datasets can be matched using the function \code{match_spatial()}. The function calculates the distance matrix of the locations between the two data sets and returns  groups (\code{spatial_n_group}) with the smallest distances. For a given group, it is possible to include more locations with the argument \code{spatial_n_each} (default to 1 for one-on-one matching).
 
 For the temporal matching a similarity score between the time series of spatially matched pairs is computed using the function \code{match_temporal()}. The similarity score is computed by a matching function which can be customized to any desired time series feature. The function \code{match_temporal()} takes as argument two time series in the form of a list and returns a single numerical value. By default, cubble uses a simple peak matching algorithm (\code{match_peak}) to count the number of peaks in two time series that fall within a specified time window. 
 
@@ -313,11 +316,11 @@ Other useful controls to modify the glyph map that can be include are:
   
 # Applications {#examples}
 
-Five examples are chosen to illustrate different aspects of the \pkg{cubble} package: creating a \code{cubble} object from two Coronavirus (COVID) data tables with the challenge of having different location names, using spatial transformations to make a glyph map of seasonal temperature changes, matching river level data with weather station records to analyze water supply, reading NetCDF format data to replicate a climate reanalysis plot, and demonstrating the workflow to create interactively linked plots.
+Five examples are chosen to illustrate different aspects of the \pkg{cubble} package: (1) creating a \code{cubble} object from two Coronavirus (COVID) data tables with the challenge of having different location names, (2) using spatial transformations to make a glyph map of seasonal temperature changes, (3) matching river level data with weather station records to analyze water supply, (4) reading NetCDF format data to replicate a climate reanalysis plot, and (5) demonstrating the workflow to create interactively linked plots.
 
 ## Victoria COVID spatio-temporal incidence and spread {#covid}
 
-Since the start of the COVID-19 pandemic, the Victoria State Government in Australia has been providing daily COVID-19 case counts per local government area (LGA). This data can be combined with map polygon data, available from the Australian Bureau of Statistics (ABS), to visualize COVID-19 incidence and spread. The COVID-19 count data (\code{covid}) and the LGA information (\code{lga}) are available in the \pkg{cubble} package as a \code{tsibble} object and an \code{sf} object, respectively. As is common, the different agencies have some difference in text id's labelling the spatial regions, so this example illustrates how this can be caught with \pkg{cubble}, and fixed. Discrepancies are flagged when creating the cubble object, notifying analysts of something that needs checking.
+Since the start of the COVID-19 pandemic, the Victoria State Government in Australia has been providing daily COVID-19 case counts per local government area (LGA). This data can be combined with map polygon data, available from the Australian Bureau of Statistics (ABS), to visualize COVID-19 incidence and spread. The COVID-19 count data (\code{covid}) and the LGA information (\code{lga}) are available in the \pkg{cubble} package as a \code{tsibble} object and an \code{sf} object, respectively. As is common, the different agencies have some difference in text id's labelling the spatial regions, so this example illustrates how this can be caught with \pkg{cubble}, and fixed. Discrepancies are flagged when creating the cubble object (see warnings in the R output below), notifying analysts of something that needs checking.
 
 The \code{by} argument of the function \code{make_cubble()} is used to specify the spatial identifier in the two data sets: 
 
@@ -496,12 +499,12 @@ climate_vic <- climate_aus |>
 river <- cubble::river |> mutate(type = "river") 
 ```
 
-The first step is to perform a spatial match on the site locations between both data sets. The rainfall recorded at a particular station can directly impact the water level in nearby rivers, which emphasizes the need to find related or matching locations. With \code{match_spatial()}, we can obtain a summary of the 10 closest pairs of weather stations and river gauges:
+Ideal matches would exhibit a spatial proximity and also a temporal similarity, with a potential offset due to translating the rainfall into water level. This motivates the two step approach where a spatial match on the site locations is first performed between both data sets. The rainfall recorded at a particular station can directly impact the water level in nearby rivers, which emphasizes the need to find related or matching locations. With \code{match_spatial()}, we can obtain a summary of the 10 closest pairs of weather stations and river gauges:
 
 ```{r echo = TRUE}
 res_sp <- match_spatial(df1 = climate_vic, df2 = river, 
                         spatial_n_group = 10)
-print(res_sp, n = 20)
+print(res_sp)
 ```
 
 The results can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. After excluding the two pairs where a river station is matched to more than one weather stations (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8), all the results can be combined into a single cubble using \code{bind_rows()},  
@@ -531,7 +534,7 @@ res_tm <- match_temporal(data =  res_sp,
 (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 ```
 
-```{r matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Example of matching weather stations and river gauges. These four stations show on the map (a) and time (b) would be considered to be matching. Precipitation and water level have been standardised between 0 and 1 to be displayed in the same scale in (b). The peaks in the time series roughly match, and would reflect percipitation increasing water levels."}
+```{r matching, out.width="100%", fig.height = 5, fig.width = 10, fig.cap="Example of matching weather stations and river gauges. These four station pairs shown on the map (a) and as time series plots (b) would be considered to be matching. Precipitation and water level have been standardised between 0 and 1 to be displayed in the same scale in (b). The peaks in the time series roughly match, and would reflect precipitation increasing water levels."}
 res_tm <- res_tm |>  filter(group %in% c(1, 7, 6, 9))
 
 res_tm_long <- res_tm |>  
@@ -699,8 +702,8 @@ crosstalk::bscols(plotly::ggplotly(p1), plotly::ggplotly(p2), ...)
 
 Figure \ref{fig:interactive-linking} shows three snapshots of the interactivity. Plot (a) shows the initial state of the interactive display: all locations are shown as dots on the map, coloured by the temperature range, and the right plot shows the ribbons representing maximum to minimum for all stations. In plot (b) the station shows a high variance on the initial map, the "Mount Elizabeth" station, is selected and this produces the ribbon on the right. In plot (c) the lowest temperature in August is selected on the left map and this corresponds to the "Thredbo" station in the mountain area in Victoria and New South Wales. This station is compared to a station in the Tasmania island, the southernmost island of the country, selected on the map.
 
-```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Illustration of using cubble for interactive graphics. Here we explore temperature variation by linking a map and a seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a particular location on the map (here Mount Elizabeth) produces the plot in the second row. The maximum and minimum temperatures are shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display, which highlights the corresponding station on the map (Thredbo). Another  station, located in the Tasmania Island, is then selected to compare its temperature variation with the Thredbo station.", fig.show='hold', purl=FALSE}
-knitr::include_graphics(here::here("figures/linking-all.png"))
+```{r interactive-linking, echo = FALSE, out.width="100%", out.height="23%", fig.retina = 2, dpi = 300, fig.cap = "Illustration of using cubble for interactive graphics. Here we explore temperature variation by linking a map and a seasonal display. Each row is a screen dump of the process. The top row shows all locations and all temperature profiles. Selecting a particular location on the map (here Mount Elizabeth) produces the plot in the second row. The maximum and minimum temperatures are shown using a ribbon. The bottom row first selects the lowest temperature in August in the seasonal display from the first row, which highlights the corresponding station on the map (Thredbo). Another  station, located in the Tasmania Island, is then selected to compare its temperature variation with the Thredbo station.", fig.show='hold', purl=FALSE}
+knitr::include_graphics(here::here("figures/linking.png"))
 knitr::include_graphics(here::here("figures/linking-north.png"))
 knitr::include_graphics(here::here("figures/linking-lower.png"))
 ```
@@ -711,7 +714,7 @@ This paper presents the \proglang{R} package \pkg{cubble} for organizing, wrangl
 
 The paper includes several examples to illustrate how \pkg{cubble} is useful for spatio-temporal analysis. These examples cover different tasks of a typical data analysis workflow: handling data with spatial and temporal misalignment, matching data from multiple sources, and creating both static and interactive graphics. In addition, a re-working of an existing climate reanalysis using cubble is explained. 
 
-Possible future directions would be in two main directions: handling much larger data sets, and integrating smoothly with modeling. Spatio-temporal data can be huge, and the current recommendation is to first reduce the spatial and temporal components before constructing a cubble. Better support could be provided with additional pre-processing functions. Considerable effort has been exerted to provide tidy tools for models, with the \pkg{tidymodels} project. It provides a much better interface to the vast array of statistical and machine learning model architecture. A similar direction would be to extend cubble to provide a more unified interface to spatio-temporal modeling.
+Possible future directions would be in two main directions: handling much larger data sets, and integrating smoothly with modeling. Spatio-temporal data can be huge, and the current recommendation is to first reduce the spatial and temporal components before constructing a cubble. Better support could be provided with additional pre-processing functions. Considerable effort has been exerted to provide tidy tools for models, with the \pkg{tidymodels} project. It provides the infrastructural interface to build vast array of statistical and machine learning models. A similar direction would be to extend cubble to provide a more unified interface to spatio-temporal modeling.
 
 # Acknowledgement
 
