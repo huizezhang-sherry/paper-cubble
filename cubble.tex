@@ -757,7 +757,7 @@ tmax |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/glyphmap-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/glyphmap-1} 
 
 }
 
@@ -768,7 +768,7 @@ tmax |>
 \hypertarget{river-levels-and-rainfall-in-victoria}{%
 \subsection{River levels and rainfall in Victoria}\label{river-levels-and-rainfall-in-victoria}}
 
-The Bureau of Meteorology collects water level data that can be matched with precipitation data from climate weather stations. The data \code{river} from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be subsetted from the \code{climate_aus} data in the \pkg{cubble} package. This example demonstrates the use of the matching function introduced in Section \ref{matching} to find river gauges that mirror changes in precipitation regimes captured in the climate weather stations in Victoria.
+This example illustrates spatio-temporal matching of water level data from stream sensors with precipitation data from climate weather stations. The data \code{river} from the \pkg{cubble} package contains water course level data for 71 river gauges collected in Victoria, Australia. Victoria weather station data can be extracted from the \code{climate_aus} data in the \pkg{cubble} package. This example demonstrates the use of the matching function introduced in Section \ref{matching} to find river gauges that mirror changes in precipitation regimes captured in the climate weather stations in Victoria.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -779,7 +779,9 @@ R> river <- cubble::river |> mutate(type = "river")
 \end{CodeInput}
 \end{CodeChunk}
 
-Ideal matches would exhibit a spatial proximity and also a temporal similarity, with a potential offset due to translating the rainfall into water level. This motivates the two step approach where a spatial match on the site locations is first performed between both data sets. The rainfall recorded at a particular station can directly impact the water level in nearby rivers, which emphasizes the need to find related or matching locations. With \code{match_spatial()}, we can obtain a summary of the 10 closest pairs of weather stations and river gauges:
+We assume that matches would be close spatially and have a similar temporal pattern, accounting for scale (volume of rainfall relative to volume of stream capacity) and temporal lags (time to take water to travel to location). This motivates a two-step approach: spatial match is first performed between both data sets, followed by a temporal pattern match on a reduced set of locations.
+
+With \code{match_spatial()}, we can obtain a summary of the closest pairs (here it is 10) of weather stations and river gauges to print or as a list of matched cubbles (if \code{return_cubble = TRUE}). The following shows the print results:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -800,7 +802,7 @@ R> print(res_sp)
 \end{CodeOutput}
 \end{CodeChunk}
 
-The results can also be returned as a list of matched cubbles, by setting the argument \code{return_cubble = TRUE}. After excluding the two pairs where a river station is matched to more than one weather stations (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8), all the results can be combined into a single cubble using \code{bind_rows()},
+Notice from the printed list that river station 226027 matches two weather stations. This is possible, and is why printing the matching results first is preferable. The user would need to decide how to handle the multiple matches, for example by removing one or aggregating results, because a cubble requires unique IDs. This example creates the list of matched cubbles after excluding the two pairs where a river station is matched to more than one weather station (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8). The \code{bind_rows} function is used to TODO
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -824,6 +826,8 @@ R> (res_sp <- res_sp[-c(5, 8)] |> bind_rows())
 # i 2 more variables: group <int>, dist [m]
 \end{CodeOutput}
 \end{CodeChunk}
+
+It is possible to keep multiple matches in order to find the best temporal match among the set using the \code{spatial_n_each} argument. In combination with \code{spatial_n_group} more complicated matched pairs can be provided to the temporal matching. For example, if \code{spatial_n_each=4} and \code{spatial_n_group=2}, two groups each with the closest four spatial neighbors would be created. The temporal matching would follow on each group.
 
 To match the water level and precipitation time series across the matched locations, the function \code{match_temporal()} is used with the variables \code{group} and \code{type} identifying the matching group and the two data sources:
 
@@ -875,7 +879,7 @@ R> (res_tm <- res_tm |> bind_rows() |> filter(group %in% c(1, 7, 6, 9)))
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/matching-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/matching-1} 
 
 }
 
@@ -942,7 +946,7 @@ res |>
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/Users/hzha400/Documents/research/paper-cubble/figures/netcdf-1} 
+{\centering \includegraphics[width=1\linewidth]{/Users/cookd/students_PhD/Sherry/paper-cubble/figures/netcdf-1} 
 
 }
 
@@ -1007,7 +1011,7 @@ This paper presents the \proglang{R} package \pkg{cubble} for organizing, wrangl
 
 The paper includes several examples to illustrate how \pkg{cubble} is useful for spatio-temporal analysis. These examples cover different tasks of a typical data analysis workflow: handling data with spatial and temporal misalignment, matching data from multiple sources, and creating both static and interactive graphics. In addition, a re-working of an existing climate reanalysis using cubble is explained.
 
-Possible future directions would be in two main directions: handling much larger data sets, and integrating smoothly with modeling. Spatio-temporal data can be huge, and the current recommendation is to first reduce the spatial and temporal components before constructing a cubble. Better support could be provided with additional pre-processing functions. Considerable effort has been exerted to provide tidy tools for models, with the \pkg{tidymodels} project. It provides the infrastructural interface to build vast array of statistical and machine learning models. A similar direction would be to extend cubble to provide a more unified interface to spatio-temporal modeling.
+Possible future improvements would be in two main directions: handling much larger data, and integrating smoothly with modeling. Our work has been designed to make it easier to focus on intricate space-time patterns, and it expects that the analyst first reduces the data if the spatio-temporal data is huge, before creating a cubble. Additional tools for pre-processing large data would be helpful. Because the cubble structure is based on tidy data principles, it potentially integrates well with tidy tools for models, as provided by the \pkg{tidymodels} project. Although that project focuses on providing an interface to the vast array of statistical and machine learning models, it would be useful to extend its capacity to provide a more unified interface to many spatio-temporal modeling software.
 
 \hypertarget{acknowledgement}{%
 \section{Acknowledgement}\label{acknowledgement}}

@@ -33,19 +33,19 @@ We provide an overall summary of the changes made to the paper and the package a
   * Typo: “that can be used to match~~ed~~ the selected time series across locations. **\textcolor{purple}{Fixed.}**
   * Typo: “The function ~~on~~ calculates” **\textcolor{purple}{Fixed.}**
   * Typo: “it is possible to ~~can~~ include” **\textcolor{purple}{Fixed.}**
-  * Is a matching based on index (date and time) only also possible in cubble?
+  * Is a matching based on index (date and time) only also possible in cubble? **It can handle matching for any of the temporal objects on which cubble is based, see section 2.1. No changes made to the paper.**
 
 ### Sec. 4: 
   * The first paragraph is hard to read. It could possibly be restructure as a numbered list, or description listing, or simply adding roman numbers in the text, e.g.: “Five examples are chosen to illustrate different aspects of the cubble package: (i) creating a cubble object from two Coronavirus (COVID) data tables with the challenge of having different location names, (ii) using spatial transformations ... ” **\textcolor{purple}{Done.}**
   
-  * It is nice to mention the challenges of all examples, as interested users of cubble could directly jump to the relevant example for their own use case.
+  * It is nice to mention the challenges of all examples, as interested users of cubble could directly jump to the relevant example for their own use case. **\textcolor{purple}{No change made, current list at top of section 4 should be sufficient for readers to jump to the example that is most relevant for them.}**
 
 ### Sec. 4.1
   * I suggest to be even more explicit about warnings to make clear, that they are expected and not due to malfunctioning code: “Discrepancies are flagged (see warnings in the R output below) when creating the cubble object.” **\textcolor{purple}{Done.}**
 
 ### Sec. 4.3
 
-At the very beginning of the example, please clearly motivate the two-step approach. **\textcolor{purple}{Added. The two-step approach is motivated because ideal matches require both spatial proximity and temporal similarity in trend.}** I thought I had understood it, but am again puzzled. What I understand is that you pick (i) the 10 closest pairs of met stations and river stations and then (ii) additionally require a temporal similarity (in terms of peaks). But how is the temporal offset treated and controlled in these cases? **\textcolor{purple}{see dot point 3 below}** I also see some logic in an approach where you (i) select 10 spatially closest met stations per river station (i.e. setting `spatial_n_each` = 10) and (ii) pick the highest data similarity between met and river stations within each group. Here, it might be possible, that close-by met and river stations are less related than apparently further apart stations due to local terrain and catchment boundaries. The motivation of the example is crucial and might raise awareness for unintended matches in individual user data. Please clearly describe what this example is meant to illustrate to the reader and potential user of cubble. **\textcolor{purple}{The proposed strategy to pick pairs has been considered, which motivates the arguemnt spaital\_n\_each.}**
+At the very beginning of the example, please clearly motivate the two-step approach. I thought I had understood it, but am again puzzled. What I understand is that you pick (i) the 10 closest pairs of met stations and river stations and then (ii) additionally require a temporal similarity (in terms of peaks). But how is the temporal offset treated and controlled in these cases? I also see some logic in an approach where you (i) select 10 spatially closest met stations per river station (i.e. setting `spatial_n_each` = 10) and (ii) pick the highest data similarity between met and river stations within each group. Here, it might be possible, that close-by met and river stations are less related than apparently further apart stations due to local terrain and catchment boundaries. The motivation of the example is crucial and might raise awareness for unintended matches in individual user data. Please clearly describe what this example is meant to illustrate to the reader and potential user of cubble. **\textcolor{purple}{We have clarified the text in this section to make it clearer. Yes, you are right, that searches can accommodate a broader spatial neighborhood using the spatial\_n\_group argument, and multiple matches can be accommodated using the spatial\_n\_each argument. The revised text mentions these more complicated matching possibilities.}**
 
   * Note that R> print(`res_sp`, n = 20) only shows ten rows as `res_sp` only has ten at that point in the script. I’d suggest to drop that argument n = 20 here. **\textcolor{purple}{Done.}**
   * After the use of `bind_rows()` the matched stations are stored in rows 2i-1 and 2i, i = 1, . . . , 8. I believe that this notion of how to write pairs in the cubble should be mentioned and explained.
@@ -58,4 +58,4 @@ At the very beginning of the example, please clearly motivate the two-step appro
   * Fig. 6: “The bottom row first selects the lowest temperature in August in the seasonal display **from the first row**” **\textcolor{purple}{Fixed.}**
   
 ### Sec. 5:
-  * “It provides a much better interface to the vast array of statistical and machine learning model architecture.” Much better than ..? **\textcolor{purple}{Changed to: It provides the infrastructural interface to build ...}**
+  * “It provides a much better interface to the vast array of statistical and machine learning model architecture.” Much better than ..? **\textcolor{purple}{Paragraph has been  revised, and is now much clearer.}**
