@@ -509,7 +509,11 @@ res_sp <- match_spatial(df1 = climate_vic, df2 = river,
 print(res_sp)
 ```
 
-Notice from the printed list that river station 226027 matches two weather stations. This is possible, and is why printing the matching results first is preferable. The user would need to decide how to handle the multiple matches, for example by removing one or aggregating results, because a cubble requires unique IDs.  This example creates the list of matched cubbles after excluding the two pairs where a river station is matched to more than one weather station (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8). The \code{bind_rows} function is used to TODO
+Notice from the printed list that river station 226027 matches two weather stations. This is possible, and is why printing the matching results first is preferable. It is possible to keep multiple matches in order to find the best temporal match among the set using the \code{spatial_n_each} argument. In combination with \code{spatial_n_group} more complicated matched pairs can be provided to the temporal matching. For example, if \code{spatial_n_each=4} and \code{spatial_n_group=2}, two groups each with the closest four spatial neighbors would be created. 
+
+The argument \code{return_cubble = TRUE} can be used to return the match as a list of matched cubbles. This list is of length \code{saptial_n_group} and each cubble element has 2x\code{saptial_n_each} rows. The subsequent temporal matches can be then performed on each cubble element using the \code{purrr::map()} or \code{lapply()} syntax.
+
+In the case of matched pairs (\code{spatial_n_each = 1} as default here), the list can be converted to a single cubble with the \code{bind_rows()} function. The matched pair/group $i$ will be stored in row $2i-1$ and $2i$ in the augmented cubble. However, the user would need to decide how to handle the multiple matches, as observed in this example, for example by removing one or aggregating results, because a cubble requires unique IDs. This example creates the list of matched cubbles after excluding the two pairs where a river station is matched to more than one weather station (river station 226027 is matched twice in group 3 and 5 and similarly for station 230200 in group 7 and 8).  The temporal matching would follow on each pair/group $i$.
 
 ```{r echo = TRUE}
 res_sp <- match_spatial(
@@ -518,9 +522,7 @@ res_sp <- match_spatial(
 (res_sp <- res_sp[-c(5, 8)] |> bind_rows())
 ```
 
-It is possible to keep multiple matches in order to find the best temporal match among the set using the \code{spatial_n_each} argument. In combination with \code{spatial_n_group} more complicated matched pairs can be provided to the temporal matching. For example, if  \code{spatial_n_each=4} and \code{spatial_n_group=2}, two groups each with the closest four spatial neighbors would be created. The temporal matching would follow on each group.
-
-To match the water level and precipitation time series across the matched locations, the function \code{match_temporal()} is used with the variables \code{group} and \code{type} identifying the matching group and the two data sources:
+To match the water level and precipitation time series across the matched locations, the function \code{match_temporal()} is used with the variables \code{group} and \code{type} identifying the matching group $i$, and the two data sources:
 
 ```{r echo = TRUE}
 (res_tm <- match_temporal(data = res_sp,
