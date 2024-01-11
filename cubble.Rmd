@@ -4,24 +4,24 @@ classoption: shortnames
 author:
   - name: H. Sherry Zhang
     affiliation: Monash University
-    address: 21 Chancellors Walk, Clayton VIC 3800 Australia
+    address: Department of Econometrics and Business Statistics, Monash University, VIC 3800 Australia
     email: \email{huize.zhang@monash.edu}
   - name: Dianne Cook
     affiliation: Monash University
-    address: 21 Chancellors Walk, Clayton VIC 3800 Australia
+    address: Department of Econometrics and Business Statistics, Monash University, VIC 3800 Australia
     email: dicook@monash.edu
   - name: Ursula Laa
     affiliation: 'University of  Natural `\\`{=latex} Resources and Life Sciences \AND'
-    address: Gregor-Mendel-Straße 33, 1180 Wien, Austria
+    address: Institute of Statistics, University of  Natural Resources and Life Sciences, Peter-Jordan-Straße 82/I 1190 Vienna
     email:  ursula.laa@boku.ac.at
   - name: Nicolas Langrené
-    affiliation: 'BNU-HKBU `\\`{=latex} United International College'
-    address: 2000 Jintong Road, Tangjiawan, Zhuhai, Guangdong Province, China
+    affiliation: 'BNU-HKBU United International College'
+    address:  Guangdong Provincial Key Laboratory of Interdisciplinary Research and Application for Data Science, BNU-HKBU United International College, Zhuhai 519087 China
     email: nicolaslangrene@uic.edu.cn
   - name: Patricia Menéndez
     affiliation: University of Melbourne
     affiliation2: Monash University
-    address: 813 Swanston Street, Parkville VIC 3052, Australia
+    address: School of Mathematics and Statistics, University of Melbourne, VIC 3052 Australia
     email:  Patricia.menendez@unimelb.edu.au
 title:
   formatted: "\\pkg{cubble}: An \\proglang{R} Package for Organizing and Wrangling Multivariate Spatio-temporal Data"
@@ -724,4 +724,4 @@ Possible future improvements would be in two main directions: handling much larg
 
 # Acknowledgement
 
-This work is funded by a Commonwealth Scientific and Industrial Research Organisation (CSIRO) Data61 Scholarship and started while Nicolas Langrené was affiliated with CSIRO's Data61. The article is created using the package \pkg{knitr} [@knitr] and \pkg{rmarkdown} [@rmarkdown] in \proglang{R} with the \code{rticles::jss_article} template. The source code for reproducing this paper can be found at: https://github.com/huizezhang-sherry/paper-cubble.
+This work is funded by a Commonwealth Scientific and Industrial Research Organisation (CSIRO) Data61 Scholarship and started while Nicolas Langrené was affiliated with CSIRO's Data61. Nicolas Langrené acknowledges the partial support of the Guangdong Provincial Key Laboratory IRADS (2022B1212010006, R0400001-22) and the UIC Start-up Research Fund UICR0700041-22. The article is created using the package \pkg{knitr} [@knitr] and \pkg{rmarkdown} [@rmarkdown] in \proglang{R} with the \code{rticles::jss_article} template. The source code for reproducing this paper can be found at: https://github.com/huizezhang-sherry/paper-cubble.
