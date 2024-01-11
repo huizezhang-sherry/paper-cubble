@@ -10,7 +10,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-We provide an overall summary of the changes made to the paper and the package and then we make a point-by-point explanation of how we addressed the reviewers' comments.
+We appreciate the helpful and careful reviews. This is a point-by-point explanation of how we modified the paper to address the comments.
 
 # Response to B-review_2\_2
 
@@ -38,7 +38,7 @@ We provide an overall summary of the changes made to the paper and the package a
 ### Sec. 4: 
   * The first paragraph is hard to read. It could possibly be restructure as a numbered list, or description listing, or simply adding roman numbers in the text, e.g.: “Five examples are chosen to illustrate different aspects of the cubble package: (i) creating a cubble object from two Coronavirus (COVID) data tables with the challenge of having different location names, (ii) using spatial transformations ... ” **\textcolor{purple}{Done.}**
   
-  * It is nice to mention the challenges of all examples, as interested users of cubble could directly jump to the relevant example for their own use case. **\textcolor{purple}{No change made, current list at top of section 4 should be sufficient for readers to jump to the example that is most relevant for them.}**
+  * It is nice to mention the challenges of all examples, as interested users of cubble could directly jump to the relevant example for their own use case. **\textcolor{purple}{No change made, paragraph at top of section 4 should be sufficient for readers to jump to the example that is most relevant for them.}**
 
 ### Sec. 4.1
   * I suggest to be even more explicit about warnings to make clear, that they are expected and not due to malfunctioning code: “Discrepancies are flagged (see warnings in the R output below) when creating the cubble object.” **\textcolor{purple}{Done.}**
