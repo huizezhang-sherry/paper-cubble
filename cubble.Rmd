@@ -11,7 +11,7 @@ author:
     address: Department of Econometrics and Business Statistics, Monash University, VIC 3800 Australia
     email: dicook@monash.edu
   - name: Ursula Laa
-    affiliation: 'University of  Natural `\\`{=latex} Resources and Life Sciences \AND'
+    affiliation: 'University of Natural `\\`{=latex} Resources and Life Sciences \AND'
     address: Institute of Statistics, University of  Natural Resources and Life Sciences, Peter-Jordan-Straße 82/I 1190 Vienna
     email:  ursula.laa@boku.ac.at
   - name: Nicolas Langrené
@@ -19,8 +19,7 @@ author:
     address:  Guangdong Provincial Key Laboratory of Interdisciplinary Research and Application for Data Science, BNU-HKBU United International College, Zhuhai 519087 China
     email: nicolaslangrene@uic.edu.cn
   - name: Patricia Menéndez
-    affiliation: University of Melbourne
-    affiliation2: Monash University
+    affiliation: 'University of Melbourne `\\`{=latex} Monash University'
     address: School of Mathematics and Statistics, University of Melbourne, VIC 3052 Australia
     email:  Patricia.menendez@unimelb.edu.au
 title:
